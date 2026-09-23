@@ -5,34 +5,70 @@ const state = params.get("state");
 const stateTitle = document.getElementById("state");
 const content = document.getElementById("content");
 
-if (state === "ecg") {
+async function loadState() {
 
-    stateTitle.textContent = "🫀 ECG MODE";
+    if (!state) {
 
-    content.innerHTML = `
-        <h2>Elettrocardiogramma</h2>
+        stateTitle.textContent = "🩺 Nursing NFC";
 
-        <p>
-            Archivio ECG infermieristico.
-        </p>
+        content.innerHTML = `
+            <p>Scansiona una carta NFC per iniziare.</p>
+        `;
 
-        <h3>Valori principali</h3>
+        return;
+    }
 
-        <ul>
-            <li>Frequenza cardiaca</li>
-            <li>Intervallo PR</li>
-            <li>QRS</li>
-            <li>QT / QTc</li>
-        </ul>
-    `;
+    try {
 
-} else {
+        const response = await fetch(`data/${state}.json`);
 
-    stateTitle.textContent = "Nessuna modalità selezionata";
+        if (!response.ok) {
+            throw new Error("Archivio non trovato");
+        }
 
-    content.innerHTML = `
-        <p>
-            Scansiona una carta NFC.
-        </p>
-    `;
+        const data = await response.json();
+
+        stateTitle.textContent = `${data.icon} ${data.title}`;
+
+        let html = `<p>${data.description}</p>`;
+
+        data.sections.forEach(section => {
+
+            html += `
+                <section>
+                    <h2>${section.title}</h2>
+
+                    <ul>
+            `;
+
+            section.items.forEach(item => {
+
+                html += `<li>${item}</li>`;
+
+            });
+
+            html += `
+                    </ul>
+                </section>
+            `;
+
+        });
+
+        content.innerHTML = html;
+
+    } catch (error) {
+
+        stateTitle.textContent = "❌ Errore";
+
+        content.innerHTML = `
+            <p>
+                Non è stato possibile trovare
+                l'archivio "${state}".
+            </p>
+        `;
+
+        console.error(error);
+    }
 }
+
+loadState();
