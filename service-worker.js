@@ -20,11 +20,7 @@ self.addEventListener("install", event => {
     event.waitUntil(
 
         caches.open(CACHE_NAME)
-            .then(cache => {
-
-                return cache.addAll(CORE_FILES);
-
-            })
+            .then(cache => cache.addAll(CORE_FILES))
 
     );
 
@@ -67,66 +63,60 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
 
+    /*
+     * Per le richieste GET usiamo:
+     *
+     * ONLINE  → prova prima Internet
+     * OFFLINE → usa la cache
+     */
+
+    if (event.request.method !== "GET") {
+        return;
+    }
+
     event.respondWith(
 
-        caches.match(event.request)
-            .then(cachedResponse => {
+        fetch(event.request)
 
-                /*
-                 * Se abbiamo già la risorsa,
-                 * usiamo quella offline.
-                 */
-                if (cachedResponse) {
+            .then(networkResponse => {
 
-                    return cachedResponse;
+                if (
+                    networkResponse &&
+                    networkResponse.status === 200 &&
+                    networkResponse.type !== "opaque"
+                ) {
+
+                    const copy =
+                        networkResponse.clone();
+
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+
+                            cache.put(
+                                event.request,
+                                copy
+                            );
+
+                        });
 
                 }
 
+                return networkResponse;
 
-                /*
-                 * Altrimenti proviamo a
-                 * scaricarla da Internet.
-                 */
-                return fetch(event.request)
+            })
 
-                    .then(networkResponse => {
+            .catch(() => {
 
-                        /*
-                         * Salviamo automaticamente
-                         * la nuova risorsa nella cache.
-                         */
-                        if (
-                            networkResponse &&
-                            networkResponse.status === 200 &&
-                            networkResponse.type !== "opaque"
-                        ) {
+                return caches.match(event.request)
 
-                            const responseToCache =
-                                networkResponse.clone();
+                    .then(cachedResponse => {
 
-                            caches.open(CACHE_NAME)
-                                .then(cache => {
+                        if (cachedResponse) {
 
-                                    cache.put(
-                                        event.request,
-                                        responseToCache
-                                    );
-
-                                });
+                            return cachedResponse;
 
                         }
 
-                        return networkResponse;
-
-                    })
-
-                    .catch(() => {
-
-                        /*
-                         * Se siamo offline e la risorsa
-                         * non è mai stata memorizzata,
-                         * restituiamo una risposta semplice.
-                         */
                         return new Response(
                             "Sei offline e questa risorsa non è ancora disponibile.",
                             {
