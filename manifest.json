@@ -1,9 +1,18 @@
 {
-    "name": "Nursing NFC",
-    "short_name": "Nursing NFC",
-    "start_url": "./",
-    "display": "standalone",
-    "background_color": "#111111",
-    "theme_color": "#111111",
-    "icons": []
+  "name": "Nursing NFC",
+  "short_name": "Nursing NFC",
+  "description": "Archivio infermieristico interattivo tramite NFC",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
