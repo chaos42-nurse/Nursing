@@ -27,7 +27,7 @@ const backButton =
 
 backButton.addEventListener("click", () => {
 
-    window.location.href = "./";
+    window.history.back();
 
 });
 
