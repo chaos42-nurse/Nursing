@@ -2,33 +2,71 @@
 <html lang="it">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Nursing Shot</title>
+    <title>Nursing NFC</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
-    <link rel="manifest" href="manifest.json">
+    <link
+        rel="manifest"
+        href="manifest.json"
+    >
+
 </head>
+
 
 <body>
 
     <main>
 
-        <h1>🩺 Nursing Shot</h1>
+        <!-- INTESTAZIONE -->
 
-        <!-- Menu principale -->
+        <header>
+
+            <button
+                id="homeButton"
+                class="home-button"
+            >
+                🏠 Home
+            </button>
+
+            <h1>🩺 Nursing NFC</h1>
+
+        </header>
+
+
+        <!-- SHORTCUT PRINCIPALI -->
+
         <div id="shortcuts"></div>
 
-        <!-- Titolo della categoria -->
-        <p id="state"></p>
 
-        <!-- Contenuto -->
+        <!-- TITOLO PAGINA -->
+
+        <div id="pageHeader">
+
+            <h2 id="state"></h2>
+
+            <p id="description"></p>
+
+        </div>
+
+
+        <!-- CONTENUTO -->
+
         <div id="content"></div>
 
     </main>
+
 
     <script src="app.js"></script>
 
