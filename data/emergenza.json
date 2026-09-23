@@ -1,0 +1,26 @@
+{
+  "id": "emergenze",
+  "title": "Emergenze",
+  "icon": "🚨",
+  "description": "Archivio infermieristico dedicato alla gestione delle principali situazioni di emergenza.",
+  "sections": [
+    {
+      "title": "Valutazione iniziale",
+      "items": [
+        "Valutazione ABCDE",
+        "Parametri vitali",
+        "Stato di coscienza",
+        "Monitoraggio"
+      ]
+    },
+    {
+      "title": "Emergenze",
+      "items": [
+        "BLS",
+        "Arresto cardiaco",
+        "Shock",
+        "Emergenze respiratorie"
+      ]
+    }
+  ]
+}
