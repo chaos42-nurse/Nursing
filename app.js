@@ -21,6 +21,7 @@ const shortcuts =
 const backButton =
     document.getElementById("backButton");
 
+
 /* =========================
    HOME
 ========================= */
@@ -150,7 +151,6 @@ async function loadState() {
      */
 
     shortcuts.style.display = "none";
-
 
 
     try {
