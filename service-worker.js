@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-nfc-v1";
+const CACHE_NAME = "nursing-nfc-v2";
 
 const FILES_TO_CACHE = [
     "./",
@@ -6,6 +6,7 @@ const FILES_TO_CACHE = [
     "./style.css",
     "./app.js",
     "./manifest.json",
+    "./icon.svg",
 
     "./data/ecg.json",
     "./data/farmaci.json",
@@ -21,7 +22,6 @@ self.addEventListener("install", event => {
     );
 
 });
-
 
 self.addEventListener("fetch", event => {
 
