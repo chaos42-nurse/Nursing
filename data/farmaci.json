@@ -1,0 +1,25 @@
+{
+  "id": "farmaci",
+  "title": "Farmaci",
+  "icon": "💊",
+  "description": "Archivio infermieristico di farmacologia.",
+  "sections": [
+    {
+      "title": "Classi farmacologiche",
+      "items": [
+        "Antibiotici",
+        "Antipertensivi",
+        "Diuretici",
+        "Anticoagulanti"
+      ]
+    },
+    {
+      "title": "Monitoraggio",
+      "items": [
+        "Indicazioni",
+        "Effetti indesiderati",
+        "Parametri da monitorare"
+      ]
+    }
+  ]
+}
