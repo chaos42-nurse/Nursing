@@ -151,7 +151,6 @@ async function loadState() {
 
     shortcuts.style.display = "none";
 
-    }
 
 
     try {
