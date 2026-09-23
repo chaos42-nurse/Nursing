@@ -18,15 +18,14 @@ const content =
 const shortcuts =
     document.getElementById("shortcuts");
 
-const homeButton =
-    document.getElementById("homeButton");
-
+const backButton =
+    document.getElementById("backButton");
 
 /* =========================
    HOME
 ========================= */
 
-homeButton.addEventListener("click", () => {
+backButton.addEventListener("click", () => {
 
     window.location.href = "./";
 
