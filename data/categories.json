@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ecg",
+    "icon": "🫀",
+    "title": "ECG",
+    "description": "Elettrocardiogramma"
+  },
+  {
+    "id": "farmaci",
+    "icon": "💊",
+    "title": "Farmaci",
+    "description": "Farmacologia"
+  },
+  {
+    "id": "laboratorio",
+    "icon": "🧪",
+    "title": "Laboratorio",
+    "description": "Esami e provette"
+  },
+  {
+    "id": "emergenze",
+    "icon": "🚨",
+    "title": "Emergenze",
+    "description": "Gestione delle emergenze"
+  }
+]
