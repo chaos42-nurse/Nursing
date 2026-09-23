@@ -131,6 +131,8 @@ async function loadState() {
 
     if (!state) {
 
+        shortcuts.style.display = "flex";
+
         stateTitle.textContent =
             "Benvenuto";
 
@@ -140,6 +142,15 @@ async function loadState() {
         content.innerHTML = "";
 
         return;
+
+    }
+
+
+    /*
+     * PAGINA CATEGORIA
+     */
+
+    shortcuts.style.display = "none";
 
     }
 
