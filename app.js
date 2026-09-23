@@ -8,51 +8,56 @@ const shortcuts = document.getElementById("shortcuts");
 
 
 /* =========================
-   CATEGORIE
+   CARICA CATEGORIE
 ========================= */
 
-const categories = [
-    {
-        id: "ecg",
-        icon: "🫀",
-        title: "ECG",
-        description: "Elettrocardiogramma"
-    },
+async function loadCategories() {
 
-    {
-        id: "farmaci",
-        icon: "💊",
-        title: "Farmaci",
-        description: "Farmacologia"
-    },
+    try {
 
-    {
-        id: "laboratorio",
-        icon: "🧪",
-        title: "Laboratorio",
-        description: "Esami e provette"
-    },
+        const response =
+            await fetch("./data/categories.json");
 
-    {
-        id: "emergenze",
-        icon: "🚨",
-        title: "Emergenze",
-        description: "Gestione delle emergenze"
+        if (!response.ok) {
+
+            throw new Error(
+                "Impossibile caricare le categorie"
+            );
+
+        }
+
+        const categories =
+            await response.json();
+
+        createShortcuts(categories);
+
+    } catch (error) {
+
+        console.error(error);
+
+        shortcuts.innerHTML = `
+            <p>
+                Impossibile caricare le categorie.
+            </p>
+        `;
+
     }
-];
+
+}
 
 
 /* =========================
    CREA SHORTCUT
 ========================= */
 
-function createShortcuts() {
+function createShortcuts(categories) {
 
     shortcuts.innerHTML = "";
 
     categories.forEach(category => {
 
-        const button = document.createElement("button");
+        const button =
+            document.createElement("button");
 
         button.className = "shortcut";
 
@@ -69,13 +74,15 @@ function createShortcuts() {
 
         button.addEventListener("click", () => {
 
-            window.location.href = `?state=${category.id}`;
+            window.location.href =
+                `?state=${category.id}`;
 
         });
 
         shortcuts.appendChild(button);
 
     });
+
 }
 
 
@@ -102,14 +109,19 @@ async function loadState() {
 
     try {
 
-        const response = await fetch(`data/${state}.json`);
+        const response =
+            await fetch(`data/${state}.json`);
 
         if (!response.ok) {
-            throw new Error("Archivio non trovato");
+
+            throw new Error(
+                "Archivio non trovato"
+            );
+
         }
 
-        const data = await response.json();
-
+        const data =
+            await response.json();
 
         stateTitle.textContent =
             `${data.icon} ${data.title}`;
@@ -154,7 +166,8 @@ async function loadState() {
 
     } catch (error) {
 
-        stateTitle.textContent = "❌ Errore";
+        stateTitle.textContent =
+            "❌ Errore";
 
         content.innerHTML = `
             <p>
@@ -164,7 +177,9 @@ async function loadState() {
         `;
 
         console.error(error);
+
     }
+
 }
 
 
@@ -172,7 +187,7 @@ async function loadState() {
    AVVIO
 ========================= */
 
-createShortcuts();
+loadCategories();
 
 loadState();
 
@@ -185,11 +200,14 @@ if ("serviceWorker" in navigator) {
 
     window.addEventListener("load", () => {
 
-        navigator.serviceWorker.register("./service-worker.js")
+        navigator.serviceWorker
+            .register("./service-worker.js")
 
             .then(() => {
 
-                console.log("Service Worker attivo");
+                console.log(
+                    "Service Worker attivo"
+                );
 
             })
 
