@@ -1,23 +1,159 @@
 body {
+
     margin: 0;
+
     font-family: Arial, sans-serif;
+
     background: #111;
+
     color: white;
 }
 
+
 main {
+
     max-width: 800px;
+
     margin: auto;
+
     padding: 30px;
 }
 
+
 h1 {
+
     font-size: 32px;
+
+    margin-bottom: 30px;
 }
 
-section {
-    margin-top: 30px;
-    padding: 20px;
-    background: #222;
+
+/* =========================
+   SHORTCUT
+========================= */
+
+#shortcuts {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+.shortcut {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 18px;
+
+    border: none;
+
     border-radius: 15px;
+
+    background: #222;
+
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition: transform 0.15s,
+                background 0.15s;
+}
+
+
+.shortcut:hover {
+
+    background: #2c2c2c;
+
+    transform: translateY(-2px);
+}
+
+
+.shortcut:active {
+
+    transform: scale(0.98);
+}
+
+
+.shortcut-icon {
+
+    font-size: 32px;
+
+    width: 45px;
+
+    text-align: center;
+}
+
+
+.shortcut-text {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.shortcut-text strong {
+
+    font-size: 18px;
+}
+
+
+.shortcut-text small {
+
+    color: #aaa;
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   CONTENUTO
+========================= */
+
+#state {
+
+    margin-top: 30px;
+
+    font-size: 26px;
+
+    font-weight: bold;
+}
+
+
+#content {
+
+    margin-top: 20px;
+}
+
+
+section {
+
+    margin-top: 20px;
+
+    padding: 20px;
+
+    background: #222;
+
+    border-radius: 15px;
+}
+
+
+.welcome {
+
+    color: #aaa;
+
+    margin-top: 25px;
 }
