@@ -1,14 +1,40 @@
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(
+    window.location.search
+);
 
 const state = params.get("state");
+const item = params.get("item");
 
-const stateTitle = document.getElementById("state");
-const content = document.getElementById("content");
-const shortcuts = document.getElementById("shortcuts");
+
+const stateTitle =
+    document.getElementById("state");
+
+const description =
+    document.getElementById("description");
+
+const content =
+    document.getElementById("content");
+
+const shortcuts =
+    document.getElementById("shortcuts");
+
+const homeButton =
+    document.getElementById("homeButton");
 
 
 /* =========================
-   CARICA CATEGORIE
+   HOME
+========================= */
+
+homeButton.addEventListener("click", () => {
+
+    window.location.href = "./";
+
+});
+
+
+/* =========================
+   CATEGORIE
 ========================= */
 
 async function loadCategories() {
@@ -21,7 +47,7 @@ async function loadCategories() {
         if (!response.ok) {
 
             throw new Error(
-                "Impossibile caricare le categorie"
+                "Categorie non trovate"
             );
 
         }
@@ -31,7 +57,9 @@ async function loadCategories() {
 
         createShortcuts(categories);
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
@@ -56,30 +84,35 @@ function createShortcuts(categories) {
 
     categories.forEach(category => {
 
-        const button =
-            document.createElement("button");
+        const link =
+            document.createElement("a");
 
-        button.className = "shortcut";
+        link.className = "shortcut";
 
-        button.innerHTML = `
+        link.href =
+            `?state=${category.id}`;
+
+        link.innerHTML = `
+
             <span class="shortcut-icon">
                 ${category.icon}
             </span>
 
             <span class="shortcut-text">
-                <strong>${category.title}</strong>
-                <small>${category.description}</small>
+
+                <strong>
+                    ${category.title}
+                </strong>
+
+                <small>
+                    ${category.description}
+                </small>
+
             </span>
+
         `;
 
-        button.addEventListener("click", () => {
-
-            window.location.href =
-                `?state=${category.id}`;
-
-        });
-
-        shortcuts.appendChild(button);
+        shortcuts.appendChild(link);
 
     });
 
@@ -92,25 +125,32 @@ function createShortcuts(categories) {
 
 async function loadState() {
 
+    /*
+     * HOME
+     */
+
     if (!state) {
 
-        stateTitle.textContent = "";
+        stateTitle.textContent =
+            "Benvenuto";
 
-        content.innerHTML = `
-            <p class="welcome">
-                Seleziona un archivio oppure
-                scansiona una carta NFC.
-            </p>
-        `;
+        description.textContent =
+            "Seleziona un archivio per iniziare.";
+
+        content.innerHTML = "";
 
         return;
+
     }
 
 
     try {
 
         const response =
-            await fetch(`data/${state}.json`);
+            await fetch(
+                `data/${state}.json`
+            );
+
 
         if (!response.ok) {
 
@@ -120,42 +160,111 @@ async function loadState() {
 
         }
 
+
         const data =
             await response.json();
+
 
         stateTitle.textContent =
             `${data.icon} ${data.title}`;
 
 
-        let html = `
-            <p>${data.description}</p>
-        `;
+        description.textContent =
+            data.description;
+
+
+        /*
+         * Se è stato selezionato
+         * un elemento specifico
+         */
+
+        if (item) {
+
+            loadItem(data);
+
+            return;
+
+        }
+
+
+        /*
+         * PAGINA PRINCIPALE
+         * DELLA CATEGORIA
+         */
+
+        let html = "";
 
 
         data.sections.forEach(section => {
 
             html += `
+
                 <section>
 
-                    <h2>${section.title}</h2>
+                    <h2>
+                        ${section.title}
+                    </h2>
 
-                    <ul>
+                    <div class="item-list">
+
             `;
 
 
-            section.items.forEach(item => {
+            section.items.forEach(sectionItem => {
+
+                /*
+                 * Supportiamo sia:
+                 *
+                 * "Frequenza cardiaca"
+                 *
+                 * sia:
+                 *
+                 * {
+                 *   "id": "frequenza",
+                 *   "title": "Frequenza cardiaca"
+                 * }
+                 */
+
+                const itemId =
+                    typeof sectionItem === "string"
+                        ? createId(sectionItem)
+                        : sectionItem.id;
+
+
+                const itemTitle =
+                    typeof sectionItem === "string"
+                        ? sectionItem
+                        : sectionItem.title;
+
 
                 html += `
-                    <li>${item}</li>
+
+                    <a
+                        class="content-button"
+                        href="?state=${state}&item=${itemId}"
+                    >
+
+                        <span>
+                            ${itemTitle}
+                        </span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
+                    </a>
+
                 `;
 
             });
 
 
             html += `
-                    </ul>
+
+                    </div>
 
                 </section>
+
             `;
 
         });
@@ -164,21 +273,153 @@ async function loadState() {
         content.innerHTML = html;
 
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         stateTitle.textContent =
             "❌ Errore";
 
+        description.textContent = "";
+
         content.innerHTML = `
+
             <p>
+
                 Non è stato possibile trovare
                 l'archivio "${state}".
+
             </p>
+
         `;
 
         console.error(error);
 
     }
+
+}
+
+
+/* =========================
+   CARICA ELEMENTO
+========================= */
+
+function loadItem(data) {
+
+    let selectedItem = null;
+
+
+    /*
+     * Cerca l'elemento
+     * dentro tutte le sezioni
+     */
+
+    data.sections.forEach(section => {
+
+        section.items.forEach(sectionItem => {
+
+            const itemId =
+                typeof sectionItem === "string"
+                    ? createId(sectionItem)
+                    : sectionItem.id;
+
+
+            if (itemId === item) {
+
+                selectedItem = sectionItem;
+
+            }
+
+        });
+
+    });
+
+
+    /*
+     * Elemento non trovato
+     */
+
+    if (!selectedItem) {
+
+        content.innerHTML = `
+
+            <section>
+
+                <h2>
+                    Elemento non trovato
+                </h2>
+
+                <a
+                    class="back-button"
+                    href="?state=${state}"
+                >
+                    ← Torna indietro
+                </a>
+
+            </section>
+
+        `;
+
+        return;
+
+    }
+
+
+    const title =
+        typeof selectedItem === "string"
+            ? selectedItem
+            : selectedItem.title;
+
+
+    const text =
+        typeof selectedItem === "string"
+            ? "Contenuto in preparazione."
+            : selectedItem.content;
+
+
+    content.innerHTML = `
+
+        <section class="detail-page">
+
+            <a
+                class="back-button"
+                href="?state=${state}"
+            >
+                ← ${data.title}
+            </a>
+
+            <h2>
+                ${title}
+            </h2>
+
+            <div class="detail-content">
+
+                ${
+                    text ||
+                    "Contenuto in preparazione."
+                }
+
+            </div>
+
+        </section>
+
+    `;
+
+}
+
+
+/* =========================
+   CREA ID
+========================= */
+
+function createId(text) {
+
+    return text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
 
 }
 
@@ -202,7 +443,6 @@ if ("serviceWorker" in navigator) {
 
         navigator.serviceWorker
             .register("./service-worker.js")
-
             .then(() => {
 
                 console.log(
@@ -210,7 +450,6 @@ if ("serviceWorker" in navigator) {
                 );
 
             })
-
             .catch(error => {
 
                 console.error(
