@@ -72,3 +72,18 @@ async function loadState() {
 }
 
 loadState();
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(() => {
+                console.log("Service Worker attivo");
+            })
+            .catch(error => {
+                console.error("Errore Service Worker:", error);
+            });
+
+    });
+
+}
