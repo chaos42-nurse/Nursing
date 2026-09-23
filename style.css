@@ -1,30 +1,45 @@
 body {
-
     margin: 0;
-
     font-family: Arial, sans-serif;
-
     background: #111;
-
     color: white;
 }
 
 
 main {
-
     max-width: 800px;
-
     margin: auto;
-
     padding: 30px;
 }
 
 
+/* =========================
+   HEADER
+========================= */
+
+header {
+    position: relative;
+}
+
+
 h1 {
-
     font-size: 32px;
-
     margin-bottom: 30px;
+}
+
+
+.home-button {
+    border: none;
+    background: transparent;
+    color: #aaa;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+
+.home-button:hover {
+    color: white;
 }
 
 
@@ -33,28 +48,22 @@ h1 {
 ========================= */
 
 #shortcuts {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 12px;
 }
 
 
 .shortcut {
-
     width: 100%;
+    box-sizing: border-box;
 
     display: flex;
-
     align-items: center;
 
     gap: 18px;
 
     padding: 18px;
-
-    border: none;
 
     border-radius: 15px;
 
@@ -62,87 +71,77 @@ h1 {
 
     color: white;
 
-    text-align: left;
+    text-decoration: none;
 
-    cursor: pointer;
-
-    transition: transform 0.15s,
-                background 0.15s;
+    transition:
+        transform 0.15s,
+        background 0.15s;
 }
 
 
 .shortcut:hover {
-
     background: #2c2c2c;
-
     transform: translateY(-2px);
 }
 
 
 .shortcut:active {
-
     transform: scale(0.98);
 }
 
 
 .shortcut-icon {
-
     font-size: 32px;
-
     width: 45px;
-
     text-align: center;
 }
 
 
 .shortcut-text {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 4px;
 }
 
 
 .shortcut-text strong {
-
     font-size: 18px;
 }
 
 
 .shortcut-text small {
-
     color: #aaa;
-
     font-size: 14px;
 }
 
 
 /* =========================
-   CONTENUTO
+   PAGINA CATEGORIA
 ========================= */
 
+#pageHeader {
+    margin-top: 35px;
+}
+
+
 #state {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
 
-    margin-top: 30px;
 
-    font-size: 26px;
-
-    font-weight: bold;
+#description {
+    color: #aaa;
 }
 
 
 #content {
-
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 
 section {
-
     margin-top: 20px;
-
     padding: 20px;
 
     background: #222;
@@ -151,9 +150,89 @@ section {
 }
 
 
-.welcome {
+section h2 {
+    margin-top: 0;
+}
+
+
+/* =========================
+   ELEMENTI CLICCABILI
+========================= */
+
+.item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+.content-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    background: #2a2a2a;
+
+    color: white;
+
+    text-decoration: none;
+
+    transition:
+        background 0.15s,
+        transform 0.15s;
+}
+
+
+.content-button:hover {
+    background: #333;
+}
+
+
+.content-button:active {
+    transform: scale(0.98);
+}
+
+
+.arrow {
+    color: #aaa;
+    font-size: 20px;
+}
+
+
+/* =========================
+   PAGINA DETTAGLIO
+========================= */
+
+.detail-page {
+    margin-top: 20px;
+}
+
+
+.back-button {
+    display: inline-block;
+
+    margin-bottom: 20px;
 
     color: #aaa;
 
-    margin-top: 25px;
+    text-decoration: none;
+}
+
+
+.back-button:hover {
+    color: white;
+}
+
+
+.detail-content {
+    line-height: 1.6;
+}
+
+
+.welcome {
+    color: #aaa;
 }
