@@ -1,0 +1,28 @@
+{
+  "id": "laboratorio",
+  "title": "Laboratorio",
+  "icon": "🧪",
+  "description": "Archivio infermieristico dedicato agli esami di laboratorio e ai prelievi.",
+  "sections": [
+    {
+      "title": "Esami principali",
+      "items": [
+        "Emocromo",
+        "Elettroliti",
+        "Funzionalità renale",
+        "Funzionalità epatica",
+        "Coagulazione",
+        "Glicemia"
+      ]
+    },
+    {
+      "title": "Prelievo",
+      "items": [
+        "Tipologie di provette",
+        "Ordine di prelievo",
+        "Identificazione del paziente",
+        "Conservazione dei campioni"
+      ]
+    }
+  ]
+}
