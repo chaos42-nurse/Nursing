@@ -1,17 +1,13 @@
-const CACHE_NAME = "nursing-nfc-v3";
+const CACHE_NAME = "nursing-nfc";
 
-const FILES_TO_CACHE = [
+const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
     "./app.js",
     "./manifest.json",
     "./icon.svg",
-
-    "./data/ecg.json",
-    "./data/farmaci.json",
-    "./data/laboratorio.json",
-    "./data/emergenze.json"
+    "./data/categories.json"
 ];
 
 
@@ -26,7 +22,7 @@ self.addEventListener("install", event => {
         caches.open(CACHE_NAME)
             .then(cache => {
 
-                return cache.addAll(FILES_TO_CACHE);
+                return cache.addAll(CORE_FILES);
 
             })
 
@@ -51,8 +47,8 @@ self.addEventListener("activate", event => {
                 return Promise.all(
 
                     cacheNames
-                        .filter(cacheName => cacheName !== CACHE_NAME)
-                        .map(cacheName => caches.delete(cacheName))
+                        .filter(name => name !== CACHE_NAME)
+                        .map(name => caches.delete(name))
 
                 );
 
@@ -76,13 +72,73 @@ self.addEventListener("fetch", event => {
         caches.match(event.request)
             .then(cachedResponse => {
 
+                /*
+                 * Se abbiamo già la risorsa,
+                 * usiamo quella offline.
+                 */
                 if (cachedResponse) {
 
                     return cachedResponse;
 
                 }
 
-                return fetch(event.request);
+
+                /*
+                 * Altrimenti proviamo a
+                 * scaricarla da Internet.
+                 */
+                return fetch(event.request)
+
+                    .then(networkResponse => {
+
+                        /*
+                         * Salviamo automaticamente
+                         * la nuova risorsa nella cache.
+                         */
+                        if (
+                            networkResponse &&
+                            networkResponse.status === 200 &&
+                            networkResponse.type !== "opaque"
+                        ) {
+
+                            const responseToCache =
+                                networkResponse.clone();
+
+                            caches.open(CACHE_NAME)
+                                .then(cache => {
+
+                                    cache.put(
+                                        event.request,
+                                        responseToCache
+                                    );
+
+                                });
+
+                        }
+
+                        return networkResponse;
+
+                    })
+
+                    .catch(() => {
+
+                        /*
+                         * Se siamo offline e la risorsa
+                         * non è mai stata memorizzata,
+                         * restituiamo una risposta semplice.
+                         */
+                        return new Response(
+                            "Sei offline e questa risorsa non è ancora disponibile.",
+                            {
+                                status: 503,
+                                headers: {
+                                    "Content-Type":
+                                        "text/plain; charset=utf-8"
+                                }
+                            }
+                        );
+
+                    });
 
             })
 
