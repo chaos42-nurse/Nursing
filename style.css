@@ -348,3 +348,94 @@ section h2 {
 
     font-weight: bold;
 }
+/* =========================
+   EDITOR
+========================= */
+
+#editor-area {
+    margin-top: 25px;
+}
+
+
+#editor-area label {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+
+    margin-top: 18px;
+
+    color: #aaa;
+}
+
+
+#editor-area input,
+#editor-area select,
+#editor-area textarea {
+    box-sizing: border-box;
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #444;
+    border-radius: 8px;
+
+    background: #181818;
+    color: white;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 15px;
+}
+
+
+#editor-area textarea {
+    min-height: 100px;
+
+    resize: vertical;
+}
+
+
+#editor-area .editor-json {
+    min-height: 400px;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 13px;
+}
+
+
+.editor-buttons {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+
+.editor-buttons button {
+    padding: 13px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #333;
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+
+.editor-buttons button:hover {
+    background: #444;
+}
