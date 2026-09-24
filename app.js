@@ -1485,8 +1485,8 @@ function renderDropsCalculator() {
                     >
 
                     <select id="drops-volume-unit">
-                        <option value="ml">mL</option>
-                        <option value="l">L</option>
+                        <option value="mL">mL</option>
+                        <option value="L">L</option>
                     </select>
 
                 </div>
@@ -1532,15 +1532,9 @@ function renderDropsCalculator() {
 
                     <select id="drops-rate-unit">
 
-                        <option value="drops-min">
-                            gocce/min
-                        </option>
-
-                        <option value="ml-min">
-                            mL/min
-                        </option>
-
-                    </select>
+                        <option value="gocce/min">gocce/min</option>
+                        <option value="mL/min">mL/min</option>
+                     </select>
 
                 </div>
 
@@ -1610,142 +1604,6 @@ function renderDropsCalculator() {
 
 
             ${calculatorNote()}
-
-        </div>
-    `;
-}
-
-/* =========================================================
-   DURATA INFUSIONE
-========================================================= */
-
-function renderDropsCalculator() {
-
-    return `
-        <div class="calculator">
-
-            <h3>Velocità gocce/min</h3>
-
-            <p class="calculator-note">
-                Inserisci 2 dei 3 valori. Il terzo verrà calcolato automaticamente.
-            </p>
-
-            <div class="calculator-grid">
-
-                <div class="calc-field">
-
-                    <label for="drops-volume">
-                        Volume
-                    </label>
-
-                    ${numberInput(
-                        "drops-volume",
-                        "Volume"
-                    )}
-
-                    ${unitSelect(
-                        "drops-volume-unit",
-                        [
-                            ["mL", "mL"],
-                            ["L", "L"]
-                        ]
-                    )}
-
-                </div>
-
-
-                <div class="calc-field">
-
-                    <label for="drops-duration">
-                        Durata
-                    </label>
-
-                    ${numberInput(
-                        "drops-duration",
-                        "Durata"
-                    )}
-
-                    ${unitSelect(
-                        "drops-duration-unit",
-                        [
-                            ["min", "min"],
-                            ["h", "ore"]
-                        ]
-                    )}
-
-                </div>
-
-
-                <div class="calc-field">
-
-                    <label for="drops-rate">
-                        Velocità infusione
-                    </label>
-
-                    ${numberInput(
-                        "drops-rate",
-                        "Velocità"
-                    )}
-
-                    ${unitSelect(
-                        "drops-rate-unit",
-                        [
-                            ["gocce/min", "gocce/min"],
-                            ["mL/min", "mL/min"]
-                        ]
-                    )}
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="drops-factor-container"
-                class="calc-field"
-                style="display:none;"
-            >
-
-                <label for="drops-factor">
-                    Fattore gocce
-                </label>
-
-                ${numberInput(
-                    "drops-factor",
-                    "gocce/mL"
-                )}
-
-                <small>
-                    Necessario per il calcolo in gocce/min.
-                </small>
-
-            </div>
-
-
-            <div class="calculator-buttons">
-
-                <button
-                    id="drops-calculate"
-                    class="primary-button"
-                >
-                    Calcola
-                </button>
-
-                <button
-                    id="drops-reset"
-                    class="secondary-button"
-                >
-                    Reset
-                </button>
-
-            </div>
-
-
-            <div
-                id="drops-result"
-                class="calculator-result"
-                style="display:none;"
-            ></div>
 
         </div>
     `;
@@ -2017,9 +1875,6 @@ function renderCalculator(id, title, data) {
     }
     else if (id === "gocce-min") {
         calculatorHTML = renderDropsCalculator();
-    }
-    else if (id === "durata-infusione") {
-        calculatorHTML = renderDurationCalculator();
     }
     else {
         content.innerHTML = `
@@ -2994,7 +2849,10 @@ function attachCalculatorEvents(id) {
 
     });
 
-}
+} // chiude if (id === "gocce-min")
+
+} // chiude attachCalculatorEvents(id)
+
 /* =========================================================
    CAMPI DINAMICI GOCCE
 ========================================================= */
