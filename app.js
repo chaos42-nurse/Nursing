@@ -973,24 +973,6 @@ function parseItalianNumber(value) {
 }
 
 
-/* =========================================================
-   FORMATTA NUMERI
-========================================================= */
-
-function formatNumber(number) {
-
-    if (!Number.isFinite(number)) {
-        return "—";
-    }
-
-    return number.toLocaleString(
-        "it-IT",
-        {
-            maximumFractionDigits: 6
-        }
-    );
-}
-
 
 /* =========================================================
    INPUT NUMERICO
@@ -2057,8 +2039,59 @@ function mgMlToSelectedConcentration(
 
 
 /* =========================================================
-   EVENTI CALCOLATORI
+   RENDER CALCOLATORE
 ========================================================= */
+
+function renderCalculator(id, title, data) {
+
+    let calculatorHTML = "";
+
+    if (id === "dose") {
+        calculatorHTML = renderDoseCalculator();
+    }
+    else if (id === "diluizioni") {
+        calculatorHTML = renderDilutionCalculator();
+    }
+    else if (id === "ml-h") {
+        calculatorHTML = renderMlHCalculator();
+    }
+    else if (id === "gocce-min") {
+        calculatorHTML = renderDropsCalculator();
+    }
+    else if (id === "durata-infusione") {
+        calculatorHTML = renderDurationCalculator();
+    }
+    else {
+        content.innerHTML = `
+            <section class="detail-page">
+                ${detailHeader(title, data)}
+
+                <div class="detail-content">
+                    <h3>Calcolatore non disponibile</h3>
+
+                    <p>
+                        Il calcolatore
+                        <strong>${id}</strong>
+                        non è stato riconosciuto.
+                    </p>
+                </div>
+            </section>
+        `;
+        return;
+    }
+
+    content.innerHTML = `
+        <section class="detail-page">
+            ${detailHeader(title, data)}
+
+            <div class="detail-content">
+                ${calculatorHTML}
+            </div>
+        </section>
+    `;
+
+    attachCalculatorEvents(id);
+}
 
 function attachCalculatorEvents(id) {
 
