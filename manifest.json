@@ -1,6 +1,6 @@
 {
-  "name": "Nursing NFC",
-  "short_name": "Nursing NFC",
+  "name": "Nursing Shot",
+  "short_name": "Nursing Shot",
   "description": "Archivio infermieristico interattivo tramite NFC",
   "start_url": "./",
   "scope": "./",
