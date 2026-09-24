@@ -180,7 +180,6 @@ async function loadState() {
         content.innerHTML = "";
 
         return;
-
     }
 
 
@@ -193,23 +192,57 @@ async function loadState() {
 
     try {
 
-        const response =
-            await fetch(
-                `./data/${state}.json`
-            );
+        /*
+         * Costruiamo esplicitamente il percorso
+         * del file JSON.
+         */
 
+        const filePath =
+            `./data/${state}.json`;
+
+        console.log(
+            "Caricamento archivio:",
+            filePath
+        );
+
+
+        const response =
+            await fetch(filePath);
+
+
+        /*
+         * Controlla se il file esiste davvero.
+         */
 
         if (!response.ok) {
 
             throw new Error(
-                "Archivio non trovato"
+                `File non trovato: ${filePath} — HTTP ${response.status}`
             );
 
         }
 
 
-        let data =
-            await response.json();
+        /*
+         * Prova a leggere il JSON.
+         */
+
+        let data;
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+
+        catch (jsonError) {
+
+            throw new Error(
+                `Il file "${filePath}" esiste, ma il JSON non è valido.`
+            );
+
+        }
 
 
         /*
@@ -224,9 +257,12 @@ async function loadState() {
             );
 
 
-        stateTitle.textContent =
-            `${data.icon || ""} ${data.title}`;
+        /*
+         * Mostra titolo e descrizione.
+         */
 
+        stateTitle.textContent =
+            `${data.icon || ""} ${data.title || state}`;
 
         description.textContent =
             data.description || "";
@@ -241,7 +277,6 @@ async function loadState() {
             loadItem(data);
 
             return;
-
         }
 
 
@@ -253,14 +288,22 @@ async function loadState() {
 
     }
 
+
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "ERRORE CARICAMENTO ARCHIVIO:",
+            error
+        );
+
 
         stateTitle.textContent =
-            "❌ Errore";
+            "❌ Errore caricamento";
 
-        description.textContent = "";
+
+        description.textContent =
+            "";
+
 
         content.innerHTML = `
 
@@ -271,8 +314,26 @@ async function loadState() {
                 </h2>
 
                 <p>
-                    Non è stato possibile trovare
-                    l'archivio "${state}".
+                    Non è stato possibile caricare
+                    l'archivio
+                    <strong>${state}</strong>.
+                </p>
+
+                <p style="
+                    color:#ff7777;
+                    font-family:monospace;
+                    font-size:13px;
+                    word-break:break-word;
+                ">
+                    ${error.message}
+                </p>
+
+                <p style="
+                    color:#888;
+                    font-size:13px;
+                ">
+                    Controlla la console del browser
+                    (F12 → Console) per maggiori dettagli.
                 </p>
 
             </section>
@@ -282,8 +343,6 @@ async function loadState() {
     }
 
 }
-
-
 /* =========================================================
    RENDER SEZIONI
 ========================================================= */
