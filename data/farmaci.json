@@ -3,23 +3,86 @@
   "title": "Farmaci",
   "icon": "💊",
   "description": "Archivio infermieristico di farmacologia.",
+
   "sections": [
+
     {
-      "title": "Classi farmacologiche",
+      "title": "Farmacologia",
       "items": [
-        "Antibiotici",
-        "Antipertensivi",
-        "Diuretici",
-        "Anticoagulanti"
+        {
+          "id": "antibiotici",
+          "title": "Antibiotici",
+          "content": "Contenuto sugli antibiotici."
+        },
+        {
+          "id": "antipertensivi",
+          "title": "Antipertensivi",
+          "content": "Contenuto sugli antipertensivi."
+        },
+        {
+          "id": "diuretici",
+          "title": "Diuretici",
+          "content": "Contenuto sui diuretici."
+        },
+        {
+          "id": "anticoagulanti",
+          "title": "Anticoagulanti",
+          "content": "Contenuto sugli anticoagulanti."
+        }
       ]
     },
+
     {
       "title": "Monitoraggio",
       "items": [
-        "Indicazioni",
-        "Effetti indesiderati",
-        "Parametri da monitorare"
+        {
+          "id": "indicazioni",
+          "title": "Indicazioni",
+          "content": "Contenuto sulle indicazioni."
+        },
+        {
+          "id": "effetti-indesiderati",
+          "title": "Effetti indesiderati",
+          "content": "Contenuto sugli effetti indesiderati."
+        },
+        {
+          "id": "parametri-monitorare",
+          "title": "Parametri da monitorare",
+          "content": "Contenuto sui parametri."
+        }
+      ]
+    },
+
+    {
+      "title": "🧮 Calcolatori",
+      "items": [
+        {
+          "id": "dose",
+          "title": "Dose da somministrare",
+          "type": "calculator"
+        },
+        {
+          "id": "diluizioni",
+          "title": "Diluizioni",
+          "type": "calculator"
+        },
+        {
+          "id": "ml-h",
+          "title": "Velocità di infusione — mL/h",
+          "type": "calculator"
+        },
+        {
+          "id": "gocce-min",
+          "title": "Velocità — gocce/min",
+          "type": "calculator"
+        },
+        {
+          "id": "durata-infusione",
+          "title": "Durata dell'infusione",
+          "type": "calculator"
+        }
       ]
     }
+
   ]
 }
