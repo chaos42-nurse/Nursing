@@ -3174,7 +3174,11 @@ function attachCalculatorEvents(id) {
 
         }
     );
-}
+} // chiude if (id === "gocce-min")
+
+} // chiude attachCalculatorEvents(id)
+
+
 /* =========================================================
    CAMPI DINAMICI GOCCE
 ========================================================= */
