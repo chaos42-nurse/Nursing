@@ -2247,13 +2247,15 @@ function attachCalculatorEvents(id) {
     if (id === "diluizioni") {
 
     const c1Input = document.getElementById("dilution-c1");
-    const v1Input = document.getElementById("dilution-v1");
-    const c2Input = document.getElementById("dilution-c2");
-    const v2Input = document.getElementById("dilution-v2");
-
     const c1Unit = document.getElementById("dilution-c1-unit");
+
+    const v1Input = document.getElementById("dilution-v1");
     const v1Unit = document.getElementById("dilution-v1-unit");
+
+    const c2Input = document.getElementById("dilution-c2");
     const c2Unit = document.getElementById("dilution-c2-unit");
+
+    const v2Input = document.getElementById("dilution-v2");
     const v2Unit = document.getElementById("dilution-v2-unit");
 
     const calculateButton =
@@ -2266,309 +2268,245 @@ function attachCalculatorEvents(id) {
         document.getElementById("dilution-result");
 
 
-    function calculateDilution() {
+    function concentrationToMgMl(value, unit) {
 
-        const inputs = [
-            {
-                name: "C1",
-                input: c1Input,
-                unit: c1Unit
-            },
-            {
-                name: "V1",
-                input: v1Input,
-                unit: v1Unit
-            },
-            {
-                name: "C2",
-                input: c2Input,
-                unit: c2Unit
-            },
-            {
-                name: "V2",
-                input: v2Input,
-                unit: v2Unit
-            }
-        ];
+        if (unit === "mg/ml") {
+            return value;
+        }
+
+        if (unit === "g/ml") {
+            return value * 1000;
+        }
+
+        if (unit === "%") {
+            return value * 10;
+        }
+
+        return NaN;
+    }
 
 
-        /*
-         * Individua automaticamente il campo vuoto.
-         */
+    function mgMlToUnit(value, unit) {
 
-        const empty = inputs.filter(
-            item => item.input.value.trim() === ""
-        );
+        if (unit === "mg/ml") {
+            return value;
+        }
+
+        if (unit === "g/ml") {
+            return value / 1000;
+        }
+
+        if (unit === "%") {
+            return value / 10;
+        }
+
+        return NaN;
+    }
 
 
-        if (empty.length !== 1) {
+    calculateButton.addEventListener("click", () => {
+
+        const c1 = c1Input.value.trim() !== "";
+        const v1 = v1Input.value.trim() !== "";
+        const c2 = c2Input.value.trim() !== "";
+        const v2 = v2Input.value.trim() !== "";
+
+        const filled =
+            [c1, v1, c2, v2].filter(Boolean).length;
+
+
+        // Meno di 3 valori
+        if (filled < 3) {
+
+            result.innerHTML = `
+                <strong>Dati insufficienti</strong>
+                <p>
+                    Inserisci 3 valori e lascia vuoto quello
+                    che vuoi calcolare.
+                </p>
+            `;
 
             result.style.display = "block";
-
-            if (empty.length === 0) {
-
-                result.innerHTML = `
-                    <strong>
-                        Tutti i valori sono compilati.
-                    </strong>
-                    <br>
-                    Lascia vuoto un solo campo per permettere
-                    il calcolo automatico.
-                `;
-
-            } else {
-
-                result.innerHTML = `
-                    <strong>
-                        Dati insufficienti.
-                    </strong>
-                    <br>
-                    Inserisci 3 valori e lascia vuoto
-                    solamente quello da calcolare.
-                `;
-            }
-
             return;
         }
 
 
-        const missing = empty[0].name;
+        // Tutti e 4 compilati
+        if (filled === 4) {
 
+            result.innerHTML = `
+                <strong>Lascia un campo vuoto</strong>
+                <p>
+                    Inserisci 3 valori e lascia vuoto quello
+                    che vuoi calcolare.
+                </p>
+            `;
 
-        /*
-         * Legge i valori numerici.
-         */
-
-        const c1 = parseItalianNumber(c1Input.value);
-        const v1 = parseItalianNumber(v1Input.value);
-        const c2 = parseItalianNumber(c2Input.value);
-        const v2 = parseItalianNumber(v2Input.value);
-
-
-        /*
-         * Controllo dei valori inseriti.
-         */
-
-        const values = [
-            {
-                name: "C1",
-                value: c1
-            },
-            {
-                name: "V1",
-                value: v1
-            },
-            {
-                name: "C2",
-                value: c2
-            },
-            {
-                name: "V2",
-                value: v2
-            }
-        ];
-
-
-        for (const item of values) {
-
-            if (
-                item.name !== missing &&
-                (
-                    !Number.isFinite(item.value) ||
-                    item.value <= 0
-                )
-            ) {
-
-                result.style.display = "block";
-
-                result.innerHTML = `
-                    <strong>
-                        Valore non valido.
-                    </strong>
-                    <br>
-                    Controlla il campo ${item.name}.
-                `;
-
-                return;
-            }
+            result.style.display = "block";
+            return;
         }
 
 
-        /*
-         * Conversione delle concentrazioni
-         * in mg/mL.
-         */
+        // Leggiamo i numeri
+        const c1Value = c1
+            ? parseItalianNumber(c1Input.value)
+            : null;
 
-        let c1MgMl = null;
-        let c2MgMl = null;
+        const v1Value = v1
+            ? parseItalianNumber(v1Input.value)
+            : null;
 
+        const c2Value = c2
+            ? parseItalianNumber(c2Input.value)
+            : null;
 
-        if (missing !== "C1") {
-
-            c1MgMl = concentrationToMgMl(
-                c1,
-                c1Unit.value
-            );
-        }
-
-
-        if (missing !== "C2") {
-
-            c2MgMl = concentrationToMgMl(
-                c2,
-                c2Unit.value
-            );
-        }
+        const v2Value = v2
+            ? parseItalianNumber(v2Input.value)
+            : null;
 
 
-        /*
-         * Conversione dei volumi in mL.
-         */
+        // Conversione concentrazioni in mg/mL
+        const c1MgMl = c1
+            ? concentrationToMgMl(c1Value, c1Unit.value)
+            : null;
 
-        let v1Ml = null;
-        let v2Ml = null;
-
-
-        if (missing !== "V1") {
-
-            v1Ml = volumeToMl(
-                v1,
-                v1Unit.value
-            );
-        }
+        const c2MgMl = c2
+            ? concentrationToMgMl(c2Value, c2Unit.value)
+            : null;
 
 
-        if (missing !== "V2") {
+        // Conversione volumi in mL
+        const v1Ml = v1
+            ? volumeToMl(v1Value, v1Unit.value)
+            : null;
 
-            v2Ml = volumeToMl(
-                v2,
-                v2Unit.value
-            );
-        }
-
-
-        /*
-         * C1 × V1 = C2 × V2
-         *
-         * Calcolo automatico del solo
-         * elemento mancante.
-         */
+        const v2Ml = v2
+            ? volumeToMl(v2Value, v2Unit.value)
+            : null;
 
 
-        let calculatedValue;
-        let calculatedText;
+        // CALCOLA C1
+        if (!c1) {
 
-
-        if (missing === "C1") {
-
-            calculatedValue =
+            const calculated =
                 (c2MgMl * v2Ml) / v1Ml;
 
-            calculatedText =
-                formatConcentration(
-                    calculatedValue,
-                    c1Unit.value
-                );
+            const finalValue =
+                mgMlToUnit(calculated, c1Unit.value);
 
             c1Input.value =
-                formatNumber(calculatedValue);
+                formatNumber(finalValue);
 
+            result.innerHTML = `
+                <strong>C1 calcolata</strong>
+                <p>
+                    C1 =
+                    <strong>
+                        ${formatNumber(finalValue)}
+                        ${c1Unit.value}
+                    </strong>
+                </p>
+            `;
         }
 
 
-        else if (missing === "V1") {
+        // CALCOLA V1
+        else if (!v1) {
 
-            calculatedValue =
+            const calculated =
                 (c2MgMl * v2Ml) / c1MgMl;
 
-            calculatedText =
-                formatNumber(calculatedValue);
+            const finalValue =
+                v1Unit.value === "L"
+                    ? calculated / 1000
+                    : calculated;
 
             v1Input.value =
-                formatNumber(
-                    calculatedValue
-                );
+                formatNumber(finalValue);
 
+            result.innerHTML = `
+                <strong>V1 calcolato</strong>
+                <p>
+                    V1 =
+                    <strong>
+                        ${formatNumber(finalValue)}
+                        ${v1Unit.value}
+                    </strong>
+                </p>
+            `;
         }
 
 
-        else if (missing === "C2") {
+        // CALCOLA C2
+        else if (!c2) {
 
-            calculatedValue =
+            const calculated =
                 (c1MgMl * v1Ml) / v2Ml;
 
-            calculatedText =
-                formatConcentration(
-                    calculatedValue,
-                    c2Unit.value
-                );
+            const finalValue =
+                mgMlToUnit(calculated, c2Unit.value);
 
             c2Input.value =
-                formatNumber(calculatedValue);
+                formatNumber(finalValue);
 
+            result.innerHTML = `
+                <strong>C2 calcolata</strong>
+                <p>
+                    C2 =
+                    <strong>
+                        ${formatNumber(finalValue)}
+                        ${c2Unit.value}
+                    </strong>
+                </p>
+            `;
         }
 
 
-        else if (missing === "V2") {
+        // CALCOLA V2
+        else if (!v2) {
 
-            calculatedValue =
+            const calculated =
                 (c1MgMl * v1Ml) / c2MgMl;
 
-            calculatedText =
-                formatNumber(calculatedValue);
+            const finalValue =
+                v2Unit.value === "L"
+                    ? calculated / 1000
+                    : calculated;
 
             v2Input.value =
-                formatNumber(
-                    calculatedValue
-                );
+                formatNumber(finalValue);
+
+            result.innerHTML = `
+                <strong>V2 calcolato</strong>
+                <p>
+                    V2 =
+                    <strong>
+                        ${formatNumber(finalValue)}
+                        ${v2Unit.value}
+                    </strong>
+                </p>
+            `;
         }
 
-
-        /*
-         * Risultato.
-         */
 
         result.style.display = "block";
 
-        result.innerHTML = `
-            <strong>
-                ${missing} calcolato automaticamente
-            </strong>
-
-            <div class="calculator-result-value">
-                ${calculatedText}
-            </div>
-
-            <small>
-                Formula:
-                C1 × V1 = C2 × V2
-            </small>
-        `;
-    }
+    });
 
 
-    calculateButton.addEventListener(
-        "click",
-        calculateDilution
-    );
+    resetButton.addEventListener("click", () => {
 
+        c1Input.value = "";
+        v1Input.value = "";
+        c2Input.value = "";
+        v2Input.value = "";
 
-    resetButton.addEventListener(
-        "click",
-        () => {
+        result.innerHTML = "";
+        result.style.display = "none";
 
-            c1Input.value = "";
-            v1Input.value = "";
-            c2Input.value = "";
-            v2Input.value = "";
+    });
 
-            result.innerHTML = "";
-            result.style.display = "none";
-        }
-    );
 }
-
-
     /* =====================================================
        VELOCITÀ DI INFUSIONE
     ===================================================== */
