@@ -1,12 +1,15 @@
 {
-  "name": "Nursing Shot",
-  "short_name": "Nursing Shot",
+  "name": "Nursing NFC",
+  "short_name": "Nursing NFC",
   "description": "Archivio infermieristico interattivo tramite NFC",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#111111",
   "theme_color": "#111111",
-  "lang": "it",
+  "lang": "it-IT",
+
   "icons": [
     {
       "src": "./icon.svg",
