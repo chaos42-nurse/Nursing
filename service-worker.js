@@ -20,7 +20,11 @@ self.addEventListener("install", event => {
     event.waitUntil(
 
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(CORE_FILES))
+            .then(cache => {
+
+                return cache.addAll(CORE_FILES);
+
+            })
 
     );
 
@@ -63,16 +67,12 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
 
-    /*
-     * Per le richieste GET usiamo:
-     *
-     * ONLINE  → prova prima Internet
-     * OFFLINE → usa la cache
-     */
-
     if (event.request.method !== "GET") {
+
         return;
+
     }
+
 
     event.respondWith(
 
@@ -89,6 +89,7 @@ self.addEventListener("fetch", event => {
                     const copy =
                         networkResponse.clone();
 
+
                     caches.open(CACHE_NAME)
                         .then(cache => {
 
@@ -100,6 +101,7 @@ self.addEventListener("fetch", event => {
                         });
 
                 }
+
 
                 return networkResponse;
 
@@ -117,15 +119,20 @@ self.addEventListener("fetch", event => {
 
                         }
 
+
                         return new Response(
+
                             "Sei offline e questa risorsa non è ancora disponibile.",
+
                             {
                                 status: 503,
+
                                 headers: {
                                     "Content-Type":
                                         "text/plain; charset=utf-8"
                                 }
                             }
+
                         );
 
                     });
