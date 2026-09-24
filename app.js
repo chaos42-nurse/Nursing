@@ -1251,262 +1251,126 @@ function renderDoseCalculator() {
 function renderDilutionCalculator() {
 
     return `
-
         <div class="calculator">
 
-            <h3>
-                Diluizioni
-            </h3>
+            <div class="calculator-grid">
 
-            ${calculatorNote()}
-
-
-            <p>
-                Formula:
-                <strong>C₁ × V₁ = C₂ × V₂</strong>
-            </p>
-
-
-            <div class="calculate-choice">
-
-                <strong>
-                    Cosa vuoi calcolare?
-                </strong>
-
-
-                <label class="radio-option">
+                <div class="calculator-field">
+                    <label for="dilution-c1">
+                        C1
+                    </label>
 
                     <input
-                        type="radio"
-                        name="dilution-target"
-                        value="c1"
+                        type="text"
+                        id="dilution-c1"
+                        inputmode="decimal"
+                        placeholder="Es. 100"
                     >
 
-                    C₁
+                    <select id="dilution-c1-unit">
+                        <option value="mg/ml">mg/mL</option>
+                        <option value="g/ml">g/mL</option>
+                        <option value="%">% m/V</option>
+                    </select>
+                </div>
 
-                </label>
 
-
-                <label class="radio-option">
+                <div class="calculator-field">
+                    <label for="dilution-v1">
+                        V1
+                    </label>
 
                     <input
-                        type="radio"
-                        name="dilution-target"
-                        value="v1"
+                        type="text"
+                        id="dilution-v1"
+                        inputmode="decimal"
+                        placeholder="Es. 5"
                     >
 
-                    V₁
+                    <select id="dilution-v1-unit">
+                        <option value="ml">mL</option>
+                        <option value="l">L</option>
+                    </select>
+                </div>
 
-                </label>
 
-
-                <label class="radio-option">
+                <div class="calculator-field">
+                    <label for="dilution-c2">
+                        C2
+                    </label>
 
                     <input
-                        type="radio"
-                        name="dilution-target"
-                        value="c2"
+                        type="text"
+                        id="dilution-c2"
+                        inputmode="decimal"
+                        placeholder="Es. 20"
                     >
 
-                    C₂
+                    <select id="dilution-c2-unit">
+                        <option value="mg/ml">mg/mL</option>
+                        <option value="g/ml">g/mL</option>
+                        <option value="%">% m/V</option>
+                    </select>
+                </div>
 
-                </label>
 
-
-                <label class="radio-option">
+                <div class="calculator-field">
+                    <label for="dilution-v2">
+                        V2
+                    </label>
 
                     <input
-                        type="radio"
-                        name="dilution-target"
-                        value="v2"
-                        checked
+                        type="text"
+                        id="dilution-v2"
+                        inputmode="decimal"
+                        placeholder="Es. ?"
                     >
 
-                    V₂
-
-                </label>
-
-            </div>
-
-
-            <!-- C1 -->
-
-            <div class="calculator-row">
-
-                ${numberInput(
-                    "c1-value",
-                    "C₁ — quantità",
-                    "es. 500"
-                )}
-
-                ${unitSelect(
-                    "c1-weight-unit",
-                    [
-                        {
-                            value: "mcg",
-                            label: "mcg"
-                        },
-                        {
-                            value: "mg",
-                            label: "mg"
-                        },
-                        {
-                            value: "g",
-                            label: "g"
-                        }
-                    ]
-                )}
+                    <select id="dilution-v2-unit">
+                        <option value="ml">mL</option>
+                        <option value="l">L</option>
+                    </select>
+                </div>
 
             </div>
 
 
-            <div class="calculator-row">
-
-                ${numberInput(
-                    "c1-volume",
-                    "C₁ — volume",
-                    "es. 10"
-                )}
-
-                ${unitSelect(
-                    "c1-volume-unit",
-                    [
-                        {
-                            value: "mL",
-                            label: "mL"
-                        },
-                        {
-                            value: "L",
-                            label: "L"
-                        }
-                    ]
-                )}
-
+            <div class="calculator-formula">
+                <strong>C1 × V1 = C2 × V2</strong>
             </div>
-
-
-            <!-- V1 -->
-
-            <div class="calculator-row">
-
-                ${numberInput(
-                    "v1",
-                    "V₁",
-                    "es. 2"
-                )}
-
-                ${unitSelect(
-                    "v1-unit",
-                    [
-                        {
-                            value: "mL",
-                            label: "mL"
-                        },
-                        {
-                            value: "L",
-                            label: "L"
-                        }
-                    ]
-                )}
-
-            </div>
-
-
-            <!-- C2 -->
-
-            <div class="calculator-row">
-
-                ${numberInput(
-                    "c2-value",
-                    "C₂ — quantità",
-                    "es. 50"
-                )}
-
-                ${unitSelect(
-                    "c2-weight-unit",
-                    [
-                        {
-                            value: "mcg",
-                            label: "mcg"
-                        },
-                        {
-                            value: "mg",
-                            label: "mg"
-                        },
-                        {
-                            value: "g",
-                            label: "g"
-                        }
-                    ]
-                )}
-
-            </div>
-
-
-            <div class="calculator-row">
-
-                ${numberInput(
-                    "c2-volume",
-                    "C₂ — volume",
-                    "es. 10"
-                )}
-
-                ${unitSelect(
-                    "c2-volume-unit",
-                    [
-                        {
-                            value: "mL",
-                            label: "mL"
-                        },
-                        {
-                            value: "L",
-                            label: "L"
-                        }
-                    ]
-                )}
-
-            </div>
-
-
-            <!-- V2 -->
-
-            <div class="calculator-row">
-
-                ${numberInput(
-                    "v2",
-                    "V₂",
-                    "es. 10"
-                )}
-
-                ${unitSelect(
-                    "v2-unit",
-                    [
-                        {
-                            value: "mL",
-                            label: "mL"
-                        },
-                        {
-                            value: "L",
-                            label: "L"
-                        }
-                    ]
-                )}
-
-            </div>
-
-
-            <button id="calculate-dilution">
-                Calcola
-            </button>
 
 
             <div
                 id="dilution-result"
                 class="calculator-result"
+                style="display:none;"
             ></div>
 
-        </div>
 
+            <div class="calculator-actions">
+
+                <button
+                    type="button"
+                    id="dilution-calculate"
+                    class="primary-button"
+                >
+                    Calcola
+                </button>
+
+                <button
+                    type="button"
+                    id="dilution-reset"
+                    class="secondary-button"
+                >
+                    Cancella
+                </button>
+
+            </div>
+
+
+            ${calculatorNote()}
+
+        </div>
     `;
 }
 
@@ -1601,108 +1465,155 @@ function renderMlHCalculator() {
 function renderDropsCalculator() {
 
     return `
-
         <div class="calculator">
 
-            <h3>
-                Gocce/min e durata
-            </h3>
+            <div class="calculator-grid">
 
-            ${calculatorNote()}
+                <!-- VOLUME -->
+
+                <div class="calculator-field">
+
+                    <label for="drops-volume">
+                        Volume
+                    </label>
+
+                    <input
+                        type="text"
+                        id="drops-volume"
+                        inputmode="decimal"
+                        placeholder="Es. 500"
+                    >
+
+                    <select id="drops-volume-unit">
+                        <option value="ml">mL</option>
+                        <option value="l">L</option>
+                    </select>
+
+                </div>
 
 
-            <div class="calculator-row">
+                <!-- DURATA -->
 
-                ${numberInput(
-                    "drops-volume",
-                    "Volume",
-                    "es. 0,5"
-                )}
+                <div class="calculator-field">
 
-                ${unitSelect(
-                    "drops-volume-unit",
-                    [
-                        {
-                            value: "mL",
-                            label: "mL"
-                        },
-                        {
-                            value: "L",
-                            label: "L"
-                        }
-                    ]
-                )}
+                    <label for="drops-duration">
+                        Durata
+                    </label>
+
+                    <input
+                        type="text"
+                        id="drops-duration"
+                        inputmode="decimal"
+                        placeholder="Es. 4"
+                    >
+
+                    <select id="drops-duration-unit">
+                        <option value="min">min</option>
+                        <option value="h">ore</option>
+                    </select>
+
+                </div>
+
+
+                <!-- VELOCITÀ -->
+
+                <div class="calculator-field">
+
+                    <label for="drops-rate">
+                        Velocità infusione
+                    </label>
+
+                    <input
+                        type="text"
+                        id="drops-rate"
+                        inputmode="decimal"
+                        placeholder="Es. 125"
+                    >
+
+                    <select id="drops-rate-unit">
+
+                        <option value="drops-min">
+                            gocce/min
+                        </option>
+
+                        <option value="ml-min">
+                            mL/min
+                        </option>
+
+                    </select>
+
+                </div>
 
             </div>
 
 
-            <div class="calculate-choice">
+            <!-- FATTORE GOCCE -->
+
+            <div
+                class="calculator-field"
+                id="drops-factor-container"
+            >
+
+                <label for="drops-factor">
+                    Fattore gocce
+                </label>
+
+                <input
+                    type="text"
+                    id="drops-factor"
+                    inputmode="decimal"
+                    placeholder="Es. 20"
+                >
+
+                <span class="calculator-unit">
+                    gocce/mL
+                </span>
+
+            </div>
+
+
+            <div class="calculator-formula">
 
                 <strong>
-                    Cosa vuoi calcolare?
+                    Volume = Velocità × Durata
                 </strong>
 
-
-                <label class="radio-option">
-
-                    <input
-                        type="radio"
-                        name="drops-target"
-                        value="rate"
-                        checked
-                    >
-
-                    Gocce/min
-
-                </label>
-
-
-                <label class="radio-option">
-
-                    <input
-                        type="radio"
-                        name="drops-target"
-                        value="duration"
-                    >
-
-                    Durata
-
-                </label>
-
-
-                <label class="radio-option">
-
-                    <input
-                        type="radio"
-                        name="drops-target"
-                        value="factor"
-                    >
-
-                    Fattore di gocciolamento
-
-                </label>
-
             </div>
-
-
-            <div id="drops-fields"></div>
-
-
-            <button id="calculate-drops">
-                Calcola
-            </button>
 
 
             <div
                 id="drops-result"
                 class="calculator-result"
+                style="display:none;"
             ></div>
 
-        </div>
 
+            <div class="calculator-actions">
+
+                <button
+                    type="button"
+                    id="drops-calculate"
+                    class="primary-button"
+                >
+                    Calcola
+                </button>
+
+                <button
+                    type="button"
+                    id="drops-reset"
+                    class="secondary-button"
+                >
+                    Cancella
+                </button>
+
+            </div>
+
+
+            ${calculatorNote()}
+
+        </div>
     `;
 }
-
 
 /* =========================================================
    DURATA INFUSIONE
@@ -2335,414 +2246,327 @@ function attachCalculatorEvents(id) {
 
     if (id === "diluizioni") {
 
-        document
-            .getElementById("calculate-dilution")
-            ?.addEventListener(
-                "click",
-                () => {
+    const c1Input = document.getElementById("dilution-c1");
+    const v1Input = document.getElementById("dilution-v1");
+    const c2Input = document.getElementById("dilution-c2");
+    const v2Input = document.getElementById("dilution-v2");
 
-
-                    const target =
-                        document.querySelector(
-                            'input[name="dilution-target"]:checked'
-                        )?.value;
-
-
-                    /* -------------------------------------
-                       C1
-                    ------------------------------------- */
-
-                    const c1Quantity =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "c1-value"
-                            ).value
-                        );
-
-
-                    const c1WeightUnit =
-                        document.getElementById(
-                            "c1-weight-unit"
-                        ).value;
-
-
-                    const c1Volume =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "c1-volume"
-                            ).value
-                        );
-
-
-                    const c1VolumeUnit =
-                        document.getElementById(
-                            "c1-volume-unit"
-                        ).value;
-
-
-                    /* -------------------------------------
-                       V1
-                    ------------------------------------- */
-
-                    const v1 =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "v1"
-                            ).value
-                        );
-
-
-                    const v1Unit =
-                        document.getElementById(
-                            "v1-unit"
-                        ).value;
-
-
-                    /* -------------------------------------
-                       C2
-                    ------------------------------------- */
-
-                    const c2Quantity =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "c2-value"
-                            ).value
-                        );
-
-
-                    const c2WeightUnit =
-                        document.getElementById(
-                            "c2-weight-unit"
-                        ).value;
-
-
-                    const c2Volume =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "c2-volume"
-                            ).value
-                        );
-
-
-                    const c2VolumeUnit =
-                        document.getElementById(
-                            "c2-volume-unit"
-                        ).value;
-
-
-                    /* -------------------------------------
-                       V2
-                    ------------------------------------- */
-
-                    const v2 =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "v2"
-                            ).value
-                        );
-
-
-                    const v2Unit =
-                        document.getElementById(
-                            "v2-unit"
-                        ).value;
-
-
-                    /* -------------------------------------
-                       CONVERSIONE C1
-                    ------------------------------------- */
-
-                    const c1 =
-                        concentrationToMgMl(
-                            c1Quantity,
-                            c1WeightUnit,
-                            c1Volume,
-                            c1VolumeUnit
-                        );
-
-
-                    /* -------------------------------------
-                       CONVERSIONE C2
-                    ------------------------------------- */
-
-                    const c2 =
-                        concentrationToMgMl(
-                            c2Quantity,
-                            c2WeightUnit,
-                            c2Volume,
-                            c2VolumeUnit
-                        );
-
-
-                    let result;
-
-
-                    /* -------------------------------------
-                       CALCOLO C1
-                    ------------------------------------- */
-
-                    if (target === "c1") {
-
-                        if (
-                            !Number.isFinite(c2) ||
-                            !Number.isFinite(v1) ||
-                            !Number.isFinite(v2) ||
-                            v1 <= 0 ||
-                            v2 <= 0
-                        ) {
-
-                            showResult(
-                                "dilution-result",
-                                "Per calcolare C₁ servono C₂, V₁ e V₂ validi."
-                            );
-
-                            return;
-                        }
-
-
-                        const v1Ml =
-                            volumeToMl(
-                                v1,
-                                v1Unit
-                            );
-
-
-                        const v2Ml =
-                            volumeToMl(
-                                v2,
-                                v2Unit
-                            );
-
-
-                        result =
-                            (
-                                c2 *
-                                v2Ml
-                            ) /
-                            v1Ml;
-
-
-                        const output =
-                            mgMlToSelectedConcentration(
-                                result,
-                                c1WeightUnit,
-                                c1VolumeUnit
-                            );
-
-
-                        showResult(
-                            "dilution-result",
-                            `C₁ = ${formatNumber(
-                                output
-                            )} ${c1WeightUnit}/${c1VolumeUnit}`
-                        );
-
-
-                        return;
-                    }
-
-
-                    /* -------------------------------------
-                       CALCOLO V1
-                    ------------------------------------- */
-
-                    if (target === "v1") {
-
-                        if (
-                            !Number.isFinite(c1) ||
-                            !Number.isFinite(c2) ||
-                            !Number.isFinite(v2) ||
-                            c1 <= 0 ||
-                            c2 <= 0 ||
-                            v2 <= 0
-                        ) {
-
-                            showResult(
-                                "dilution-result",
-                                "Per calcolare V₁ servono C₁, C₂ e V₂ validi."
-                            );
-
-                            return;
-                        }
-
-
-                        const v2Ml =
-                            volumeToMl(
-                                v2,
-                                v2Unit
-                            );
-
-
-                        const resultMl =
-                            (
-                                c2 *
-                                v2Ml
-                            ) /
-                            c1;
-
-
-                        let output;
-
-
-                        if (v1Unit === "L") {
-
-                            output =
-                                resultMl / 1000;
-
-                        } else {
-
-                            output =
-                                resultMl;
-
-                        }
-
-
-                        showResult(
-                            "dilution-result",
-                            `V₁ = ${formatNumber(
-                                output
-                            )} ${v1Unit}`
-                        );
-
-
-                        return;
-                    }
-
-
-                    /* -------------------------------------
-                       CALCOLO C2
-                    ------------------------------------- */
-
-                    if (target === "c2") {
-
-                        if (
-                            !Number.isFinite(c1) ||
-                            !Number.isFinite(v1) ||
-                            !Number.isFinite(v2) ||
-                            v1 <= 0 ||
-                            v2 <= 0
-                        ) {
-
-                            showResult(
-                                "dilution-result",
-                                "Per calcolare C₂ servono C₁, V₁ e V₂ validi."
-                            );
-
-                            return;
-                        }
-
-
-                        const v1Ml =
-                            volumeToMl(
-                                v1,
-                                v1Unit
-                            );
-
-
-                        const v2Ml =
-                            volumeToMl(
-                                v2,
-                                v2Unit
-                            );
-
-
-                        result =
-                            (
-                                c1 *
-                                v1Ml
-                            ) /
-                            v2Ml;
-
-
-                        const output =
-                            mgMlToSelectedConcentration(
-                                result,
-                                c2WeightUnit,
-                                c2VolumeUnit
-                            );
-
-
-                        showResult(
-                            "dilution-result",
-                            `C₂ = ${formatNumber(
-                                output
-                            )} ${c2WeightUnit}/${c2VolumeUnit}`
-                        );
-
-
-                        return;
-                    }
-
-
-                    /* -------------------------------------
-                       CALCOLO V2
-                    ------------------------------------- */
-
-                    if (target === "v2") {
-
-                        if (
-                            !Number.isFinite(c1) ||
-                            !Number.isFinite(c2) ||
-                            !Number.isFinite(v1) ||
-                            c1 <= 0 ||
-                            c2 <= 0 ||
-                            v1 <= 0
-                        ) {
-
-                            showResult(
-                                "dilution-result",
-                                "Per calcolare V₂ servono C₁, V₁ e C₂ validi."
-                            );
-
-                            return;
-                        }
-
-
-                        const v1Ml =
-                            volumeToMl(
-                                v1,
-                                v1Unit
-                            );
-
-
-                        const resultMl =
-                            (
-                                c1 *
-                                v1Ml
-                            ) /
-                            c2;
-
-
-                        let output;
-
-
-                        if (v2Unit === "L") {
-
-                            output =
-                                resultMl / 1000;
-
-                        } else {
-
-                            output =
-                                resultMl;
-
-                        }
-
-
-                        showResult(
-                            "dilution-result",
-                            `V₂ = ${formatNumber(
-                                output
-                            )} ${v2Unit}`
-                        );
-
-
-                        return;
-                    }
-
-                }
+    const c1Unit = document.getElementById("dilution-c1-unit");
+    const v1Unit = document.getElementById("dilution-v1-unit");
+    const c2Unit = document.getElementById("dilution-c2-unit");
+    const v2Unit = document.getElementById("dilution-v2-unit");
+
+    const calculateButton =
+        document.getElementById("dilution-calculate");
+
+    const resetButton =
+        document.getElementById("dilution-reset");
+
+    const result =
+        document.getElementById("dilution-result");
+
+
+    function calculateDilution() {
+
+        const inputs = [
+            {
+                name: "C1",
+                input: c1Input,
+                unit: c1Unit
+            },
+            {
+                name: "V1",
+                input: v1Input,
+                unit: v1Unit
+            },
+            {
+                name: "C2",
+                input: c2Input,
+                unit: c2Unit
+            },
+            {
+                name: "V2",
+                input: v2Input,
+                unit: v2Unit
+            }
+        ];
+
+
+        /*
+         * Individua automaticamente il campo vuoto.
+         */
+
+        const empty = inputs.filter(
+            item => item.input.value.trim() === ""
+        );
+
+
+        if (empty.length !== 1) {
+
+            result.style.display = "block";
+
+            if (empty.length === 0) {
+
+                result.innerHTML = `
+                    <strong>
+                        Tutti i valori sono compilati.
+                    </strong>
+                    <br>
+                    Lascia vuoto un solo campo per permettere
+                    il calcolo automatico.
+                `;
+
+            } else {
+
+                result.innerHTML = `
+                    <strong>
+                        Dati insufficienti.
+                    </strong>
+                    <br>
+                    Inserisci 3 valori e lascia vuoto
+                    solamente quello da calcolare.
+                `;
+            }
+
+            return;
+        }
+
+
+        const missing = empty[0].name;
+
+
+        /*
+         * Legge i valori numerici.
+         */
+
+        const c1 = parseItalianNumber(c1Input.value);
+        const v1 = parseItalianNumber(v1Input.value);
+        const c2 = parseItalianNumber(c2Input.value);
+        const v2 = parseItalianNumber(v2Input.value);
+
+
+        /*
+         * Controllo dei valori inseriti.
+         */
+
+        const values = [
+            {
+                name: "C1",
+                value: c1
+            },
+            {
+                name: "V1",
+                value: v1
+            },
+            {
+                name: "C2",
+                value: c2
+            },
+            {
+                name: "V2",
+                value: v2
+            }
+        ];
+
+
+        for (const item of values) {
+
+            if (
+                item.name !== missing &&
+                (
+                    !Number.isFinite(item.value) ||
+                    item.value <= 0
+                )
+            ) {
+
+                result.style.display = "block";
+
+                result.innerHTML = `
+                    <strong>
+                        Valore non valido.
+                    </strong>
+                    <br>
+                    Controlla il campo ${item.name}.
+                `;
+
+                return;
+            }
+        }
+
+
+        /*
+         * Conversione delle concentrazioni
+         * in mg/mL.
+         */
+
+        let c1MgMl = null;
+        let c2MgMl = null;
+
+
+        if (missing !== "C1") {
+
+            c1MgMl = concentrationToMgMl(
+                c1,
+                c1Unit.value
             );
+        }
+
+
+        if (missing !== "C2") {
+
+            c2MgMl = concentrationToMgMl(
+                c2,
+                c2Unit.value
+            );
+        }
+
+
+        /*
+         * Conversione dei volumi in mL.
+         */
+
+        let v1Ml = null;
+        let v2Ml = null;
+
+
+        if (missing !== "V1") {
+
+            v1Ml = volumeToMl(
+                v1,
+                v1Unit.value
+            );
+        }
+
+
+        if (missing !== "V2") {
+
+            v2Ml = volumeToMl(
+                v2,
+                v2Unit.value
+            );
+        }
+
+
+        /*
+         * C1 × V1 = C2 × V2
+         *
+         * Calcolo automatico del solo
+         * elemento mancante.
+         */
+
+
+        let calculatedValue;
+        let calculatedText;
+
+
+        if (missing === "C1") {
+
+            calculatedValue =
+                (c2MgMl * v2Ml) / v1Ml;
+
+            calculatedText =
+                formatConcentration(
+                    calculatedValue,
+                    c1Unit.value
+                );
+
+            c1Input.value =
+                formatNumber(calculatedValue);
+
+        }
+
+
+        else if (missing === "V1") {
+
+            calculatedValue =
+                (c2MgMl * v2Ml) / c1MgMl;
+
+            calculatedText =
+                formatNumber(calculatedValue);
+
+            v1Input.value =
+                formatNumber(
+                    calculatedValue
+                );
+
+        }
+
+
+        else if (missing === "C2") {
+
+            calculatedValue =
+                (c1MgMl * v1Ml) / v2Ml;
+
+            calculatedText =
+                formatConcentration(
+                    calculatedValue,
+                    c2Unit.value
+                );
+
+            c2Input.value =
+                formatNumber(calculatedValue);
+
+        }
+
+
+        else if (missing === "V2") {
+
+            calculatedValue =
+                (c1MgMl * v1Ml) / c2MgMl;
+
+            calculatedText =
+                formatNumber(calculatedValue);
+
+            v2Input.value =
+                formatNumber(
+                    calculatedValue
+                );
+        }
+
+
+        /*
+         * Risultato.
+         */
+
+        result.style.display = "block";
+
+        result.innerHTML = `
+            <strong>
+                ${missing} calcolato automaticamente
+            </strong>
+
+            <div class="calculator-result-value">
+                ${calculatedText}
+            </div>
+
+            <small>
+                Formula:
+                C1 × V1 = C2 × V2
+            </small>
+        `;
     }
+
+
+    calculateButton.addEventListener(
+        "click",
+        calculateDilution
+    );
+
+
+    resetButton.addEventListener(
+        "click",
+        () => {
+
+            c1Input.value = "";
+            v1Input.value = "";
+            c2Input.value = "";
+            v2Input.value = "";
+
+            result.innerHTML = "";
+            result.style.display = "none";
+        }
+    );
+}
 
 
     /* =====================================================
@@ -2844,169 +2668,513 @@ function attachCalculatorEvents(id) {
 
     if (id === "gocce-min") {
 
-        const targetInputs =
-            document.querySelectorAll(
-                'input[name="drops-target"]'
-            );
+    const volumeInput =
+        document.getElementById("drops-volume");
+
+    const volumeUnit =
+        document.getElementById("drops-volume-unit");
+
+    const durationInput =
+        document.getElementById("drops-duration");
+
+    const durationUnit =
+        document.getElementById("drops-duration-unit");
+
+    const rateInput =
+        document.getElementById("drops-rate");
+
+    const rateUnit =
+        document.getElementById("drops-rate-unit");
+
+    const factorInput =
+        document.getElementById("drops-factor");
+
+    const factorContainer =
+        document.getElementById(
+            "drops-factor-container"
+        );
+
+    const calculateButton =
+        document.getElementById(
+            "drops-calculate"
+        );
+
+    const resetButton =
+        document.getElementById(
+            "drops-reset"
+        );
+
+    const result =
+        document.getElementById(
+            "drops-result"
+        );
 
 
-        updateDropsFields();
+    /*
+     * Mostra il fattore gocce solo quando
+     * la velocità è espressa in gocce/min.
+     */
 
+    function updateFactorVisibility() {
 
-        targetInputs.forEach(input => {
+        if (rateUnit.value === "drops-min") {
 
-            input.addEventListener(
-                "change",
-                updateDropsFields
-            );
+            factorContainer.style.display = "block";
 
-        });
+        } else {
 
-
-        document
-            .getElementById("calculate-drops")
-            ?.addEventListener(
-                "click",
-                calculateDrops
-            );
+            factorContainer.style.display = "none";
+            factorInput.value = "";
+        }
     }
 
 
-    /* =====================================================
-       DURATA INFUSIONE
-    ===================================================== */
+    rateUnit.addEventListener(
+        "change",
+        updateFactorVisibility
+    );
 
-    if (id === "durata-infusione") {
-
-        document
-            .getElementById("calculate-duration")
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    const volume =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "duration-volume"
-                            ).value
-                        );
+    updateFactorVisibility();
 
 
-                    const volumeUnit =
-                        document.getElementById(
-                            "duration-volume-unit"
-                        ).value;
+    /*
+     * Calcolo automatico:
+     *
+     * 2 valori inseriti → 1 valore calcolato.
+     */
+
+    function calculateDrops() {
+
+        const volumeEmpty =
+            volumeInput.value.trim() === "";
+
+        const durationEmpty =
+            durationInput.value.trim() === "";
+
+        const rateEmpty =
+            rateInput.value.trim() === "";
 
 
-                    const rate =
-                        parseItalianNumber(
-                            document.getElementById(
-                                "duration-rate"
-                            ).value
-                        );
+        const emptyCount =
+            [volumeEmpty, durationEmpty, rateEmpty]
+                .filter(Boolean)
+                .length;
 
 
-                    const rateUnit =
-                        document.getElementById(
-                            "duration-rate-unit"
-                        ).value;
+        /*
+         * Devono esserci esattamente
+         * 2 valori inseriti.
+         */
+
+        if (emptyCount !== 1) {
+
+            result.style.display = "block";
+
+            if (emptyCount === 0) {
+
+                result.innerHTML = `
+                    <strong>
+                        Tutti i valori sono compilati.
+                    </strong>
+                    <br>
+                    Lascia vuoto un solo campo
+                    per permettere il calcolo.
+                `;
+
+            } else {
+
+                result.innerHTML = `
+                    <strong>
+                        Dati insufficienti.
+                    </strong>
+                    <br>
+                    Inserisci 2 valori e lascia
+                    vuoto solamente quello
+                    da calcolare.
+                `;
+            }
+
+            return;
+        }
 
 
-                    if (
-                        !Number.isFinite(volume) ||
-                        !Number.isFinite(rate) ||
-                        volume <= 0 ||
-                        rate <= 0
-                    ) {
+        /*
+         * Volume → mL
+         */
 
-                        showResult(
-                            "duration-result",
-                            "Controlla i valori inseriti."
-                        );
+        let volumeMl = null;
 
-                        return;
-                    }
+        if (!volumeEmpty) {
 
+            const volume =
+                parseItalianNumber(
+                    volumeInput.value
+                );
 
-                    const volumeMl =
-                        volumeToMl(
-                            volume,
-                            volumeUnit
-                        );
+            if (
+                !Number.isFinite(volume) ||
+                volume <= 0
+            ) {
 
+                result.style.display = "block";
 
-                    let mlPerMinute;
+                result.innerHTML = `
+                    <strong>
+                        Volume non valido.
+                    </strong>
+                `;
 
+                return;
+            }
 
-                    switch (rateUnit) {
-
-                        case "mL/h":
-
-                            mlPerMinute =
-                                rate / 60;
-
-                            break;
-
-
-                        case "L/h":
-
-                            mlPerMinute =
-                                (rate * 1000) / 60;
-
-                            break;
+            volumeMl =
+                volumeToMl(
+                    volume,
+                    volumeUnit.value
+                );
+        }
 
 
-                        case "mL/min":
+        /*
+         * Durata → minuti
+         */
 
-                            mlPerMinute =
-                                rate;
+        let durationMin = null;
 
-                            break;
+        if (!durationEmpty) {
 
-                    }
+            const duration =
+                parseItalianNumber(
+                    durationInput.value
+                );
+
+            if (
+                !Number.isFinite(duration) ||
+                duration <= 0
+            ) {
+
+                result.style.display = "block";
+
+                result.innerHTML = `
+                    <strong>
+                        Durata non valida.
+                    </strong>
+                `;
+
+                return;
+            }
+
+            durationMin =
+                timeToMinutes(
+                    duration,
+                    durationUnit.value
+                );
+        }
 
 
-                    if (
-                        !Number.isFinite(
-                            mlPerMinute
-                        ) ||
-                        mlPerMinute <= 0
-                    ) {
+        /*
+         * Velocità → mL/min
+         */
 
-                        showResult(
-                            "duration-result",
-                            "Controlla la velocità inserita."
-                        );
+        let rateMlMin = null;
 
-                        return;
-                    }
+        if (!rateEmpty) {
+
+            const rate =
+                parseItalianNumber(
+                    rateInput.value
+                );
+
+            if (
+                !Number.isFinite(rate) ||
+                rate <= 0
+            ) {
+
+                result.style.display = "block";
+
+                result.innerHTML = `
+                    <strong>
+                        Velocità non valida.
+                    </strong>
+                `;
+
+                return;
+            }
 
 
-                    const minutes =
-                        volumeMl /
-                        mlPerMinute;
+            /*
+             * Se è espressa in mL/min,
+             * non serve il fattore gocce.
+             */
+
+            if (rateUnit.value === "ml-min") {
+
+                rateMlMin = rate;
+
+            }
 
 
-                    const hours =
-                        minutes / 60;
+            /*
+             * Se è espressa in gocce/min,
+             * serve il fattore gocce/mL.
+             */
 
+            else {
 
-                    showResult(
-                        "duration-result",
-                        `Durata: ${formatDuration(
-                            minutes
-                        )} — ${formatNumber(
-                            hours
-                        )} ore`
+                const factor =
+                    parseItalianNumber(
+                        factorInput.value
                     );
 
+                if (
+                    !Number.isFinite(factor) ||
+                    factor <= 0
+                ) {
+
+                    result.style.display = "block";
+
+                    result.innerHTML = `
+                        <strong>
+                            Inserisci il fattore gocce.
+                        </strong>
+                        <br>
+                        Esempio: 20 gocce/mL.
+                    `;
+
+                    return;
                 }
-            );
+
+                rateMlMin =
+                    rate / factor;
+            }
+        }
+
+
+        /*
+         * Determina quale valore manca.
+         */
+
+        let missing;
+
+
+        if (volumeEmpty) {
+
+            missing = "volume";
+
+        } else if (durationEmpty) {
+
+            missing = "duration";
+
+        } else {
+
+            missing = "rate";
+        }
+
+
+        let resultValue;
+        let resultUnit;
+
+
+        /*
+         * VOLUME
+         *
+         * V = velocità × durata
+         */
+
+        if (missing === "volume") {
+
+            const calculatedVolumeMl =
+                rateMlMin * durationMin;
+
+
+            resultValue =
+                calculatedVolumeMl;
+
+            resultUnit = "mL";
+
+
+            /*
+             * Mostra il risultato nell'unità
+             * selezionata dall'utente.
+             */
+
+            if (volumeUnit.value === "l") {
+
+                resultValue =
+                    calculatedVolumeMl / 1000;
+
+                resultUnit = "L";
+            }
+
+
+            volumeInput.value =
+                formatNumber(resultValue);
+        }
+
+
+        /*
+         * DURATA
+         *
+         * T = volume / velocità
+         */
+
+        else if (missing === "duration") {
+
+            const calculatedDurationMin =
+                volumeMl / rateMlMin;
+
+
+            resultValue =
+                calculatedDurationMin;
+
+            resultUnit = "min";
+
+
+            if (durationUnit.value === "h") {
+
+                resultValue =
+                    calculatedDurationMin / 60;
+
+                resultUnit = "ore";
+            }
+
+
+            durationInput.value =
+                formatNumber(resultValue);
+        }
+
+
+        /*
+         * VELOCITÀ
+         *
+         * R = volume / durata
+         */
+
+        else if (missing === "rate") {
+
+            const calculatedRateMlMin =
+                volumeMl / durationMin;
+
+
+            /*
+             * mL/min
+             */
+
+            if (rateUnit.value === "ml-min") {
+
+                resultValue =
+                    calculatedRateMlMin;
+
+                resultUnit = "mL/min";
+
+                rateInput.value =
+                    formatNumber(
+                        calculatedRateMlMin
+                    );
+            }
+
+
+            /*
+             * gocce/min
+             */
+
+            else {
+
+                const factor =
+                    parseItalianNumber(
+                        factorInput.value
+                    );
+
+                if (
+                    !Number.isFinite(factor) ||
+                    factor <= 0
+                ) {
+
+                    result.style.display = "block";
+
+                    result.innerHTML = `
+                        <strong>
+                            Inserisci il fattore gocce.
+                        </strong>
+                        <br>
+                        Esempio: 20 gocce/mL.
+                    `;
+
+                    return;
+                }
+
+
+                const calculatedDropsMin =
+                    calculatedRateMlMin * factor;
+
+
+                resultValue =
+                    calculatedDropsMin;
+
+                resultUnit =
+                    "gocce/min";
+
+
+                rateInput.value =
+                    formatNumber(
+                        calculatedDropsMin
+                    );
+            }
+        }
+
+
+        /*
+         * RISULTATO
+         */
+
+        result.style.display = "block";
+
+        result.innerHTML = `
+
+            <strong>
+                ${missing === "volume"
+                    ? "Volume"
+                    : missing === "duration"
+                        ? "Durata"
+                        : "Velocità infusione"
+                }
+                calcolato automaticamente
+            </strong>
+
+            <div class="calculator-result-value">
+                ${formatNumber(resultValue)}
+                ${resultUnit}
+            </div>
+
+            <small>
+                Inseriti 2 valori → calcolato automaticamente
+                il terzo.
+            </small>
+        `;
     }
 
+
+    calculateButton.addEventListener(
+        "click",
+        calculateDrops
+    );
+
+
+    resetButton.addEventListener(
+        "click",
+        () => {
+
+            volumeInput.value = "";
+            durationInput.value = "";
+            rateInput.value = "";
+            factorInput.value = "";
+
+            result.innerHTML = "";
+            result.style.display = "none";
+
+        }
+    );
 }
-
-
 /* =========================================================
    CAMPI DINAMICI GOCCE
 ========================================================= */
