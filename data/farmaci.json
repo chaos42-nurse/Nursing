@@ -2,85 +2,175 @@
   "id": "farmaci",
   "title": "Farmaci",
   "icon": "💊",
-  "description": "Archivio infermieristico di farmacologia.",
+  "description": "Archivio infermieristico di farmacologia e calcolo della somministrazione.",
 
   "sections": [
 
     {
-      "title": "Farmacologia",
+      "title": "Classi farmacologiche",
       "items": [
+
         {
           "id": "antibiotici",
           "title": "Antibiotici",
-          "content": "Contenuto sugli antibiotici."
+          "type": "drug",
+          "content": {
+            "class": "Antibatterici",
+            "indications": [
+              "Da compilare"
+            ],
+            "effects": [
+              "Da compilare"
+            ],
+            "monitoring": [
+              "Da compilare"
+            ],
+            "adverseEffects": [
+              "Da compilare"
+            ],
+            "notes": "Contenuto da completare."
+          }
         },
+
         {
           "id": "antipertensivi",
           "title": "Antipertensivi",
-          "content": "Contenuto sugli antipertensivi."
+          "type": "drug",
+          "content": {
+            "class": "Farmaci antipertensivi",
+            "indications": [
+              "Da compilare"
+            ],
+            "effects": [
+              "Da compilare"
+            ],
+            "monitoring": [
+              "Da compilare"
+            ],
+            "adverseEffects": [
+              "Da compilare"
+            ],
+            "notes": "Contenuto da completare."
+          }
         },
+
         {
           "id": "diuretici",
           "title": "Diuretici",
-          "content": "Contenuto sui diuretici."
+          "type": "drug",
+          "content": {
+            "class": "Diuretici",
+            "indications": [
+              "Da compilare"
+            ],
+            "effects": [
+              "Da compilare"
+            ],
+            "monitoring": [
+              "Da compilare"
+            ],
+            "adverseEffects": [
+              "Da compilare"
+            ],
+            "notes": "Contenuto da completare."
+          }
         },
+
         {
           "id": "anticoagulanti",
           "title": "Anticoagulanti",
-          "content": "Contenuto sugli anticoagulanti."
+          "type": "drug",
+          "content": {
+            "class": "Anticoagulanti",
+            "indications": [
+              "Da compilare"
+            ],
+            "effects": [
+              "Da compilare"
+            ],
+            "monitoring": [
+              "Da compilare"
+            ],
+            "adverseEffects": [
+              "Da compilare"
+            ],
+            "notes": "Contenuto da completare."
+          }
         }
+
       ]
     },
+
 
     {
       "title": "Monitoraggio",
       "items": [
+
         {
           "id": "indicazioni",
           "title": "Indicazioni",
-          "content": "Contenuto sulle indicazioni."
+          "type": "text",
+          "content": {
+            "text": "Sezione dedicata alle indicazioni farmacologiche."
+          }
         },
+
         {
           "id": "effetti-indesiderati",
           "title": "Effetti indesiderati",
-          "content": "Contenuto sugli effetti indesiderati."
+          "type": "text",
+          "content": {
+            "text": "Sezione dedicata agli effetti indesiderati."
+          }
         },
+
         {
           "id": "parametri-monitorare",
           "title": "Parametri da monitorare",
-          "content": "Contenuto sui parametri."
+          "type": "text",
+          "content": {
+            "text": "Sezione dedicata ai parametri da monitorare."
+          }
         }
+
       ]
     },
+
 
     {
       "title": "🧮 Calcolatori",
       "items": [
+
         {
           "id": "dose",
           "title": "Dose da somministrare",
           "type": "calculator"
         },
+
         {
           "id": "diluizioni",
           "title": "Diluizioni",
           "type": "calculator"
         },
+
         {
           "id": "ml-h",
           "title": "Velocità di infusione — mL/h",
           "type": "calculator"
         },
+
         {
           "id": "gocce-min",
           "title": "Velocità — gocce/min",
           "type": "calculator"
         },
+
         {
           "id": "durata-infusione",
           "title": "Durata dell'infusione",
           "type": "calculator"
         }
+
       ]
     }
 
