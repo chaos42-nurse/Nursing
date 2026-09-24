@@ -1463,147 +1463,55 @@ function renderMlHCalculator() {
 ========================================================= */
 
 function renderDropsCalculator() {
-
     return `
         <div class="calculator">
 
             <div class="calculator-grid">
 
-                <!-- VOLUME -->
-
                 <div class="calculator-field">
-
-                    <label for="drops-volume">
-                        Volume
-                    </label>
-
-                    <input
-                        type="text"
-                        id="drops-volume"
-                        inputmode="decimal"
-                        placeholder="Es. 500"
-                    >
-
+                    <label for="drops-volume">Volume</label>
+                    <input type="text" id="drops-volume" inputmode="decimal" placeholder="Es. 500">
                     <select id="drops-volume-unit">
                         <option value="mL">mL</option>
                         <option value="L">L</option>
                     </select>
-
                 </div>
 
-
-                <!-- DURATA -->
-
                 <div class="calculator-field">
-
-                    <label for="drops-duration">
-                        Durata
-                    </label>
-
-                    <input
-                        type="text"
-                        id="drops-duration"
-                        inputmode="decimal"
-                        placeholder="Es. 4"
-                    >
-
+                    <label for="drops-duration">Durata</label>
+                    <input type="text" id="drops-duration" inputmode="decimal" placeholder="Es. 4">
                     <select id="drops-duration-unit">
                         <option value="min">min</option>
                         <option value="h">ore</option>
                     </select>
-
                 </div>
-
-
-                <!-- VELOCITÀ -->
 
                 <div class="calculator-field">
-
-                    <label for="drops-rate">
-                        Velocità infusione
-                    </label>
-
-                    <input
-                        type="text"
-                        id="drops-rate"
-                        inputmode="decimal"
-                        placeholder="Es. 125"
-                    >
-
+                    <label for="drops-rate">Velocità infusione</label>
+                    <input type="text" id="drops-rate" inputmode="decimal" placeholder="Es. 125">
                     <select id="drops-rate-unit">
-
                         <option value="gocce/min">gocce/min</option>
                         <option value="mL/min">mL/min</option>
-                     </select>
-
+                    </select>
                 </div>
 
             </div>
 
-
-            <!-- FATTORE GOCCE -->
-
-            <div
-                class="calculator-field"
-                id="drops-factor-container"
-            >
-
-                <label for="drops-factor">
-                    Fattore gocce
-                </label>
-
-                <input
-                    type="text"
-                    id="drops-factor"
-                    inputmode="decimal"
-                    placeholder="Es. 20"
-                >
-
-                <span class="calculator-unit">
-                    gocce/mL
-                </span>
-
+            <div class="calculator-field" id="drops-factor-container">
+                <label for="drops-factor">Fattore gocce</label>
+                <select id="drops-factor">
+                    <option value="10">10 gocce/mL</option>
+                    <option value="15">15 gocce/mL</option>
+                    <option value="20" selected>20 gocce/mL</option>
+                    <option value="60">60 gocce/mL</option>
+                </select>
             </div>
-
 
             <div class="calculator-formula">
-
-                <strong>
-                    Volume = Velocità × Durata
-                </strong>
-
+                <strong>Volume = Velocità × Durata</strong>
             </div>
 
-
-            <div
-                id="drops-result"
-                class="calculator-result"
-                style="display:none;"
-            ></div>
-
-
-            <div class="calculator-actions">
-
-                <button
-                    type="button"
-                    id="drops-calculate"
-                    class="primary-button"
-                >
-                    Calcola
-                </button>
-
-                <button
-                    type="button"
-                    id="drops-reset"
-                    class="secondary-button"
-                >
-                    Cancella
-                </button>
-
-            </div>
-
-
-            ${calculatorNote()}
+            <div id="drops-result" class="calculator-result" style="display:none;"></div>
 
         </div>
     `;
@@ -2508,75 +2416,39 @@ function attachCalculatorEvents(id) {
        GOCCE
     ===================================================== */
 
-    if (id === "gocce-min") {
+   if (id === "gocce-min") {
 
-    const volumeInput =
-        document.getElementById("drops-volume");
+    const volumeInput = document.getElementById("drops-volume");
+    const volumeUnit = document.getElementById("drops-volume-unit");
 
-    const volumeUnit =
-        document.getElementById("drops-volume-unit");
+    const durationInput = document.getElementById("drops-duration");
+    const durationUnit = document.getElementById("drops-duration-unit");
 
-    const durationInput =
-        document.getElementById("drops-duration");
+    const rateInput = document.getElementById("drops-rate");
+    const rateUnit = document.getElementById("drops-rate-unit");
 
-    const durationUnit =
-        document.getElementById("drops-duration-unit");
+    const factorContainer = document.getElementById("drops-factor-container");
+    const factorInput = document.getElementById("drops-factor");
 
-    const rateInput =
-        document.getElementById("drops-rate");
-
-    const rateUnit =
-        document.getElementById("drops-rate-unit");
-
-    const factorInput =
-        document.getElementById("drops-factor");
-
-    const factorContainer =
-        document.getElementById("drops-factor-container");
-
-    const calculateButton =
-        document.getElementById("drops-calculate");
-
-    const resetButton =
-        document.getElementById("drops-reset");
-
-    const result =
-        document.getElementById("drops-result");
+    const result = document.getElementById("drops-result");
 
 
     function updateFactorVisibility() {
 
         if (rateUnit.value === "gocce/min") {
-
             factorContainer.style.display = "block";
-
         } else {
-
             factorContainer.style.display = "none";
-
         }
+
     }
 
 
-    rateUnit.addEventListener(
-        "change",
-        updateFactorVisibility
-    );
+    function calculateAutomatically() {
 
-    updateFactorVisibility();
-
-
-    calculateButton.addEventListener("click", () => {
-
-        const volumeFilled =
-            volumeInput.value.trim() !== "";
-
-        const durationFilled =
-            durationInput.value.trim() !== "";
-
-        const rateFilled =
-            rateInput.value.trim() !== "";
-
+        const volumeFilled = volumeInput.value.trim() !== "";
+        const durationFilled = durationInput.value.trim() !== "";
+        const rateFilled = rateInput.value.trim() !== "";
 
         const filled = [
             volumeFilled,
@@ -2585,59 +2457,48 @@ function attachCalculatorEvents(id) {
         ].filter(Boolean).length;
 
 
-        // Servono 2 dei 3 valori
+        // Meno di 2 valori → niente calcolo
         if (filled < 2) {
-
-            result.innerHTML = `
-                <strong>Dati insufficienti</strong>
-
-                <p>
-                    Inserisci 2 dei 3 valori:
-                    volume, durata e velocità.
-                </p>
-            `;
-
-            result.style.display = "block";
-
+            result.style.display = "none";
+            result.innerHTML = "";
             return;
         }
 
 
-        // Tutti e 3 compilati
+        // Tutti e 3 compilati → non modificare nulla
         if (filled === 3) {
-
-            result.innerHTML = `
-                <strong>Lascia un campo vuoto</strong>
-
-                <p>
-                    Inserisci 2 valori e lascia vuoto
-                    quello che vuoi calcolare.
-                </p>
-            `;
-
             result.style.display = "block";
-
+            result.innerHTML = `
+                <strong>Inserisci solo 2 valori.</strong><br>
+                Lascia vuoto il valore che vuoi calcolare.
+            `;
             return;
         }
 
 
-        const volume =
-            volumeFilled
-                ? parseItalianNumber(volumeInput.value)
-                : null;
+        const volume = volumeFilled
+            ? parseItalianNumber(volumeInput.value)
+            : null;
 
-        const duration =
-            durationFilled
-                ? parseItalianNumber(durationInput.value)
-                : null;
+        const duration = durationFilled
+            ? parseItalianNumber(durationInput.value)
+            : null;
 
-        const rate =
-            rateFilled
-                ? parseItalianNumber(rateInput.value)
-                : null;
+        const rate = rateFilled
+            ? parseItalianNumber(rateInput.value)
+            : null;
 
 
-        // Volume → mL
+        // Controllo numeri
+        if (volumeFilled && !validNumber(volume)) return;
+        if (durationFilled && !validNumber(duration)) return;
+        if (rateFilled && !validNumber(rate)) return;
+
+
+        // -------------------------
+        // CONVERSIONE VOLUME
+        // -------------------------
+
         let volumeMl = null;
 
         if (volumeFilled) {
@@ -2646,10 +2507,14 @@ function attachCalculatorEvents(id) {
                 volumeUnit.value === "L"
                     ? volume * 1000
                     : volume;
+
         }
 
 
-        // Durata → minuti
+        // -------------------------
+        // CONVERSIONE DURATA
+        // -------------------------
+
         let durationMin = null;
 
         if (durationFilled) {
@@ -2658,201 +2523,156 @@ function attachCalculatorEvents(id) {
                 durationUnit.value === "h"
                     ? duration * 60
                     : duration;
+
         }
 
 
-        // Fattore gocce
-        let factor = null;
+        // -------------------------
+        // CONVERSIONE VELOCITÀ
+        // -------------------------
 
-        if (rateUnit.value === "gocce/min") {
+        let rateMlMin = null;
 
-            factor =
-                parseItalianNumber(factorInput.value);
+        if (rateFilled) {
 
-            if (!validNumber(factor) || factor <= 0) {
+            if (rateUnit.value === "gocce/min") {
 
-                result.innerHTML = `
-                    <strong>Fattore gocce mancante</strong>
+                const factor = Number(factorInput.value);
 
-                    <p>
-                        Inserisci il fattore in gocce/mL.
-                    </p>
-                `;
+                if (!factor || factor <= 0) {
+                    result.style.display = "block";
+                    result.innerHTML = `
+                        <strong>Seleziona un fattore gocce valido.</strong>
+                    `;
+                    return;
+                }
 
-                result.style.display = "block";
+                rateMlMin = rate / factor;
 
-                return;
+            } else {
+
+                rateMlMin = rate;
+
             }
+
         }
 
 
-        /*
-         * CALCOLA VOLUME
-         *
-         * V = velocità × durata
-         */
+        // =====================================================
+        // CALCOLO DEL VOLUME
+        // =====================================================
 
         if (!volumeFilled) {
 
-            let rateMlMin;
-
-            if (rateUnit.value === "gocce/min") {
-
-                rateMlMin =
-                    rate / factor;
-
-            } else {
-
-                rateMlMin =
-                    rate;
-            }
-
-
-            let calculated =
+            const calculatedMl =
                 rateMlMin * durationMin;
 
+            let calculated = calculatedMl;
 
             if (volumeUnit.value === "L") {
-
-                calculated =
-                    calculated / 1000;
+                calculated = calculatedMl / 1000;
             }
 
+            volumeInput.value = formatNumber(calculated);
 
-            volumeInput.value =
-                formatNumber(calculated);
-
-
+            result.style.display = "block";
             result.innerHTML = `
-                <strong>Volume calcolato</strong>
-
-                <p>
-                    Volume =
-                    <strong>
-                        ${formatNumber(calculated)}
-                        ${volumeUnit.value}
-                    </strong>
-                </p>
+                Volume calcolato:
+                <strong>${formatNumber(calculated)} ${volumeUnit.value}</strong>
             `;
+
+            return;
         }
 
 
-        /*
-         * CALCOLA DURATA
-         *
-         * T = volume / velocità
-         */
+        // =====================================================
+        // CALCOLO DELLA DURATA
+        // =====================================================
 
-        else if (!durationFilled) {
+        if (!durationFilled) {
 
-            let rateMlMin;
-
-            if (rateUnit.value === "gocce/min") {
-
-                rateMlMin =
-                    rate / factor;
-
-            } else {
-
-                rateMlMin =
-                    rate;
-            }
-
-
-            let calculated =
+            const calculatedMin =
                 volumeMl / rateMlMin;
 
+            let calculated = calculatedMin;
 
             if (durationUnit.value === "h") {
-
-                calculated =
-                    calculated / 60;
+                calculated = calculatedMin / 60;
             }
 
+            durationInput.value = formatNumber(calculated);
 
-            durationInput.value =
-                formatNumber(calculated);
-
-
+            result.style.display = "block";
             result.innerHTML = `
-                <strong>Durata calcolata</strong>
-
-                <p>
-                    Durata =
-                    <strong>
-                        ${formatNumber(calculated)}
-                        ${durationUnit.value === "h" ? "ore" : "min"}
-                    </strong>
-                </p>
+                Durata calcolata:
+                <strong>${formatNumber(calculated)} ${durationUnit.value === "h" ? "ore" : "min"}</strong>
             `;
+
+            return;
         }
 
 
-        /*
-         * CALCOLA VELOCITÀ
-         *
-         * R = volume / durata
-         */
+        // =====================================================
+        // CALCOLO DELLA VELOCITÀ
+        // =====================================================
 
-        else if (!rateFilled) {
+        if (!rateFilled) {
 
-            const rateMlMin =
+            const calculatedMlMin =
                 volumeMl / durationMin;
-
 
             let calculated;
 
             if (rateUnit.value === "gocce/min") {
 
+                const factor = Number(factorInput.value);
+
                 calculated =
-                    rateMlMin * factor;
+                    calculatedMlMin * factor;
 
             } else {
 
                 calculated =
-                    rateMlMin;
+                    calculatedMlMin;
+
             }
 
+            rateInput.value = formatNumber(calculated);
 
-            rateInput.value =
-                formatNumber(calculated);
-
-
+            result.style.display = "block";
             result.innerHTML = `
-                <strong>Velocità calcolata</strong>
-
-                <p>
-                    Velocità =
-                    <strong>
-                        ${formatNumber(calculated)}
-                        ${rateUnit.value}
-                    </strong>
-                </p>
+                Velocità calcolata:
+                <strong>${formatNumber(calculated)} ${rateUnit.value}</strong>
             `;
+
         }
 
+    }
 
-        result.style.display = "block";
+
+    // =====================================================
+    // AGGIORNAMENTO AUTOMATICO
+    // =====================================================
+
+    volumeInput.addEventListener("input", calculateAutomatically);
+    durationInput.addEventListener("input", calculateAutomatically);
+    rateInput.addEventListener("input", calculateAutomatically);
+
+    volumeUnit.addEventListener("change", calculateAutomatically);
+    durationUnit.addEventListener("change", calculateAutomatically);
+    rateUnit.addEventListener("change", () => {
+
+        updateFactorVisibility();
+        calculateAutomatically();
 
     });
 
+    factorInput.addEventListener("change", calculateAutomatically);
 
-    resetButton.addEventListener("click", () => {
 
-        volumeInput.value = "";
-        durationInput.value = "";
-        rateInput.value = "";
-        factorInput.value = "";
+    updateFactorVisibility();
 
-        result.innerHTML = "";
-        result.style.display = "none";
-
-    });
-
-} // chiude if (id === "gocce-min")
-
-} // chiude attachCalculatorEvents(id)
-
+}
 /* =========================================================
    CAMPI DINAMICI GOCCE
 ========================================================= */
