@@ -1932,6 +1932,7 @@ function renderCalculator(id, title, data) {
     }
     else if (id === "ml-h") {
         calculatorHTML = renderMlHCalculator();
+       
     }
    else if (id === "gocce-min") {
     calculatorHTML = renderDropsCalculator();
