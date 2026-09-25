@@ -1448,7 +1448,90 @@ function renderMlHCalculator() {
     `;
 }
 
+/* =========================================================
+   DURATA DELL'INFUSIONE
+========================================================= */
 
+function renderDurationCalculator() {
+
+    return `
+
+        <div class="calculator">
+
+            <h3>
+                Durata dell'infusione
+            </h3>
+
+            ${calculatorNote()}
+
+            <div class="calculator-row">
+
+                ${numberInput(
+                    "duration-volume",
+                    "Volume",
+                    "es. 500"
+                )}
+
+                ${unitSelect(
+                    "duration-volume-unit",
+                    [
+                        {
+                            value: "mL",
+                            label: "mL"
+                        },
+                        {
+                            value: "L",
+                            label: "L"
+                        }
+                    ]
+                )}
+
+            </div>
+
+
+            <div class="calculator-row">
+
+                ${numberInput(
+                    "duration-rate",
+                    "Velocità di infusione",
+                    "es. 125"
+                )}
+
+                ${unitSelect(
+                    "duration-rate-unit",
+                    [
+                        {
+                            value: "mL/h",
+                            label: "mL/h"
+                        },
+                        {
+                            value: "mL/min",
+                            label: "mL/min"
+                        }
+                    ]
+                )}
+
+            </div>
+
+
+            <button
+                id="calculate-duration"
+                type="button"
+            >
+                Calcola
+            </button>
+
+
+            <div
+                id="duration-result"
+                class="calculator-result"
+            ></div>
+
+        </div>
+
+    `;
+
+}
 /* =========================================================
    GOCCE / MINUTO
 ========================================================= */
@@ -1849,9 +1932,11 @@ function renderCalculator(id, title, data) {
     }
     else if (id === "ml-h") {
         calculatorHTML = renderMlHCalculator();
+   else if (id === "gocce-min") {
+    calculatorHTML = renderDropsCalculator();
     }
-    else if (id === "gocce-min") {
-        calculatorHTML = renderDropsCalculator();
+    else if (id === "durata-infusione") {
+    calculatorHTML = renderDurationCalculator();
     }
     else {
         content.innerHTML = `
@@ -2479,7 +2564,107 @@ function attachCalculatorEvents(id) {
                 }
             );
     }
+/* =====================================================
+   DURATA DELL'INFUSIONE
+===================================================== */
 
+if (id === "durata-infusione") {
+
+    document
+        .getElementById("calculate-duration")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const volume =
+                    parseItalianNumber(
+                        document.getElementById(
+                            "duration-volume"
+                        ).value
+                    );
+
+
+                const volumeUnit =
+                    document.getElementById(
+                        "duration-volume-unit"
+                    ).value;
+
+
+                const rate =
+                    parseItalianNumber(
+                        document.getElementById(
+                            "duration-rate"
+                        ).value
+                    );
+
+
+                const rateUnit =
+                    document.getElementById(
+                        "duration-rate-unit"
+                    ).value;
+
+
+                if (
+                    !Number.isFinite(volume) ||
+                    !Number.isFinite(rate) ||
+                    volume <= 0 ||
+                    rate <= 0
+                ) {
+
+                    showResult(
+                        "duration-result",
+                        "Controlla i valori inseriti."
+                    );
+
+                    return;
+                }
+
+
+                const volumeMl =
+                    volumeToMl(
+                        volume,
+                        volumeUnit
+                    );
+
+
+                let rateMlHour;
+
+
+                if (rateUnit === "mL/min") {
+
+                    rateMlHour =
+                        rate * 60;
+
+                } else {
+
+                    rateMlHour =
+                        rate;
+
+                }
+
+
+                const durationHours =
+                    volumeMl /
+                    rateMlHour;
+
+
+                const durationMinutes =
+                    durationHours * 60;
+
+
+                showResult(
+                    "duration-result",
+                    `Durata: ${formatDuration(
+                        durationMinutes
+                    )} — ${formatNumber(
+                        durationHours
+                    )} ore`
+                );
+
+            }
+        );
+
+}
 
     /* =====================================================
        GOCCE
