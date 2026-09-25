@@ -1,7 +1,7 @@
 {
   "name": "Nursing Shot",
   "short_name": "Nursing Shot",
-  "description": "Archivio infermieristico interattivo tramite NFC",
+  "description": "Archivio infermieristico in pillole",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
