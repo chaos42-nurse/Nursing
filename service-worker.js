@@ -6,8 +6,6 @@ const CORE_FILES = [
     "./style.css",
     "./app.js",
     "./manifest.json",
-    "./icon-192.png",
-    "./icon-512.png",
     "./icon.svg",
     "./data/categories.json",
     "./data/ecg.json",
@@ -82,10 +80,12 @@ self.addEventListener("fetch", event => {
 
                     caches.open(CACHE_NAME)
                         .then(cache => {
+
                             cache.put(
                                 event.request,
                                 responseCopy
                             );
+
                         });
 
                 }
