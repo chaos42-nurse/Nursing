@@ -641,21 +641,12 @@ function detailHeader(title, data) {
 
     return `
 
-        <a
-            class="back-button"
-            href="?state=${encodeURIComponent(data.id)}"
-        >
-            ← ${data.title}
-        </a>
-
         <h2>
             ${title}
         </h2>
 
     `;
-
 }
-
 
 /* =========================================================
    TESTO GENERICO
