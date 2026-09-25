@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-app-cache";
+const CACHE_NAME = "nursing-app-cache-v2";
 
 const CORE_FILES = [
     "./",
@@ -67,6 +67,7 @@ self.addEventListener("fetch", event => {
     event.respondWith(
 
         fetch(event.request)
+
             .then(networkResponse => {
 
                 if (
@@ -93,6 +94,7 @@ self.addEventListener("fetch", event => {
                 return networkResponse;
 
             })
+
             .catch(() => {
 
                 return caches.match(event.request)
