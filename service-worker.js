@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-nfc";
+const CACHE_NAME = "Nursing-Shot";
 
 const CORE_FILES = [
     "./",
@@ -7,13 +7,18 @@ const CORE_FILES = [
     "./app.js",
     "./manifest.json",
     "./icon.svg",
-    "./data/categories.json"
+
+    "./data/categories.json",
+    "./data/ecg.json",
+    "./data/farmaci.json",
+    "./data/laboratorio.json",
+    "./data/emergenze.json"
 ];
 
 
-/* =========================
+/* =========================================================
    INSTALLAZIONE
-========================= */
+========================================================= */
 
 self.addEventListener("install", event => {
 
@@ -22,7 +27,9 @@ self.addEventListener("install", event => {
         caches.open(CACHE_NAME)
             .then(cache => {
 
-                return cache.addAll(CORE_FILES);
+                return cache.addAll(
+                    CORE_FILES
+                );
 
             })
 
@@ -33,9 +40,9 @@ self.addEventListener("install", event => {
 });
 
 
-/* =========================
+/* =========================================================
    ATTIVAZIONE
-========================= */
+========================================================= */
 
 self.addEventListener("activate", event => {
 
@@ -47,8 +54,14 @@ self.addEventListener("activate", event => {
                 return Promise.all(
 
                     cacheNames
-                        .filter(name => name !== CACHE_NAME)
-                        .map(name => caches.delete(name))
+                        .filter(
+                            name =>
+                                name !== CACHE_NAME
+                        )
+                        .map(
+                            name =>
+                                caches.delete(name)
+                        )
 
                 );
 
@@ -61,16 +74,14 @@ self.addEventListener("activate", event => {
 });
 
 
-/* =========================
+/* =========================================================
    RICHIESTE
-========================= */
+========================================================= */
 
 self.addEventListener("fetch", event => {
 
     if (event.request.method !== "GET") {
-
         return;
-
     }
 
 
@@ -89,7 +100,6 @@ self.addEventListener("fetch", event => {
                     const copy =
                         networkResponse.clone();
 
-
                     caches.open(CACHE_NAME)
                         .then(cache => {
 
@@ -102,37 +112,30 @@ self.addEventListener("fetch", event => {
 
                 }
 
-
                 return networkResponse;
 
             })
 
             .catch(() => {
 
-                return caches.match(event.request)
-
+                return caches.match(
+                    event.request
+                )
                     .then(cachedResponse => {
 
                         if (cachedResponse) {
-
                             return cachedResponse;
-
                         }
 
-
                         return new Response(
-
-                            "Sei offline e questa risorsa non è ancora disponibile.",
-
+                            "Risorsa non disponibile offline.",
                             {
                                 status: 503,
-
                                 headers: {
                                     "Content-Type":
                                         "text/plain; charset=utf-8"
                                 }
                             }
-
                         );
 
                     });
