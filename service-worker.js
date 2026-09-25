@@ -1,4 +1,4 @@
-const CACHE_NAME = "Nursing-Shot";
+const CACHE_NAME = "nursing-app-cache";
 
 const CORE_FILES = [
     "./",
@@ -6,8 +6,9 @@ const CORE_FILES = [
     "./style.css",
     "./app.js",
     "./manifest.json",
+    "./icon-192.png",
+    "./icon-512.png",
     "./icon.svg",
-
     "./data/categories.json",
     "./data/ecg.json",
     "./data/farmaci.json",
@@ -23,16 +24,8 @@ const CORE_FILES = [
 self.addEventListener("install", event => {
 
     event.waitUntil(
-
         caches.open(CACHE_NAME)
-            .then(cache => {
-
-                return cache.addAll(
-                    CORE_FILES
-                );
-
-            })
-
+            .then(cache => cache.addAll(CORE_FILES))
     );
 
     self.skipWaiting();
@@ -47,35 +40,24 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
 
     event.waitUntil(
-
         caches.keys()
             .then(cacheNames => {
 
                 return Promise.all(
-
                     cacheNames
-                        .filter(
-                            name =>
-                                name !== CACHE_NAME
-                        )
-                        .map(
-                            name =>
-                                caches.delete(name)
-                        )
-
+                        .filter(name => name !== CACHE_NAME)
+                        .map(name => caches.delete(name))
                 );
 
             })
-
+            .then(() => self.clients.claim())
     );
-
-    self.clients.claim();
 
 });
 
 
 /* =========================================================
-   RICHIESTE
+   RICHIESTE DI RISORSE
 ========================================================= */
 
 self.addEventListener("fetch", event => {
@@ -84,11 +66,9 @@ self.addEventListener("fetch", event => {
         return;
     }
 
-
     event.respondWith(
 
         fetch(event.request)
-
             .then(networkResponse => {
 
                 if (
@@ -97,17 +77,15 @@ self.addEventListener("fetch", event => {
                     networkResponse.type !== "opaque"
                 ) {
 
-                    const copy =
+                    const responseCopy =
                         networkResponse.clone();
 
                     caches.open(CACHE_NAME)
                         .then(cache => {
-
                             cache.put(
                                 event.request,
-                                copy
+                                responseCopy
                             );
-
                         });
 
                 }
@@ -115,12 +93,9 @@ self.addEventListener("fetch", event => {
                 return networkResponse;
 
             })
-
             .catch(() => {
 
-                return caches.match(
-                    event.request
-                )
+                return caches.match(event.request)
                     .then(cachedResponse => {
 
                         if (cachedResponse) {
