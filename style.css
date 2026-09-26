@@ -35,6 +35,8 @@
     --radius: 16px;
     --radius-small: 12px;
 
+    --page-shadow: rgba(0, 0, 0, 0.18);
+
 }
 
 
@@ -67,6 +69,71 @@ body {
     line-height: 1.5;
 
     -webkit-font-smoothing: antialiased;
+
+}
+
+
+
+
+/* =========================================================
+   LIGHT MODE
+========================================================= */
+
+:root[data-theme="light"] {
+
+    --background: #f3f5f7;
+    --surface: #ffffff;
+    --surface-hover: #eef2f5;
+    --surface-elevated: #ffffff;
+
+    --border: #d7dee5;
+    --border-hover: #b9c5cf;
+
+    --text: #17212b;
+    --text-secondary: #5d6b78;
+    --text-muted: #7b8792;
+
+    --accent: #168acb;
+    --accent-soft: rgba(22, 138, 203, 0.10);
+
+    --page-shadow: rgba(20, 35, 50, 0.10);
+
+}
+
+
+:root[data-theme="light"] body {
+
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            #ffffff 0%,
+            #f3f5f7 65%
+        );
+
+}
+
+
+:root[data-theme="light"] .calculator input,
+:root[data-theme="light"] .calculator select,
+:root[data-theme="light"] .calculator textarea {
+
+    background: #f7f9fb;
+
+}
+
+
+:root[data-theme="light"] .calculator button {
+
+    color: #ffffff;
+
+}
+
+
+:root[data-theme="light"] .shortcut,
+:root[data-theme="light"] .calculator {
+
+    box-shadow:
+        0 8px 24px var(--page-shadow);
 
 }
 
@@ -112,6 +179,8 @@ header {
 header h1 {
 
     font-size: 1.3rem;
+
+    margin-right: auto;
 
     font-weight: 750;
 
@@ -211,7 +280,7 @@ header h1 {
 
     display: grid;
 
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
 
     gap: 12px;
 
@@ -225,6 +294,8 @@ header h1 {
 .shortcut {
 
     position: relative;
+
+    overflow: hidden;
 
     display: flex;
 
@@ -358,6 +429,125 @@ header h1 {
     font-size: 0.82rem;
 
     line-height: 1.3;
+
+}
+
+
+
+
+/* =========================================================
+   PERSONALIZZAZIONE SHORTCUT
+========================================================= */
+
+.customize-button {
+
+    display: block;
+
+    width: 100%;
+
+    margin:
+        -18px
+        0
+        30px;
+
+    padding: 11px 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    font: inherit;
+
+    font-size: 0.86rem;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+
+}
+
+
+.customize-button:hover {
+
+    background: var(--surface-hover);
+
+    border-color: var(--border-hover);
+
+    color: var(--text);
+
+}
+
+
+.shortcut-order-controls {
+
+    display: none;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    margin-left: auto;
+
+    position: relative;
+
+    z-index: 2;
+
+}
+
+
+.shortcuts-editing .shortcut {
+
+    cursor: default;
+
+}
+
+
+.shortcuts-editing .shortcut-order-controls {
+
+    display: flex;
+
+}
+
+
+.shortcut-move {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 26px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    background: var(--surface-hover);
+
+    color: var(--text);
+
+    font: inherit;
+
+    font-size: 0.9rem;
+
+    cursor: pointer;
+
+}
+
+
+.shortcut-move:hover {
+
+    border-color: var(--border-hover);
+
+    color: var(--accent);
 
 }
 
