@@ -919,15 +919,8 @@ function setupContentSorting() {
         .querySelectorAll(".sortable-section")
         .forEach(section => {
 
-            setupLongPressSort(
-                section,
-                content,
-                ".sortable-section",
-                () => {
-
-                    saveSectionOrder();
-
-                }
+            setupSectionSorting(
+                section
             );
 
         });
@@ -954,6 +947,188 @@ function setupContentSorting() {
             );
 
         });
+
+}
+
+
+function setupSectionSorting(section) {
+
+    const handle =
+        section.querySelector("h2");
+
+    if (!handle) {
+        return;
+    }
+
+    let timer = null;
+    let dragging = false;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+
+    handle.addEventListener("pointerdown", event => {
+
+        if (
+            event.pointerType === "mouse" &&
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        pointerId = event.pointerId;
+
+        startX = event.clientX;
+        startY = event.clientY;
+
+        dragging = false;
+
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+
+            dragging = true;
+
+            section.classList.add(
+                "sortable-dragging"
+            );
+
+            try {
+                handle.setPointerCapture(pointerId);
+            }
+            catch (_) {}
+
+        }, 1000);
+
+    });
+
+    handle.addEventListener("pointermove", event => {
+
+        if (event.pointerId !== pointerId) {
+            return;
+        }
+
+        if (!dragging) {
+
+            const distance =
+                Math.hypot(
+                    event.clientX - startX,
+                    event.clientY - startY
+                );
+
+            if (distance > 12) {
+                clearTimeout(timer);
+            }
+
+            return;
+
+        }
+
+        event.preventDefault();
+
+        const target =
+            document
+                .elementFromPoint(
+                    event.clientX,
+                    event.clientY
+                )
+                ?.closest(".sortable-section");
+
+        if (
+            !target ||
+            target === section ||
+            !content.contains(target)
+        ) {
+            return;
+        }
+
+        const rect =
+            target.getBoundingClientRect();
+
+        const after =
+            event.clientY >
+            rect.top + rect.height / 2;
+
+        if (after) {
+
+            content.insertBefore(
+                section,
+                target.nextSibling
+            );
+
+        } else {
+
+            content.insertBefore(
+                section,
+                target
+            );
+
+        }
+
+    });
+
+    const finish = event => {
+
+        if (event.pointerId !== pointerId) {
+            return;
+        }
+
+        clearTimeout(timer);
+
+        if (dragging) {
+
+            event.preventDefault();
+
+            section.classList.remove(
+                "sortable-dragging"
+            );
+
+            dragging = false;
+
+            try {
+                handle.releasePointerCapture(
+                    pointerId
+                );
+            }
+            catch (_) {}
+
+            saveSectionOrder();
+
+            section.dataset.justDragged = "1";
+
+            setTimeout(() => {
+                delete section.dataset.justDragged;
+            }, 250);
+
+        }
+
+        pointerId = null;
+
+    };
+
+    handle.addEventListener(
+        "pointerup",
+        finish
+    );
+
+    handle.addEventListener(
+        "pointercancel",
+        finish
+    );
+
+    handle.addEventListener(
+        "click",
+        event => {
+
+            if (
+                section.dataset.justDragged === "1"
+            ) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+        },
+        true
+    );
 
 }
 
