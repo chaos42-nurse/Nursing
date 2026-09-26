@@ -226,12 +226,13 @@ function createShortcuts(categories) {
             document.createElement("a");
 
         link.className = "shortcut";
-
         link.href =
             `?state=${encodeURIComponent(category.id)}`;
 
         link.dataset.categoryId =
             category.id;
+
+        link.draggable = true;
 
         link.innerHTML = `
 
@@ -251,193 +252,206 @@ function createShortcuts(categories) {
 
             </span>
 
-            <span class="shortcut-order-controls">
-
-                <button
-                    type="button"
-                    class="shortcut-move"
-                    data-direction="up"
-                    aria-label="Sposta ${category.title} in alto"
-                >
-                    ↑
-                </button>
-
-                <button
-                    type="button"
-                    class="shortcut-move"
-                    data-direction="down"
-                    aria-label="Sposta ${category.title} in basso"
-                >
-                    ↓
-                </button>
-
+            <span class="shortcut-drag-indicator" aria-hidden="true">
+                ⋮⋮
             </span>
 
         `;
 
-        link.querySelectorAll(".shortcut-move")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        moveShortcut(
-                            category.id,
-                            button.dataset.direction
-                        );
-
-                    }
-                );
-
-            });
+        setupShortcutDrag(link);
 
         shortcuts.appendChild(link);
 
     });
 
-    renderCustomizeButton();
-
-    updateShortcutEditingState();
-
 }
 
 
 /* =========================================================
-   PERSONALIZZAZIONE ORDINE
+   RIORDINO TRAMITE TRASCINAMENTO
 ========================================================= */
 
-let shortcutsEditing = false;
+let draggedShortcut = null;
+let dragTimer = null;
+let dragReady = false;
 
+function setupShortcutDrag(element) {
 
-function renderCustomizeButton() {
+    element.addEventListener("dragstart", event => {
 
-    const existing =
-        document.getElementById(
-            "customize-shortcuts"
-        );
+        draggedShortcut = element;
+        element.classList.add("shortcut-dragging");
 
-    if (existing) {
-        existing.remove();
-    }
-
-    if (!shortcuts.parentElement) {
-        return;
-    }
-
-    const button =
-        document.createElement("button");
-
-    button.id =
-        "customize-shortcuts";
-
-    button.className =
-        "customize-button";
-
-    button.type =
-        "button";
-
-    button.textContent =
-        shortcutsEditing
-            ? "✓ Fine personalizzazione"
-            : "☷ Personalizza ordine";
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            shortcutsEditing =
-                !shortcutsEditing;
-
-            updateShortcutEditingState();
-
-            button.textContent =
-                shortcutsEditing
-                    ? "✓ Fine personalizzazione"
-                    : "☷ Personalizza ordine";
-
+        if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData(
+                "text/plain",
+                element.dataset.categoryId
+            );
         }
-    );
 
-    shortcuts.insertAdjacentElement(
-        "afterend",
-        button
-    );
+    });
+
+    element.addEventListener("dragend", () => {
+
+        element.classList.remove("shortcut-dragging");
+        shortcuts
+            .querySelectorAll(".shortcut-drag-over")
+            .forEach(card => card.classList.remove("shortcut-drag-over"));
+
+        draggedShortcut = null;
+        saveShortcutOrder();
+
+    });
+
+    element.addEventListener("dragover", event => {
+
+        event.preventDefault();
+
+        if (!draggedShortcut || draggedShortcut === element) {
+            return;
+        }
+
+        element.classList.add("shortcut-drag-over");
+
+        const rect = element.getBoundingClientRect();
+        const after =
+            event.clientY > rect.top + rect.height / 2;
+
+        if (after) {
+            shortcuts.insertBefore(
+                draggedShortcut,
+                element.nextSibling
+            );
+        } else {
+            shortcuts.insertBefore(
+                draggedShortcut,
+                element
+            );
+        }
+
+    });
+
+    element.addEventListener("dragleave", () => {
+        element.classList.remove("shortcut-drag-over");
+    });
+
+    element.addEventListener("drop", event => {
+        event.preventDefault();
+        element.classList.remove("shortcut-drag-over");
+        saveShortcutOrder();
+    });
+
+    let touchStartY = 0;
+    let touchMoved = false;
+
+    element.addEventListener("touchstart", event => {
+
+        if (event.touches.length !== 1) {
+            return;
+        }
+
+        touchStartY = event.touches[0].clientY;
+        touchMoved = false;
+        dragReady = false;
+
+        clearTimeout(dragTimer);
+
+        dragTimer = setTimeout(() => {
+
+            dragReady = true;
+            draggedShortcut = element;
+
+            element.classList.add("shortcut-dragging");
+
+        }, 1200);
+
+    }, { passive: true });
+
+    element.addEventListener("touchmove", event => {
+
+        if (event.touches.length !== 1) {
+            return;
+        }
+
+        const touch = event.touches[0];
+
+        if (Math.abs(touch.clientY - touchStartY) > 8) {
+            touchMoved = true;
+        }
+
+        if (!dragReady || !draggedShortcut) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const target =
+            document.elementFromPoint(
+                touch.clientX,
+                touch.clientY
+            )?.closest(".shortcut");
+
+        if (!target || target === draggedShortcut) {
+            return;
+        }
+
+        const rect = target.getBoundingClientRect();
+        const after =
+            touch.clientY > rect.top + rect.height / 2;
+
+        if (after) {
+            shortcuts.insertBefore(
+                draggedShortcut,
+                target.nextSibling
+            );
+        } else {
+            shortcuts.insertBefore(
+                draggedShortcut,
+                target
+            );
+        }
+
+    }, { passive: false });
+
+    element.addEventListener("touchend", () => {
+
+        clearTimeout(dragTimer);
+
+        if (dragReady && draggedShortcut === element) {
+            element.classList.remove("shortcut-dragging");
+            draggedShortcut = null;
+            dragReady = false;
+            saveShortcutOrder();
+            return;
+        }
+
+        dragReady = false;
+
+    });
+
+    element.addEventListener("touchcancel", () => {
+
+        clearTimeout(dragTimer);
+
+        dragReady = false;
+        element.classList.remove("shortcut-dragging");
+
+        if (draggedShortcut === element) {
+            draggedShortcut = null;
+        }
+
+    });
 
 }
 
-
-function updateShortcutEditingState() {
-
-    document.body.classList.toggle(
-        "shortcuts-editing",
-        shortcutsEditing
-    );
-
-}
-
-
-function moveShortcut(categoryId, direction) {
-
-    const cards =
-        Array.from(
-            shortcuts.querySelectorAll(
-                ".shortcut"
-            )
-        );
-
-    const currentIndex =
-        cards.findIndex(
-            card =>
-                card.dataset.categoryId ===
-                categoryId
-        );
-
-    if (currentIndex === -1) {
-        return;
-    }
-
-    const targetIndex =
-        direction === "up"
-            ? currentIndex - 1
-            : currentIndex + 1;
-
-    if (
-        targetIndex < 0 ||
-        targetIndex >= cards.length
-    ) {
-        return;
-    }
-
-    const current =
-        cards[currentIndex];
-
-    const target =
-        cards[targetIndex];
-
-    if (direction === "up") {
-        shortcuts.insertBefore(
-            current,
-            target
-        );
-    } else {
-        shortcuts.insertBefore(
-            target,
-            current
-        );
-    }
+function saveShortcutOrder() {
 
     const order =
         Array.from(
-            shortcuts.querySelectorAll(
-                ".shortcut"
-            )
+            shortcuts.querySelectorAll(".shortcut")
         ).map(
-            card =>
-                card.dataset.categoryId
+            card => card.dataset.categoryId
         );
 
     localStorage.setItem(
