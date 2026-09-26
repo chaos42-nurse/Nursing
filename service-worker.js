@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-app-cache-v2";
+const CACHE_NAME = "nursing-app-cache";
 
 const CORE_FILES = [
     "./",
@@ -7,6 +7,8 @@ const CORE_FILES = [
     "./app.js",
     "./manifest.json",
     "./icon.svg",
+    "./icon-192.png",
+    "./icon-512.png",
     "./data/categories.json",
     "./data/ecg.json",
     "./data/farmaci.json",
@@ -102,6 +104,17 @@ self.addEventListener("fetch", event => {
 
                         if (cachedResponse) {
                             return cachedResponse;
+                        }
+
+                        /*
+                         * Se siamo offline e l'utente apre
+                         * un URL con ?state=... o ?item=...,
+                         * restituiamo comunque index.html.
+                         * L'app poi legge i parametri dell'URL.
+                         */
+
+                        if (event.request.mode === "navigate") {
+                            return caches.match("./index.html");
                         }
 
                         return new Response(
