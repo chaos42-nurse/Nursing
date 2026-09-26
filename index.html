@@ -52,8 +52,19 @@
 
 <body>
 
-    <div id="appLoadingScreen" aria-hidden="true">
-        <span>🩺</span>
+    <div id="settingsPanel" class="settings-panel" hidden>
+        <div class="settings-card">
+            <div class="settings-header">
+                <h2>Impostazioni</h2>
+                <button id="settingsClose" class="home-button" type="button" aria-label="Chiudi impostazioni">×</button>
+            </div>
+            <div class="settings-group">
+                <button id="orderModeButton" class="settings-action" type="button">↕️ Modifica ordine</button>
+                <button id="resetOrderButton" class="settings-action" type="button">↩️ Ripristina ordini</button>
+                <button id="settingsThemeButton" class="settings-action" type="button">🌙 Tema</button>
+            </div>
+            <p id="settingsMessage" class="settings-message"></p>
+        </div>
     </div>
 
     <main>
@@ -72,6 +83,15 @@
             <h1>
                 🩺 Nursing Shot
             </h1>
+
+            <button
+                id="settingsButton"
+                class="home-button settings-button"
+                type="button"
+                aria-label="Impostazioni"
+            >
+                ⚙️
+            </button>
 
             <button
                 id="themeButton"
