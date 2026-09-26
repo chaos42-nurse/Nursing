@@ -1276,6 +1276,123 @@ function loadItem(data) {
     }
 
 
+
+    /*
+     * STRINGA SEMPLICE
+     */
+    if (typeof selectedItem === "string") {
+
+        renderGenericText(
+            selectedItem,
+            "Contenuto in preparazione."
+        );
+
+        return;
+    }
+
+
+    /*
+     * SEZIONE CALCOLATORI
+     */
+    if (selectedItem.type === "calculator-section") {
+
+        renderCalculatorHub(
+            selectedItem,
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+     * CALCOLATORE
+     */
+    if (selectedItem.type === "calculator") {
+
+        renderCalculator(
+            selectedItem.id,
+            selectedItem.title,
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+     * FARMACO
+     */
+    if (selectedItem.type === "drug") {
+
+        renderDrug(
+            selectedItem,
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+     * VALORE DI LABORATORIO
+     */
+    if (selectedItem.type === "lab-value") {
+
+        renderLabValue(
+            selectedItem,
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+     * PROTOCOLLO
+     */
+    if (selectedItem.type === "protocol") {
+
+        renderProtocol(
+            selectedItem,
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+     * TESTO GENERICO
+     */
+    if (selectedItem.type === "text") {
+
+        const text =
+            selectedItem.content?.text ||
+            "Contenuto in preparazione.";
+
+        renderGenericText(
+            selectedItem.title,
+            text,
+            data
+        );
+
+        return;
+    }
+
+
+    /*
+     * FALLBACK
+     */
+    renderGenericText(
+        selectedItem.title,
+        "Contenuto in preparazione.",
+        data
+    );
+
+}
+
+
 /* =========================================================
    SCHEDE COMPONIBILI
 ========================================================= */
