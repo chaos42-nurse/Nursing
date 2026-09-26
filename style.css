@@ -160,6 +160,12 @@ body {
    MAIN
 ========================================================= */
 
+body.home-page {
+    height: 100vh;
+    overflow: hidden;
+}
+
+
 main {
 
     width: 100%;
@@ -309,8 +315,15 @@ header h1 {
 }
 
 
-.shortcut {
+.shortcut-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+}
 
+
+.shortcut {
     position: relative;
 
     overflow: hidden;
@@ -461,18 +474,9 @@ header h1 {
 ========================================================= */
 
 .shortcut-drag-indicator {
-
-    margin-left: auto;
-    flex-shrink: 0;
-
-    color: var(--text-muted);
-    font-size: 1rem;
-    letter-spacing: -3px;
-    opacity: 0.65;
-
-    pointer-events: none;
-
+    display: none;
 }
+
 
 .shortcut-dragging {
 
@@ -1055,6 +1059,7 @@ section h2 {
 }
 
 .content-drag-indicator {
+    display: none;
 
     display: inline-flex;
 
@@ -1124,6 +1129,70 @@ section h2 {
 
     cursor: grabbing;
 
+}
+
+
+/* =========================================================
+   CONTROLLI ORDINE
+========================================================= */
+
+.order-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.order-button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.order-button:hover:not(:disabled) {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+}
+
+.order-button:disabled {
+    opacity: 0.28;
+    cursor: default;
+}
+
+.order-editing .shortcut-row,
+.order-editing .sortable-item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.order-editing .shortcut-row .shortcut,
+.order-editing .sortable-item-row .sortable-item {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-editing .sortable-section > h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-order-controls {
+    margin-left: auto;
+}
+
+.item-order-controls {
+    margin-left: 0;
 }
 
 
@@ -1198,17 +1267,3 @@ section h2 {
     font-size: .86rem;
 }
 
-.order-editing .shortcut,
-.order-editing .sortable-item {
-    cursor: grab;
-    border-color: var(--accent);
-}
-
-.order-editing .sortable-section > h2 {
-    color: var(--accent);
-}
-
-.order-editing .shortcut:active,
-.order-editing .sortable-item:active {
-    cursor: grabbing;
-}
