@@ -476,15 +476,6 @@ async function loadState() {
 
         shortcuts.style.display = "flex";
 
-        const customizeButton =
-            document.getElementById(
-                "customize-shortcuts"
-            );
-
-        if (customizeButton) {
-            customizeButton.style.display = "block";
-        }
-
         if (backButton) {
             backButton.style.display = "none";
         }
@@ -506,15 +497,6 @@ async function loadState() {
      */
 
     shortcuts.style.display = "none";
-
-    const customizeButton =
-        document.getElementById(
-            "customize-shortcuts"
-        );
-
-    if (customizeButton) {
-        customizeButton.style.display = "none";
-    }
 
     if (backButton) {
         backButton.style.display = "flex";
