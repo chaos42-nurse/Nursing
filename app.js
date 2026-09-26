@@ -1169,55 +1169,62 @@ function saveItemOrder(sectionKey, list) {
 
 function findItem(data, itemId) {
 
-    if (!data.sections) {
+    if (!data.sections || !itemId) {
         return null;
     }
 
-    for (const section of data.sections) {
+    /*
+     * Cerca ricorsivamente negli elementi dell'archivio.
+     * Questo gestisce anche elementi annidati, come i
+     * singoli calcolatori dentro la sezione Calcolatori.
+     */
 
-        if (!section.items) {
-            continue;
+    function searchItems(items) {
+
+        if (!Array.isArray(items)) {
+            return null;
         }
 
-        for (const sectionItem of section.items) {
+        for (const currentItem of items) {
 
             const currentId =
-                typeof sectionItem === "string"
-                    ? createId(sectionItem)
-                    : sectionItem.id;
+                typeof currentItem === "string"
+                    ? createId(currentItem)
+                    : currentItem?.id;
 
             if (currentId === itemId) {
-                return sectionItem;
+                return currentItem;
             }
 
-            /*
-             * Alcuni elementi, come la sezione Calcolatori,
-             * contengono a loro volta altri elementi.
-             * Cerchiamo quindi anche negli elementi annidati.
-             */
-
             if (
-                typeof sectionItem === "object" &&
-                Array.isArray(sectionItem.items)
+                typeof currentItem === "object" &&
+                Array.isArray(currentItem.items)
             ) {
 
                 const nestedItem =
-                    sectionItem.items.find(
-                        nested =>
-                            nested &&
-                            nested.id === itemId
-                    );
+                    searchItems(currentItem.items);
 
                 if (nestedItem) {
                     return nestedItem;
                 }
             }
         }
+
+        return null;
+    }
+
+    for (const section of data.sections) {
+
+        const found =
+            searchItems(section.items);
+
+        if (found) {
+            return found;
+        }
     }
 
     return null;
 }
-
 
 /* =========================================================
    CARICA ELEMENTO
