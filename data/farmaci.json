@@ -138,39 +138,40 @@
 
 
     {
-      "title": "🧮 Calcolatori",
+      "title": "Calcolatori",
       "items": [
-
         {
-          "id": "dose",
-          "title": "Dose da somministrare",
-          "type": "calculator"
-        },
-
-        {
-          "id": "diluizioni",
-          "title": "Diluizioni",
-          "type": "calculator"
-        },
-
-        {
-          "id": "ml-h",
-          "title": "Velocità di infusione — mL/h",
-          "type": "calculator"
-        },
-
-        {
-          "id": "gocce-min",
-          "title": "Velocità — gocce/min",
-          "type": "calculator"
-        },
-
-        {
-          "id": "durata-infusione",
-          "title": "Durata dell'infusione",
-          "type": "calculator"
+          "id": "calcolatori",
+          "title": "🧮 Calcolatori",
+          "type": "calculator-section",
+          "items": [
+            {
+              "id": "dose",
+              "title": "Dose da somministrare",
+              "type": "calculator"
+            },
+            {
+              "id": "diluizioni",
+              "title": "Diluizioni",
+              "type": "calculator"
+            },
+            {
+              "id": "ml-h",
+              "title": "Velocità di infusione — mL/h",
+              "type": "calculator"
+            },
+            {
+              "id": "gocce-min",
+              "title": "Velocità — gocce/min",
+              "type": "calculator"
+            },
+            {
+              "id": "durata-infusione",
+              "title": "Durata dell'infusione",
+              "type": "calculator"
+            }
+          ]
         }
-
       ]
     }
 
