@@ -18,10 +18,14 @@
     --background: #0d1117;
     --surface: #151b23;
     --surface-hover: #1b232e;
+    --surface-elevated: #19212b;
+
     --border: #27313d;
+    --border-hover: #3a4a5b;
 
     --text: #f2f5f7;
     --text-secondary: #9ba7b4;
+    --text-muted: #718090;
 
     --accent: #5cc8ff;
     --accent-soft: rgba(92, 200, 255, 0.12);
@@ -29,6 +33,7 @@
     --danger: #ff6464;
 
     --radius: 16px;
+    --radius-small: 12px;
 
 }
 
@@ -44,9 +49,10 @@ body {
 
     background:
         radial-gradient(
-            circle at top,
-            #151d27 0%,
-            var(--background) 45%
+            circle at 50% -10%,
+            #1b2734 0%,
+            #111821 32%,
+            var(--background) 70%
         );
 
     color: var(--text);
@@ -60,6 +66,8 @@ body {
 
     line-height: 1.5;
 
+    -webkit-font-smoothing: antialiased;
+
 }
 
 
@@ -72,12 +80,14 @@ main {
     width: 100%;
     max-width: 720px;
 
+    min-height: 100vh;
+
     margin: 0 auto;
 
     padding:
-        18px
+        20px
         16px
-        40px;
+        48px;
 
 }
 
@@ -94,18 +104,18 @@ header {
 
     gap: 12px;
 
-    margin-bottom: 24px;
+    margin-bottom: 30px;
 
 }
 
 
 header h1 {
 
-    font-size: 1.25rem;
+    font-size: 1.3rem;
 
-    font-weight: 700;
+    font-weight: 750;
 
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 
 }
 
@@ -120,11 +130,13 @@ header h1 {
     width: 42px;
     height: 42px;
 
+    flex-shrink: 0;
+
     border: 1px solid var(--border);
 
-    border-radius: 12px;
+    border-radius: var(--radius-small);
 
-    background: var(--surface);
+    background: rgba(21, 27, 35, 0.88);
 
     color: var(--text);
 
@@ -133,8 +145,9 @@ header h1 {
     cursor: pointer;
 
     transition:
-        background 0.2s,
-        transform 0.15s;
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
 
 }
 
@@ -142,6 +155,8 @@ header h1 {
 .home-button:hover {
 
     background: var(--surface-hover);
+
+    border-color: var(--border-hover);
 
 }
 
@@ -159,20 +174,20 @@ header h1 {
 
 #pageHeader {
 
-    margin-bottom: 22px;
+    margin-bottom: 24px;
 
 }
 
 
 #state {
 
-    font-size: 1.7rem;
+    font-size: 1.8rem;
 
-    line-height: 1.2;
+    line-height: 1.15;
 
-    letter-spacing: -0.03em;
+    letter-spacing: -0.035em;
 
-    margin-bottom: 6px;
+    margin-bottom: 7px;
 
 }
 
@@ -181,7 +196,9 @@ header h1 {
 
     color: var(--text-secondary);
 
-    font-size: 0.95rem;
+    font-size: 0.94rem;
+
+    line-height: 1.55;
 
 }
 
@@ -192,45 +209,78 @@ header h1 {
 
 #shortcuts {
 
-    display: flex;
+    display: grid;
 
-    flex-direction: column;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     gap: 12px;
 
-    margin-top: 8px;
+    margin-top: 10px;
 
-    margin-bottom: 28px;
+    margin-bottom: 32px;
 
 }
 
 
 .shortcut {
 
+    position: relative;
+
     display: flex;
 
     align-items: center;
 
-    gap: 16px;
+    gap: 13px;
 
     width: 100%;
 
-    padding: 17px;
+    min-height: 82px;
+
+    padding: 15px;
 
     border: 1px solid var(--border);
 
     border-radius: var(--radius);
 
-    background: var(--surface);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(25, 33, 43, 0.98),
+            rgba(21, 27, 35, 0.98)
+        );
 
     color: var(--text);
 
     text-decoration: none;
 
+    overflow: hidden;
+
     transition:
-        background 0.2s,
-        border-color 0.2s,
-        transform 0.15s;
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.shortcut::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 80px;
+    height: 80px;
+
+    right: -35px;
+    bottom: -45px;
+
+    border-radius: 50%;
+
+    background: var(--accent-soft);
+
+    pointer-events: none;
 
 }
 
@@ -239,7 +289,10 @@ header h1 {
 
     background: var(--surface-hover);
 
-    border-color: #354352;
+    border-color: var(--border-hover);
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.18);
 
 }
 
@@ -258,16 +311,18 @@ header h1 {
     align-items: center;
     justify-content: center;
 
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
 
     flex-shrink: 0;
+
+    border: 1px solid rgba(92, 200, 255, 0.08);
 
     border-radius: 14px;
 
     background: var(--accent-soft);
 
-    font-size: 1.65rem;
+    font-size: 1.55rem;
 
 }
 
@@ -287,7 +342,11 @@ header h1 {
 
 .shortcut-text strong {
 
-    font-size: 1.05rem;
+    font-size: 1rem;
+
+    font-weight: 700;
+
+    line-height: 1.25;
 
 }
 
@@ -296,7 +355,9 @@ header h1 {
 
     color: var(--text-secondary);
 
-    font-size: 0.86rem;
+    font-size: 0.82rem;
+
+    line-height: 1.3;
 
 }
 
@@ -307,7 +368,7 @@ header h1 {
 
 section {
 
-    margin-bottom: 24px;
+    margin-bottom: 26px;
 
 }
 
@@ -319,6 +380,8 @@ section h2 {
     font-size: 1.05rem;
 
     font-weight: 700;
+
+    letter-spacing: -0.015em;
 
 }
 
@@ -362,9 +425,9 @@ section h2 {
     text-decoration: none;
 
     transition:
-        background 0.2s,
-        border-color 0.2s,
-        transform 0.15s;
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
 
 }
 
@@ -373,7 +436,7 @@ section h2 {
 
     background: var(--surface-hover);
 
-    border-color: #354352;
+    border-color: var(--border-hover);
 
 }
 
@@ -393,6 +456,8 @@ section h2 {
 
     flex-shrink: 0;
 
+    opacity: 0.85;
+
 }
 
 
@@ -409,14 +474,21 @@ section h2 {
 
 #content section {
 
-    margin-bottom: 26px;
+    margin-bottom: 28px;
 
 }
 
 
-/* =========================================================
-   TEXT CONTENT
-========================================================= */
+#content h3 {
+
+    margin-bottom: 10px;
+
+    font-size: 1.1rem;
+
+    line-height: 1.3;
+
+}
+
 
 #content p {
 
@@ -429,7 +501,6 @@ section h2 {
 #content ol {
 
     margin:
-
         8px
         0
         14px
@@ -457,7 +528,15 @@ section h2 {
 
     border-radius: var(--radius);
 
-    background: var(--surface);
+    background:
+        linear-gradient(
+            145deg,
+            var(--surface-elevated),
+            var(--surface)
+        );
+
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.14);
 
 }
 
@@ -508,6 +587,10 @@ section h2 {
 
     font: inherit;
 
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
 }
 
 
@@ -544,6 +627,24 @@ section h2 {
 
     cursor: pointer;
 
+    transition:
+        filter 0.2s ease,
+        transform 0.15s ease;
+
+}
+
+
+.calculator button:hover {
+
+    filter: brightness(1.06);
+
+}
+
+
+.calculator button:active {
+
+    transform: scale(0.985);
+
 }
 
 
@@ -552,6 +653,8 @@ section h2 {
     margin-top: 16px;
 
     padding: 13px;
+
+    border: 1px solid rgba(92, 200, 255, 0.08);
 
     border-radius: 10px;
 
@@ -586,6 +689,8 @@ section h2 {
     color: var(--text-secondary);
 
     font-size: 0.78rem;
+
+    line-height: 1.45;
 
 }
 
@@ -636,12 +741,18 @@ section h2 {
 
     cursor: pointer;
 
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+
 }
 
 
 .editor-buttons button:hover {
 
     background: #222c38;
+
+    border-color: var(--border-hover);
 
 }
 
@@ -661,33 +772,53 @@ section h2 {
    MOBILE
 ========================================================= */
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
 
     main {
 
         padding:
-            14px
+            15px
             12px
-            32px;
+            36px;
+
+    }
+
+
+    header {
+
+        margin-bottom: 25px;
 
     }
 
 
     header h1 {
 
-        font-size: 1.15rem;
+        font-size: 1.18rem;
 
     }
 
 
     #state {
 
-        font-size: 1.5rem;
+        font-size: 1.55rem;
+
+    }
+
+
+    #shortcuts {
+
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+        margin-bottom: 28px;
 
     }
 
 
     .shortcut {
+
+        min-height: 76px;
 
         padding: 14px;
 
@@ -700,6 +831,27 @@ section h2 {
         height: 46px;
 
         font-size: 1.5rem;
+
+    }
+
+
+    .shortcut-text strong {
+
+        font-size: 0.98rem;
+
+    }
+
+
+    .shortcut-text small {
+
+        font-size: 0.81rem;
+
+    }
+
+
+    .calculator {
+
+        padding: 16px;
 
     }
 
