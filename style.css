@@ -1106,3 +1106,20 @@ section h2 {
     padding-bottom: 3px;
 
 }
+
+
+.sortable-section > h2 {
+
+    cursor: grab;
+
+    user-select: none;
+
+    touch-action: none;
+
+}
+
+.sortable-section.sortable-dragging > h2 {
+
+    cursor: grabbing;
+
+}
