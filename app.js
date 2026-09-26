@@ -1170,20 +1170,14 @@ function saveItemOrder(sectionKey, list) {
 function findItem(data, itemId) {
 
     if (!data.sections) {
-
         return null;
-
     }
-
 
     for (const section of data.sections) {
 
         if (!section.items) {
-
             continue;
-
         }
-
 
         for (const sectionItem of section.items) {
 
@@ -1192,20 +1186,36 @@ function findItem(data, itemId) {
                     ? createId(sectionItem)
                     : sectionItem.id;
 
-
             if (currentId === itemId) {
-
                 return sectionItem;
-
             }
 
-        }
+            /*
+             * Alcuni elementi, come la sezione Calcolatori,
+             * contengono a loro volta altri elementi.
+             * Cerchiamo quindi anche negli elementi annidati.
+             */
 
+            if (
+                typeof sectionItem === "object" &&
+                Array.isArray(sectionItem.items)
+            ) {
+
+                const nestedItem =
+                    sectionItem.items.find(
+                        nested =>
+                            nested &&
+                            nested.id === itemId
+                    );
+
+                if (nestedItem) {
+                    return nestedItem;
+                }
+            }
+        }
     }
 
-
     return null;
-
 }
 
 
