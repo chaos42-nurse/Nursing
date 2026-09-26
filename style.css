@@ -42,6 +42,7 @@
 
 html {
     min-height: 100%;
+    overflow-x: hidden;
 }
 
 
@@ -69,7 +70,41 @@ body {
     line-height: 1.5;
 
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
 
+}
+
+
+/* =========================================================
+   SCHERMATA DI CARICAMENTO APP
+========================================================= */
+
+#appLoadingScreen {
+
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #E2F6F6;
+    color: #17212b;
+
+    transition: opacity 0.18s ease;
+
+}
+
+
+#appLoadingScreen span {
+    font-size: 2rem;
+}
+
+
+#appLoadingScreen.is-hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 
@@ -166,6 +201,7 @@ main {
     max-width: 720px;
 
     min-height: 100vh;
+    min-height: 100dvh;
 
     margin: 0 auto;
 
@@ -345,7 +381,9 @@ header h1 {
     overflow: hidden;
 
     cursor: pointer;
-    touch-action: pan-y;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
 
     transition:
         background 0.2s ease,
@@ -599,6 +637,14 @@ section h2 {
 
     width: 100%;
 
+}
+
+
+/* La Home non deve creare uno scroll verticale inutile. */
+.home-page {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
 }
 
 
@@ -1111,6 +1157,9 @@ section h2 {
 .sortable-section > h2 {
 
     cursor: grab;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
 
     user-select: none;
 
