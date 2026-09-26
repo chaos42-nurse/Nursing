@@ -33,6 +33,83 @@ const backButton =
 
 
 /* =========================================================
+   TEMA
+========================================================= */
+
+function applyTheme(theme) {
+
+    document.documentElement.dataset.theme =
+        theme;
+
+    localStorage.setItem(
+        "nursing-theme",
+        theme
+    );
+
+    const themeButton =
+        document.getElementById(
+            "themeButton"
+        );
+
+    if (themeButton) {
+
+        const light =
+            theme === "light";
+
+        themeButton.textContent =
+            light ? "☀️" : "💡";
+
+        themeButton.setAttribute(
+            "aria-label",
+            light
+                ? "Passa alla modalità scura"
+                : "Passa alla modalità chiara"
+        );
+
+    }
+
+}
+
+
+function setupTheme() {
+
+    const savedTheme =
+        localStorage.getItem(
+            "nursing-theme"
+        ) || "dark";
+
+    applyTheme(savedTheme);
+
+    const themeButton =
+        document.getElementById(
+            "themeButton"
+        );
+
+    if (themeButton) {
+
+        themeButton.addEventListener(
+            "click",
+            () => {
+
+                const current =
+                    document.documentElement.dataset.theme ||
+                    "dark";
+
+                applyTheme(
+                    current === "dark"
+                        ? "light"
+                        : "dark"
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    NAVIGAZIONE
 ========================================================= */
 
@@ -118,9 +195,32 @@ async function loadCategories() {
 
 function createShortcuts(categories) {
 
+    const savedOrder =
+        JSON.parse(
+            localStorage.getItem("nursing-category-order") || "null"
+        );
+
+    let orderedCategories = [...categories];
+
+    if (Array.isArray(savedOrder)) {
+
+        orderedCategories.sort((a, b) => {
+
+            const aIndex = savedOrder.indexOf(a.id);
+            const bIndex = savedOrder.indexOf(b.id);
+
+            return (
+                (aIndex === -1 ? 999 : aIndex) -
+                (bIndex === -1 ? 999 : bIndex)
+            );
+
+        });
+
+    }
+
     shortcuts.innerHTML = "";
 
-    categories.forEach(category => {
+    orderedCategories.forEach(category => {
 
         const link =
             document.createElement("a");
@@ -129,6 +229,9 @@ function createShortcuts(categories) {
 
         link.href =
             `?state=${encodeURIComponent(category.id)}`;
+
+        link.dataset.categoryId =
+            category.id;
 
         link.innerHTML = `
 
@@ -148,11 +251,199 @@ function createShortcuts(categories) {
 
             </span>
 
+            <span class="shortcut-order-controls">
+
+                <button
+                    type="button"
+                    class="shortcut-move"
+                    data-direction="up"
+                    aria-label="Sposta ${category.title} in alto"
+                >
+                    ↑
+                </button>
+
+                <button
+                    type="button"
+                    class="shortcut-move"
+                    data-direction="down"
+                    aria-label="Sposta ${category.title} in basso"
+                >
+                    ↓
+                </button>
+
+            </span>
+
         `;
+
+        link.querySelectorAll(".shortcut-move")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        moveShortcut(
+                            category.id,
+                            button.dataset.direction
+                        );
+
+                    }
+                );
+
+            });
 
         shortcuts.appendChild(link);
 
     });
+
+    renderCustomizeButton();
+
+    updateShortcutEditingState();
+
+}
+
+
+/* =========================================================
+   PERSONALIZZAZIONE ORDINE
+========================================================= */
+
+let shortcutsEditing = false;
+
+
+function renderCustomizeButton() {
+
+    const existing =
+        document.getElementById(
+            "customize-shortcuts"
+        );
+
+    if (existing) {
+        existing.remove();
+    }
+
+    if (!shortcuts.parentElement) {
+        return;
+    }
+
+    const button =
+        document.createElement("button");
+
+    button.id =
+        "customize-shortcuts";
+
+    button.className =
+        "customize-button";
+
+    button.type =
+        "button";
+
+    button.textContent =
+        shortcutsEditing
+            ? "✓ Fine personalizzazione"
+            : "☷ Personalizza ordine";
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            shortcutsEditing =
+                !shortcutsEditing;
+
+            updateShortcutEditingState();
+
+            button.textContent =
+                shortcutsEditing
+                    ? "✓ Fine personalizzazione"
+                    : "☷ Personalizza ordine";
+
+        }
+    );
+
+    shortcuts.insertAdjacentElement(
+        "afterend",
+        button
+    );
+
+}
+
+
+function updateShortcutEditingState() {
+
+    document.body.classList.toggle(
+        "shortcuts-editing",
+        shortcutsEditing
+    );
+
+}
+
+
+function moveShortcut(categoryId, direction) {
+
+    const cards =
+        Array.from(
+            shortcuts.querySelectorAll(
+                ".shortcut"
+            )
+        );
+
+    const currentIndex =
+        cards.findIndex(
+            card =>
+                card.dataset.categoryId ===
+                categoryId
+        );
+
+    if (currentIndex === -1) {
+        return;
+    }
+
+    const targetIndex =
+        direction === "up"
+            ? currentIndex - 1
+            : currentIndex + 1;
+
+    if (
+        targetIndex < 0 ||
+        targetIndex >= cards.length
+    ) {
+        return;
+    }
+
+    const current =
+        cards[currentIndex];
+
+    const target =
+        cards[targetIndex];
+
+    if (direction === "up") {
+        shortcuts.insertBefore(
+            current,
+            target
+        );
+    } else {
+        shortcuts.insertBefore(
+            target,
+            current
+        );
+    }
+
+    const order =
+        Array.from(
+            shortcuts.querySelectorAll(
+                ".shortcut"
+            )
+        ).map(
+            card =>
+                card.dataset.categoryId
+        );
+
+    localStorage.setItem(
+        "nursing-category-order",
+        JSON.stringify(order)
+    );
 
 }
 
@@ -171,6 +462,10 @@ async function loadState() {
 
         shortcuts.style.display = "flex";
 
+        if (backButton) {
+            backButton.style.display = "none";
+        }
+
         stateTitle.textContent =
             "Benvenuto";
 
@@ -188,6 +483,10 @@ async function loadState() {
      */
 
     shortcuts.style.display = "none";
+
+    if (backButton) {
+        backButton.style.display = "flex";
+    }
 
 
     try {
@@ -527,6 +826,22 @@ function loadItem(data) {
         renderGenericText(
             selectedItem,
             "Contenuto in preparazione."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * SEZIONE CALCOLATORI
+     */
+
+    if (selectedItem.type === "calculator-section") {
+
+        renderCalculatorHub(
+            selectedItem,
+            data
         );
 
         return;
@@ -905,6 +1220,53 @@ function renderListField(title, values) {
         </div>
 
     `;
+
+}
+
+
+/* =========================================================
+   SEZIONE CALCOLATORI
+========================================================= */
+
+function renderCalculatorHub(item, data) {
+
+    const calculators =
+        item.items || [];
+
+    let html = `
+        <section class="detail-page">
+
+            ${detailHeader(item.title, data)}
+
+            <div class="detail-content">
+
+                <div class="item-list calculator-list">
+
+                    ${calculators.map(calculator => `
+
+                        <a
+                            class="content-button"
+                            href="?state=${encodeURIComponent(data.id)}&item=${encodeURIComponent(calculator.id)}"
+                        >
+                            <span>
+                                ${calculator.title}
+                            </span>
+
+                            <span class="arrow">
+                                →
+                            </span>
+                        </a>
+
+                    `).join("")}
+
+                </div>
+
+            </div>
+
+        </section>
+    `;
+
+    content.innerHTML = html;
 
 }
 
@@ -3769,6 +4131,8 @@ function applyLocalOverride(stateId, data) {
 /* =========================================================
    AVVIO
 ========================================================= */
+setupTheme();
+
 if (editor === "1") {
 
     loadEditor();
