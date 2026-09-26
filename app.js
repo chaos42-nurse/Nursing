@@ -1266,135 +1266,14 @@ function loadItem(data) {
     }
 
 
-    /*\n     * SCHEDA COMPONIBILE\n     */\n    if (Array.isArray(selectedItem.blocks)) {\n\n        renderComposableItem(selectedItem, data);\n        return;\n    }\n\n\n    /*
-     * STRINGA SEMPLICE
-     */
-
-    if (typeof selectedItem === "string") {
-
-        renderGenericText(
-            selectedItem,
-            "Contenuto in preparazione."
-        );
-
-        return;
-
-    }
-
-
     /*
-     * SEZIONE CALCOLATORI
+     * SCHEDA COMPONIBILE
      */
+    if (Array.isArray(selectedItem.blocks)) {
 
-    if (selectedItem.type === "calculator-section") {
-
-        renderCalculatorHub(
-            selectedItem,
-            data
-        );
-
+        renderComposableItem(selectedItem, data);
         return;
-
     }
-
-
-    /*
-     * CALCOLATORE
-     */
-
-    if (selectedItem.type === "calculator") {
-
-        renderCalculator(
-            selectedItem.id,
-            selectedItem.title,
-            data
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * FARMACO
-     */
-
-    if (selectedItem.type === "drug") {
-
-        renderDrug(
-            selectedItem,
-            data
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * VALORE DI LABORATORIO
-     */
-
-    if (selectedItem.type === "lab-value") {
-
-        renderLabValue(
-            selectedItem,
-            data
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * PROTOCOLLO
-     */
-
-    if (selectedItem.type === "protocol") {
-
-        renderProtocol(
-            selectedItem,
-            data
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * TESTO GENERICO
-     */
-
-    if (selectedItem.type === "text") {
-
-        const text =
-            selectedItem.content?.text ||
-            "Contenuto in preparazione.";
-
-        renderGenericText(
-            selectedItem.title,
-            text,
-            data
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * FALLBACK
-     */
-
-    renderGenericText(
-        selectedItem.title,
-        "Contenuto in preparazione.",
-        data
-    );
-
-}
 
 
 /* =========================================================
@@ -1408,17 +1287,17 @@ function renderComposableItem(item, data) {
             ? item.blocks
             : [];
 
-    content.innerHTML = \`
+    content.innerHTML = `
         <section class="detail-page composable-page">
 
-            \${detailHeader(item.title, data)}
+            ${detailHeader(item.title, data)}
 
             <div class="detail-content composable-content">
-                \${blocks.map(renderContentBlock).join("")}
+                ${blocks.map(renderContentBlock).join("")}
             </div>
 
         </section>
-    \`;
+    `;
 }
 
 
@@ -1431,42 +1310,42 @@ function renderContentBlock(block) {
     const type = block.type || "text";
 
     if (type === "text") {
-        return \`
+        return `
             <article class="info-block info-block-text">
-                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
-                <p>\${escapeHtml(block.content || "")}</p>
+                ${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ""}
+                <p>${escapeHtml(block.content || "")}</p>
             </article>
-        \`;
+        `;
     }
 
     if (type === "value") {
-        return \`
+        return `
             <article class="info-block info-block-value">
-                \${block.title ? \`<span class="info-block-label">\${escapeHtml(block.title)}</span>\` : ""}
-                <strong>\${escapeHtml(block.content || "")}</strong>
+                ${block.title ? `<span class="info-block-label">${escapeHtml(block.title)}</span>` : ""}
+                <strong>${escapeHtml(block.content || "")}</strong>
             </article>
-        \`;
+        `;
     }
 
     if (type === "warning") {
-        return \`
+        return `
             <aside class="info-block info-block-warning">
                 <span class="info-block-icon">⚠️</span>
                 <div>
-                    \${block.title ? \`<strong>\${escapeHtml(block.title)}</strong>\` : ""}
-                    <p>\${escapeHtml(block.content || "")}</p>
+                    ${block.title ? `<strong>${escapeHtml(block.title)}</strong>` : ""}
+                    <p>${escapeHtml(block.content || "")}</p>
                 </div>
             </aside>
-        \`;
+        `;
     }
 
     if (type === "note") {
-        return \`
+        return `
             <aside class="info-block info-block-note">
-                \${block.title ? \`<strong>\${escapeHtml(block.title)}</strong>\` : ""}
-                <p>\${escapeHtml(block.content || "")}</p>
+                ${block.title ? `<strong>${escapeHtml(block.title)}</strong>` : ""}
+                <p>${escapeHtml(block.content || "")}</p>
             </aside>
-        \`;
+        `;
     }
 
     if (type === "list") {
@@ -1479,14 +1358,14 @@ function renderContentBlock(block) {
         const listTag =
             block.ordered ? "ol" : "ul";
 
-        return \`
+        return `
             <article class="info-block info-block-list">
-                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
-                <\${listTag}>
-                    \${items.map(item => \`<li>\${escapeHtml(item)}</li>\`).join("")}
-                </\${listTag}>
+                ${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ""}
+                <${listTag}>
+                    ${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+                </${listTag}>
             </article>
-        \`;
+        `;
     }
 
     if (type === "table") {
@@ -1501,42 +1380,42 @@ function renderContentBlock(block) {
                 ? block.rows
                 : [];
 
-        return \`
+        return `
             <article class="info-block info-block-table">
-                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
+                ${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ""}
                 <div class="info-table-wrapper">
                     <table>
-                        \${headers.length ? \`
+                        ${headers.length ? `
                             <thead>
                                 <tr>
-                                    \${headers.map(header => \`<th>\${escapeHtml(header)}</th>\`).join("")}
+                                    ${headers.map(header => `<th>${escapeHtml(header)}</th>`).join("")}
                                 </tr>
                             </thead>
-                        \` : ""}
+                        ` : ""}
                         <tbody>
-                            \${rows.map(row => \`
+                            ${rows.map(row => `
                                 <tr>
-                                    \${(Array.isArray(row) ? row : [row]).map(cell => \`<td>\${escapeHtml(cell)}</td>\`).join("")}
+                                    ${(Array.isArray(row) ? row : [row]).map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}
                                 </tr>
-                            \`).join("")}
+                            `).join("")}
                         </tbody>
                     </table>
                 </div>
             </article>
-        \`;
+        `;
     }
 
     if (type === "divider") {
-        return \`<hr class="info-block-divider">\`;
+        return `<hr class="info-block-divider">`;
     }
 
     if (type === "image" && block.src) {
-        return \`
+        return `
             <figure class="info-block info-block-image">
-                <img src="\${escapeAttribute(block.src)}" alt="\${escapeAttribute(block.alt || "")}" loading="lazy">
-                \${block.caption ? \`<figcaption>\${escapeHtml(block.caption)}</figcaption>\` : ""}
+                <img src="${escapeAttribute(block.src)}" alt="${escapeAttribute(block.alt || "")}" loading="lazy">
+                ${block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : ""}
             </figure>
-        \`;
+        `;
     }
 
     if (type === "related") {
@@ -1546,11 +1425,11 @@ function renderContentBlock(block) {
                 ? block.items
                 : [];
 
-        return \`
+        return `
             <article class="info-block info-block-related">
-                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
+                ${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ""}
                 <div class="related-list">
-                    \${items.map(related => {
+                    ${items.map(related => {
                         const relatedId =
                             typeof related === "string"
                                 ? createId(related)
@@ -1564,16 +1443,16 @@ function renderContentBlock(block) {
                             return "";
                         }
 
-                        return \`
-                            <a class="related-link" href="?state=\${encodeURIComponent(data.id || state)}&item=\${encodeURIComponent(relatedId)}">
-                                <span>\${escapeHtml(relatedTitle)}</span>
+                        return `
+                            <a class="related-link" href="?state=${encodeURIComponent(data.id || state)}&item=${encodeURIComponent(relatedId)}">
+                                <span>${escapeHtml(relatedTitle)}</span>
                                 <span class="arrow">→</span>
                             </a>
-                        \`;
+                        `;
                     }).join("")}
                 </div>
             </article>
-        \`;
+        `;
     }
 
     return "";
