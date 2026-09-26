@@ -42,7 +42,6 @@
 
 html {
     min-height: 100%;
-    overflow-x: hidden;
 }
 
 
@@ -70,41 +69,7 @@ body {
     line-height: 1.5;
 
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
 
-}
-
-
-/* =========================================================
-   SCHERMATA DI CARICAMENTO APP
-========================================================= */
-
-#appLoadingScreen {
-
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #E2F6F6;
-    color: #17212b;
-
-    transition: opacity 0.18s ease;
-
-}
-
-
-#appLoadingScreen span {
-    font-size: 2rem;
-}
-
-
-#appLoadingScreen.is-hidden {
-    opacity: 0;
-    pointer-events: none;
 }
 
 
@@ -201,7 +166,6 @@ main {
     max-width: 720px;
 
     min-height: 100vh;
-    min-height: 100dvh;
 
     margin: 0 auto;
 
@@ -381,9 +345,7 @@ header h1 {
     overflow: hidden;
 
     cursor: pointer;
-    touch-action: none;
-    -webkit-user-select: none;
-    user-select: none;
+    touch-action: pan-y;
 
     transition:
         background 0.2s ease,
@@ -638,15 +600,6 @@ section h2 {
     width: 100%;
 
 }
-
-
-/* La Home non deve creare uno scroll verticale inutile. */
-.home-page {
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-}
-
 
 #content section {
 
@@ -1171,4 +1124,91 @@ section h2 {
 
     cursor: grabbing;
 
+}
+
+
+/* =========================================================
+   IMPOSTAZIONI
+========================================================= */
+
+.settings-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.settings-panel[hidden] {
+    display: none;
+}
+
+.settings-card {
+    width: min(100%, 420px);
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-elevated);
+    color: var(--text);
+    box-shadow: 0 18px 50px rgba(0,0,0,.28);
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.settings-header h2 {
+    margin: 0;
+}
+
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.settings-action {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.settings-action:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+}
+
+.settings-message {
+    min-height: 1.4em;
+    margin-top: 13px;
+    color: var(--text-secondary);
+    font-size: .86rem;
+}
+
+.order-editing .shortcut,
+.order-editing .sortable-item {
+    cursor: grab;
+    border-color: var(--accent);
+}
+
+.order-editing .sortable-section > h2 {
+    color: var(--accent);
+}
+
+.order-editing .shortcut:active,
+.order-editing .sortable-item:active {
+    cursor: grabbing;
 }
