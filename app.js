@@ -275,6 +275,8 @@ let draggedShortcut = null;
 
 function setupShortcutDrag(element) {
 
+    element.addEventListener("contextmenu", event => event.preventDefault());
+
     let timer = null;
     let dragging = false;
     let pointerId = null;
@@ -313,7 +315,7 @@ function setupShortcutDrag(element) {
             }
             catch (_) {}
 
-        }, 1000);
+        }, 650);
 
     });
 
@@ -324,19 +326,7 @@ function setupShortcutDrag(element) {
         }
 
         if (!dragging) {
-
-            const distance =
-                Math.hypot(
-                    event.clientX - startX,
-                    event.clientY - startY
-                );
-
-            if (distance > 12) {
-                clearTimeout(timer);
-            }
-
             return;
-
         }
 
         event.preventDefault();
@@ -479,6 +469,7 @@ async function loadState() {
 
     if (!state) {
 
+        document.body.classList.add("home-page");
         shortcuts.style.display = "flex";
 
         if (backButton) {
@@ -496,6 +487,8 @@ async function loadState() {
         return;
     }
 
+
+    document.body.classList.remove("home-page");
 
     /*
      * PAGINA CATEGORIA
@@ -997,7 +990,7 @@ function setupSectionSorting(section) {
             }
             catch (_) {}
 
-        }, 1000);
+        }, 650);
 
     });
 
@@ -1140,6 +1133,8 @@ function setupLongPressSort(
     saveCallback
 ) {
 
+    element.addEventListener("contextmenu", event => event.preventDefault());
+
     let timer = null;
     let dragging = false;
     let pointerId = null;
@@ -1181,7 +1176,7 @@ function setupLongPressSort(
                 }
                 catch (_) {}
 
-            }, 1000);
+            }, 650);
 
         }
     );
@@ -1195,19 +1190,7 @@ function setupLongPressSort(
             }
 
             if (!dragging) {
-
-                const distance =
-                    Math.hypot(
-                        event.clientX - startX,
-                        event.clientY - startY
-                    );
-
-                if (distance > 12) {
-                    clearTimeout(timer);
-                }
-
                 return;
-
             }
 
             event.preventDefault();
@@ -4764,6 +4747,13 @@ function applyLocalOverride(stateId, data) {
    AVVIO
 ========================================================= */
 setupTheme();
+
+function hideLoadingScreen() {
+    const loader = document.getElementById("appLoadingScreen");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(() => loader.remove(), 220);
+}
 
 if (editor === "1") {
 
