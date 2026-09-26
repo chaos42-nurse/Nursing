@@ -984,3 +984,125 @@ section h2 {
     }
 
 }
+
+
+/* =========================================================
+   LIGHT MODE — HOME E CONTROLLI
+========================================================= */
+
+:root[data-theme="light"] .shortcut {
+
+    background: #ffffff;
+
+    color: #17212b;
+
+    border-color: #d7dee5;
+
+    box-shadow:
+        0 8px 24px var(--page-shadow);
+
+}
+
+:root[data-theme="light"] .shortcut:hover {
+
+    background: #f7f9fb;
+
+    border-color: #b9c5cf;
+
+}
+
+:root[data-theme="light"] .shortcut-icon {
+
+    background: rgba(22, 138, 203, 0.10);
+
+    border-color: rgba(22, 138, 203, 0.16);
+
+}
+
+:root[data-theme="light"] .shortcut-text small {
+
+    color: #5d6b78;
+
+}
+
+:root[data-theme="light"] .shortcut-drag-indicator {
+
+    color: #7b8792;
+
+}
+
+
+/* =========================================================
+   RIORDINO CONTENUTI
+========================================================= */
+
+.sortable-section,
+.sortable-item {
+
+    position: relative;
+
+}
+
+.sortable-section {
+
+    touch-action: pan-y;
+
+}
+
+.sortable-item {
+
+    touch-action: pan-y;
+
+}
+
+.content-drag-indicator {
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    margin-left: auto;
+
+    width: 24px;
+    height: 24px;
+
+    color: var(--text-muted);
+
+    font-size: 0.95rem;
+
+    letter-spacing: -3px;
+
+    opacity: 0.65;
+
+    pointer-events: none;
+
+}
+
+.sortable-dragging {
+
+    opacity: 0.5;
+
+    transform: scale(0.985);
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.20);
+
+}
+
+.sortable-drag-over {
+
+    border-color: var(--accent) !important;
+
+}
+
+.sortable-section.sortable-drag-over {
+
+    border-radius: 13px;
+
+    padding-top: 3px;
+    padding-bottom: 3px;
+
+}
