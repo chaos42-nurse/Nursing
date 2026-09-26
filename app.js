@@ -1069,7 +1069,7 @@ function setupSectionSorting(section) {
 
         clearTimeout(timer);
 
-        timer = setTimeout(() => {
+        if (isOrderEditMode()) {
 
             dragging = true;
 
@@ -1082,7 +1082,24 @@ function setupSectionSorting(section) {
             }
             catch (_) {}
 
-        }, isOrderEditMode() ? 0 : 1000);
+        } else {
+
+            timer = setTimeout(() => {
+
+                dragging = true;
+
+                section.classList.add(
+                    "sortable-dragging"
+                );
+
+                try {
+                    handle.setPointerCapture(pointerId);
+                }
+                catch (_) {}
+
+            }, 1000);
+
+        }
 
     });
 
