@@ -1266,7 +1266,7 @@ function loadItem(data) {
     }
 
 
-    /*
+    /*\n     * SCHEDA COMPONIBILE\n     */\n    if (Array.isArray(selectedItem.blocks)) {\n\n        renderComposableItem(selectedItem, data);\n        return;\n    }\n\n\n    /*
      * STRINGA SEMPLICE
      */
 
@@ -1394,6 +1394,189 @@ function loadItem(data) {
         data
     );
 
+}
+
+
+/* =========================================================
+   SCHEDE COMPONIBILI
+========================================================= */
+
+function renderComposableItem(item, data) {
+
+    const blocks =
+        Array.isArray(item.blocks)
+            ? item.blocks
+            : [];
+
+    content.innerHTML = \`
+        <section class="detail-page composable-page">
+
+            \${detailHeader(item.title, data)}
+
+            <div class="detail-content composable-content">
+                \${blocks.map(renderContentBlock).join("")}
+            </div>
+
+        </section>
+    \`;
+}
+
+
+function renderContentBlock(block) {
+
+    if (!block || typeof block !== "object") {
+        return "";
+    }
+
+    const type = block.type || "text";
+
+    if (type === "text") {
+        return \`
+            <article class="info-block info-block-text">
+                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
+                <p>\${escapeHtml(block.content || "")}</p>
+            </article>
+        \`;
+    }
+
+    if (type === "value") {
+        return \`
+            <article class="info-block info-block-value">
+                \${block.title ? \`<span class="info-block-label">\${escapeHtml(block.title)}</span>\` : ""}
+                <strong>\${escapeHtml(block.content || "")}</strong>
+            </article>
+        \`;
+    }
+
+    if (type === "warning") {
+        return \`
+            <aside class="info-block info-block-warning">
+                <span class="info-block-icon">⚠️</span>
+                <div>
+                    \${block.title ? \`<strong>\${escapeHtml(block.title)}</strong>\` : ""}
+                    <p>\${escapeHtml(block.content || "")}</p>
+                </div>
+            </aside>
+        \`;
+    }
+
+    if (type === "note") {
+        return \`
+            <aside class="info-block info-block-note">
+                \${block.title ? \`<strong>\${escapeHtml(block.title)}</strong>\` : ""}
+                <p>\${escapeHtml(block.content || "")}</p>
+            </aside>
+        \`;
+    }
+
+    if (type === "list") {
+
+        const items =
+            Array.isArray(block.items)
+                ? block.items
+                : [];
+
+        const listTag =
+            block.ordered ? "ol" : "ul";
+
+        return \`
+            <article class="info-block info-block-list">
+                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
+                <\${listTag}>
+                    \${items.map(item => \`<li>\${escapeHtml(item)}</li>\`).join("")}
+                </\${listTag}>
+            </article>
+        \`;
+    }
+
+    if (type === "table") {
+
+        const headers =
+            Array.isArray(block.headers)
+                ? block.headers
+                : [];
+
+        const rows =
+            Array.isArray(block.rows)
+                ? block.rows
+                : [];
+
+        return \`
+            <article class="info-block info-block-table">
+                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
+                <div class="info-table-wrapper">
+                    <table>
+                        \${headers.length ? \`
+                            <thead>
+                                <tr>
+                                    \${headers.map(header => \`<th>\${escapeHtml(header)}</th>\`).join("")}
+                                </tr>
+                            </thead>
+                        \` : ""}
+                        <tbody>
+                            \${rows.map(row => \`
+                                <tr>
+                                    \${(Array.isArray(row) ? row : [row]).map(cell => \`<td>\${escapeHtml(cell)}</td>\`).join("")}
+                                </tr>
+                            \`).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        \`;
+    }
+
+    if (type === "divider") {
+        return \`<hr class="info-block-divider">\`;
+    }
+
+    if (type === "image" && block.src) {
+        return \`
+            <figure class="info-block info-block-image">
+                <img src="\${escapeAttribute(block.src)}" alt="\${escapeAttribute(block.alt || "")}" loading="lazy">
+                \${block.caption ? \`<figcaption>\${escapeHtml(block.caption)}</figcaption>\` : ""}
+            </figure>
+        \`;
+    }
+
+    if (type === "related") {
+
+        const items =
+            Array.isArray(block.items)
+                ? block.items
+                : [];
+
+        return \`
+            <article class="info-block info-block-related">
+                \${block.title ? \`<h3>\${escapeHtml(block.title)}</h3>\` : ""}
+                <div class="related-list">
+                    \${items.map(related => {
+                        const relatedId =
+                            typeof related === "string"
+                                ? createId(related)
+                                : related?.id;
+                        const relatedTitle =
+                            typeof related === "string"
+                                ? related
+                                : related?.title;
+
+                        if (!relatedId || !relatedTitle) {
+                            return "";
+                        }
+
+                        return \`
+                            <a class="related-link" href="?state=\${encodeURIComponent(data.id || state)}&item=\${encodeURIComponent(relatedId)}">
+                                <span>\${escapeHtml(relatedTitle)}</span>
+                                <span class="arrow">→</span>
+                            </a>
+                        \`;
+                    }).join("")}
+                </div>
+            </article>
+        \`;
+    }
+
+    return "";
 }
 
 
@@ -4998,6 +5181,22 @@ function showEditorMessage(message) {
             message;
 
     }
+
+}
+
+
+/* =========================================================
+   SICUREZZA HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
