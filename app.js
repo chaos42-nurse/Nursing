@@ -268,182 +268,187 @@ function createShortcuts(categories) {
 
 
 /* =========================================================
-   RIORDINO TRAMITE TRASCINAMENTO
+   RIORDINO HOME — LONG PRESS + POINTER DRAG
 ========================================================= */
 
 let draggedShortcut = null;
-let dragTimer = null;
-let dragReady = false;
 
 function setupShortcutDrag(element) {
 
-    element.addEventListener("dragstart", event => {
+    let timer = null;
+    let dragging = false;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
 
-        draggedShortcut = element;
-        element.classList.add("shortcut-dragging");
+    element.addEventListener("pointerdown", event => {
 
-        if (event.dataTransfer) {
-            event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData(
-                "text/plain",
-                element.dataset.categoryId
-            );
-        }
-
-    });
-
-    element.addEventListener("dragend", () => {
-
-        element.classList.remove("shortcut-dragging");
-        shortcuts
-            .querySelectorAll(".shortcut-drag-over")
-            .forEach(card => card.classList.remove("shortcut-drag-over"));
-
-        draggedShortcut = null;
-        saveShortcutOrder();
-
-    });
-
-    element.addEventListener("dragover", event => {
-
-        event.preventDefault();
-
-        if (!draggedShortcut || draggedShortcut === element) {
+        if (
+            event.pointerType === "mouse" &&
+            event.button !== 0
+        ) {
             return;
         }
 
-        element.classList.add("shortcut-drag-over");
+        pointerId = event.pointerId;
 
-        const rect = element.getBoundingClientRect();
-        const after =
-            event.clientY > rect.top + rect.height / 2;
+        startX = event.clientX;
+        startY = event.clientY;
 
-        if (after) {
-            shortcuts.insertBefore(
-                draggedShortcut,
-                element.nextSibling
-            );
-        } else {
-            shortcuts.insertBefore(
-                draggedShortcut,
-                element
-            );
-        }
+        dragging = false;
 
-    });
+        clearTimeout(timer);
 
-    element.addEventListener("dragleave", () => {
-        element.classList.remove("shortcut-drag-over");
-    });
+        timer = setTimeout(() => {
 
-    element.addEventListener("drop", event => {
-        event.preventDefault();
-        element.classList.remove("shortcut-drag-over");
-        saveShortcutOrder();
-    });
-
-    let touchStartY = 0;
-    let touchMoved = false;
-
-    element.addEventListener("touchstart", event => {
-
-        if (event.touches.length !== 1) {
-            return;
-        }
-
-        touchStartY = event.touches[0].clientY;
-        touchMoved = false;
-        dragReady = false;
-
-        clearTimeout(dragTimer);
-
-        dragTimer = setTimeout(() => {
-
-            dragReady = true;
+            dragging = true;
             draggedShortcut = element;
 
-            element.classList.add("shortcut-dragging");
+            element.classList.add(
+                "shortcut-dragging"
+            );
 
-        }, 1200);
+            try {
+                element.setPointerCapture(pointerId);
+            }
+            catch (_) {}
 
-    }, { passive: true });
+        }, 1000);
 
-    element.addEventListener("touchmove", event => {
+    });
 
-        if (event.touches.length !== 1) {
+    element.addEventListener("pointermove", event => {
+
+        if (event.pointerId !== pointerId) {
             return;
         }
 
-        const touch = event.touches[0];
+        if (!dragging) {
 
-        if (Math.abs(touch.clientY - touchStartY) > 8) {
-            touchMoved = true;
-        }
+            const distance =
+                Math.hypot(
+                    event.clientX - startX,
+                    event.clientY - startY
+                );
 
-        if (!dragReady || !draggedShortcut) {
+            if (distance > 12) {
+                clearTimeout(timer);
+            }
+
             return;
+
         }
 
         event.preventDefault();
 
         const target =
-            document.elementFromPoint(
-                touch.clientX,
-                touch.clientY
-            )?.closest(".shortcut");
+            document
+                .elementFromPoint(
+                    event.clientX,
+                    event.clientY
+                )
+                ?.closest(".shortcut");
 
-        if (!target || target === draggedShortcut) {
+        if (
+            !target ||
+            target === element ||
+            !shortcuts.contains(target)
+        ) {
             return;
         }
 
-        const rect = target.getBoundingClientRect();
+        const rect =
+            target.getBoundingClientRect();
+
         const after =
-            touch.clientY > rect.top + rect.height / 2;
+            event.clientY >
+            rect.top + rect.height / 2;
 
         if (after) {
+
             shortcuts.insertBefore(
-                draggedShortcut,
+                element,
                 target.nextSibling
             );
+
         } else {
+
             shortcuts.insertBefore(
-                draggedShortcut,
+                element,
                 target
             );
+
         }
 
-    }, { passive: false });
+    });
 
-    element.addEventListener("touchend", () => {
+    const finish = event => {
 
-        clearTimeout(dragTimer);
-
-        if (dragReady && draggedShortcut === element) {
-            element.classList.remove("shortcut-dragging");
-            draggedShortcut = null;
-            dragReady = false;
-            saveShortcutOrder();
+        if (event.pointerId !== pointerId) {
             return;
         }
 
-        dragReady = false;
+        clearTimeout(timer);
 
-    });
+        if (dragging) {
 
-    element.addEventListener("touchcancel", () => {
+            event.preventDefault();
 
-        clearTimeout(dragTimer);
+            element.classList.remove(
+                "shortcut-dragging"
+            );
 
-        dragReady = false;
-        element.classList.remove("shortcut-dragging");
-
-        if (draggedShortcut === element) {
+            dragging = false;
             draggedShortcut = null;
+
+            try {
+                element.releasePointerCapture(
+                    pointerId
+                );
+            }
+            catch (_) {}
+
+            saveShortcutOrder();
+
+            element.dataset.justDragged = "1";
+
+            setTimeout(() => {
+                delete element.dataset.justDragged;
+            }, 250);
+
         }
 
-    });
+        pointerId = null;
+
+    };
+
+    element.addEventListener(
+        "pointerup",
+        finish
+    );
+
+    element.addEventListener(
+        "pointercancel",
+        finish
+    );
+
+    element.addEventListener(
+        "click",
+        event => {
+
+            if (
+                element.dataset.justDragged === "1"
+            ) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+        },
+        true
+    );
 
 }
+
 
 function saveShortcutOrder() {
 
@@ -662,9 +667,6 @@ async function loadState() {
 
 function renderSections(data) {
 
-    let html = "";
-
-
     if (!data.sections) {
 
         content.innerHTML = "";
@@ -673,47 +675,75 @@ function renderSections(data) {
 
     }
 
+    const orderedSections =
+        applySavedSectionOrder(
+            data.id || state,
+            data.sections
+        );
 
-    data.sections.forEach(section => {
+    let html = "";
+
+    orderedSections.forEach((section, sectionIndex) => {
+
+        const sectionKey =
+            getStableSectionKey(
+                section,
+                sectionIndex
+            );
+
+        const orderedItems =
+            applySavedItemOrder(
+                data.id || state,
+                sectionKey,
+                section.items || []
+            );
 
         html += `
 
-            <section>
+            <section
+                class="sortable-section"
+                data-section-key="${escapeAttribute(sectionKey)}"
+            >
 
                 <h2>
-                    ${section.title}
+                    <span>${section.title}</span>
+                    <span
+                        class="content-drag-indicator"
+                        aria-hidden="true"
+                    >⋮⋮</span>
                 </h2>
 
                 <div class="item-list">
 
         `;
 
+        orderedItems.forEach((sectionItem, itemIndex) => {
 
-        if (section.items) {
+            const itemId =
+                typeof sectionItem === "string"
+                    ? createId(sectionItem)
+                    : sectionItem.id || createId(sectionItem.title);
 
-            section.items.forEach(sectionItem => {
+            const itemTitle =
+                typeof sectionItem === "string"
+                    ? sectionItem
+                    : sectionItem.title;
 
-                const itemId =
-                    typeof sectionItem === "string"
-                        ? createId(sectionItem)
-                        : sectionItem.id;
-
-
-                const itemTitle =
-                    typeof sectionItem === "string"
-                        ? sectionItem
-                        : sectionItem.title;
-
-
-                html += `
+            html += `
 
                     <a
-                        class="content-button"
+                        class="content-button sortable-item"
+                        data-item-id="${escapeAttribute(itemId)}"
+                        data-section-key="${escapeAttribute(sectionKey)}"
                         href="?state=${encodeURIComponent(state)}&item=${encodeURIComponent(itemId)}"
                     >
 
                         <span>
                             ${itemTitle}
+                        </span>
+
+                        <span class="content-drag-indicator" aria-hidden="true">
+                            ⋮⋮
                         </span>
 
                         <span class="arrow">
@@ -722,12 +752,9 @@ function renderSections(data) {
 
                     </a>
 
-                `;
+            `;
 
-            });
-
-        }
-
+        });
 
         html += `
 
@@ -739,8 +766,424 @@ function renderSections(data) {
 
     });
 
-
     content.innerHTML = html;
+
+    setupContentSorting();
+
+}
+
+
+/* =========================================================
+   ORDINE CONTENUTI — LOCAL STORAGE
+========================================================= */
+
+function getStableSectionKey(section, index) {
+
+    return (
+        section.id ||
+        createId(section.title || `section-${index}`)
+    );
+
+}
+
+
+function getItemKey(item, index) {
+
+    if (typeof item === "string") {
+        return createId(item);
+    }
+
+    return (
+        item.id ||
+        createId(item.title || `item-${index}`)
+    );
+
+}
+
+
+function applySavedSectionOrder(stateId, sections) {
+
+    const key =
+        `nursing-sections-${stateId}`;
+
+    try {
+
+        const saved =
+            JSON.parse(
+                localStorage.getItem(key) || "null"
+            );
+
+        if (!Array.isArray(saved)) {
+            return [...sections];
+        }
+
+        const map =
+            new Map(
+                sections.map(
+                    (section, index) => [
+                        getStableSectionKey(section, index),
+                        section
+                    ]
+                )
+            );
+
+        return [
+            ...saved
+                .map(id => map.get(id))
+                .filter(Boolean),
+            ...sections.filter(
+                (section, index) =>
+                    !saved.includes(
+                        getStableSectionKey(section, index)
+                    )
+            )
+        ];
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Errore ordine sottogruppi:",
+            error
+        );
+
+        return [...sections];
+
+    }
+
+}
+
+
+function applySavedItemOrder(stateId, sectionKey, items) {
+
+    const key =
+        `nursing-items-${stateId}-${sectionKey}`;
+
+    try {
+
+        const saved =
+            JSON.parse(
+                localStorage.getItem(key) || "null"
+            );
+
+        if (!Array.isArray(saved)) {
+            return [...items];
+        }
+
+        const map =
+            new Map(
+                items.map(
+                    (item, index) => [
+                        getItemKey(item, index),
+                        item
+                    ]
+                )
+            );
+
+        return [
+            ...saved
+                .map(id => map.get(id))
+                .filter(Boolean),
+            ...items.filter(
+                (item, index) =>
+                    !saved.includes(
+                        getItemKey(item, index)
+                    )
+            )
+        ];
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Errore ordine elementi:",
+            error
+        );
+
+        return [...items];
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAG CONTENUTI — POINTER EVENTS
+========================================================= */
+
+function setupContentSorting() {
+
+    content
+        .querySelectorAll(".sortable-section")
+        .forEach(section => {
+
+            setupLongPressSort(
+                section,
+                content,
+                ".sortable-section",
+                () => {
+
+                    saveSectionOrder();
+
+                }
+            );
+
+        });
+
+    content
+        .querySelectorAll(".sortable-item")
+        .forEach(itemElement => {
+
+            const list =
+                itemElement.parentElement;
+
+            setupLongPressSort(
+                itemElement,
+                list,
+                ".sortable-item",
+                () => {
+
+                    saveItemOrder(
+                        itemElement.dataset.sectionKey,
+                        list
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+function setupLongPressSort(
+    element,
+    container,
+    selector,
+    saveCallback
+) {
+
+    let timer = null;
+    let dragging = false;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+
+    element.addEventListener(
+        "pointerdown",
+        event => {
+
+            if (
+                event.pointerType === "mouse" &&
+                event.button !== 0
+            ) {
+                return;
+            }
+
+            pointerId = event.pointerId;
+
+            startX = event.clientX;
+            startY = event.clientY;
+
+            dragging = false;
+
+            clearTimeout(timer);
+
+            timer = setTimeout(() => {
+
+                dragging = true;
+
+                element.classList.add(
+                    "sortable-dragging"
+                );
+
+                try {
+                    element.setPointerCapture(
+                        pointerId
+                    );
+                }
+                catch (_) {}
+
+            }, 1000);
+
+        }
+    );
+
+    element.addEventListener(
+        "pointermove",
+        event => {
+
+            if (event.pointerId !== pointerId) {
+                return;
+            }
+
+            if (!dragging) {
+
+                const distance =
+                    Math.hypot(
+                        event.clientX - startX,
+                        event.clientY - startY
+                    );
+
+                if (distance > 12) {
+                    clearTimeout(timer);
+                }
+
+                return;
+
+            }
+
+            event.preventDefault();
+
+            const target =
+                document
+                    .elementFromPoint(
+                        event.clientX,
+                        event.clientY
+                    )
+                    ?.closest(selector);
+
+            if (
+                !target ||
+                target === element ||
+                !container.contains(target)
+            ) {
+                return;
+            }
+
+            const rect =
+                target.getBoundingClientRect();
+
+            const after =
+                event.clientY >
+                rect.top + rect.height / 2;
+
+            if (after) {
+
+                container.insertBefore(
+                    element,
+                    target.nextSibling
+                );
+
+            } else {
+
+                container.insertBefore(
+                    element,
+                    target
+                );
+
+            }
+
+        }
+    );
+
+    const finish = event => {
+
+        if (event.pointerId !== pointerId) {
+            return;
+        }
+
+        clearTimeout(timer);
+
+        if (dragging) {
+
+            event.preventDefault();
+
+            element.classList.remove(
+                "sortable-dragging"
+            );
+
+            dragging = false;
+
+            try {
+                element.releasePointerCapture(
+                    pointerId
+                );
+            }
+            catch (_) {}
+
+            saveCallback();
+
+            /*
+             * Evita che il rilascio dopo il trascinamento
+             * apra accidentalmente il link.
+             */
+            element.dataset.justDragged = "1";
+
+            setTimeout(() => {
+                delete element.dataset.justDragged;
+            }, 250);
+
+        }
+
+        pointerId = null;
+
+    };
+
+    element.addEventListener(
+        "pointerup",
+        finish
+    );
+
+    element.addEventListener(
+        "pointercancel",
+        finish
+    );
+
+    element.addEventListener(
+        "click",
+        event => {
+
+            if (element.dataset.justDragged === "1") {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+        },
+        true
+    );
+
+}
+
+
+function saveSectionOrder() {
+
+    const order =
+        Array.from(
+            content.querySelectorAll(
+                ".sortable-section"
+            )
+        ).map(
+            section =>
+                section.dataset.sectionKey
+        );
+
+    localStorage.setItem(
+        `nursing-sections-${state}`,
+        JSON.stringify(order)
+    );
+
+}
+
+
+function saveItemOrder(sectionKey, list) {
+
+    const order =
+        Array.from(
+            list.querySelectorAll(
+                ".sortable-item"
+            )
+        ).map(
+            item =>
+                item.dataset.itemId
+        );
+
+    localStorage.setItem(
+        `nursing-items-${state}-${sectionKey}`,
+        JSON.stringify(order)
+    );
 
 }
 
