@@ -101,6 +101,24 @@ body {
 }
 
 
+:root[data-theme="light"] .home-button,
+:root[data-theme="light"] .shortcut-move {
+
+    background: #ffffff;
+    border-color: #d7dee5;
+    color: #17212b;
+
+}
+
+:root[data-theme="light"] .home-button:hover,
+:root[data-theme="light"] .shortcut-move:hover {
+
+    background: #f3f5f7;
+    border-color: #b9c5cf;
+    color: #17212b;
+
+}
+
 :root[data-theme="light"] body {
 
     background:
@@ -278,9 +296,9 @@ header h1 {
 
 #shortcuts {
 
-    display: grid;
+    display: flex;
 
-    grid-template-columns: 1fr;
+    flex-direction: column;
 
     gap: 12px;
 
@@ -325,6 +343,9 @@ header h1 {
     text-decoration: none;
 
     overflow: hidden;
+
+    cursor: pointer;
+    touch-action: pan-y;
 
     transition:
         background 0.2s ease,
@@ -436,118 +457,37 @@ header h1 {
 
 
 /* =========================================================
-   PERSONALIZZAZIONE SHORTCUT
+   TRASCINAMENTO SHORTCUT
 ========================================================= */
 
-.customize-button {
-
-    display: block;
-
-    width: 100%;
-
-    margin:
-        -18px
-        0
-        30px;
-
-    padding: 11px 14px;
-
-    border: 1px solid var(--border);
-
-    border-radius: 12px;
-
-    background: transparent;
-
-    color: var(--text-secondary);
-
-    font: inherit;
-
-    font-size: 0.86rem;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-
-}
-
-
-.customize-button:hover {
-
-    background: var(--surface-hover);
-
-    border-color: var(--border-hover);
-
-    color: var(--text);
-
-}
-
-
-.shortcut-order-controls {
-
-    display: none;
-
-    flex-direction: column;
-
-    gap: 4px;
+.shortcut-drag-indicator {
 
     margin-left: auto;
+    flex-shrink: 0;
 
-    position: relative;
+    color: var(--text-muted);
+    font-size: 1rem;
+    letter-spacing: -3px;
+    opacity: 0.65;
 
-    z-index: 2;
-
-}
-
-
-.shortcuts-editing .shortcut {
-
-    cursor: default;
+    pointer-events: none;
 
 }
 
+.shortcut-dragging {
 
-.shortcuts-editing .shortcut-order-controls {
+    opacity: 0.55;
 
-    display: flex;
+    transform: scale(0.985);
 
-}
-
-
-.shortcut-move {
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    width: 30px;
-    height: 26px;
-
-    border: 1px solid var(--border);
-
-    border-radius: 8px;
-
-    background: var(--surface-hover);
-
-    color: var(--text);
-
-    font: inherit;
-
-    font-size: 0.9rem;
-
-    cursor: pointer;
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.22);
 
 }
 
+.shortcut-drag-over {
 
-.shortcut-move:hover {
-
-    border-color: var(--border-hover);
-
-    color: var(--accent);
+    border-color: var(--accent);
 
 }
 
@@ -996,8 +936,6 @@ section h2 {
 
 
     #shortcuts {
-
-        grid-template-columns: 1fr;
 
         gap: 10px;
 
