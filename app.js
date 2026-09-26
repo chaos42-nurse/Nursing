@@ -110,6 +110,94 @@ function setupTheme() {
 
 
 /* =========================================================
+   IMPOSTAZIONI / MODALITÀ MODIFICA ORDINE
+========================================================= */
+
+let orderEditMode = false;
+
+function isOrderEditMode() {
+    return orderEditMode;
+}
+
+function setupSettings() {
+
+    const panel = document.getElementById("settingsPanel");
+    const openButton = document.getElementById("settingsButton");
+    const closeButton = document.getElementById("settingsClose");
+    const orderButton = document.getElementById("orderModeButton");
+    const resetButton = document.getElementById("resetOrderButton");
+    const themeButton = document.getElementById("settingsThemeButton");
+    const message = document.getElementById("settingsMessage");
+
+    if (!panel || !openButton) return;
+
+    const setMessage = text => {
+        if (message) message.textContent = text;
+    };
+
+    openButton.addEventListener("click", () => {
+        panel.hidden = false;
+    });
+
+    closeButton?.addEventListener("click", () => {
+        panel.hidden = true;
+    });
+
+    panel.addEventListener("click", event => {
+        if (event.target === panel) panel.hidden = true;
+    });
+
+    orderButton?.addEventListener("click", () => {
+        orderEditMode = !orderEditMode;
+        document.body.classList.toggle("order-editing", orderEditMode);
+
+        orderButton.textContent =
+            orderEditMode
+                ? "✅ Fine modifica ordine"
+                : "↕️ Modifica ordine";
+
+        setMessage(
+            orderEditMode
+                ? "Modalità modifica attiva: trascina direttamente gli elementi."
+                : "Ordine salvato."
+        );
+
+        panel.hidden = false;
+    });
+
+    resetButton?.addEventListener("click", () => {
+        const keys = Object.keys(localStorage)
+            .filter(key =>
+                key === "nursing-category-order" ||
+                key.startsWith("nursing-sections-") ||
+                key.startsWith("nursing-items-")
+            );
+
+        keys.forEach(key => localStorage.removeItem(key));
+
+        setMessage("↩️ Ordini ripristinati.");
+
+        if (panel) panel.hidden = false;
+
+        if (state) {
+            loadState();
+        } else {
+            loadCategories();
+        }
+    });
+
+    themeButton?.addEventListener("click", () => {
+        const current =
+            document.documentElement.dataset.theme || "dark";
+
+        applyTheme(current === "dark" ? "light" : "dark");
+        setMessage("Tema aggiornato.");
+    });
+}
+
+
+
+/* =========================================================
    NAVIGAZIONE
 ========================================================= */
 
@@ -315,7 +403,7 @@ function setupShortcutDrag(element) {
             }
             catch (_) {}
 
-        }, 650);
+        }, isOrderEditMode() ? 0 : 1000);
 
     });
 
@@ -326,7 +414,14 @@ function setupShortcutDrag(element) {
         }
 
         if (!dragging) {
-            return;
+            if (isOrderEditMode()) {
+                dragging = true;
+                draggedShortcut = element;
+                element.classList.add("shortcut-dragging");
+                try { element.setPointerCapture(pointerId); } catch (_) {}
+            } else {
+                return;
+            }
         }
 
         event.preventDefault();
@@ -469,7 +564,6 @@ async function loadState() {
 
     if (!state) {
 
-        document.body.classList.add("home-page");
         shortcuts.style.display = "flex";
 
         if (backButton) {
@@ -487,8 +581,6 @@ async function loadState() {
         return;
     }
 
-
-    document.body.classList.remove("home-page");
 
     /*
      * PAGINA CATEGORIA
@@ -990,7 +1082,7 @@ function setupSectionSorting(section) {
             }
             catch (_) {}
 
-        }, 650);
+        }, isOrderEditMode() ? 0 : 1000);
 
     });
 
@@ -1176,7 +1268,7 @@ function setupLongPressSort(
                 }
                 catch (_) {}
 
-            }, 650);
+            }, isOrderEditMode() ? 0 : 1000);
 
         }
     );
@@ -1190,7 +1282,13 @@ function setupLongPressSort(
             }
 
             if (!dragging) {
-                return;
+                if (isOrderEditMode()) {
+                    dragging = true;
+                    element.classList.add("sortable-dragging");
+                    try { element.setPointerCapture(pointerId); } catch (_) {}
+                } else {
+                    return;
+                }
             }
 
             event.preventDefault();
@@ -4747,13 +4845,7 @@ function applyLocalOverride(stateId, data) {
    AVVIO
 ========================================================= */
 setupTheme();
-
-function hideLoadingScreen() {
-    const loader = document.getElementById("appLoadingScreen");
-    if (!loader) return;
-    loader.classList.add("is-hidden");
-    setTimeout(() => loader.remove(), 220);
-}
+setupSettings();
 
 if (editor === "1") {
 
