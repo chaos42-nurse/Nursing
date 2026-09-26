@@ -84,38 +84,9 @@ function applyTheme(theme) {
 function setupTheme() {
 
     const savedTheme =
-        localStorage.getItem(
-            "nursing-theme"
-        ) || "dark";
+        localStorage.getItem("nursing-theme") || "dark";
 
     applyTheme(savedTheme);
-
-    const themeButton =
-        document.getElementById(
-            "themeButton"
-        );
-
-    if (themeButton) {
-
-        themeButton.addEventListener(
-            "click",
-            () => {
-
-                const current =
-                    document.documentElement.dataset.theme ||
-                    "dark";
-
-                applyTheme(
-                    current === "dark"
-                        ? "light"
-                        : "dark"
-                );
-
-            }
-        );
-
-    }
-
 }
 
 
@@ -168,11 +139,17 @@ function setupSettings() {
 
         setMessage(
             orderEditMode
-                ? "Modalità modifica attiva: trascina direttamente gli elementi."
+                ? "Modalità modifica attiva: usa i pulsanti ↑ e ↓."
                 : "Ordine salvato."
         );
 
-        panel.hidden = false;
+        panel.hidden = true;
+
+        if (state) {
+            loadState();
+        } else {
+            loadCategories();
+        }
     });
 
     resetButton?.addEventListener("click", () => {
@@ -301,67 +278,52 @@ function createShortcuts(categories) {
     let orderedCategories = [...categories];
 
     if (Array.isArray(savedOrder)) {
-
         orderedCategories.sort((a, b) => {
-
             const aIndex = savedOrder.indexOf(a.id);
             const bIndex = savedOrder.indexOf(b.id);
-
             return (
                 (aIndex === -1 ? 999 : aIndex) -
                 (bIndex === -1 ? 999 : bIndex)
             );
-
         });
-
     }
 
     shortcuts.innerHTML = "";
 
-    orderedCategories.forEach(category => {
+    orderedCategories.forEach((category, index) => {
 
-        const link =
-            document.createElement("a");
+        const row = document.createElement("div");
+        row.className = "shortcut-row";
 
+        const link = document.createElement("a");
         link.className = "shortcut";
-        link.href =
-            `?state=${encodeURIComponent(category.id)}`;
-
-        link.dataset.categoryId =
-            category.id;
-
-        link.draggable = true;
+        link.href = `?state=${encodeURIComponent(category.id)}`;
+        link.dataset.categoryId = category.id;
 
         link.innerHTML = `
-
-            <span class="shortcut-icon">
-                ${category.icon || ""}
-            </span>
-
+            <span class="shortcut-icon">${category.icon || ""}</span>
             <span class="shortcut-text">
-
-                <strong>
-                    ${category.title}
-                </strong>
-
-                <small>
-                    ${category.description || ""}
-                </small>
-
+                <strong>${category.title}</strong>
+                <small>${category.description || ""}</small>
             </span>
-
-            <span class="shortcut-drag-indicator" aria-hidden="true">
-                ⋮⋮
-            </span>
-
         `;
 
-        setupShortcutDrag(link);
+        row.appendChild(link);
 
-        shortcuts.appendChild(link);
+        if (isOrderEditMode()) {
+            row.appendChild(
+                createOrderControls(
+                    index,
+                    orderedCategories.length,
+                    "categoria"
+                )
+            );
+        }
 
+        shortcuts.appendChild(row);
     });
 
+    setupHomeOrderControls();
 }
 
 
@@ -549,7 +511,7 @@ function saveShortcutOrder() {
 
     const order =
         Array.from(
-            shortcuts.querySelectorAll(".shortcut")
+            shortcuts.querySelectorAll(".shortcut-row .shortcut")
         ).map(
             card => card.dataset.categoryId
         );
@@ -574,6 +536,8 @@ async function loadState() {
 
     if (!state) {
 
+        document.body.classList.add("home-page");
+
         shortcuts.style.display = "flex";
 
         if (backButton) {
@@ -591,6 +555,8 @@ async function loadState() {
         return;
     }
 
+
+    document.body.classList.remove("home-page");
 
     /*
      * PAGINA CATEGORIA
@@ -763,11 +729,8 @@ async function loadState() {
 function renderSections(data) {
 
     if (!data.sections) {
-
         content.innerHTML = "";
-
         return;
-
     }
 
     const orderedSections =
@@ -781,10 +744,7 @@ function renderSections(data) {
     orderedSections.forEach((section, sectionIndex) => {
 
         const sectionKey =
-            getStableSectionKey(
-                section,
-                sectionIndex
-            );
+            getStableSectionKey(section, sectionIndex);
 
         const orderedItems =
             applySavedItemOrder(
@@ -794,25 +754,24 @@ function renderSections(data) {
             );
 
         html += `
-
             <section
                 class="sortable-section"
                 data-section-key="${escapeAttribute(sectionKey)}"
             >
-
                 <h2>
                     <span>${section.title}</span>
-                    <span
-                        class="content-drag-indicator"
-                        aria-hidden="true"
-                    >⋮⋮</span>
+                    ${isOrderEditMode() ? `
+                        <span class="order-controls section-order-controls">
+                            <button type="button" class="order-button" data-order="up" aria-label="Sposta sezione su">↑</button>
+                            <button type="button" class="order-button" data-order="down" aria-label="Sposta sezione giù">↓</button>
+                        </span>
+                    ` : ""}
                 </h2>
 
                 <div class="item-list">
-
         `;
 
-        orderedItems.forEach((sectionItem, itemIndex) => {
+        orderedItems.forEach(sectionItem => {
 
             const itemId =
                 typeof sectionItem === "string"
@@ -825,46 +784,37 @@ function renderSections(data) {
                     : sectionItem.title;
 
             html += `
-
-                    <a
-                        class="content-button sortable-item"
+                    <div
+                        class="sortable-item-row"
                         data-item-id="${escapeAttribute(itemId)}"
                         data-section-key="${escapeAttribute(sectionKey)}"
-                        href="?state=${encodeURIComponent(state)}&item=${encodeURIComponent(itemId)}"
                     >
+                        <a
+                            class="content-button sortable-item"
+                            href="?state=${encodeURIComponent(state)}&item=${encodeURIComponent(itemId)}"
+                        >
+                            <span>${itemTitle}</span>
+                            <span class="arrow">→</span>
+                        </a>
 
-                        <span>
-                            ${itemTitle}
-                        </span>
-
-                        <span class="content-drag-indicator" aria-hidden="true">
-                            ⋮⋮
-                        </span>
-
-                        <span class="arrow">
-                            →
-                        </span>
-
-                    </a>
-
+                        ${isOrderEditMode() ? `
+                            <span class="order-controls item-order-controls">
+                                <button type="button" class="order-button" data-order="up" aria-label="Sposta elemento su">↑</button>
+                                <button type="button" class="order-button" data-order="down" aria-label="Sposta elemento giù">↓</button>
+                            </span>
+                        ` : ""}
+                    </div>
             `;
-
         });
 
         html += `
-
                 </div>
-
             </section>
-
         `;
-
     });
 
     content.innerHTML = html;
-
-    setupContentSorting();
-
+    setupContentOrderControls();
 }
 
 
@@ -1005,431 +955,177 @@ function applySavedItemOrder(stateId, sectionKey, items) {
 
 
 /* =========================================================
-   DRAG CONTENUTI — POINTER EVENTS
+   MODIFICA ORDINE — PULSANTI SU / GIÙ
 ========================================================= */
 
-function setupContentSorting() {
+function createOrderControls(index, total, label) {
+
+    const controls = document.createElement("div");
+    controls.className = "order-controls";
+
+    const up = document.createElement("button");
+    up.type = "button";
+    up.className = "order-button";
+    up.dataset.order = "up";
+    up.setAttribute("aria-label", `Sposta ${label} su`);
+    up.textContent = "↑";
+    up.disabled = index === 0;
+
+    const down = document.createElement("button");
+    down.type = "button";
+    down.className = "order-button";
+    down.dataset.order = "down";
+    down.setAttribute("aria-label", `Sposta ${label} giù`);
+    down.textContent = "↓";
+    down.disabled = index === total - 1;
+
+    controls.append(up, down);
+    return controls;
+}
+
+
+function moveElement(element, direction, selector, saveCallback) {
+
+    const current = element.closest(selector);
+    if (!current) return;
+
+    const sibling =
+        direction === "up"
+            ? current.previousElementSibling
+            : current.nextElementSibling;
+
+    if (!sibling) return;
+
+    if (direction === "up") {
+        current.parentNode.insertBefore(current, sibling);
+    } else {
+        current.parentNode.insertBefore(sibling, current);
+    }
+
+    saveCallback();
+    refreshOrderControls();
+}
+
+
+function setupHomeOrderControls() {
+
+    shortcuts
+        .querySelectorAll(".order-button")
+        .forEach(button => {
+
+            button.addEventListener("click", event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const row = button.closest(".shortcut-row");
+                if (!row) return;
+
+                moveElement(
+                    row,
+                    button.dataset.order,
+                    ".shortcut-row",
+                    saveShortcutOrder
+                );
+            });
+        });
+}
+
+
+function setupContentOrderControls() {
+
+    content
+        .querySelectorAll(".section-order-controls .order-button")
+        .forEach(button => {
+
+            button.addEventListener("click", event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const section = button.closest(".sortable-section");
+                if (!section) return;
+
+                moveElement(
+                    section,
+                    button.dataset.order,
+                    ".sortable-section",
+                    saveSectionOrder
+                );
+            });
+        });
+
+    content
+        .querySelectorAll(".item-order-controls .order-button")
+        .forEach(button => {
+
+            button.addEventListener("click", event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const row = button.closest(".sortable-item-row");
+                if (!row) return;
+
+                moveElement(
+                    row,
+                    button.dataset.order,
+                    ".sortable-item-row",
+                    () => {
+                        saveItemOrder(
+                            row.dataset.sectionKey,
+                            row.parentElement
+                        );
+                    }
+                );
+            });
+        });
+}
+
+
+function refreshOrderControls() {
+
+    shortcuts
+        .querySelectorAll(".shortcut-row")
+        .forEach((row, index, rows) => {
+
+            row.querySelector('[data-order="up"]').disabled =
+                index === 0;
+
+            row.querySelector('[data-order="down"]').disabled =
+                index === rows.length - 1;
+        });
 
     content
         .querySelectorAll(".sortable-section")
-        .forEach(section => {
+        .forEach((section, index, sections) => {
 
-            setupSectionSorting(
-                section
-            );
+            section.querySelector('[data-order="up"]').disabled =
+                index === 0;
 
+            section.querySelector('[data-order="down"]').disabled =
+                index === sections.length - 1;
         });
 
     content
-        .querySelectorAll(".sortable-item")
-        .forEach(itemElement => {
+        .querySelectorAll(".item-list")
+        .forEach(list => {
 
-            const list =
-                itemElement.parentElement;
+            const rows =
+                Array.from(
+                    list.querySelectorAll(".sortable-item-row")
+                );
 
-            setupLongPressSort(
-                itemElement,
-                list,
-                ".sortable-item",
-                () => {
+            rows.forEach((row, index) => {
 
-                    saveItemOrder(
-                        itemElement.dataset.sectionKey,
-                        list
-                    );
+                row.querySelector('[data-order="up"]').disabled =
+                    index === 0;
 
-                }
-            );
-
+                row.querySelector('[data-order="down"]').disabled =
+                    index === rows.length - 1;
+            });
         });
-
 }
-
-
-function setupSectionSorting(section) {
-
-    const handle =
-        section.querySelector("h2");
-
-    if (!handle) {
-        return;
-    }
-
-    let timer = null;
-    let dragging = false;
-    let pointerId = null;
-    let startX = 0;
-    let startY = 0;
-
-    handle.addEventListener("pointerdown", event => {
-
-        if (
-            event.pointerType === "mouse" &&
-            event.button !== 0
-        ) {
-            return;
-        }
-
-        pointerId = event.pointerId;
-
-        startX = event.clientX;
-        startY = event.clientY;
-
-        dragging = false;
-
-        clearTimeout(timer);
-
-        if (isOrderEditMode()) {
-
-            dragging = true;
-
-            section.classList.add(
-                "sortable-dragging"
-            );
-
-            try {
-                handle.setPointerCapture(pointerId);
-            }
-            catch (_) {}
-
-        } else {
-
-            timer = setTimeout(() => {
-
-                dragging = true;
-
-                section.classList.add(
-                    "sortable-dragging"
-                );
-
-                try {
-                    handle.setPointerCapture(pointerId);
-                }
-                catch (_) {}
-
-            }, 1000);
-
-        }
-
-    });
-
-    handle.addEventListener("pointermove", event => {
-
-        if (event.pointerId !== pointerId) {
-            return;
-        }
-
-        if (!dragging) {
-
-            const distance =
-                Math.hypot(
-                    event.clientX - startX,
-                    event.clientY - startY
-                );
-
-            if (distance > 12) {
-                clearTimeout(timer);
-            }
-
-            return;
-
-        }
-
-        event.preventDefault();
-
-        const target =
-            document
-                .elementFromPoint(
-                    event.clientX,
-                    event.clientY
-                )
-                ?.closest(".sortable-section");
-
-        if (
-            !target ||
-            target === section ||
-            !content.contains(target)
-        ) {
-            return;
-        }
-
-        const rect =
-            target.getBoundingClientRect();
-
-        const after =
-            event.clientY >
-            rect.top + rect.height / 2;
-
-        if (after) {
-
-            content.insertBefore(
-                section,
-                target.nextSibling
-            );
-
-        } else {
-
-            content.insertBefore(
-                section,
-                target
-            );
-
-        }
-
-    });
-
-    const finish = event => {
-
-        if (event.pointerId !== pointerId) {
-            return;
-        }
-
-        clearTimeout(timer);
-
-        if (dragging) {
-
-            event.preventDefault();
-
-            section.classList.remove(
-                "sortable-dragging"
-            );
-
-            dragging = false;
-
-            try {
-                handle.releasePointerCapture(
-                    pointerId
-                );
-            }
-            catch (_) {}
-
-            saveSectionOrder();
-
-            section.dataset.justDragged = "1";
-
-            setTimeout(() => {
-                delete section.dataset.justDragged;
-            }, 250);
-
-        }
-
-        pointerId = null;
-
-    };
-
-    handle.addEventListener(
-        "pointerup",
-        finish
-    );
-
-    handle.addEventListener(
-        "pointercancel",
-        finish
-    );
-
-    handle.addEventListener(
-        "click",
-        event => {
-
-            if (
-                section.dataset.justDragged === "1"
-            ) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-
-        },
-        true
-    );
-
-}
-
-
-function setupLongPressSort(
-    element,
-    container,
-    selector,
-    saveCallback
-) {
-
-    element.addEventListener("contextmenu", event => event.preventDefault());
-
-    let timer = null;
-    let dragging = false;
-    let pointerId = null;
-    let startX = 0;
-    let startY = 0;
-
-    element.addEventListener(
-        "pointerdown",
-        event => {
-
-            if (
-                event.pointerType === "mouse" &&
-                event.button !== 0
-            ) {
-                return;
-            }
-
-            pointerId = event.pointerId;
-
-            startX = event.clientX;
-            startY = event.clientY;
-
-            dragging = false;
-
-            clearTimeout(timer);
-
-            timer = setTimeout(() => {
-
-                dragging = true;
-
-                element.classList.add(
-                    "sortable-dragging"
-                );
-
-                try {
-                    element.setPointerCapture(
-                        pointerId
-                    );
-                }
-                catch (_) {}
-
-            }, isOrderEditMode() ? 0 : 1000);
-
-        }
-    );
-
-    element.addEventListener(
-        "pointermove",
-        event => {
-
-            if (event.pointerId !== pointerId) {
-                return;
-            }
-
-            if (!dragging) {
-                if (isOrderEditMode()) {
-                    dragging = true;
-                    element.classList.add("sortable-dragging");
-                    try { element.setPointerCapture(pointerId); } catch (_) {}
-                } else {
-                    return;
-                }
-            }
-
-            event.preventDefault();
-
-            const target =
-                document
-                    .elementFromPoint(
-                        event.clientX,
-                        event.clientY
-                    )
-                    ?.closest(selector);
-
-            if (
-                !target ||
-                target === element ||
-                !container.contains(target)
-            ) {
-                return;
-            }
-
-            const rect =
-                target.getBoundingClientRect();
-
-            const after =
-                event.clientY >
-                rect.top + rect.height / 2;
-
-            if (after) {
-
-                container.insertBefore(
-                    element,
-                    target.nextSibling
-                );
-
-            } else {
-
-                container.insertBefore(
-                    element,
-                    target
-                );
-
-            }
-
-        }
-    );
-
-    const finish = event => {
-
-        if (event.pointerId !== pointerId) {
-            return;
-        }
-
-        clearTimeout(timer);
-
-        if (dragging) {
-
-            event.preventDefault();
-
-            element.classList.remove(
-                "sortable-dragging"
-            );
-
-            dragging = false;
-
-            try {
-                element.releasePointerCapture(
-                    pointerId
-                );
-            }
-            catch (_) {}
-
-            saveCallback();
-
-            /*
-             * Evita che il rilascio dopo il trascinamento
-             * apra accidentalmente il link.
-             */
-            element.dataset.justDragged = "1";
-
-            setTimeout(() => {
-                delete element.dataset.justDragged;
-            }, 250);
-
-        }
-
-        pointerId = null;
-
-    };
-
-    element.addEventListener(
-        "pointerup",
-        finish
-    );
-
-    element.addEventListener(
-        "pointercancel",
-        finish
-    );
-
-    element.addEventListener(
-        "click",
-        event => {
-
-            if (element.dataset.justDragged === "1") {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-
-        },
-        true
-    );
-
-}
-
 
 function saveSectionOrder() {
 
@@ -1455,19 +1151,15 @@ function saveItemOrder(sectionKey, list) {
 
     const order =
         Array.from(
-            list.querySelectorAll(
-                ".sortable-item"
-            )
+            list.querySelectorAll(".sortable-item-row")
         ).map(
-            item =>
-                item.dataset.itemId
+            row => row.dataset.itemId
         );
 
     localStorage.setItem(
         `nursing-items-${state}-${sectionKey}`,
         JSON.stringify(order)
     );
-
 }
 
 
