@@ -1,4 +1,14 @@
 /* =========================================================
+   PULIZIA VECCHIA SCHERMATA DI CARICAMENTO
+========================================================= */
+
+const oldLoadingScreen = document.getElementById("appLoadingScreen");
+if (oldLoadingScreen) {
+    oldLoadingScreen.remove();
+}
+
+
+/* =========================================================
    PARAMETRI URL
 ========================================================= */
 
