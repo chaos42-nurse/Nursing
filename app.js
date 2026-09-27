@@ -716,30 +716,62 @@ function renderPatientField(label, value) {
     `;
 }
 
-function renderPatientPvHistory(history) {
+function renderPatientPvHistory(history, patientId = "") {
     if (!Array.isArray(history) || !history.length) {
         return '<div class="personal-note-empty">Nessuna rilevazione registrata.</div>';
     }
 
-    return history.slice().reverse().map(entry => {
-        const date = entry.recordedAt
-            ? new Date(entry.recordedAt).toLocaleString("it-IT")
-            : "Data non disponibile";
+    return `
+        <div class="patient-pv-table-wrap">
+            <table class="patient-pv-table">
+                <thead>
+                    <tr>
+                        <th>Data/ora</th>
+                        <th>P.A.<small>mm/Mh</small></th>
+                        <th>F.C.<small>bpm</small></th>
+                        <th>Sat.<small>%</small></th>
+                        <th>T.°<small>°C</small></th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${history.slice().reverse().map((entry, reversedIndex) => {
+                        const index = history.length - 1 - reversedIndex;
+                        const date = entry.recordedAt
+                            ? new Date(entry.recordedAt).toLocaleString("it-IT")
+                            : "—";
+                        const pa = formatBloodPressure(entry.pa);
+                        const fc = entry.fc ? escapeHtml(entry.fc) + " bpm" : "—";
+                        const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
+                        const temperature = entry.temperature
+                            ? escapeHtml(entry.temperature) + " °C"
+                            : "—";
 
-        return `
-            <article class="patient-pv-entry">
-                <strong>${escapeHtml(date)}</strong>
-                <div class="patient-pv-grid">
-                    <span><b>P.A.</b> ${escapeHtml(entry.pa || "—")}</span>
-                    <span><b>F.C.</b> ${escapeHtml(entry.fc || "—")}</span>
-                    <span><b>Sat.</b> ${escapeHtml(entry.sat || "—")}</span>
-                    <span><b>T°</b> ${escapeHtml(entry.temperature || "—")}</span>
-                </div>
-            </article>
-        `;
-    }).join("");
+                        return `
+                            <tr>
+                                <td>${escapeHtml(date)}</td>
+                                <td>${pa !== "—" ? pa + " <small>mm/Mh</small>" : "—"}</td>
+                                <td>${fc}</td>
+                                <td>${sat}</td>
+                                <td>${temperature}</td>
+                                <td class="patient-pv-actions">
+                                    <button type="button" class="patient-pv-edit"
+                                        data-patient-id="${escapeAttribute(patientId)}"
+                                        data-pv-index="${index}"
+                                        title="Modifica">✏️</button>
+                                    <button type="button" class="patient-pv-delete"
+                                        data-patient-id="${escapeAttribute(patientId)}"
+                                        data-pv-index="${index}"
+                                        title="Elimina">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
 }
-
 function renderPatientsPage(selectedPatientId = "", editMode = false) {
     const patients = getPatients();
     const selectedPatient =
@@ -840,7 +872,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
 
                         <div class="patient-pv-section">
                             <h4>🩺 Parametri vitali</h4>
-                            <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
+                            <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory, selectedPatient.id)}</div>
                             <button id="openPvRecorder" class="settings-action" type="button"
     data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
                         </div>
