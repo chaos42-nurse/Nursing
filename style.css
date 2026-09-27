@@ -2150,3 +2150,100 @@ section h2 {
 .patient-pv-actions button:hover {
     filter: brightness(1.1);
 }
+
+
+/* =========================================================
+   PATIENTI — CONTRASTO E PARAMETRI VITALI
+========================================================= */
+
+.patient-card-name {
+    width: 100%;
+    color: var(--text) !important;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.patient-card-name strong {
+    color: var(--text) !important;
+}
+
+.patient-pv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin: 12px 0 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+}
+
+.patient-pv-table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    color: var(--text);
+    background: var(--surface);
+}
+
+.patient-pv-table th,
+.patient-pv-table td {
+    padding: 10px 8px;
+    text-align: center;
+    vertical-align: middle;
+    color: var(--text);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.patient-pv-table thead th {
+    color: var(--text);
+    background: var(--surface-elevated);
+    font-weight: 700;
+}
+
+.patient-pv-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.patient-pv-table th small,
+.patient-pv-table td small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: .72em;
+    font-weight: 400;
+}
+
+.patient-pv-actions {
+    white-space: nowrap;
+}
+
+.patient-pv-actions button {
+    margin: 0 2px;
+    min-width: 36px;
+    padding: 7px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-hover);
+    color: var(--text) !important;
+    cursor: pointer;
+}
+
+.patient-pv-actions button:hover {
+    background: var(--surface-elevated);
+}
+
+.patient-pv-entry {
+    color: var(--text);
+    background: var(--surface);
+}
+
+.patient-pv-modal-card {
+    color: var(--text);
+    background: var(--surface);
+}
+
+.patient-pv-modal-card input {
+    color: var(--text);
+    background: var(--background);
+    border-color: var(--border);
+}
