@@ -563,10 +563,15 @@ async function loadCategories() {
 
 function createShortcuts(categories) {
 
-    const savedOrder =
-        JSON.parse(
+    let savedOrder = null;
+
+    try {
+        savedOrder = JSON.parse(
             localStorage.getItem("nursing-category-order") || "null"
         );
+    } catch (_) {
+        localStorage.removeItem("nursing-category-order");
+    }
 
     let orderedCategories = [...categories];
 
@@ -590,7 +595,9 @@ function createShortcuts(categories) {
 
         const link = document.createElement("a");
         link.className = "shortcut";
-        link.href = `?state=${encodeURIComponent(category.id)}`;
+        link.href = category.route === "patients"
+            ? "?patients=1"
+            : `?state=${encodeURIComponent(category.id)}`;
         link.dataset.categoryId = category.id;
 
         link.innerHTML = `
@@ -873,15 +880,6 @@ async function loadState() {
     document.body.classList.remove("home-page");
 
     /*
-    if (state === "pazienti") {
-        shortcuts.style.display = "none";
-        if (backButton) backButton.style.display = "flex";
-        stateTitle.textContent = "👤 Pazienti";
-        description.textContent = "Gestione locale dei pazienti.";
-        renderPatientsPage();
-        return;
-    }
-
      * PAGINA CATEGORIA
      */
 
@@ -7076,25 +7074,6 @@ function setupTheme() {
 
     applyTheme(savedTheme);
 
-    const themeButton =
-        document.getElementById("themeButton") ||
-        document.getElementById("settingsThemeButton");
-
-    if (themeButton) {
-
-        themeButton.addEventListener("click", () => {
-
-            const current =
-                document.documentElement.dataset.theme ||
-                "dark";
-
-            applyTheme(
-                current === "dark" ? "light" : "dark"
-            );
-
-        });
-
-    }
 
 }
 
