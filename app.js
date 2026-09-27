@@ -895,7 +895,7 @@ function setupPatients() {
         }
 
         if (event.target.closest("#addPatientPv")) {
-            const editingId = document.getElementById("savePatient")?.dataset.editingId || "";
+            const editingId = document.querySelector(".patient-editor")?.dataset.selectedId || "";
             if (!editingId) return;
 
             const pa = document.getElementById("patientPa")?.value.trim() || "";
@@ -920,8 +920,7 @@ function setupPatients() {
 
             savePatients(patients);
             document.querySelector(".patient-pv-modal")?.remove();
-            const currentEditMode = document.getElementById("savePatient") ? true : false;
-            renderPatientsPage(editingId, currentEditMode);
+            renderPatientsPage(editingId, false);
             return;
         }
 
