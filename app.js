@@ -108,6 +108,7 @@ function setupSettings() {
     const orderButton = document.getElementById("orderModeButton");
     const resetButton = document.getElementById("resetOrderButton");
     const themeButton = document.getElementById("settingsThemeButton");
+    const noteLinksButton = document.getElementById("noteLinksButton");
     const exportButton = document.getElementById("exportPersonalizationButton");
     const importButton = document.getElementById("importPersonalizationButton");
     const importInput = document.getElementById("importPersonalizationInput");
@@ -168,6 +169,11 @@ function setupSettings() {
         } else {
             loadCategories();
         }
+    });
+
+    noteLinksButton?.addEventListener("click", () => {
+        panel.hidden = true;
+        window.location.href = "?links=1";
     });
 
     themeButton?.addEventListener("click", () => {
@@ -2081,7 +2087,8 @@ function loadItem(data) {
 
         renderGenericText(
             selectedItem,
-            "Contenuto in preparazione."
+            "Contenuto in preparazione.",
+            data
         );
 
         return;
