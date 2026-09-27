@@ -781,34 +781,36 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 
     content.innerHTML = `
         <section class="detail-page patients-page">
-            <button id="newPatientButton" class="settings-action patient-new-button" type="button">
-                ➕ Nuovo paziente
-            </button>
+            ${selectedPatient ? "" : `
+                <button id="newPatientButton" class="settings-action patient-new-button" type="button">
+                    ➕ Nuovo paziente
+                </button>
 
-            <div class="patient-privacy-warning">
-                <strong>⚠️ Dati sensibili</strong>
-                <p>
-                    I dati paziente restano salvati localmente sul dispositivo
-                    e vengono condivisi solo se scegli esplicitamente di
-                    includerli nella condivisione dell'intera personalizzazione.
-                </p>
-            </div>
+                <div class="patient-privacy-warning">
+                    <strong>⚠️ Dati sensibili</strong>
+                    <p>
+                        I dati paziente restano salvati localmente sul dispositivo
+                        e vengono condivisi solo se scegli esplicitamente di
+                        includerli nella condivisione dell'intera personalizzazione.
+                    </p>
+                </div>
 
-            <div class="patients-list">
-                ${patients.length
-                    ? patients.map(patient => `
-                        <button
-                            class="patient-card patient-card-name"
-                            type="button"
-                            data-patient-open="${escapeAttribute(patient.id)}"
-                        >
-                            <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
-                            <span class="arrow">→</span>
-                        </button>
-                    `).join("")
-                    : '<div class="personal-note-empty">Nessun paziente inserito.</div>'
-                }
-            </div>
+                <div class="patients-list">
+                    ${patients.length
+                        ? patients.map(patient => `
+                            <button
+                                class="patient-card patient-card-name"
+                                type="button"
+                                data-patient-open="${escapeAttribute(patient.id)}"
+                            >
+                                <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
+                                <span class="arrow">→</span>
+                            </button>
+                        `).join("")
+                        : '<div class="personal-note-empty">Nessun paziente inserito.</div>'
+                    }
+                </div>
+            `}
 
             ${selectedPatient ? `
                 <div class="patient-editor" data-selected-id="${escapeAttribute(selectedPatient.id)}">
@@ -1236,7 +1238,13 @@ if (backButton) {
     backButton.addEventListener("click", () => {
 
         if (patientsRoute === "1") {
-            if (document.querySelector(".patient-editor[data-selected-id]")) {
+            const currentPatient =
+                document.querySelector(".patient-editor[data-selected-id]");
+
+            if (currentPatient) {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("patient");
+                window.history.pushState({}, "", url);
                 renderPatientsPage();
             } else {
                 window.location.href = "./";
@@ -7891,6 +7899,15 @@ if (incomingPersonalization) {
             input.dispatchEvent(new Event("input"));
         }
     });
+    const patientSearchToggle =
+        document.getElementById("patientSearchToggle");
+
+    if (patientRouteId) {
+        patientSearchToggle?.remove();
+        document.getElementById("patientSearch")?.remove();
+        document.getElementById("patientNames")?.remove();
+    }
+
     renderPatientsPage(patientRouteId, false);
 
 } else if (editor === "1") {
@@ -7903,6 +7920,15 @@ if (incomingPersonalization) {
     loadState();
 
 }
+window.addEventListener("popstate", () => {
+    const search = new URLSearchParams(window.location.search);
+
+    if (search.get("patients") !== "1") return;
+
+    const patientId = search.get("patient") || "";
+    renderPatientsPage(patientId, false);
+});
+
 /* =========================================================
    EDITOR
 ========================================================= */
