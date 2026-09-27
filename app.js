@@ -109,9 +109,8 @@ function setupSettings() {
     const resetButton = document.getElementById("resetOrderButton");
     const themeButton = document.getElementById("settingsThemeButton");
     const noteLinksButton = document.getElementById("noteLinksButton");
-    const exportButton = document.getElementById("exportPersonalizationButton");
-    const importButton = document.getElementById("importPersonalizationButton");
-    const importInput = document.getElementById("importPersonalizationInput");
+    const shareButton = document.getElementById("sharePersonalizationButton");
+    const patientsButton = document.getElementById("patientsButton");
     const resetAllButton = document.getElementById("resetPersonalizationButton");
     const message = document.getElementById("settingsMessage");
 
@@ -184,22 +183,13 @@ function setupSettings() {
         setMessage("Tema aggiornato.");
     });
 
-    exportButton?.addEventListener("click", () => {
-        exportPersonalization();
-        setMessage("📥 Personalizzazione esportata.");
+    shareButton?.addEventListener("click", () => {
+        showPersonalizationShareDialog();
     });
 
-    importButton?.addEventListener("click", () => {
-        importInput?.click();
-    });
-
-    importInput?.addEventListener("change", event => {
-        const file = event.target.files?.[0];
-
-        if (!file) return;
-
-        importPersonalization(file, setMessage);
-        event.target.value = "";
+    patientsButton?.addEventListener("click", () => {
+        panel.hidden = true;
+        window.location.href = "?patients=1";
     });
 
     resetAllButton?.addEventListener("click", () => {
@@ -1333,14 +1323,11 @@ function setupPersonalNotes() {
     });
 }
 
+
 function collectOrderPreferences() {
-
-
-
     const result = {};
 
     for (const key of Object.keys(localStorage)) {
-
         if (
             key === PERSONALIZATION_KEYS.categoryOrder ||
             key.startsWith("nursing-sections-") ||
@@ -1353,8 +1340,40 @@ function collectOrderPreferences() {
     return result;
 }
 
-function collectPersonalization() {
+const PATIENTS_KEY = "nursing-patients";
 
+function getPatients() {
+    try {
+        const raw = JSON.parse(
+            localStorage.getItem(PATIENTS_KEY) || "[]"
+        );
+
+        if (!Array.isArray(raw)) return [];
+
+        return raw
+            .filter(patient => patient && typeof patient === "object")
+            .map(patient => ({
+                id: String(patient.id || ""),
+                name: String(patient.name || ""),
+                room: String(patient.room || ""),
+                bed: String(patient.bed || ""),
+                pv: String(patient.pv || ""),
+                medications: String(patient.medications || ""),
+                notes: String(patient.notes || "")
+            }));
+    } catch (_) {
+        return [];
+    }
+}
+
+function savePatients(patients) {
+    localStorage.setItem(
+        PATIENTS_KEY,
+        JSON.stringify(patients)
+    );
+}
+
+function collectPersonalization(includePatients = false) {
     return {
         app: "Nursing Shot",
         type: "personalization",
@@ -1364,103 +1383,678 @@ function collectPersonalization() {
             localStorage.getItem(PERSONALIZATION_KEYS.theme) ||
             "dark",
         orders: collectOrderPreferences(),
-        notes: getPersonalNotes()
+        notes: getPersonalNotes(),
+        patients: includePatients ? getPatients() : []
     };
 }
 
-function exportPersonalization() {
-
-    const data = collectPersonalization();
-
-    const blob = new Blob(
-        [JSON.stringify(data, null, 2)],
-        { type: "application/json" }
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "nursing-shot-personalizzazione.json";
-    link.click();
-
-    URL.revokeObjectURL(url);
+function createSharePayload(type, data) {
+    return [
+        "NS2",
+        toBase64(type),
+        toBase64(JSON.stringify(data))
+    ].join("|");
 }
 
-function importPersonalization(file, setMessage) {
+function buildShareUrl(type, data) {
+    return window.location.origin +
+        window.location.pathname +
+        "#nursing-share=" +
+        encodeURIComponent(
+            createSharePayload(type, data)
+        );
+}
 
-    const reader = new FileReader();
+function readSharePayload() {
+    const hash = window.location.hash || "";
 
-    reader.onload = () => {
+    if (!hash.startsWith("#nursing-share=")) {
+        return null;
+    }
 
-        try {
+    try {
+        const payload = decodeURIComponent(
+            hash.slice("#nursing-share=".length)
+        );
 
-            const data =
-                JSON.parse(reader.result);
+        const parts = payload.split("|");
 
-            if (
-                !data ||
-                data.type !== "personalization" ||
-                data.app !== "Nursing Shot"
-            ) {
-                throw new Error("File di personalizzazione non valido.");
-            }
+        if (parts.length !== 3 || parts[0] !== "NS2") {
+            return null;
+        }
 
-            if (data.theme === "light" || data.theme === "dark") {
-                localStorage.setItem(
-                    PERSONALIZATION_KEYS.theme,
-                    data.theme
+        const type = fromBase64(parts[1]);
+        const data = JSON.parse(fromBase64(parts[2]));
+
+        return {
+            type,
+            data
+        };
+    } catch (error) {
+        console.error(
+            "Collegamento di condivisione non valido:",
+            error
+        );
+        return null;
+    }
+}
+
+function getCurrentSectionShareData() {
+    if (!state || !item) return null;
+
+    return {
+        stateId: state,
+        itemId: item,
+        notes: getNotesForItem(state, item)
+    };
+}
+
+function getSelectedNotesFromDialog(dialog) {
+    return Array.from(
+        dialog.querySelectorAll(
+            'input[data-share-note]:checked'
+        )
+    ).map(input => input.dataset.shareNote);
+}
+
+function showPersonalizationShareDialog() {
+    document.getElementById("personalizationShareDialog")?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "personalizationShareDialog";
+    dialog.className = "notes-qr-dialog";
+
+    const currentNotes =
+        state && item
+            ? getNotesForItem(state, item)
+            : [];
+
+    const noteOptions = currentNotes.length
+        ? currentNotes.map(note => `
+            <label class="share-note-option">
+                <input
+                    type="checkbox"
+                    data-share-note="${escapeAttribute(note.id)}"
+                >
+                <span>
+                    <strong>${escapeHtml(note.title || "Nota personale")}</strong>
+                    <small>${escapeHtml(
+                        String(note.text || "").slice(0, 100)
+                    )}${String(note.text || "").length > 100 ? "…" : ""}</small>
+                </span>
+            </label>
+        `).join("")
+        : `
+            <p class="settings-message">
+                Non ci sono micronote nella sezione corrente.
+            </p>
+        `;
+
+    dialog.innerHTML = `
+        <div class="notes-qr-card personalization-share-card">
+            <button
+                class="notes-qr-close"
+                type="button"
+                aria-label="Chiudi"
+            >×</button>
+
+            <h3>🔗 Condividi personalizzazione</h3>
+
+            <p>
+                Scegli cosa vuoi trasferire. Il destinatario potrà importarlo
+                direttamente nell'app.
+            </p>
+
+            <div class="share-choice-list">
+                ${state && item ? `
+                    <button
+                        class="settings-action share-choice"
+                        type="button"
+                        data-share-scope="section"
+                    >
+                        📚 Sezione corrente
+                        <small>Tutte le note di questa sottosezione</small>
+                    </button>
+
+                    <div class="share-micronotes">
+                        <strong>📝 Micronote specifiche</strong>
+                        ${noteOptions}
+                        <button
+                            class="settings-action share-choice"
+                            type="button"
+                            data-share-scope="notes"
+                        >
+                            Condividi micronote selezionate
+                        </button>
+                    </div>
+                ` : ""}
+
+                <button
+                    class="settings-action share-choice"
+                    type="button"
+                    data-share-scope="all"
+                >
+                    🗂️ Intera personalizzazione
+                    <small>Tema, ordini e tutte le note</small>
+                </button>
+            </div>
+
+            <p class="settings-message">
+                Dopo questa scelta potrai scegliere il metodo:
+                collegamento, QR oppure NFC.
+            </p>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const close = () => dialog.remove();
+
+    dialog.querySelector(".notes-qr-close")
+        ?.addEventListener("click", close);
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) close();
+
+        const button =
+            event.target.closest("[data-share-scope]");
+
+        if (!button) return;
+
+        const scope = button.dataset.shareScope;
+        let data = null;
+        let type = scope;
+
+        if (scope === "section") {
+            data = getCurrentSectionShareData();
+        }
+
+        if (scope === "notes") {
+            const selectedIds =
+                getSelectedNotesFromDialog(dialog);
+
+            if (!selectedIds.length) {
+                window.alert(
+                    "Seleziona almeno una micronota."
                 );
+                return;
             }
 
-            const orders =
-                data.orders &&
-                typeof data.orders === "object"
-                    ? data.orders
-                    : {};
+            data = {
+                stateId: state,
+                itemId: item,
+                notes: getNotesForItem(state, item)
+                    .filter(note =>
+                        selectedIds.includes(String(note.id))
+                    )
+            };
+        }
 
-            resetOrderPreferences();
+        if (scope === "all") {
+            const includePatients =
+                getPatients().length > 0 &&
+                window.confirm(
+                    "Vuoi includere anche i dati dei pazienti? Contengono potenzialmente dati sanitari personali e verranno inseriti nel collegamento condiviso."
+                );
 
-            for (const [key, value] of Object.entries(orders)) {
+            data = collectPersonalization(includePatients);
 
+            if (includePatients) {
+                const secondConfirm =
+                    window.confirm(
+                        "Confermi di voler condividere anche i dati dei pazienti?"
+                    );
+
+                if (!secondConfirm) {
+                    data.patients = [];
+                }
+            }
+        }
+
+        if (!data) return;
+
+        close();
+        showShareMethodDialog(type, data);
+    });
+}
+
+function showShareMethodDialog(type, data) {
+    document.getElementById("shareMethodDialog")?.remove();
+
+    const url = buildShareUrl(type, data);
+
+    const dialog = document.createElement("div");
+    dialog.id = "shareMethodDialog";
+    dialog.className = "notes-qr-dialog";
+
+    dialog.innerHTML = `
+        <div class="notes-qr-card personalization-share-card">
+            <button
+                class="notes-qr-close"
+                type="button"
+                aria-label="Chiudi"
+            >×</button>
+
+            <h3>📤 Come vuoi condividere?</h3>
+
+            <button id="shareMethodLink" class="settings-action" type="button">
+                🔗 Collegamento
+            </button>
+
+            <button id="shareMethodQr" class="settings-action" type="button">
+                ▦ QR code
+            </button>
+
+            <button id="shareMethodNfc" class="settings-action" type="button">
+                📳 Scrivi su NFC
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const close = () => dialog.remove();
+
+    dialog.querySelector(".notes-qr-close")
+        ?.addEventListener("click", close);
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) close();
+    });
+
+    dialog.querySelector("#shareMethodLink")
+        ?.addEventListener("click", async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: "Nursing Shot — personalizzazione",
+                        text: "Personalizzazione condivisa da Nursing Shot",
+                        url
+                    });
+                    close();
+                    return;
+                } catch (_) {}
+            }
+
+            try {
+                await navigator.clipboard.writeText(url);
+                window.alert("Collegamento copiato.");
+            } catch (_) {
+                window.prompt("Copia questo collegamento:", url);
+            }
+
+            close();
+        });
+
+    dialog.querySelector("#shareMethodQr")
+        ?.addEventListener("click", () => {
+            close();
+            showGenericShareQr(url);
+        });
+
+    dialog.querySelector("#shareMethodNfc")
+        ?.addEventListener("click", async () => {
+            close();
+            await writeGenericNfc(url);
+        });
+}
+
+function showGenericShareQr(url) {
+    const dialog = document.createElement("div");
+    dialog.id = "genericShareQrDialog";
+    dialog.className = "notes-qr-dialog";
+
+    const qrUrl =
+        "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" +
+        encodeURIComponent(url);
+
+    dialog.innerHTML = `
+        <div class="notes-qr-card">
+            <button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>
+            <h3>▦ Condividi tramite QR</h3>
+            <img src="${qrUrl}" alt="QR per condividere la personalizzazione">
+            <p class="settings-message">
+                Scansiona il QR con Nursing Shot.
+            </p>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    dialog.querySelector(".notes-qr-close")
+        ?.addEventListener("click", () => dialog.remove());
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) dialog.remove();
+    });
+}
+
+async function writeGenericNfc(url) {
+    if (!window.isSecureContext) {
+        window.alert(
+            "La scrittura NFC richiede una connessione HTTPS."
+        );
+        return;
+    }
+
+    if (!("NDEFReader" in window)) {
+        window.alert(
+            "Questo browser non supporta Web NFC."
+        );
+        return;
+    }
+
+    if (!window.confirm(
+        "Il collegamento verrà scritto sul tag NFC. Continuare?"
+    )) {
+        return;
+    }
+
+    try {
+        const writer = new NDEFReader();
+
+        await writer.write({
+            records: [
+                {
+                    recordType: "url",
+                    data: url
+                }
+            ]
+        });
+
+        window.alert("✅ Collegamento scritto sul tag NFC.");
+
+    } catch (error) {
+        console.error("Errore scrittura NFC:", error);
+        window.alert(
+            "Non è stato possibile scrivere il tag NFC."
+        );
+    }
+}
+
+function importSharedPersonalization(payload) {
+    if (!payload) return false;
+
+    if (
+        payload.type === "section" ||
+        payload.type === "notes"
+    ) {
+        const data = payload.data;
+
+        if (
+            !data ||
+            !data.stateId ||
+            !data.itemId ||
+            !Array.isArray(data.notes)
+        ) {
+            return false;
+        }
+
+        const existing =
+            getNotesForItem(
+                data.stateId,
+                data.itemId
+            );
+
+        const imported = data.notes.map(note => ({
+            id:
+                String(Date.now()) +
+                "-" +
+                Math.random().toString(36).slice(2, 8),
+            title: note.title || "Nota personale",
+            text: note.text || ""
+        }));
+
+        saveNotesForItem(
+            data.stateId,
+            data.itemId,
+            [...existing, ...imported]
+        );
+
+        return true;
+    }
+
+    if (payload.type === "all") {
+        const data = payload.data;
+
+        if (
+            !data ||
+            data.app !== "Nursing Shot" ||
+            data.type !== "personalization"
+        ) {
+            return false;
+        }
+
+        if (
+            data.theme === "light" ||
+            data.theme === "dark"
+        ) {
+            localStorage.setItem(
+                PERSONALIZATION_KEYS.theme,
+                data.theme
+            );
+        }
+
+        resetOrderPreferences();
+
+        if (
+            data.orders &&
+            typeof data.orders === "object"
+        ) {
+            for (const [key, value] of Object.entries(data.orders)) {
                 if (
                     key === PERSONALIZATION_KEYS.categoryOrder ||
                     key.startsWith("nursing-sections-") ||
                     key.startsWith("nursing-items-")
                 ) {
-                    localStorage.setItem(key, String(value));
+                    localStorage.setItem(
+                        key,
+                        String(value)
+                    );
                 }
             }
+        }
 
-            const notes =
-                data.notes &&
-                typeof data.notes === "object"
-                    ? data.notes
-                    : {};
-
+        if (
+            data.notes &&
+            typeof data.notes === "object"
+        ) {
             localStorage.setItem(
                 PERSONALIZATION_KEYS.notes,
-                JSON.stringify(notes)
+                JSON.stringify(data.notes)
             );
+        }
 
-            setupTheme();
+        if (Array.isArray(data.patients)) {
+            savePatients(data.patients);
+        }
 
-            setMessage("✅ Personalizzazione importata.");
+        setupTheme();
+        return true;
+    }
 
-            if (state) {
-                loadState();
-            } else {
-                loadCategories();
+    return false;
+}
+
+function renderSharedPersonalizationImport(payload) {
+    if (!payload) return "";
+
+    let descriptionText =
+        "Personalizzazione pronta da importare.";
+
+    if (payload.type === "section") {
+        descriptionText =
+            "Sono disponibili le note della sezione corrente.";
+    } else if (payload.type === "notes") {
+        descriptionText =
+            "Sono disponibili le micronote selezionate.";
+    } else if (payload.type === "all") {
+        const hasPatients =
+            Array.isArray(payload.data?.patients) &&
+            payload.data.patients.length > 0;
+
+        descriptionText =
+            hasPatients
+                ? "Include anche dati paziente."
+                : "Non include dati paziente.";
+    }
+
+    return `
+        <section class="personal-notes-import personalization-import-banner">
+            <div>
+                <strong>📥 Personalizzazione ricevuta</strong>
+                <span>${descriptionText}</span>
+            </div>
+            <div>
+                <button id="importSharedPersonalization" class="settings-action" type="button">
+                    📥 Importa
+                </button>
+                <button id="cancelSharedPersonalization" class="settings-action" type="button">
+                    ✕ Ignora
+                </button>
+            </div>
+        </section>
+    `;
+}
+
+function renderPatientsPage() {
+    const patients = getPatients();
+
+    content.innerHTML = `
+        <section class="detail-page patients-page">
+            <div class="detail-header-row">
+                <h2>👤 Pazienti</h2>
+            </div>
+
+            <div class="patient-privacy-warning">
+                <strong>⚠️ Dati sensibili</strong>
+                <p>
+                    Inserisci solo i dati necessari. I dati paziente restano
+                    salvati localmente sul dispositivo e vengono condivisi
+                    solo se scegli esplicitamente di includerli nella
+                    condivisione dell'intera personalizzazione.
+                </p>
+            </div>
+
+            <div class="patients-list">
+                ${patients.length
+                    ? patients.map(patient => `
+                        <article class="patient-card" data-patient-id="${escapeAttribute(patient.id)}">
+                            <div class="patient-card-header">
+                                <h3>${escapeHtml(patient.name || "Paziente senza nome")}</h3>
+                                <div>
+                                    <button class="patient-edit" type="button" data-patient-edit="${escapeAttribute(patient.id)}">✏️</button>
+                                    <button class="patient-delete" type="button" data-patient-delete="${escapeAttribute(patient.id)}">🗑️</button>
+                                </div>
+                            </div>
+                            <p><strong>Reparto:</strong> ${escapeHtml(patient.room || "—")}</p>
+                            <p><strong>Letto:</strong> ${escapeHtml(patient.bed || "—")}</p>
+                            <p><strong>PV:</strong><br>${escapeHtml(patient.pv || "—").replace(/\n/g, "<br>")}</p>
+                            <p><strong>Farmaci:</strong><br>${escapeHtml(patient.medications || "—").replace(/\n/g, "<br>")}</p>
+                            <p><strong>Note:</strong><br>${escapeHtml(patient.notes || "—").replace(/\n/g, "<br>")}</p>
+                        </article>
+                    `).join("")
+                    : '<div class="personal-note-empty">Nessun paziente inserito.</div>'
+                }
+            </div>
+
+            <div class="patient-editor">
+                <h3>➕ Nuovo paziente</h3>
+
+                <input id="patientName" class="personal-note-title-input" type="text" placeholder="Nome / identificativo">
+
+                <div class="patient-fields-grid">
+                    <input id="patientRoom" class="personal-note-title-input" type="text" placeholder="Reparto">
+                    <input id="patientBed" class="personal-note-title-input" type="text" placeholder="Stanza / letto">
+                </div>
+
+                <textarea id="patientPv" class="personal-note-input" placeholder="Parametri vitali (PV)" rows="4"></textarea>
+                <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="5"></textarea>
+                <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="5"></textarea>
+
+                <button id="savePatient" class="settings-action" type="button">💾 Salva paziente</button>
+                <p id="patientMessage" class="personal-note-message"></p>
+            </div>
+
+            <a class="personal-notes-back" href="./">← Torna alla home</a>
+        </section>
+    `;
+}
+
+function setupPatients() {
+    document.addEventListener("click", event => {
+        if (event.target.closest("#savePatient")) {
+            const name =
+                document.getElementById("patientName")?.value.trim() || "";
+
+            const room =
+                document.getElementById("patientRoom")?.value.trim() || "";
+
+            const bed =
+                document.getElementById("patientBed")?.value.trim() || "";
+
+            const pv =
+                document.getElementById("patientPv")?.value.trim() || "";
+
+            const medications =
+                document.getElementById("patientMedications")?.value.trim() || "";
+
+            const notes =
+                document.getElementById("patientNotes")?.value.trim() || "";
+
+            if (!name) {
+                const message =
+                    document.getElementById("patientMessage");
+
+                if (message) {
+                    message.textContent =
+                        "✏️ Inserisci almeno un nome o identificativo.";
+                }
+
+                return;
             }
 
-        } catch (error) {
+            const patients = getPatients();
 
-            console.error(error);
-            setMessage("❌ File di personalizzazione non valido.");
+            patients.push({
+                id:
+                    String(Date.now()) +
+                    "-" +
+                    Math.random().toString(36).slice(2, 8),
+                name,
+                room,
+                bed,
+                pv,
+                medications,
+                notes
+            });
+
+            savePatients(patients);
+            renderPatientsPage();
+            return;
         }
-    };
 
-    reader.readAsText(file);
+        const deleteButton =
+            event.target.closest("[data-patient-delete]");
+
+        if (deleteButton) {
+            const id = deleteButton.dataset.patientDelete;
+
+            if (!window.confirm(
+                "Eliminare questo paziente dal dispositivo?"
+            )) {
+                return;
+            }
+
+            savePatients(
+                getPatients().filter(
+                    patient => patient.id !== id
+                )
+            );
+
+            renderPatientsPage();
+        }
+    });
 }
 
 function resetOrderPreferences() {
@@ -1485,6 +2079,10 @@ function resetAllPersonalization() {
 
     localStorage.removeItem(
         PERSONALIZATION_KEYS.theme
+    );
+
+    localStorage.removeItem(
+        PATIENTS_KEY
     );
 
     applyTheme("dark");
@@ -6113,20 +6711,77 @@ function applyLocalOverride(stateId, data) {
 
 
 /* =========================================================
+   ROUTE CONDIVISIONE / PAZIENTI
+========================================================= */
+
+const incomingPersonalization =
+    readSharePayload();
+
+if (incomingPersonalization) {
+    window.__incomingPersonalization =
+        incomingPersonalization;
+}
+
+const patientsRoute =
+    new URLSearchParams(window.location.search)
+        .get("patients");
+
+if (patientsRoute === "1") {
+    document.body.classList.remove("home-page");
+}
+
+/* =========================================================
    AVVIO
 ========================================================= */
 setupTheme();
 setupSettings();
 setupPersonalNotes();
+setupPatients();
 
-if (editor === "1") {
+if (incomingPersonalization) {
+    loadCategories();
+    content.innerHTML = renderSharedPersonalizationImport(
+        incomingPersonalization
+    );
+
+    const importButton =
+        document.getElementById(
+            "importSharedPersonalization"
+        );
+
+    importButton?.addEventListener("click", () => {
+        if (importSharedPersonalization(incomingPersonalization)) {
+            window.location.hash = "";
+            window.location.href = "./";
+        } else {
+            window.alert(
+                "Collegamento di personalizzazione non valido."
+            );
+        }
+    });
+
+    document.getElementById(
+        "cancelSharedPersonalization"
+    )?.addEventListener("click", () => {
+        window.location.hash = "";
+        window.location.href = "./";
+    });
+
+} else if (patientsRoute === "1") {
+
+    stateTitle.textContent = "👤 Pazienti";
+    description.textContent =
+        "Gestione locale dei pazienti.";
+    shortcuts.style.display = "none";
+    renderPatientsPage();
+
+} else if (editor === "1") {
 
     loadEditor();
 
 } else {
 
     loadCategories();
-
     loadState();
 
 }
