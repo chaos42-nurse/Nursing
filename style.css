@@ -2260,3 +2260,43 @@ section h2 {
 .patient-new-form-hidden {
     display: none;
 }
+
+
+/* =========================================================
+   RICERCA PAZIENTI
+========================================================= */
+
+.page-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.patient-search-toggle {
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 1.1rem;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.patient-search-input {
+    display: none;
+    width: min(260px, 100%);
+    margin: 8px 0 0;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+}
+
+.patient-search-input.is-open {
+    display: block;
+}
+
+.patient-search-input::placeholder {
+    color: var(--text-secondary);
+}
