@@ -1427,68 +1427,190 @@ section h2 {
     border-color: rgba(255, 90, 90, 0.28);
 }
 
-.personal-note {
+.detail-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.personal-notes-button {
+    order: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
     margin-top: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.personal-notes-button:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+}
+
+.detail-page > .detail-header-row {
+    order: 1;
+}
+
+.detail-page > .detail-content {
+    order: 2;
+}
+
+.personal-notes-page {
+    gap: 12px;
+}
+
+.personal-notes-context {
+    order: 2;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: .88rem;
+}
+
+.personal-notes-page .detail-header-row {
+    order: 1;
+}
+
+.personal-notes-list {
+    order: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.personal-note-card,
+.personal-note-editor,
+.personal-note-empty {
     padding: 15px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--surface);
 }
 
-.personal-note-header {
+.personal-note-card-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 9px;
 }
 
-.personal-note-header h3 {
+.personal-note-card-header h3 {
     margin: 0;
 }
 
-.personal-note-header span {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
+.personal-note-delete {
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    padding: 7px 9px;
 }
 
-.personal-note-input {
-    display: block;
+.personal-note-delete:hover {
+    border-color: var(--danger);
+}
+
+.personal-note-text {
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.personal-note-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: .8rem;
+}
+
+.personal-note-link {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-hover);
+    color: var(--text);
+    text-decoration: none;
+}
+
+.personal-note-link:hover {
+    border-color: var(--accent);
+}
+
+.personal-note-filter {
+    order: 2;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--text-secondary);
+    font-size: .84rem;
+}
+
+.personal-note-filter a {
+    float: right;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.personal-note-editor {
+    order: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.personal-note-editor h3 {
+    margin: 0 0 2px;
+}
+
+.personal-note-title-input {
     width: 100%;
-    min-height: 110px;
+    box-sizing: border-box;
     padding: 11px 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
     outline: none;
-    resize: vertical;
     background: #0f141b;
     color: var(--text);
     font: inherit;
-    line-height: 1.45;
-    box-sizing: border-box;
 }
 
-.personal-note-input:focus {
+.personal-note-title-input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(92, 200, 255, 0.10);
 }
 
-.personal-note-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 9px;
+.personal-note-editor .personal-note-input {
+    min-height: 150px;
+    margin: 0;
 }
 
-.personal-note-actions .settings-action {
-    flex: 1;
+.personal-note-editor .settings-action {
     text-align: center;
 }
 
-.personal-note-message {
-    min-height: 1.3em;
-    margin: 8px 0 0;
-    color: var(--text-secondary);
-    font-size: 0.78rem;
+.personal-notes-back {
+    order: 5;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: .88rem;
+}
+
+.personal-note {
+    display: none;
 }
 
 .detail-header-row {
