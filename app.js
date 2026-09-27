@@ -346,6 +346,318 @@ function renderPatientField(label, value) {
     `;
 }
 
+function formatBloodPressure(value) {
+    const raw = String(value || "").trim().replace(/\\s/g, "");
+    const match = raw.match(/^(\\d{1,3})\\/(\\d{1,3})$/);
+    if (!match) return escapeHtml(raw || "—");
+
+    const systolic = String(Number(match[1]));
+    const diastolic = String(Number(match[2]));
+
+    return escapeHtml(`${systolic}/${diastolic}`);
+}
+
+function renderPatientPvHistory(history) {
+    if (!Array.isArray(history) || !history.length) {
+        return '<div class="personal-note-empty">Nessuna rilevazione registrata.</div>';
+    }
+
+    return `
+        <div class="patient-pv-table-wrap">
+            <table class="patient-pv-table">
+                <thead>
+                    <tr>
+                        <th>Data/ora</th>
+                        <th>P.A.<small>mm/Mh</small></th>
+                        <th>F.C.<small>bpm</small></th>
+                        <th>Sat.<small>%</small></th>
+                        <th>T.°<small>°C</small></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${history.slice().reverse().map(entry => {
+                        const date = entry.recordedAt
+                            ? new Date(entry.recordedAt).toLocaleString("it-IT")
+                            : "—";
+
+                        return `
+                            <tr>
+                                <td>${escapeHtml(date)}</td>
+                                <td>${formatBloodPressure(entry.pa)}</td>
+                                <td>${escapeHtml(entry.fc || "—")}</td>
+                                <td>${escapeHtml(entry.sat || "—")}</td>
+                                <td>${escapeHtml(entry.temperature || "—")}</td>
+                            </tr>
+                        `;
+                    }).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderPatientsPage() {
+    const patients = getPatients();
+
+    content.innerHTML = `
+        <section class="detail-page patients-page">
+            <div class="detail-header-row">
+                <h2>👤 Pazienti</h2>
+            </div>
+
+            <div class="patient-privacy-warning">
+                <strong>⚠️ Dati sensibili</strong>
+                <p>
+                    Inserisci solo i dati necessari. I dati paziente restano
+                    salvati localmente sul dispositivo e vengono condivisi
+                    solo se scegli esplicitamente di includerli nella
+                    condivisione dell'intera personalizzazione.
+                </p>
+            </div>
+
+            <div class="patients-list">
+                ${patients.length
+                    ? patients.map(patient => `
+                        <article class="patient-card" data-patient-id="${escapeAttribute(patient.id)}">
+                            <div class="patient-card-header">
+                                <h3>${escapeHtml(patient.name || "Paziente senza nome")}</h3>
+                                <div>
+                                    <button class="patient-edit" type="button" data-patient-edit="${escapeAttribute(patient.id)}">✏️</button>
+                                    <button class="patient-delete" type="button" data-patient-delete="${escapeAttribute(patient.id)}">🗑️</button>
+                                </div>
+                            </div>
+                            <p><strong>Reparto:</strong> ${escapeHtml(patient.room || "—")}</p>
+                            <p><strong>Letto:</strong> ${escapeHtml(patient.bed || "—")}</p>
+                            <p><strong>PV:</strong><br>${escapeHtml(patient.pv || "—").replace(/\n/g, "<br>")}</p>
+                            <p><strong>Farmaci:</strong><br>${escapeHtml(patient.medications || "—").replace(/\n/g, "<br>")}</p>
+                            <p><strong>Note:</strong><br>${escapeHtml(patient.notes || "—").replace(/\n/g, "<br>")}</p>
+                        </article>
+                    `).join("")
+                    : '<div class="personal-note-empty">Nessun paziente inserito.</div>'
+                }
+            </div>
+
+            <div class="patient-editor">
+                <h3>➕ Nuovo paziente</h3>
+
+                <input id="patientName" class="personal-note-title-input" type="text" placeholder="Nome / identificativo">
+
+                <div class="patient-fields-grid">
+                    <input id="patientRoom" class="personal-note-title-input" type="text" placeholder="Reparto">
+                    <input id="patientBed" class="personal-note-title-input" type="text" placeholder="Stanza / letto">
+                </div>
+
+                <textarea id="patientPv" class="personal-note-input" placeholder="Parametri vitali (PV)" rows="4"></textarea>
+                <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="5"></textarea>
+                <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="5"></textarea>
+
+                <button id="savePatient" class="settings-action" type="button">💾 Salva paziente</button>
+                <p id="patientMessage" class="personal-note-message"></p>
+            </div>
+
+            <a class="personal-notes-back" href="./">← Torna alla home</a>
+        </section>
+    `;
+}
+
+function setupPatients() {
+    document.addEventListener("click", event => {
+        if (event.target.closest("#savePatient")) {
+            const name =
+                document.getElementById("patientName")?.value.trim() || "";
+
+            const room =
+                document.getElementById("patientRoom")?.value.trim() || "";
+
+            const bed =
+                document.getElementById("patientBed")?.value.trim() || "";
+
+            const pv =
+                document.getElementById("patientPv")?.value.trim() || "";
+
+            const medications =
+                document.getElementById("patientMedications")?.value.trim() || "";
+
+            const notes =
+                document.getElementById("patientNotes")?.value.trim() || "";
+
+            if (!name) {
+                const message =
+                    document.getElementById("patientMessage");
+
+                if (message) {
+                    message.textContent =
+                        "✏️ Inserisci almeno un nome o identificativo.";
+                }
+
+                return;
+            }
+
+            const patients = getPatients();
+            const editor =
+                document.querySelector(".patient-editor");
+            const editingId =
+                editor?.dataset.editingId || "";
+
+            if (editingId) {
+                const patient =
+                    patients.find(
+                        current => current.id === editingId
+                    );
+
+                if (patient) {
+                    patient.name = name;
+                    patient.room = room;
+                    patient.bed = bed;
+                    patient.pv = pv;
+                    patient.medications = medications;
+                    patient.notes = notes;
+                }
+            } else {
+                patients.push({
+                    id:
+                        String(Date.now()) +
+                        "-" +
+                        Math.random().toString(36).slice(2, 8),
+                    name,
+                    room,
+                    bed,
+                    pv,
+                    medications,
+                    notes
+                });
+            }
+
+            savePatients(patients);
+            renderPatientsPage();
+            return;
+        }
+
+        const editButton =
+            event.target.closest("[data-patient-edit]");
+
+        if (editButton) {
+            const patient =
+                getPatients().find(
+                    current => current.id === editButton.dataset.patientEdit
+                );
+
+            if (!patient) return;
+
+            const nameInput = document.getElementById("patientName");
+            const roomInput = document.getElementById("patientRoom");
+            const bedInput = document.getElementById("patientBed");
+            const pvInput = document.getElementById("patientPv");
+            const medicationsInput = document.getElementById("patientMedications");
+            const notesInput = document.getElementById("patientNotes");
+            const saveButton = document.getElementById("savePatient");
+
+            if (!nameInput || !roomInput || !bedInput || !pvInput ||
+                !medicationsInput || !notesInput) {
+                return;
+            }
+
+            nameInput.value = patient.name;
+            roomInput.value = patient.room;
+            bedInput.value = patient.bed;
+            pvInput.value = patient.pv;
+            medicationsInput.value = patient.medications;
+            notesInput.value = patient.notes;
+
+            const editor = document.querySelector(".patient-editor");
+
+            if (editor) {
+                editor.dataset.editingId = patient.id;
+                editor.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+
+            if (saveButton) {
+                saveButton.textContent = "💾 Salva modifiche";
+            }
+
+            return;
+        }
+
+        const deleteButton =
+            event.target.closest("[data-patient-delete]");
+
+        if (deleteButton) {
+            const id = deleteButton.dataset.patientDelete;
+
+            if (!window.confirm(
+                "Eliminare questo paziente dal dispositivo?"
+            )) {
+                return;
+            }
+
+            savePatients(
+                getPatients().filter(
+                    patient => patient.id !== id
+                )
+            );
+
+            renderPatientsPage();
+        }
+    });
+}
+
+function renderPatientPvHistory(history) {
+    if (!Array.isArray(history) || !history.length) {
+        return '<div class="personal-note-empty">Nessuna rilevazione registrata.</div>';
+    }
+
+    return history.slice().reverse().map(entry => {
+        const date = entry.recordedAt
+            ? new Date(entry.recordedAt).toLocaleString("it-IT")
+            : "Data non disponibile";
+
+        return `
+            <article class="patient-pv-entry">
+                <strong>${escapeHtml(date)}</strong>
+                <div class="patient-pv-grid">
+                    <span><b>P.A.</b> ${escapeHtml(entry.pa || "—")}</span>
+                    <span><b>F.C.</b> ${escapeHtml(entry.fc || "—")}</span>
+                    <span><b>Sat.</b> ${escapeHtml(entry.sat || "—")}</span>
+                    <span><b>T°</b> ${escapeHtml(entry.temperature || "—")}</span>
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+function calculatePatientAge(birthDate) {
+    if (!birthDate) return "";
+
+    const birth = new Date(birthDate + "T00:00:00");
+    if (Number.isNaN(birth.getTime())) return "";
+
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+
+    const beforeBirthday =
+        today.getMonth() < birth.getMonth() ||
+        (
+            today.getMonth() === birth.getMonth() &&
+            today.getDate() < birth.getDate()
+        );
+
+    if (beforeBirthday) age--;
+
+    return age >= 0 ? String(age) : "";
+}
+
+function renderPatientField(label, value) {
+    return `
+        <div class="patient-readonly-field">
+            <strong>${escapeHtml(label)}</strong>
+            <span>${escapeHtml(value || "—").replace(/\\n/g, "<br>")}</span>
+        </div>
+    `;
+}
+
 function renderPatientPvHistory(history) {
     if (!Array.isArray(history) || !history.length) {
         return '<div class="personal-note-empty">Nessuna rilevazione registrata.</div>';
@@ -442,14 +754,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
                         <div class="patient-pv-section">
                             <h4>🩺 Parametri vitali</h4>
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
-
-                            <div class="patient-pv-grid patient-pv-inputs">
-                                <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A.">
-                                <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C.">
-                                <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat.">
-                                <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T°">
-                            </div>
-                            <button id="addPatientPv" class="settings-action" type="button">➕ Registra PV</button>
+                            <button id="openPvRecorder" class="settings-action" type="button">➕ Nuova rilevazione PV</button>
                         </div>
 
                         <button id="savePatient" class="settings-action" type="button"
@@ -477,6 +782,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
                         <div class="patient-pv-section">
                             <h4>🩺 Parametri vitali</h4>
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
+                            <button id="openPvRecorder" class="settings-action" type="button">➕ Nuova rilevazione PV</button>
                         </div>
 
                         <button id="editCurrentPatient" class="settings-action" type="button">
@@ -559,6 +865,35 @@ function setupPatients() {
             return;
         }
 
+        if (event.target.closest("#openPvRecorder")) {
+            const editor = document.querySelector(".patient-editor");
+            const id = editor?.dataset.selectedId || "";
+            if (!id) return;
+
+            const modal = document.createElement("div");
+            modal.className = "patient-pv-modal";
+            modal.innerHTML = `
+                <div class="patient-pv-modal-card">
+                    <h3>🩺 Nuova rilevazione PV</h3>
+                    <div class="patient-pv-input-form">
+                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
+                        <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
+                        <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
+                        <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
+                    </div>
+                    <button id="addPatientPv" class="settings-action" type="button">💾 Registra PV</button>
+                    <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return;
+        }
+
+        if (event.target.closest("#closePvRecorder")) {
+            event.target.closest(".patient-pv-modal")?.remove();
+            return;
+        }
+
         if (event.target.closest("#addPatientPv")) {
             const editingId = document.getElementById("savePatient")?.dataset.editingId || "";
             if (!editingId) return;
@@ -584,7 +919,9 @@ function setupPatients() {
             });
 
             savePatients(patients);
-            renderPatientsPage(editingId, true);
+            document.querySelector(".patient-pv-modal")?.remove();
+            const currentEditMode = document.getElementById("savePatient") ? true : false;
+            renderPatientsPage(editingId, currentEditMode);
             return;
         }
 
