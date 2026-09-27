@@ -779,10 +779,6 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 
     content.innerHTML = `
         <section class="detail-page patients-page">
-            <div class="detail-header-row">
-                <h2>👤 Pazienti</h2>
-            </div>
-
             <button id="newPatientButton" class="settings-action patient-new-button" type="button">
                 ➕ Nuovo paziente
             </button>
@@ -933,6 +929,19 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 }
 
 function setupPatients() {
+    const searchInput = document.getElementById("patientSearch");
+
+    searchInput?.addEventListener("input", () => {
+        const query = searchInput.value.trim().toLocaleLowerCase("it-IT");
+
+        document.querySelectorAll("[data-patient-open]").forEach(button => {
+            const name = button.querySelector("strong")?.textContent
+                .toLocaleLowerCase("it-IT") || "";
+            button.style.display =
+                !query || name.includes(query) ? "" : "none";
+        });
+    });
+
     document.addEventListener("click", event => {
         if (event.target.closest("#newPatientButton")) {
             renderPatientsPage("", false, true);
@@ -1200,6 +1209,14 @@ function resetAllPersonalization() {
 if (backButton) {
 
     backButton.addEventListener("click", () => {
+
+        if (
+            patientsRoute === "1" &&
+            document.querySelector(".patient-editor[data-selected-id]")
+        ) {
+            renderPatientsPage();
+            return;
+        }
 
         if (window.history.length > 1) {
 
@@ -7826,6 +7843,28 @@ if (incomingPersonalization) {
     description.textContent =
         "Gestione locale dei pazienti.";
     shortcuts.style.display = "none";
+    stateTitle.insertAdjacentHTML("afterend", `
+        <button id="patientSearchToggle" class="patient-search-toggle" type="button" aria-label="Cerca paziente">🔍</button>
+        <input id="patientSearch" class="patient-search-input" type="search"
+            placeholder="Cerca paziente..." autocomplete="off" list="patientNames">
+        <datalist id="patientNames"></datalist>
+    `);
+    const patientSearchList = document.getElementById("patientNames");
+    getPatients().forEach(patient => {
+        const option = document.createElement("option");
+        option.value = patient.name || "";
+        patientSearchList?.appendChild(option);
+    });
+    document.getElementById("patientSearchToggle")?.addEventListener("click", () => {
+        const input = document.getElementById("patientSearch");
+        if (!input) return;
+        input.classList.toggle("is-open");
+        if (input.classList.contains("is-open")) input.focus();
+        else {
+            input.value = "";
+            input.dispatchEvent(new Event("input"));
+        }
+    });
     renderPatientsPage();
 
 } else if (editor === "1") {
