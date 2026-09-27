@@ -333,7 +333,7 @@ function renderPlaceorders(text) {
 
 function renderNoteText(text) {
     return escapeNoteText(text).replace(
-        /&lt;placeorder&gt;([\s\S]*?)&lt;\\/placeorder&gt;/gi,
+        /&lt;placeorder&gt;([\s\S]*?)&lt;\/placeorder&gt;/gi,
         ""
     );
 }
