@@ -1634,3 +1634,147 @@ section h2 {
     }
 }
 
+
+
+/* =========================================================
+   COLLEGAMENTI TRA NOTE
+========================================================= */
+
+.personal-note-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.personal-note-edit,
+.personal-note-delete {
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.personal-note-edit:hover,
+.personal-note-delete:hover {
+    border-color: var(--accent);
+    background: var(--surface-hover);
+}
+
+.personal-note-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 11px;
+    border-top: 1px solid var(--border);
+}
+
+.personal-note-links > span {
+    color: var(--text-secondary);
+    font-size: .8rem;
+}
+
+.personal-note-link-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 9px;
+    border-radius: 10px;
+    background: var(--surface-hover);
+}
+
+.personal-note-link-group strong {
+    color: var(--accent);
+    font-size: .84rem;
+}
+
+.personal-note-link {
+    display: block;
+    padding: 8px 9px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-size: .8rem;
+}
+
+.personal-note-link:hover {
+    border-color: var(--accent);
+}
+
+.personal-note-link-empty {
+    color: var(--text-muted);
+    font-size: .78rem;
+}
+
+.personal-note-index {
+    order: 2;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+}
+
+.personal-note-index-title {
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.personal-note-index p {
+    margin: 0 0 11px;
+    color: var(--text-secondary);
+    font-size: .82rem;
+}
+
+.personal-note-index-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.personal-note-index-group {
+    padding: 9px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.personal-note-index-term {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--accent);
+}
+
+.personal-note-index-links {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.personal-note-index-link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: .78rem;
+}
+
+.personal-note-index-link:hover {
+    background: var(--surface-hover);
+}
+
+.personal-note-index-link strong {
+    font-size: .82rem;
+}
+
+.personal-note-card-focused {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
