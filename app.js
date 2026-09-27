@@ -311,6 +311,59 @@ function extractPlaceorders(text) {
     return matches;
 }
 
+
+function getAllPersonalNoteRecords() {
+    const notes = getPersonalNotes();
+    const records = [];
+
+    for (const [key, itemNotes] of Object.entries(notes)) {
+        const separator = key.indexOf("::");
+        if (separator === -1 || !Array.isArray(itemNotes)) continue;
+
+        const stateId = key.slice(0, separator);
+        const itemId = key.slice(separator + 2);
+
+        itemNotes_ForEach(note => {
+            records.push({ stateId, itemId, note });
+        });
+    }
+
+    return records;
+}
+
+function normalizeLinkTerm(value) {
+    return String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("it-IT");
+}
+
+function getLinkedNoteRecords(term, sourceStateId, sourceItemId, sourceNoteId) {
+    const normalized = normalizeLinkTerm(term);
+
+    return getAllPersonalNoteRecords().filter(record => {
+        if (
+            record.stateId === sourceStateId &&
+            record.itemId === sourceItemId &&
+            String(record.note.id) === String(sourceNoteId)
+        ) {
+            return false;
+        }
+
+        return extractPlaceorders(record.note.text).some(
+            linkedTerm => normalizeLinkTerm(linkedTerm) === normalized
+        );
+    });
+}
+
+function makeNoteUrl(stateId, itemId, noteId, term = "") {
+    const params = new URLSearchParams();
+    params.set("state", stateId);
+    params.set("item", itemId);
+    params.set("notes", "1");
+    params.set("note", noteId);
+    if (term) params.set("link", term);
+    return "?" + params.toString();
+}
+
+
 function renderPlaceorders(text) {
     const terms = extractPlaceorders(text);
 
