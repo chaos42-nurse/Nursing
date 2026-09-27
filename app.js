@@ -672,6 +672,111 @@ function showNotesQr(stateId, itemId) {
     });
 }
 
+
+function showNotesQrReader() {
+    const existing = document.getElementById("notesQrReaderDialog");
+    existing?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "notesQrReaderDialog";
+    dialog.className = "notes-qr-dialog";
+    dialog.innerHTML = '<div class="notes-qr-card notes-qr-reader-card">' +
+        '<button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>' +
+        '<h3>📷 Leggi QR</h3>' +
+        '<p>Inquadra il QR delle note con la fotocamera.</p>' +
+        '<video id="notesQrVideo" class="notes-qr-video" autoplay muted playsinline></video>' +
+        '<p id="notesQrReaderMessage" class="personal-note-message">Avvio fotocamera…</p>' +
+        '</div>';
+
+    document.body.appendChild(dialog);
+
+    const video = dialog.querySelector("#notesQrVideo");
+    const message = dialog.querySelector("#notesQrReaderMessage");
+    let stream = null;
+    let scanning = true;
+
+    const close = () => {
+        scanning = false;
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        dialog.remove();
+    };
+
+    dialog.querySelector(".notes-qr-close")?.addEventListener("click", close);
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) close();
+    });
+
+    if (!("BarcodeDetector" in window)) {
+        message.textContent = "La lettura QR tramite fotocamera non è supportata da questo browser.";
+        return;
+    }
+
+    const detector = new BarcodeDetector({ formats: ["qr_code"] });
+
+    (async () => {
+        try {
+            if (!navigator.mediaDevices?.getUserMedia) throw new Error("camera");
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: "environment" } },
+                audio: false
+            });
+            video.srcObject = stream;
+            await video.play();
+            message.textContent = "Inquadra il QR…";
+
+            while (scanning) {
+                if (video.readyState >= 2) {
+                    const codes = await detector.detect(video);
+                    if (codes.length) {
+                        const raw = codes[0].rawValue || "";
+                        if (raw.includes("#nursing-notes=")) {
+                            close();
+                            window.location.href = raw;
+                            return;
+                        }
+                        message.textContent = "QR rilevato, ma non contiene un collegamento Nursing.";
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 250));
+            }
+        } catch (error) {
+            console.error("Errore lettura QR:", error);
+            message.textContent = error.name === "NotAllowedError"
+                ? "Accesso alla fotocamera negato. Consenti la fotocamera per leggere il QR."
+                : "Impossibile avviare la fotocamera o leggere il QR.";
+        }
+    })();
+}
+
+function scanNotesQr() {
+    showNotesQrReader();
+}
+
+async function shareNotesViaNfc(stateId, itemId) {
+    const notes = getNotesForItem(stateId, itemId);
+    if (!notes.length) {
+        window.alert("Non ci sono note da condividere.");
+        return;
+    }
+
+    const url = buildNotesShareUrl(stateId, itemId, notes);
+
+    if (!("NDEFWriter" in window)) {
+        window.alert("La scrittura NFC non è supportata da questo browser. Su Android usa Chrome con NFC attivo e HTTPS.");
+        return;
+    }
+
+    try {
+        const writer = new NDEFWriter();
+        await writer.write({ records: [{ recordType: "url", data: url }] });
+        window.alert("✅ Collegamento scritto sul tag NFC. Ora puoi avvicinare il telefono al tag per aprire le note.");
+    } catch (error) {
+        console.error("Errore scrittura NFC:", error);
+        window.alert(error.name === "NotAllowedError"
+            ? "Scrittura NFC non autorizzata. Attiva NFC e consenti l\'accesso quando richiesto."
+            : "Impossibile scrivere il collegamento sul tag NFC.");
+    }
+}
 function renderSharedNotesImport(shared) {
     if (!shared) return "";
 
@@ -751,6 +856,8 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             <div class="personal-notes-share-actions">
                 <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi collegamento</button>
                 <button id="qrPersonalNotes" class="settings-action" type="button">▦ Mostra QR</button>
+                <button id="scanNotesQr" class="settings-action" type="button">📷 Leggi QR</button>
+                <button id="nfcPersonalNotes" class="settings-action" type="button">📳 Scrivi su NFC</button>
             </div>
 
             <div class="personal-notes-list">
@@ -801,6 +908,16 @@ function setupPersonalNotes() {
 
         if (event.target.closest("#qrPersonalNotes")) {
             showNotesQr(state, item);
+            return;
+        }
+
+        if (event.target.closest("#scanNotesQr")) {
+            scanNotesQr();
+            return;
+        }
+
+        if (event.target.closest("#nfcPersonalNotes")) {
+            shareNotesViaNfc(state, item);
             return;
         }
 
