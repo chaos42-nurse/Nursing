@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-app-cache-v12";
+const CACHE_NAME = "nursing-app-cache";
 
 const CORE_FILES = [
     "./",
@@ -66,6 +66,23 @@ self.addEventListener("fetch", event => {
         return;
     }
 
+    /*
+     * Il service worker deve gestire solo richieste
+     * HTTP/HTTPS. Estensioni del browser (chrome-extension://),
+     * devtools e altri schemi non possono essere inseriti
+     * nella Cache API.
+     */
+
+    const protocol =
+        new URL(event.request.url).protocol;
+
+    if (
+        protocol !== "http:" &&
+        protocol !== "https:"
+    ) {
+        return;
+    }
+
     event.respondWith(
 
         fetch(event.request)
@@ -84,9 +101,17 @@ self.addEventListener("fetch", event => {
                     caches.open(CACHE_NAME)
                         .then(cache => {
 
-                            cache.put(
+                            return cache.put(
                                 event.request,
                                 responseCopy
+                            );
+
+                        })
+                        .catch(error => {
+
+                            console.warn(
+                                "Impossibile aggiornare la cache:",
+                                error
                             );
 
                         });
