@@ -2247,3 +2247,16 @@ section h2 {
     background: var(--background);
     border-color: var(--border);
 }
+
+
+/* =========================================================
+   PAZIENTI — NUOVO PAZIENTE COMPATTO
+========================================================= */
+
+.patient-new-button {
+    margin-bottom: 12px;
+}
+
+.patient-new-form-hidden {
+    display: none;
+}
