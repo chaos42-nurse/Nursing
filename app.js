@@ -6114,7 +6114,7 @@ function setupSettings() {
 
     shareButton?.addEventListener("click", () => {
         panel.hidden = true;
-        showPersonalizationShareDialog();
+        showShareCenter();
     });
 
     patientsButton?.addEventListener("click", () => {
@@ -6576,7 +6576,12 @@ function getInternalNotesShareUrl(rawValue) {
 
         if (url.origin !== window.location.origin) return null;
 
-        if (!url.hash.startsWith("#nursing-notes=")) return null;
+        if (
+            !url.hash.startsWith("#nursing-notes=") &&
+            !url.hash.startsWith("#nursing-share=")
+        ) {
+            return null;
+        }
 
         return url.href;
     } catch (_) {
