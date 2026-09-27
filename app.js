@@ -5054,8 +5054,64 @@ function applyLocalOverride(stateId, data) {
 
 
 /* =========================================================
+   CODIFICA CONDIVISIONE
+========================================================= */
+
+function toBase64(value) {
+
+    const bytes =
+        new TextEncoder().encode(
+            String(value ?? "")
+        );
+
+    let binary = "";
+
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+    }
+
+    return btoa(binary);
+}
+
+function fromBase64(value) {
+
+    const binary =
+        atob(String(value || ""));
+
+    const bytes =
+        Uint8Array.from(
+            binary,
+            char => char.charCodeAt(0)
+        );
+
+    return new TextDecoder().decode(bytes);
+}
+
+function createSharePayload(type, data) {
+
+    return [
+        "NS2",
+        toBase64(type),
+        toBase64(JSON.stringify(data))
+    ].join("|");
+}
+
+function buildShareUrl(type, data) {
+
+    return window.location.origin +
+        window.location.pathname +
+        "#nursing-share=" +
+        encodeURIComponent(
+            createSharePayload(type, data)
+        );
+}
+
+
+/* =========================================================
    LETTURA CONDIVISIONE
 ========================================================= */
+
+
 
 function readSharePayload() {
 
