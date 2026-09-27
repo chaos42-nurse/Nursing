@@ -423,7 +423,7 @@ function renderPlaceorders(text, sourceStateId, sourceItemId, sourceNoteId) {
 
 function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
     const source = String(text || "");
-    const pattern = /<placeorder>([\\s\\S]*?)<\\/placeorder>|\\[\\[([\\s\\S]*?)\\]\\]/gi;
+    const pattern = /<placeorder>([\s\S]*?)<\/placeorder>|\[\[([\s\S]*?)\]\]/gi;
     let html = "";
     let lastIndex = 0;
     let match;
