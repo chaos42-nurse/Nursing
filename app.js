@@ -810,6 +810,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                                 class="patient-card patient-card-name"
                                 type="button"
                                 data-patient-open="${escapeAttribute(patient.id)}"
+                                data-patient-name="${escapeAttribute(patient.name || "Paziente senza nome")}"
                             >
                                 <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
                                 <span class="arrow">→</span>
@@ -7795,16 +7796,50 @@ function importSharedPersonalization(payload) {
 
         if (Array.isArray(data.patients)) {
             const existingPatients = getPatients();
-            const mergedPatients = [...existingPatients];
+            const mergedPatients = existingPatients.map(normalizePatient);
 
             for (const incomingPatient of data.patients) {
-                const incomingId = String(incomingPatient?.id || "");
-                const existingIndex = mergedPatients.findIndex(
-                    patient => String(patient.id) === incomingId
+                const normalizedIncoming = normalizePatient(incomingPatient);
+                const incomingId = String(normalizedIncoming.id || "");
+
+                const existingIndex = mergedPatients.findIndex(patient =>
+                    String(patient.id) === incomingId && incomingId !== ""
                 );
 
                 if (existingIndex === -1) {
-                    mergedPatients.push(incomingPatient);
+                    mergedPatients.push(normalizedIncoming);
+                    continue;
+                }
+
+                const existingPatient = mergedPatients[existingIndex];
+
+                for (const [key, value] of Object.entries(normalizedIncoming)) {
+                    if (key === "pvHistory") {
+                        const existingHistory = Array.isArray(existingPatient.pvHistory)
+                            ? existingPatient.pvHistory
+                            : [];
+                        const incomingHistory = Array.isArray(value) ? value : [];
+                        const historyById = new Map(
+                            existingHistory.map(entry => [String(entry.id || ""), entry])
+                        );
+
+                        for (const entry of incomingHistory) {
+                            const entryId = String(entry.id || "");
+                            if (entryId && historyById.has(entryId)) continue;
+                            const newId = entryId || (Date.now() + "-" + Math.random().toString(36).slice(2, 8));
+                            historyById.set(newId, { ...entry, id: newId });
+                        }
+
+                        existingPatient.pvHistory = Array.from(historyById.values());
+                        continue;
+                    }
+
+                    if (
+                        String(value || "").trim() !== "" &&
+                        String(existingPatient[key] || "").trim() === ""
+                    ) {
+                        existingPatient[key] = value;
+                    }
                 }
             }
 
@@ -7946,29 +7981,52 @@ if (incomingPersonalization) {
     const patientSearchSuggestions =
         document.getElementById("patientSearchSuggestions");
 
+    function normalizePatientSearchText(value = "") {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\\u0300-\\u036f]/g, "")
+            .toLocaleLowerCase("it-IT")
+            .trim()
+            .replace(/\\s+/g, " ");
+    }
+
+    function patientNameMatches(name, queryValue) {
+        const nameNormalized =
+            normalizePatientSearchText(name);
+
+        const queryNormalized =
+            normalizePatientSearchText(queryValue);
+
+        if (!queryNormalized) return true;
+
+        if (nameNormalized.includes(queryNormalized)) {
+            return true;
+        }
+
+        const queryWords =
+            queryNormalized.split(" ").filter(Boolean);
+        const nameWords =
+            nameNormalized.split(" ").filter(Boolean);
+
+        return queryWords.every(queryWord =>
+            nameWords.some(nameWord =>
+                nameWord.includes(queryWord)
+            )
+        );
+    }
+
     function updatePatientSearch(queryValue = "") {
-        const query = queryValue.trim().toLocaleLowerCase("it-IT");
+        const query = queryValue.trim();
         const patients = getPatients();
 
         document.querySelectorAll("[data-patient-open]").forEach(button => {
-            const name = button.querySelector("strong")?.textContent || "";
-            const words = name
-                .trim()
-                .split(/[\s']+/)
-                .filter(Boolean);
+            const name =
+                button.dataset.patientName ||
+                button.querySelector("strong")?.textContent ||
+                "";
 
-            const normalizedWords = words.map(word =>
-                word.toLocaleLowerCase("it-IT")
-            );
-
-            const matches =
-                !query ||
-                normalizedWords.some(word =>
-                    word.startsWith(query) ||
-                    word.includes(query)
-                );
-
-            button.style.display = matches ? "" : "none";
+            button.style.display =
+                patientNameMatches(name, query) ? "" : "none";
         });
 
         if (!patientSearchSuggestions) return;
@@ -7979,18 +8037,9 @@ if (incomingPersonalization) {
             return;
         }
 
-        const matches = patients.filter(patient => {
-            const words = String(patient.name || "")
-                .trim()
-                .split(/[\s']+/)
-                .filter(Boolean)
-                .map(word => word.toLocaleLowerCase("it-IT"));
-
-            return words.some(word =>
-                word.startsWith(query) ||
-                word.includes(query)
-            );
-        });
+        const matches = patients.filter(patient =>
+            patientNameMatches(patient.name, query)
+        );
 
         patientSearchSuggestions.innerHTML = matches.map(patient => `
             <button type="button" class="patient-search-suggestion"
