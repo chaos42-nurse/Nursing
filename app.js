@@ -7733,8 +7733,6 @@ function importSharedPersonalization(payload) {
             );
         }
 
-        resetOrderPreferences();
-
         if (
             data.orders &&
             typeof data.orders === "object"
@@ -7757,14 +7755,60 @@ function importSharedPersonalization(payload) {
             data.notes &&
             typeof data.notes === "object"
         ) {
+            const existingNotes =
+                JSON.parse(
+                    localStorage.getItem(PERSONALIZATION_KEYS.notes) || "{}"
+                );
+
+            for (const [key, incomingNotes] of Object.entries(data.notes)) {
+                const currentNotes =
+                    Array.isArray(existingNotes[key])
+                        ? existingNotes[key]
+                        : [];
+
+                const mergedNotes = [
+                    ...currentNotes,
+                    ...(Array.isArray(incomingNotes) ? incomingNotes : [])
+                ];
+
+                const seen = new Set();
+                existingNotes[key] = mergedNotes.filter(note => {
+                    const noteId = String(note?.id || "");
+                    const fingerprint =
+                        noteId ||
+                        JSON.stringify({
+                            title: note?.title || "",
+                            text: note?.text || ""
+                        });
+
+                    if (seen.has(fingerprint)) return false;
+                    seen.add(fingerprint);
+                    return true;
+                });
+            }
+
             localStorage.setItem(
                 PERSONALIZATION_KEYS.notes,
-                JSON.stringify(data.notes)
+                JSON.stringify(existingNotes)
             );
         }
 
         if (Array.isArray(data.patients)) {
-            savePatients(data.patients);
+            const existingPatients = getPatients();
+            const mergedPatients = [...existingPatients];
+
+            for (const incomingPatient of data.patients) {
+                const incomingId = String(incomingPatient?.id || "");
+                const existingIndex = mergedPatients.findIndex(
+                    patient => String(patient.id) === incomingId
+                );
+
+                if (existingIndex === -1) {
+                    mergedPatients.push(incomingPatient);
+                }
+            }
+
+            savePatients(mergedPatients);
         }
 
         setupTheme();
