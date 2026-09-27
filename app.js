@@ -347,8 +347,8 @@ function renderPatientField(label, value) {
 }
 
 function formatBloodPressure(value) {
-    const raw = String(value || "").trim().replace(/\\s/g, "");
-    const match = raw.match(/^(\\d{1,3})\\/(\\d{1,3})$/);
+    const raw = String(value || "").trim().replace(/\s/g, "");
+    const match = raw.match(/^(\d{1,3})\/(\d{1,3})$/);
     if (!match) return escapeHtml(raw || "—");
 
     const systolic = String(Number(match[1]));
