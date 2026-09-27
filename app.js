@@ -1719,6 +1719,26 @@ function loadItem(data) {
     }
 
 
+    window.__currentData = data;
+    window.__currentItemTitle =
+        typeof selectedItem === "string"
+            ? selectedItem
+            : selectedItem.title || "Scheda";
+
+    const notesMode =
+        new URLSearchParams(window.location.search).get("notes");
+
+    if (notesMode === "1") {
+        renderPersonalNotesPage(
+            state,
+            item,
+            data,
+            window.__currentItemTitle
+        );
+        return;
+    }
+
+
     /*
      * SCHEDA COMPONIBILE
      */
@@ -2040,7 +2060,9 @@ function detailHeader(title, data) {
             <h2>${title}</h2>
         </div>
 
-        ${state && item ? renderPersonalNote(state, item) : ""}
+        ${state && item
+            ? renderPersonalNotesButton(state, item)
+            : ""}
     `;
 }
 
