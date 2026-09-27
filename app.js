@@ -341,7 +341,7 @@ function renderPatientField(label, value) {
     return `
         <div class="patient-readonly-field">
             <strong>${escapeHtml(label)}</strong>
-            <span>${escapeHtml(value || "—").replace(/\\n/g, "<br>")}</span>
+            <span>${value ? renderNoteText(value) : "—"}</span>
         </div>
     `;
 }
@@ -379,14 +379,20 @@ function renderPatientPvHistory(history) {
                         const date = entry.recordedAt
                             ? new Date(entry.recordedAt).toLocaleString("it-IT")
                             : "—";
+                        const pa = formatBloodPressure(entry.pa);
+                        const fc = entry.fc ? escapeHtml(entry.fc) + " bpm" : "—";
+                        const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
+                        const temperature = entry.temperature
+                            ? escapeHtml(entry.temperature) + " °C"
+                            : "—";
 
                         return `
                             <tr>
                                 <td>${escapeHtml(date)}</td>
-                                <td>${formatBloodPressure(entry.pa)}</td>
-                                <td>${escapeHtml(entry.fc || "—")}</td>
-                                <td>${escapeHtml(entry.sat || "—")}</td>
-                                <td>${escapeHtml(entry.temperature || "—")}</td>
+                                <td>${pa !== "—" ? pa + " <small>mm/Mh</small>" : "—"}</td>
+                                <td>${fc}</td>
+                                <td>${sat}</td>
+                                <td>${temperature}</td>
                             </tr>
                         `;
                     }).join("")}
@@ -754,7 +760,8 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
                         <div class="patient-pv-section">
                             <h4>🩺 Parametri vitali</h4>
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
-                            <button id="openPvRecorder" class="settings-action" type="button">➕ Nuova rilevazione PV</button>
+                            <button id="openPvRecorder" class="settings-action" type="button"
+    data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
                         </div>
 
                         <button id="savePatient" class="settings-action" type="button"
@@ -866,12 +873,12 @@ function setupPatients() {
         }
 
         if (event.target.closest("#openPvRecorder")) {
-            const editor = document.querySelector(".patient-editor");
-            const id = editor?.dataset.selectedId || "";
+            const id = event.target.closest("#openPvRecorder")?.dataset.patientId || "";
             if (!id) return;
 
             const modal = document.createElement("div");
             modal.className = "patient-pv-modal";
+            modal.dataset.patientId = id;
             modal.innerHTML = `
                 <div class="patient-pv-modal-card">
                     <h3>🩺 Nuova rilevazione PV</h3>
@@ -886,6 +893,16 @@ function setupPatients() {
                 </div>
             `;
             document.body.appendChild(modal);
+
+            const paInput = modal.querySelector("#patientPa");
+            paInput?.addEventListener("input", () => {
+                let digits = paInput.value.replace(/\D/g, "").slice(0, 6);
+                if (digits.length > 3) {
+                    digits = digits.slice(0, 3) + "/" + digits.slice(3);
+                }
+                paInput.value = digits;
+            });
+
             return;
         }
 
@@ -895,7 +912,9 @@ function setupPatients() {
         }
 
         if (event.target.closest("#addPatientPv")) {
-            const editingId = document.querySelector(".patient-editor")?.dataset.selectedId || "";
+            const editingId = event.target.closest("#addPatientPv")
+                ?.closest(".patient-pv-modal")
+                ?.dataset.patientId || "";
             if (!editingId) return;
 
             const pa = document.getElementById("patientPa")?.value.trim() || "";
