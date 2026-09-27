@@ -298,7 +298,7 @@ function escapeNoteText(value) {
 
 function extractPlaceorders(text) {
     const matches = [];
-    const regex = /<placeorder>([\\s\\S]*?)<\\/placeorder>/gi;
+    const regex = /<placeorder>([\s\S]*?)<\/placeorder>/gi;
     let match;
 
     while ((match = regex.exec(String(text || ""))) !== null) {
@@ -333,7 +333,7 @@ function renderPlaceorders(text) {
 
 function renderNoteText(text) {
     return escapeNoteText(text).replace(
-        /&lt;placeorder&gt;([\\s\\S]*?)&lt;\\/placeorder&gt;/gi,
+        /&lt;placeorder&gt;([\s\S]*?)&lt;\\/placeorder&gt;/gi,
         ""
     );
 }
