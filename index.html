@@ -65,6 +65,21 @@
                 <button id="orderModeButton" class="settings-action" type="button">↕️ Modifica ordine</button>
                 <button id="resetOrderButton" class="settings-action" type="button">↩️ Ripristina ordini</button>
                 <button id="settingsThemeButton" class="settings-action" type="button">🌙 Tema</button>
+
+                <div class="settings-divider"></div>
+
+                <button id="exportPersonalizationButton" class="settings-action" type="button">📥 Esporta personalizzazione</button>
+                <button id="importPersonalizationButton" class="settings-action" type="button">📤 Importa personalizzazione</button>
+                <input
+                    id="importPersonalizationInput"
+                    type="file"
+                    accept="application/json,.json"
+                    hidden
+                >
+
+                <div class="settings-divider"></div>
+
+                <button id="resetPersonalizationButton" class="settings-action settings-danger" type="button">↩️ Ripristino completo</button>
             </div>
             <p id="settingsMessage" class="settings-message"></p>
         </div>
