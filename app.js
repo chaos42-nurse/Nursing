@@ -108,6 +108,10 @@ function setupSettings() {
     const orderButton = document.getElementById("orderModeButton");
     const resetButton = document.getElementById("resetOrderButton");
     const themeButton = document.getElementById("settingsThemeButton");
+    const exportButton = document.getElementById("exportPersonalizationButton");
+    const importButton = document.getElementById("importPersonalizationButton");
+    const importInput = document.getElementById("importPersonalizationInput");
+    const resetAllButton = document.getElementById("resetPersonalizationButton");
     const message = document.getElementById("settingsMessage");
 
     if (!panel || !openButton) return;
@@ -153,14 +157,7 @@ function setupSettings() {
     });
 
     resetButton?.addEventListener("click", () => {
-        const keys = Object.keys(localStorage)
-            .filter(key =>
-                key === "nursing-category-order" ||
-                key.startsWith("nursing-sections-") ||
-                key.startsWith("nursing-items-")
-            );
-
-        keys.forEach(key => localStorage.removeItem(key));
+        resetOrderPreferences();
 
         setMessage("↩️ Ordini ripristinati.");
 
@@ -180,6 +177,347 @@ function setupSettings() {
         applyTheme(current === "dark" ? "light" : "dark");
         setMessage("Tema aggiornato.");
     });
+
+    exportButton?.addEventListener("click", () => {
+        exportPersonalization();
+        setMessage("📥 Personalizzazione esportata.");
+    });
+
+    importButton?.addEventListener("click", () => {
+        importInput?.click();
+    });
+
+    importInput?.addEventListener("change", event => {
+        const file = event.target.files?.[0];
+
+        if (!file) return;
+
+        importPersonalization(file, setMessage);
+        event.target.value = "";
+    });
+
+    resetAllButton?.addEventListener("click", () => {
+        const confirmed = window.confirm(
+            "Ripristinare tutte le personalizzazioni locali? Note, ordini e tema verranno cancellati. I contenuti dell'archivio non verranno modificati."
+        );
+
+        if (!confirmed) return;
+
+        resetAllPersonalization();
+
+        setMessage("↩️ Personalizzazione ripristinata.");
+
+        panel.hidden = false;
+
+        if (state) {
+            loadState();
+        } else {
+            loadCategories();
+        }
+    });
+}
+
+
+/* =========================================================
+   PERSONALIZZAZIONE UTENTE
+========================================================= */
+
+const PERSONALIZATION_VERSION = 1;
+
+const PERSONALIZATION_KEYS = {
+    theme: "nursing-theme",
+    categoryOrder: "nursing-category-order",
+    notes: "nursing-personal-notes"
+};
+
+function getPersonalNotes() {
+
+    try {
+        return JSON.parse(
+            localStorage.getItem(PERSONALIZATION_KEYS.notes) || "{}"
+        );
+    } catch (_) {
+        return {};
+    }
+}
+
+function getPersonalNoteKey(stateId, itemId) {
+    return (stateId || "") + "::" + (itemId || "");
+}
+
+function savePersonalNote(stateId, itemId, value) {
+
+    const notes = getPersonalNotes();
+    const key = getPersonalNoteKey(stateId, itemId);
+    const text = String(value || "").trim();
+
+    if (text) {
+        notes[key] = text;
+    } else {
+        delete notes[key];
+    }
+
+    localStorage.setItem(
+        PERSONALIZATION_KEYS.notes,
+        JSON.stringify(notes)
+    );
+}
+
+function deletePersonalNote(stateId, itemId) {
+
+    const notes = getPersonalNotes();
+    delete notes[getPersonalNoteKey(stateId, itemId)];
+
+    localStorage.setItem(
+        PERSONALIZATION_KEYS.notes,
+        JSON.stringify(notes)
+    );
+}
+
+function renderPersonalNote(stateId, itemId) {
+
+    const notes = getPersonalNotes();
+    const value =
+        notes[getPersonalNoteKey(stateId, itemId)] || "";
+
+    return `
+        <section class="personal-note">
+            <div class="personal-note-header">
+                <h3>📝 La mia nota</h3>
+                <span>Solo su questo dispositivo</span>
+            </div>
+
+            <textarea
+                id="personalNoteInput"
+                class="personal-note-input"
+                placeholder="Scrivi una nota personale..."
+                rows="5"
+            >NOTE_VALUE_PLACEHOLDER</textarea>
+
+            <div class="personal-note-actions">
+                <button
+                    id="savePersonalNote"
+                    class="settings-action"
+                    type="button"
+                >
+                    💾 Salva nota
+                </button>
+
+                <button
+                    id="clearPersonalNote"
+                    class="settings-action personal-note-clear"
+                    type="button"
+                >
+                    🗑️ Cancella nota
+                </button>
+            </div>
+
+            <p id="personalNoteMessage" class="personal-note-message"></p>
+        </section>
+    `;
+}
+
+function setupPersonalNotes() {
+
+    document.addEventListener("click", event => {
+
+        if (event.target.closest("#savePersonalNote")) {
+
+            const input =
+                document.getElementById("personalNoteInput");
+
+            if (!input) return;
+
+            savePersonalNote(
+                state,
+                item,
+                input.value
+            );
+
+            const message =
+                document.getElementById("personalNoteMessage");
+
+            if (message) {
+                message.textContent =
+                    "✅ Nota salvata su questo dispositivo.";
+            }
+        }
+
+        if (event.target.closest("#clearPersonalNote")) {
+
+            deletePersonalNote(state, item);
+
+            const input =
+                document.getElementById("personalNoteInput");
+
+            if (input) input.value = "";
+
+            const message =
+                document.getElementById("personalNoteMessage");
+
+            if (message) {
+                message.textContent =
+                    "🗑️ Nota cancellata.";
+            }
+        }
+    });
+}
+
+function collectOrderPreferences() {
+
+    const result = {};
+
+    for (const key of Object.keys(localStorage)) {
+
+        if (
+            key === PERSONALIZATION_KEYS.categoryOrder ||
+            key.startsWith("nursing-sections-") ||
+            key.startsWith("nursing-items-")
+        ) {
+            result[key] = localStorage.getItem(key);
+        }
+    }
+
+    return result;
+}
+
+function collectPersonalization() {
+
+    return {
+        app: "Nursing Shot",
+        type: "personalization",
+        version: PERSONALIZATION_VERSION,
+        exportedAt: new Date().toISOString(),
+        theme:
+            localStorage.getItem(PERSONALIZATION_KEYS.theme) ||
+            "dark",
+        orders: collectOrderPreferences(),
+        notes: getPersonalNotes()
+    };
+}
+
+function exportPersonalization() {
+
+    const data = collectPersonalization();
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "nursing-shot-personalizzazione.json";
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+function importPersonalization(file, setMessage) {
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+        try {
+
+            const data =
+                JSON.parse(reader.result);
+
+            if (
+                !data ||
+                data.type !== "personalization" ||
+                data.app !== "Nursing Shot"
+            ) {
+                throw new Error("File di personalizzazione non valido.");
+            }
+
+            if (data.theme === "light" || data.theme === "dark") {
+                localStorage.setItem(
+                    PERSONALIZATION_KEYS.theme,
+                    data.theme
+                );
+            }
+
+            const orders =
+                data.orders &&
+                typeof data.orders === "object"
+                    ? data.orders
+                    : {};
+
+            resetOrderPreferences();
+
+            for (const [key, value] of Object.entries(orders)) {
+
+                if (
+                    key === PERSONALIZATION_KEYS.categoryOrder ||
+                    key.startsWith("nursing-sections-") ||
+                    key.startsWith("nursing-items-")
+                ) {
+                    localStorage.setItem(key, String(value));
+                }
+            }
+
+            const notes =
+                data.notes &&
+                typeof data.notes === "object"
+                    ? data.notes
+                    : {};
+
+            localStorage.setItem(
+                PERSONALIZATION_KEYS.notes,
+                JSON.stringify(notes)
+            );
+
+            setupTheme();
+
+            setMessage("✅ Personalizzazione importata.");
+
+            if (state) {
+                loadState();
+            } else {
+                loadCategories();
+            }
+
+        } catch (error) {
+
+            console.error(error);
+            setMessage("❌ File di personalizzazione non valido.");
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function resetOrderPreferences() {
+
+    const keys = Object.keys(localStorage)
+        .filter(key =>
+            key === PERSONALIZATION_KEYS.categoryOrder ||
+            key.startsWith("nursing-sections-") ||
+            key.startsWith("nursing-items-")
+        );
+
+    keys.forEach(key => localStorage.removeItem(key));
+}
+
+function resetAllPersonalization() {
+
+    resetOrderPreferences();
+
+    localStorage.removeItem(
+        PERSONALIZATION_KEYS.notes
+    );
+
+    localStorage.removeItem(
+        PERSONALIZATION_KEYS.theme
+    );
+
+    applyTheme("dark");
+    orderEditMode = false;
+    document.body.classList.remove("order-editing");
 }
 
 
@@ -1583,13 +1921,15 @@ function renderContentBlock(block) {
 function detailHeader(title, data) {
 
     return `
+        <div class="detail-header-row">
+            <h2>${title}</h2>
+        </div>
 
-        <h2>
-            ${title}
-        </h2>
-
+        ${state && item ? renderPersonalNote(state, item) : ""}
     `;
 }
+
+
 
 /* =========================================================
    TESTO GENERICO
@@ -4761,6 +5101,7 @@ function applyLocalOverride(stateId, data) {
 ========================================================= */
 setupTheme();
 setupSettings();
+setupPersonalNotes();
 
 if (editor === "1") {
 
