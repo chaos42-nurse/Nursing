@@ -2,10 +2,20 @@
    PULIZIA VECCHIA SCHERMATA DI CARICAMENTO
 ========================================================= */
 
-const oldLoadingScreen = document.getElementById("appLoadingScreen");
-if (oldLoadingScreen) {
-    oldLoadingScreen.remove();
+function hideAppLoadingScreen() {
+    const loadingScreen =
+        document.getElementById("appLoadingScreen");
+
+    if (!loadingScreen) return;
+
+    loadingScreen.classList.add("app-loading-hidden");
+
+    setTimeout(() => {
+        loadingScreen.remove();
+    }, 220);
 }
+
+window.addEventListener("load", hideAppLoadingScreen);
 
 
 /* =========================================================
