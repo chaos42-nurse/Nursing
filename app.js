@@ -422,82 +422,6 @@ function renderPersonalNotesButton(stateId, itemId) {
     `;
 }
 
-function renderGlobalNoteLinks() {
-    const groups = new Map();
-
-    for (const record of getAllPersonalNoteRecords()) {
-        for (const term of extractPlaceorders(record.note.text)) {
-            const targets = getLinkedNoteRecords(
-                term,
-                record.stateId,
-                record.itemId,
-                record.note.id
-            );
-
-            if (!targets.length) continue;
-
-            const key = normalizeLinkTerm(term);
-
-            if (!groups.has(key)) {
-                groups.set(key, {
-                    term,
-                    targets: []
-                });
-            }
-
-            const group = groups.get(key);
-
-            targets.forEach(target => {
-                const exists = group.targets.some(
-                    current =>
-                        current.stateId === target.stateId &&
-                        current.itemId === target.itemId &&
-                        String(current.note.id) === String(target.note.id)
-                );
-
-                if (!exists) {
-                    group.targets.push(target);
-                }
-            });
-        }
-    }
-
-    if (!groups.size) return "";
-
-    return [
-        '<section class="personal-note-index">',
-        '<div class="personal-note-index-title">🔎 Collegamenti tra note</div>',
-        '<p>Parole presenti in più note. Clicca una destinazione per aprirla.</p>',
-        '<div class="personal-note-index-list">',
-        Array.from(groups.values()).map(group =>
-            '<div class="personal-note-index-group">' +
-                '<strong class="personal-note-index-term">' +
-                    escapeHtml(group.term) +
-                '</strong>' +
-                '<div class="personal-note-index-links">' +
-                    group.targets.map(target =>
-                        '<a class="personal-note-index-link" href="' +
-                        makeNoteUrl(
-                            target.stateId,
-                            target.itemId,
-                            target.note.id
-                        ) +
-                        '">' +
-                        escapeHtml(target.stateId) +
-                        ' › ' +
-                        escapeHtml(target.itemId) +
-                        ' — ' +
-                        escapeHtml(target.note.title || "Nota personale") +
-                        '</a>'
-                    ).join("") +
-                '</div>' +
-            '</div>'
-        ).join(""),
-        '</div>',
-        '</section>'
-    ].join("");
-}
-
 function renderAllNoteLinksPage(termFilter = "") {
     const groups = new Map();
 
@@ -678,9 +602,6 @@ function setupPersonalNotes() {
                 .filter(note => note.id !== noteId);
 
             saveNotesForItem(state, item, notes);
-
-            const activePlaceorder =
-                new URLSearchParams(window.location.search).get("placeorder") || "";
 
             renderPersonalNotesPage(
                 state,
