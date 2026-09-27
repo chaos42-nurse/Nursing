@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-app-cache-v17";
+const CACHE_NAME = "nursing-app-cache-v18";
 
 const CORE_FILES = [
     "./",
