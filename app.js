@@ -855,9 +855,6 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         <button id="cancelPatientEdit" class="settings-action" type="button">
                             ↩️ Annulla modifiche
                         </button>
-                        <button id="deleteCurrentPatient" class="settings-action settings-danger" type="button">
-                            🗑️ Elimina paziente
-                        </button>
                         <p id="patientMessage" class="personal-note-message"></p>
                     ` : `
                         ${renderPatientField("Data di nascita", selectedPatient.birthDate)}
@@ -879,6 +876,9 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 
                         <button id="editCurrentPatient" class="settings-action" type="button">
                             ✏️ Modifica scheda
+                        </button>
+                        <button id="deleteCurrentPatient" class="settings-action settings-danger" type="button">
+                            🗑️ Elimina paziente
                         </button>
                     `}
                 </div>
@@ -1156,13 +1156,28 @@ function setupPatients() {
         }
 
         if (event.target.closest("#deleteCurrentPatient")) {
-            const id = document.getElementById("savePatient")?.dataset.editingId || "";
+            const id =
+                document.querySelector(".patient-editor[data-selected-id]")?.dataset.selectedId || "";
+
             if (!id) return;
 
-            if (!window.confirm("Eliminare questo paziente dal dispositivo?")) return;
+            const patient =
+                getPatients().find(current => current.id === id);
 
-            savePatients(getPatients().filter(patient => patient.id !== id));
+            if (!patient) return;
+
+            if (!window.confirm(
+                "Eliminare il paziente \"" + (patient.name || "senza nome") + "\" dal dispositivo?"
+            )) {
+                return;
+            }
+
+            savePatients(
+                getPatients().filter(current => current.id !== id)
+            );
+
             renderPatientsPage();
+            return;
         }
     });
 }
@@ -1210,11 +1225,12 @@ if (backButton) {
 
     backButton.addEventListener("click", () => {
 
-        if (
-            patientsRoute === "1" &&
-            document.querySelector(".patient-editor[data-selected-id]")
-        ) {
-            renderPatientsPage();
+        if (patientsRoute === "1") {
+            if (document.querySelector(".patient-editor[data-selected-id]")) {
+                renderPatientsPage();
+            } else {
+                window.location.href = "./";
+            }
             return;
         }
 
