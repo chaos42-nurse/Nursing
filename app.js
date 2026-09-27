@@ -6783,7 +6783,7 @@ function showGenericShareQr(url) {
     });
 }
 
-function writeGenericNfc(url) {
+async function writeGenericNfc(url) {
     if (!window.isSecureContext) {
         window.alert(
             "La scrittura NFC richiede una connessione HTTPS."
