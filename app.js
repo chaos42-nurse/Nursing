@@ -5192,6 +5192,55 @@ if (patientsRoute === "1") {
 /* =========================================================
    AVVIO
 ========================================================= */
+
+/* =========================================================
+   TEMA
+========================================================= */
+
+function applyTheme(theme) {
+
+    const normalizedTheme =
+        theme === "light" ? "light" : "dark";
+
+    document.documentElement.dataset.theme =
+        normalizedTheme;
+
+    localStorage.setItem(
+        "nursing-theme",
+        normalizedTheme
+    );
+
+}
+
+function setupTheme() {
+
+    const savedTheme =
+        localStorage.getItem("nursing-theme") || "dark";
+
+    applyTheme(savedTheme);
+
+    const themeButton =
+        document.getElementById("themeButton") ||
+        document.getElementById("settingsThemeButton");
+
+    if (themeButton) {
+
+        themeButton.addEventListener("click", () => {
+
+            const current =
+                document.documentElement.dataset.theme ||
+                "dark";
+
+            applyTheme(
+                current === "dark" ? "light" : "dark"
+            );
+
+        });
+
+    }
+
+}
+
 setupTheme();
 setupSettings();
 setupPersonalNotes();
