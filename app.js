@@ -222,7 +222,7 @@ function setupSettings() {
    PERSONALIZZAZIONE UTENTE
 ========================================================= */
 
-const PERSONALIZATION_VERSION = 1;
+const PERSONALIZATION_VERSION = 2;
 
 const PERSONALIZATION_KEYS = {
     theme: "nursing-theme",
@@ -231,139 +231,254 @@ const PERSONALIZATION_KEYS = {
 };
 
 function getPersonalNotes() {
-
     try {
-        return JSON.parse(
+        const raw = JSON.parse(
             localStorage.getItem(PERSONALIZATION_KEYS.notes) || "{}"
         );
+
+        const normalized = {};
+
+        for (const [key, value] of Object.entries(raw)) {
+            if (Array.isArray(value)) {
+                normalized[key] = value
+                    .filter(note => note && typeof note === "object")
+                    .map(note => ({
+                        id: String(note.id || Date.now()),
+                        title: String(note.title || "Nota personale"),
+                        text: String(note.text || "")
+                    }));
+            } else if (typeof value === "string" && value.trim()) {
+                normalized[key] = [{
+                    id: "legacy-" + Date.now(),
+                    title: "Nota personale",
+                    text: value
+                }];
+            }
+        }
+
+        return normalized;
     } catch (_) {
         return {};
     }
+}
+
+function savePersonalNotes(notes) {
+    localStorage.setItem(
+        PERSONALIZATION_KEYS.notes,
+        JSON.stringify(notes)
+    );
 }
 
 function getPersonalNoteKey(stateId, itemId) {
     return (stateId || "") + "::" + (itemId || "");
 }
 
-function savePersonalNote(stateId, itemId, value) {
+function getNotesForItem(stateId, itemId) {
+    const notes = getPersonalNotes();
+    return notes[getPersonalNoteKey(stateId, itemId)] || [];
+}
 
+function saveNotesForItem(stateId, itemId, itemNotes) {
     const notes = getPersonalNotes();
     const key = getPersonalNoteKey(stateId, itemId);
-    const text = String(value || "").trim();
 
-    if (text) {
-        notes[key] = text;
+    if (itemNotes.length) {
+        notes[key] = itemNotes;
     } else {
         delete notes[key];
     }
 
-    localStorage.setItem(
-        PERSONALIZATION_KEYS.notes,
-        JSON.stringify(notes)
-    );
+    savePersonalNotes(notes);
 }
 
-function deletePersonalNote(stateId, itemId) {
-
-    const notes = getPersonalNotes();
-    delete notes[getPersonalNoteKey(stateId, itemId)];
-
-    localStorage.setItem(
-        PERSONALIZATION_KEYS.notes,
-        JSON.stringify(notes)
-    );
+function escapeNoteText(value) {
+    return escapeHtml(value)
+        .replace(/\n/g, "<br>");
 }
 
-function renderPersonalNote(stateId, itemId) {
+function extractPlaceorders(text) {
+    const matches = [];
+    const regex = /<placeorder>([\\s\\S]*?)<\\/placeorder>/gi;
+    let match;
 
-    const notes = getPersonalNotes();
-    const value =
-        notes[getPersonalNoteKey(stateId, itemId)] || "";
+    while ((match = regex.exec(String(text || ""))) !== null) {
+        const term = match[1].trim();
+        if (term && !matches.includes(term)) {
+            matches.push(term);
+        }
+    }
+
+    return matches;
+}
+
+function renderPlaceorders(text) {
+    const terms = extractPlaceorders(text);
+
+    if (!terms.length) {
+        return "";
+    }
 
     return `
-        <section class="personal-note">
-            <div class="personal-note-header">
-                <h3>📝 La mia nota</h3>
-                <span>Solo su questo dispositivo</span>
+        <div class="personal-note-links">
+            <span>Collegamenti:</span>
+            ${terms.map(term => `
+                <a
+                    class="personal-note-link"
+                    href="?state=${encodeURIComponent(state)}&item=${encodeURIComponent(item)}&notes=1&placeorder=${encodeURIComponent(term)}"
+                >↗ ${escapeHtml(term)}</a>
+            `).join("")}
+        </div>
+    `;
+}
+
+function renderNoteText(text) {
+    return escapeNoteText(text).replace(
+        /&lt;placeorder&gt;([\\s\\S]*?)&lt;\\/placeorder&gt;/gi,
+        ""
+    );
+}
+
+function renderPersonalNotesButton(stateId, itemId) {
+    return `
+        <a
+            class="personal-notes-button"
+            href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(itemId)}&notes=1"
+        >
+            <span>📝 Note personali</span>
+            <span class="arrow">→</span>
+        </a>
+    `;
+}
+
+function renderPersonalNotesPage(stateId, itemId, data, title) {
+    const notes = getNotesForItem(stateId, itemId);
+    const activePlaceorder =
+        new URLSearchParams(window.location.search).get("placeorder") || "";
+
+    const filteredNotes = activePlaceorder
+        ? notes.filter(note =>
+            extractPlaceorders(note.text)
+                .some(term => term.toLowerCase() === activePlaceorder.toLowerCase())
+        )
+        : notes;
+
+    content.innerHTML = `
+        <section class="detail-page personal-notes-page">
+            <div class="detail-header-row">
+                <h2>📝 Note personali</h2>
             </div>
 
-            <textarea
-                id="personalNoteInput"
-                class="personal-note-input"
-                placeholder="Scrivi una nota personale..."
-                rows="5"
-            >NOTE_VALUE_PLACEHOLDER</textarea>
+            <p class="personal-notes-context">
+                ${escapeHtml(title)}
+            </p>
 
-            <div class="personal-note-actions">
-                <button
-                    id="savePersonalNote"
-                    class="settings-action"
-                    type="button"
-                >
-                    💾 Salva nota
-                </button>
+            ${activePlaceorder ? `
+                <div class="personal-note-filter">
+                    Collegate tramite <strong>${escapeHtml(activePlaceorder)}</strong>
+                    <a href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(itemId)}&notes=1">Mostra tutte</a>
+                </div>
+            ` : ""}
 
-                <button
-                    id="clearPersonalNote"
-                    class="settings-action personal-note-clear"
-                    type="button"
-                >
-                    🗑️ Cancella nota
-                </button>
+            <div class="personal-notes-list">
+                ${filteredNotes.length
+                    ? filteredNotes.map(note => `
+                        <article class="personal-note-card" data-note-id="${escapeAttribute(note.id)}">
+                            <div class="personal-note-card-header">
+                                <h3>${escapeHtml(note.title || "Nota personale")}</h3>
+                                <button class="personal-note-delete" type="button" data-note-delete="${escapeAttribute(note.id)}">🗑️</button>
+                            </div>
+                            <div class="personal-note-text">${renderNoteText(note.text)}</div>
+                            ${renderPlaceorders(note.text)}
+                        </article>
+                    `).join("")
+                    : `
+                        <div class="personal-note-empty">
+                            Nessuna nota personale in questa sottocategoria.
+                        </div>
+                    `}
             </div>
 
-            <p id="personalNoteMessage" class="personal-note-message"></p>
+            <div class="personal-note-editor">
+                <h3>➕ Nuova nota</h3>
+                <input id="personalNoteTitle" class="personal-note-title-input" type="text" placeholder="Titolo della nota">
+                <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota...\n\nPer collegarla ad altre note usa: <placeorder>parola</placeorder>" rows="7"></textarea>
+                <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
+                <p id="personalNoteMessage" class="personal-note-message"></p>
+            </div>
+
+            <a
+                class="personal-notes-back"
+                href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(itemId)}"
+            >← Torna alla scheda</a>
         </section>
     `;
 }
 
 function setupPersonalNotes() {
-
     document.addEventListener("click", event => {
+        const deleteButton = event.target.closest("[data-note-delete]");
+
+        if (deleteButton) {
+            const noteId = deleteButton.dataset.noteDelete;
+            const notes = getNotesForItem(state, item)
+                .filter(note => note.id !== noteId);
+
+            saveNotesForItem(state, item, notes);
+
+            const activePlaceorder =
+                new URLSearchParams(window.location.search).get("placeorder") || "";
+
+            renderPersonalNotesPage(
+                state,
+                item,
+                window.__currentData || {},
+                window.__currentItemTitle || ""
+            );
+            return;
+        }
 
         if (event.target.closest("#savePersonalNote")) {
-
-            const input =
-                document.getElementById("personalNoteInput");
+            const titleInput = document.getElementById("personalNoteTitle");
+            const input = document.getElementById("personalNoteInput");
 
             if (!input) return;
 
-            savePersonalNote(
+            const textValue = input.value.trim();
+
+            if (!textValue) {
+                const message = document.getElementById("personalNoteMessage");
+                if (message) message.textContent = "✏️ Scrivi prima il testo della nota.";
+                return;
+            }
+
+            const notes = getNotesForItem(state, item);
+            notes.push({
+                id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+                title: (titleInput?.value || "").trim() || "Nota personale",
+                text: textValue
+            });
+
+            saveNotesForItem(state, item, notes);
+
+            input.value = "";
+            if (titleInput) titleInput.value = "";
+
+            const message = document.getElementById("personalNoteMessage");
+            if (message) message.textContent = "✅ Nota aggiunta.";
+
+            renderPersonalNotesPage(
                 state,
                 item,
-                input.value
+                window.__currentData || {},
+                window.__currentItemTitle || ""
             );
-
-            const message =
-                document.getElementById("personalNoteMessage");
-
-            if (message) {
-                message.textContent =
-                    "✅ Nota salvata su questo dispositivo.";
-            }
-        }
-
-        if (event.target.closest("#clearPersonalNote")) {
-
-            deletePersonalNote(state, item);
-
-            const input =
-                document.getElementById("personalNoteInput");
-
-            if (input) input.value = "";
-
-            const message =
-                document.getElementById("personalNoteMessage");
-
-            if (message) {
-                message.textContent =
-                    "🗑️ Nota cancellata.";
-            }
         }
     });
 }
 
 function collectOrderPreferences() {
+
+
 
     const result = {};
 
