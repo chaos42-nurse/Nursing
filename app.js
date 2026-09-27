@@ -774,6 +774,14 @@ function renderPatientPvHistory(history, patientId = "") {
         </div>
     `;
 }
+function getPatientInitials(name = "") {
+    return String(name)
+        .trim()
+        .match(/(?:^|[\s'])\p{L}/gu)
+        ?.join("")
+        .toUpperCase() || "";
+}
+
 function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
     const patients = getPatients();
     const selectedPatient =
@@ -936,13 +944,14 @@ function setupPatients() {
     document.addEventListener("input", event => {
         if (event.target.id !== "patientSearch") return;
 
-        const query = event.target.value.trim().toLocaleLowerCase("it-IT");
+        const query = event.target.value.trim().toLocaleUpperCase("it-IT");
 
         document.querySelectorAll("[data-patient-open]").forEach(button => {
-            const name = button.querySelector("strong")?.textContent
-                .toLocaleLowerCase("it-IT") || "";
+            const name = button.querySelector("strong")?.textContent || "";
+            const initials = getPatientInitials(name);
+
             button.style.display =
-                !query || name.includes(query) ? "" : "none";
+                !query || initials.startsWith(query) ? "" : "none";
         });
     });
 
@@ -965,9 +974,7 @@ function setupPatients() {
             const url = new URL(window.location.href);
             url.searchParams.set("patients", "1");
             url.searchParams.set("patient", patientId);
-            window.history.pushState({}, "", url);
-
-            renderPatientsPage(patientId, false);
+            window.location.href = url.toString();
             return;
         }
 
@@ -7885,8 +7892,12 @@ if (incomingPersonalization) {
     `);
     const patientSearchList = document.getElementById("patientNames");
     getPatients().forEach(patient => {
+        const initials = getPatientInitials(patient.name);
+        if (!initials) return;
+
         const option = document.createElement("option");
-        option.value = patient.name || "";
+        option.value = initials;
+        option.label = patient.name || initials;
         patientSearchList?.appendChild(option);
     });
     document.getElementById("patientSearchToggle")?.addEventListener("click", () => {
