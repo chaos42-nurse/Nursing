@@ -2130,3 +2130,23 @@ section h2 {
     gap: 10px;
     margin: 14px 0;
 }
+
+
+.patient-pv-actions {
+    white-space: nowrap;
+}
+
+.patient-pv-actions button {
+    margin: 0 2px;
+    min-width: 36px;
+    padding: 7px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--button-bg, rgba(255,255,255,.08));
+    color: inherit;
+    cursor: pointer;
+}
+
+.patient-pv-actions button:hover {
+    filter: brightness(1.1);
+}
