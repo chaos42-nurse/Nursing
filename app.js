@@ -7091,7 +7091,7 @@ if (incomingPersonalization) {
 
 } else if (editor === "1") {
 
-    loadEditor()};
+    loadEditor();
 
 } else {
 
