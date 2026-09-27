@@ -415,13 +415,33 @@ function renderPlaceorders(text, sourceStateId, sourceItemId, sourceNoteId) {
     ].join("");
 }
 
-function renderNoteText(text) {
-    return escapeNoteText(text)
-        .replace(
-            /&lt;placeorder&gt;([\s\S]*?)&lt;\/placeorder&gt;/gi,
-            ""
-        )
-        .replace(/\[\[([\s\S]*?)\]\]/g, "");
+function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
+    const source = String(text || "");
+    const pattern = /<placeorder>([\\s\\S]*?)<\\/placeorder>|\\[\\[([\\s\\S]*?)\\]\\]/gi;
+    let html = "";
+    let lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(source)) !== null) {
+        html += escapeNoteText(source.slice(lastIndex, match.index));
+
+        const term = String(match[1] || match[2] || "").trim();
+
+        if (term) {
+            html += '<a class="personal-note-linked-term" href="?links=1&term=' +
+                encodeURIComponent(term) +
+                '" title="Visualizza i collegamenti di ' +
+                escapeAttribute(term) +
+                '">' +
+                escapeHtml(term) +
+                '</a>';
+        }
+
+        lastIndex = pattern.lastIndex;
+    }
+
+    html += escapeNoteText(source.slice(lastIndex));
+    return html;
 }
 
 function renderPersonalNotesButton(stateId, itemId) {
@@ -513,6 +533,83 @@ function renderGlobalNoteLinks() {
     ].join("");
 }
 
+function renderAllNoteLinksPage(termFilter = "") {
+    const groups = new Map();
+
+    for (const record of getAllPersonalNoteRecords()) {
+        for (const term of extractPlaceorders(record.note.text)) {
+            const key = normalizeLinkTerm(term);
+
+            if (!groups.has(key)) {
+                groups.set(key, { term, records: [] });
+            }
+
+            const group = groups.get(key);
+
+            if (!group.records.some(existing =>
+                existing.stateId === record.stateId &&
+                existing.itemId === record.itemId &&
+                String(existing.note.id) === String(record.note.id)
+            )) {
+                group.records.push(record);
+            }
+        }
+    }
+
+    let visibleGroups = Array.from(groups.values())
+        .filter(group => group.records.length >= 2)
+        .sort((a, b) =>
+            normalizeLinkTerm(a.term).localeCompare(
+                normalizeLinkTerm(b.term), "it"
+            )
+        );
+
+    if (termFilter) {
+        const normalizedFilter = normalizeLinkTerm(termFilter);
+        visibleGroups = visibleGroups.filter(group =>
+            normalizeLinkTerm(group.term) === normalizedFilter
+        );
+    }
+
+    content.innerHTML = `
+        <section class="detail-page personal-links-page">
+            <div class="detail-header-row">
+                <h2>🔗 Collegamenti tra note</h2>
+            </div>
+            <p class="personal-notes-context">
+                Tutti i collegamenti creati con &lt;placeorder&gt;parola&lt;/placeorder&gt; o [[parola]].
+            </p>
+            ${termFilter ? `
+                <div class="personal-note-filter">
+                    Parola selezionata: <strong>${escapeHtml(termFilter)}</strong>
+                    <a href="?links=1">Mostra tutti</a>
+                </div>
+            ` : ""}
+            <div class="personal-note-index-list">
+                ${visibleGroups.length
+                    ? visibleGroups.map(group => `
+                        <article class="personal-note-index-group">
+                            <strong class="personal-note-index-term">${escapeHtml(group.term)}</strong>
+                            <div class="personal-note-index-links">
+                                ${group.records.map(record => `
+                                    <a class="personal-note-index-link"
+                                       href="${makeNoteUrl(record.stateId, record.itemId, record.note.id, group.term)}">
+                                        <span>${escapeHtml(record.stateId)} › ${escapeHtml(record.itemId)}</span>
+                                        <strong>${escapeHtml(record.note.title || "Nota personale")}</strong>
+                                    </a>
+                                `).join("")}
+                            </div>
+                        </article>
+                    `).join("")
+                    : `<div class="personal-note-empty">${termFilter
+                        ? "Nessun collegamento trovato per questa parola."
+                        : "Non ci sono ancora parole presenti in più note."}</div>`
+                }
+            </div>
+        </section>
+    `;
+}
+
 function renderPersonalNotesPage(stateId, itemId, data, title) {
     const notes = getNotesForItem(stateId, itemId);
     const activePlaceorder =
@@ -557,7 +654,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                                     <button class="personal-note-delete" type="button" data-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
                             </div>
-                            <div class="personal-note-text">${renderNoteText(note.text)}</div>
+                            <div class="personal-note-text">${renderNoteText(note.text, stateId, itemId, note.id)}</div>
                             ${renderPlaceorders(note.text, stateId, itemId, note.id)}
                         </article>
                     `).join("")
@@ -1188,6 +1285,27 @@ function saveShortcutOrder() {
 ========================================================= */
 
 async function loadState() {
+
+        const linksMode =
+        new URLSearchParams(window.location.search).get("links");
+
+    if (linksMode === "1") {
+        document.body.classList.remove("home-page");
+        shortcuts.style.display = "none";
+
+        if (backButton) {
+            backButton.style.display = "flex";
+        }
+
+        const termFilter =
+            new URLSearchParams(window.location.search).get("term") || "";
+
+        stateTitle.textContent = "🔗 Collegamenti";
+        description.textContent = "Collegamenti tra tutte le note personali.";
+        renderAllNoteLinksPage(termFilter);
+        return;
+    }
+
 
     /*
      * HOME
