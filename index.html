@@ -52,8 +52,47 @@
 
 <body>
 
-    <!-- Rimuove eventuali residui della vecchia schermata di caricamento. -->
-    <style>#appLoadingScreen{display:none!important;visibility:hidden!important;pointer-events:none!important;}</style>
+    <div id="appLoadingScreen" aria-hidden="true">
+        <img src="./icon.svg" alt="" class="app-loading-icon">
+        <div class="app-loading-title">Nursing Shot</div>
+    </div>
+
+    <style>
+        #appLoadingScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #E1F4F5;
+            color: #0d1117;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .18s ease, visibility .18s ease;
+        }
+
+        #appLoadingScreen.app-loading-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .app-loading-icon {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .app-loading-title {
+            margin-top: -2px;
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+    </style>
 
     <div id="settingsPanel" class="settings-panel" hidden>
         <div class="settings-card">
