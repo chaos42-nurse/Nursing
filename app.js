@@ -148,6 +148,27 @@ function renderPatientsPage() {
     `;
 }
 
+function setupPvInputFormatting(modal) {
+    const paInput = modal.querySelector("#patientPa");
+    const temperatureInput = modal.querySelector("#patientTemperature");
+
+    paInput?.addEventListener("input", () => {
+        let digits = paInput.value.replace(/\D/g, "").slice(0, 6);
+        if (digits.length > 3) {
+            digits = digits.slice(0, 3) + "/" + digits.slice(3);
+        }
+        paInput.value = digits;
+    });
+
+    temperatureInput?.addEventListener("input", () => {
+        let digits = temperatureInput.value.replace(/\D/g, "").slice(0, 4);
+        if (digits.length > 2) {
+            digits = digits.slice(0, 2) + "," + digits.slice(2);
+        }
+        temperatureInput.value = digits;
+    });
+}
+
 function setupPatients() {
     document.addEventListener("click", event => {
         if (event.target.closest("#savePatient")) {
@@ -292,28 +313,59 @@ function setupPatients() {
     });
 }
 
-function renderPatientPvHistory(history) {
+function renderPatientPvHistory(history, patientId = "") {
     if (!Array.isArray(history) || !history.length) {
         return '<div class="personal-note-empty">Nessuna rilevazione registrata.</div>';
     }
 
-    return history.slice().reverse().map(entry => {
-        const date = entry.recordedAt
-            ? new Date(entry.recordedAt).toLocaleString("it-IT")
-            : "Data non disponibile";
+    return `
+        <div class="patient-pv-table-wrap">
+            <table class="patient-pv-table">
+                <thead>
+                    <tr>
+                        <th>Data/ora</th>
+                        <th>P.A.<small>mm/Mh</small></th>
+                        <th>F.C.<small>bpm</small></th>
+                        <th>Sat.<small>%</small></th>
+                        <th>T.°<small>°C</small></th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${history.slice().reverse().map((entry, reversedIndex) => {
+                        const index = history.length - 1 - reversedIndex;
+                        const date = entry.recordedAt
+                            ? new Date(entry.recordedAt).toLocaleString("it-IT")
+                            : "—";
+                        const pa = formatBloodPressure(entry.pa);
+                        const fc = entry.fc ? escapeHtml(entry.fc) + " bpm" : "—";
+                        const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
+                        const temperature = entry.temperature
+                            ? escapeHtml(entry.temperature) + " °C"
+                            : "—";
 
-        return `
-            <article class="patient-pv-entry">
-                <strong>${escapeHtml(date)}</strong>
-                <div class="patient-pv-grid">
-                    <span><b>P.A.</b> ${escapeHtml(entry.pa || "—")}</span>
-                    <span><b>F.C.</b> ${escapeHtml(entry.fc || "—")}</span>
-                    <span><b>Sat.</b> ${escapeHtml(entry.sat || "—")}</span>
-                    <span><b>T°</b> ${escapeHtml(entry.temperature || "—")}</span>
-                </div>
-            </article>
-        `;
-    }).join("");
+                        return `
+                            <tr>
+                                <td>${escapeHtml(date)}</td>
+                                <td>${pa !== "—" ? pa + " <small>mm/Mh</small>" : "—"}</td>
+                                <td>${fc}</td>
+                                <td>${sat}</td>
+                                <td>${temperature}</td>
+                                <td class="patient-pv-actions">
+                                    <button type="button" class="patient-pv-edit"
+                                        data-patient-id="${escapeAttribute(patientId)}"
+                                        data-pv-index="${index}">✏️</button>
+                                    <button type="button" class="patient-pv-delete"
+                                        data-patient-id="${escapeAttribute(patientId)}"
+                                        data-pv-index="${index}">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
 }
 
 function calculatePatientAge(birthDate) {
@@ -659,7 +711,7 @@ function renderPatientField(label, value) {
     return `
         <div class="patient-readonly-field">
             <strong>${escapeHtml(label)}</strong>
-            <span>${escapeHtml(value || "—").replace(/\\n/g, "<br>")}</span>
+            <span>${value ? renderNoteText(value) : "—"}</span>
         </div>
     `;
 }
@@ -759,7 +811,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
 
                         <div class="patient-pv-section">
                             <h4>🩺 Parametri vitali</h4>
-                            <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
+                            <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory, selectedPatient.id)}</div>
                             <button id="openPvRecorder" class="settings-action" type="button"
     data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
                         </div>
@@ -789,7 +841,8 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
                         <div class="patient-pv-section">
                             <h4>🩺 Parametri vitali</h4>
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
-                            <button id="openPvRecorder" class="settings-action" type="button">➕ Nuova rilevazione PV</button>
+                            <button id="openPvRecorder" class="settings-action" type="button"
+    data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
                         </div>
 
                         <button id="editCurrentPatient" class="settings-action" type="button">
@@ -872,6 +925,52 @@ function setupPatients() {
             return;
         }
 
+        if (event.target.closest(".patient-pv-edit")) {
+            const button = event.target.closest(".patient-pv-edit");
+            const patientId = button.dataset.patientId || "";
+            const index = Number(button.dataset.pvIndex);
+            const patient = getPatients().find(current => current.id === patientId);
+            const entry = patient?.pvHistory?.[index];
+            if (!patient || !entry) return;
+
+            const modal = document.createElement("div");
+            modal.className = "patient-pv-modal";
+            modal.dataset.patientId = patientId;
+            modal.dataset.pvIndex = String(index);
+            modal.innerHTML = `
+                <div class="patient-pv-modal-card">
+                    <h3>✏️ Modifica rilevazione PV</h3>
+                    <div class="patient-pv-input-form">
+                        <input id="patientPa" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh (es. 120/80)">
+                        <input id="patientFc" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.fc || "")}" placeholder="F.C. bpm">
+                        <input id="patientSat" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.sat || "")}" placeholder="Sat. %">
+                        <input id="patientTemperature" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
+                    </div>
+                    <button id="savePatientPv" class="settings-action" type="button">💾 Salva rilevazione</button>
+                    <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setupPvInputFormatting(modal);
+            return;
+        }
+
+        if (event.target.closest(".patient-pv-delete")) {
+            const button = event.target.closest(".patient-pv-delete");
+            const patientId = button.dataset.patientId || "";
+            const index = Number(button.dataset.pvIndex);
+            if (!window.confirm("Eliminare questa rilevazione dei parametri vitali?")) return;
+
+            const patients = getPatients();
+            const patient = patients.find(current => current.id === patientId);
+            if (!patient || !patient.pvHistory[index]) return;
+
+            patient.pvHistory.splice(index, 1);
+            savePatients(patients);
+            renderPatientsPage(patientId, false);
+            return;
+        }
+
         if (event.target.closest("#openPvRecorder")) {
             const id = event.target.closest("#openPvRecorder")?.dataset.patientId || "";
             if (!id) return;
@@ -893,21 +992,41 @@ function setupPatients() {
                 </div>
             `;
             document.body.appendChild(modal);
-
-            const paInput = modal.querySelector("#patientPa");
-            paInput?.addEventListener("input", () => {
-                let digits = paInput.value.replace(/\D/g, "").slice(0, 6);
-                if (digits.length > 3) {
-                    digits = digits.slice(0, 3) + "/" + digits.slice(3);
-                }
-                paInput.value = digits;
-            });
-
+            setupPvInputFormatting(modal);
             return;
         }
 
         if (event.target.closest("#closePvRecorder")) {
             event.target.closest(".patient-pv-modal")?.remove();
+            return;
+        }
+
+        if (event.target.closest("#savePatientPv")) {
+            const modal = event.target.closest(".patient-pv-modal");
+            const patientId = modal?.dataset.patientId || "";
+            const index = Number(modal?.dataset.pvIndex);
+            const patients = getPatients();
+            const patient = patients.find(current => current.id === patientId);
+            if (!patient || !patient.pvHistory[index]) return;
+
+            const pa = document.getElementById("patientPa")?.value.trim() || "";
+            const fc = document.getElementById("patientFc")?.value.trim() || "";
+            const sat = document.getElementById("patientSat")?.value.trim() || "";
+            const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
+
+            if (!pa && !fc && !sat && !temperature) {
+                window.alert("Inserisci almeno un parametro vitale.");
+                return;
+            }
+
+            patient.pvHistory[index] = {
+                ...patient.pvHistory[index],
+                pa, fc, sat, temperature
+            };
+
+            savePatients(patients);
+            modal.remove();
+            renderPatientsPage(patientId, false);
             return;
         }
 
