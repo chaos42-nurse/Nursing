@@ -370,56 +370,16 @@ function getLinkedNoteRecords(term, sourceStateId, sourceItemId, sourceNoteId) {
     });
 }
 
-function makeNoteUrl(stateId, itemId, noteId, term = "") {
+function makeNoteUrl(stateId, itemId, noteId) {
     const params = new URLSearchParams();
     params.set("state", stateId);
     params.set("item", itemId);
     params.set("notes", "1");
-
-    if (term) {
-        params.set("placeorder", term);
-    }
+    params.set("note", noteId);
 
     return "?" + params.toString();
 }
 
-
-function renderPlaceorders(text, sourceStateId, sourceItemId, sourceNoteId) {
-    const terms = extractPlaceorders(text);
-
-    if (!terms.length) return "";
-
-    return [
-        '<div class="personal-note-links">',
-        '<span>🔗 Parole collegate:</span>',
-        terms.map(term => {
-            const targets = getLinkedNoteRecords(
-                term,
-                sourceStateId,
-                sourceItemId,
-                sourceNoteId
-            );
-
-            const targetLinks = targets.map(target =>
-                '<a class="personal-note-link" href="' +
-                makeNoteUrl(target.stateId, target.itemId, target.note.id, term) +
-                '">' +
-                escapeHtml(target.stateId) +
-                ' › ' +
-                escapeHtml(target.itemId) +
-                ' — ' +
-                escapeHtml(target.note.title || "Nota personale") +
-                '</a>'
-            ).join("");
-
-            return '<div class="personal-note-link-group">' +
-                '<strong>' + escapeHtml(term) + '</strong>' +
-                (targetLinks || '<span class="personal-note-link-empty">Nessun altro collegamento</span>') +
-                '</div>';
-        }).join(""),
-        '</div>'
-    ].join("");
-}
 
 function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
     const source = String(text || "");
@@ -583,7 +543,7 @@ function renderAllNoteLinksPage(termFilter = "") {
                 <h2>🔗 Collegamenti tra note</h2>
             </div>
             <p class="personal-notes-context">
-                Tutti i collegamenti creati con &lt;placeorder&gt;parola&lt;/placeorder&gt; o [[parola]].
+                Tutti i collegamenti creati con [[parola]].
             </p>
             ${termFilter ? `
                 <div class="personal-note-filter">
@@ -599,7 +559,7 @@ function renderAllNoteLinksPage(termFilter = "") {
                             <div class="personal-note-index-links">
                                 ${group.records.map(record => `
                                     <a class="personal-note-index-link"
-                                       href="${makeNoteUrl(record.stateId, record.itemId, record.note.id, group.term)}">
+                                       href="${makeNoteUrl(record.stateId, record.itemId, record.note.id)}">
                                         <span>${escapeHtml(record.stateId)} › ${escapeHtml(record.itemId)}</span>
                                         <strong>${escapeHtml(record.note.title || "Nota personale")}</strong>
                                     </a>
@@ -618,15 +578,6 @@ function renderAllNoteLinksPage(termFilter = "") {
 
 function renderPersonalNotesPage(stateId, itemId, data, title) {
     const notes = getNotesForItem(stateId, itemId);
-    const activePlaceorder =
-        new URLSearchParams(window.location.search).get("placeorder") || "";
-
-    const filteredNotes = activePlaceorder
-        ? notes.filter(note =>
-            extractPlaceorders(note.text)
-                .some(term => term.toLowerCase() === activePlaceorder.toLowerCase())
-        )
-        : notes;
 
     content.innerHTML = `
         <section class="detail-page personal-notes-page">
@@ -638,18 +589,9 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 ${escapeHtml(title)}
             </p>
 
-            ${activePlaceorder ? `
-                <div class="personal-note-filter">
-                    Collegate tramite <strong>${escapeHtml(activePlaceorder)}</strong>
-                    <a href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(itemId)}&notes=1">Mostra tutte</a>
-                </div>
-            ` : ""}
-
-            ${renderGlobalNoteLinks()}
-
             <div class="personal-notes-list">
-                ${filteredNotes.length
-                    ? filteredNotes.map(note => `
+                ${notes.length
+                    ? notes.map(note => `
                         <article class="personal-note-card" data-note-id="${escapeAttribute(note.id)}">
                             <div class="personal-note-card-header">
                                 <div>
@@ -661,21 +603,47 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                                 </div>
                             </div>
                             <div class="personal-note-text">${renderNoteText(note.text, stateId, itemId, note.id)}</div>
-                            ${renderPlaceorders(note.text, stateId, itemId, note.id)}
                         </article>
                     `).join("")
                     : `
                         <div class="personal-note-empty">
                             Nessuna nota personale in questa sottocategoria.
                         </div>
-                    `}
+                    `
             </div>
 
-            <div class="personal-note-editor">
-                <h3>➕ Nuova nota</h3>
-                <input id="personalNoteTitle" class="personal-note-title-input" type="text" placeholder="Titolo della nota">
-                <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota...\n\nPer collegarla ad altre note usa: <placeorder>parola</placeorder>" rows="7"></textarea>
-                <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
+            <button id="openPersonalNoteEditor" class="settings-action personal-note-open-editor" type="button">
+                ➕ Nuova nota
+            </button>
+
+            <div id="personalNoteEditor" class="personal-note-editor" hidden>
+                <div class="personal-note-editor-header">
+                    <h3 id="personalNoteEditorTitle">➕ Nuova nota</h3>
+                    <button id="closePersonalNoteEditor" class="personal-note-editor-close" type="button" title="Chiudi editor">✕</button>
+                </div>
+
+                <input
+                    id="personalNoteTitle"
+                    class="personal-note-title-input"
+                    type="text"
+                    placeholder="Titolo della nota"
+                >
+
+                <textarea
+                    id="personalNoteInput"
+                    class="personal-note-input"
+                    placeholder="Scrivi la nota...\n\nPer collegarla ad altre note usa: [[parola]]"
+                    rows="12"
+                ></textarea>
+
+                <button id="savePersonalNote" class="settings-action" type="button">
+                    💾 Aggiungi nota
+                </button>
+
+                <button id="cancelPersonalNoteEdit" class="settings-action personal-note-cancel" type="button">
+                    Annulla
+                </button>
+
                 <p id="personalNoteMessage" class="personal-note-message"></p>
             </div>
 
@@ -689,38 +657,124 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
 
 function setupPersonalNotes() {
     document.addEventListener("click", event => {
+        const editor = document.getElementById("personalNoteEditor");
+        const titleInput = document.getElementById("personalNoteTitle");
+        const input = document.getElementById("personalNoteInput");
+        const saveButton = document.getElementById("savePersonalNote");
+        const editorTitle = document.getElementById("personalNoteEditorTitle");
+
+        const openEditor = () => {
+            if (!editor) return;
+
+            editor.hidden = false;
+
+            const openButton =
+                document.getElementById("openPersonalNoteEditor");
+
+            if (openButton) {
+                openButton.hidden = true;
+            }
+
+            setTimeout(() => {
+                (titleInput || input)?.focus();
+                editor.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }, 0);
+        };
+
+        const closeEditor = () => {
+            if (!editor) return;
+
+            editor.hidden = true;
+
+            const openButton =
+                document.getElementById("openPersonalNoteEditor");
+
+            if (openButton) {
+                openButton.hidden = false;
+            }
+
+            editor.dataset.editingId = "";
+
+            if (titleInput) titleInput.value = "";
+            if (input) input.value = "";
+
+            if (editorTitle) {
+                editorTitle.textContent = "➕ Nuova nota";
+            }
+
+            if (saveButton) {
+                saveButton.textContent = "💾 Aggiungi nota";
+            }
+        };
+
+        if (event.target.closest("#openPersonalNoteEditor")) {
+            if (editorTitle) {
+                editorTitle.textContent = "➕ Nuova nota";
+            }
+
+            if (saveButton) {
+                saveButton.textContent = "💾 Aggiungi nota";
+            }
+
+            if (editor) {
+                editor.dataset.editingId = "";
+            }
+
+            if (titleInput) titleInput.value = "";
+            if (input) input.value = "";
+
+            openEditor();
+            return;
+        }
+
+        if (
+            event.target.closest("#closePersonalNoteEditor") ||
+            event.target.closest("#cancelPersonalNoteEdit")
+        ) {
+            closeEditor();
+            return;
+        }
+
         const editButton = event.target.closest("[data-note-edit]");
 
         if (editButton) {
             const noteId = editButton.dataset.noteEdit;
             const notes = getNotesForItem(state, item);
-            const note = notes.find(current => String(current.id) === String(noteId));
+            const note = notes.find(current =>
+                String(current.id) === String(noteId)
+            );
 
             if (!note) return;
 
-            const newTitle = window.prompt("Titolo della nota:", note.title || "Nota personale");
-            if (newTitle === null) return;
+            openEditor();
 
-            const newText = window.prompt("Testo della nota:", note.text || "");
-            if (newText === null) return;
-
-            if (!newText.trim()) {
-                window.alert("La nota non può essere vuota.");
-                return;
+            if (editor) {
+                editor.dataset.editingId = String(note.id);
             }
 
-            note.title = newTitle.trim() || "Nota personale";
-            note.text = newText.trim();
-            note.updatedAt = new Date().toISOString();
+            if (editorTitle) {
+                editorTitle.textContent = "✏️ Modifica nota";
+            }
 
-            saveNotesForItem(state, item, notes);
+            if (saveButton) {
+                saveButton.textContent = "💾 Salva modifiche";
+            }
 
-            renderPersonalNotesPage(
-                state,
-                item,
-                window.__currentData || {},
-                window.__currentItemTitle || ""
-            );
+            if (titleInput) {
+                titleInput.value = note.title || "";
+            }
+
+            if (input) {
+                input.value = note.text || "";
+                input.focus();
+                input.setSelectionRange(
+                    input.value.length,
+                    input.value.length
+                );
+            }
 
             return;
         }
@@ -730,12 +784,9 @@ function setupPersonalNotes() {
         if (deleteButton) {
             const noteId = deleteButton.dataset.noteDelete;
             const notes = getNotesForItem(state, item)
-                .filter(note => note.id !== noteId);
+                .filter(note => String(note.id) !== String(noteId));
 
             saveNotesForItem(state, item, notes);
-
-            const activePlaceorder =
-                new URLSearchParams(window.location.search).get("placeorder") || "";
 
             renderPersonalNotesPage(
                 state,
@@ -747,33 +798,65 @@ function setupPersonalNotes() {
         }
 
         if (event.target.closest("#savePersonalNote")) {
-            const titleInput = document.getElementById("personalNoteTitle");
-            const input = document.getElementById("personalNoteInput");
-
             if (!input) return;
 
             const textValue = input.value.trim();
 
             if (!textValue) {
-                const message = document.getElementById("personalNoteMessage");
-                if (message) message.textContent = "✏️ Scrivi prima il testo della nota.";
+                const message =
+                    document.getElementById("personalNoteMessage");
+
+                if (message) {
+                    message.textContent =
+                        "✏️ Scrivi prima il testo della nota.";
+                }
+
                 return;
             }
 
             const notes = getNotesForItem(state, item);
+            const editingId =
+                editor?.dataset.editingId || "";
+
+            if (editingId) {
+                const note =
+                    notes.find(current =>
+                        String(current.id) === String(editingId)
+                    );
+
+                if (note) {
+                    note.title =
+                        (titleInput?.value || "").trim() ||
+                        "Nota personale";
+
+                    note.text = textValue;
+                    note.updatedAt = new Date().toISOString();
+                }
+
+                saveNotesForItem(state, item, notes);
+
+                renderPersonalNotesPage(
+                    state,
+                    item,
+                    window.__currentData || {},
+                    window.__currentItemTitle || ""
+                );
+
+                return;
+            }
+
             notes.push({
-                id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
-                title: (titleInput?.value || "").trim() || "Nota personale",
+                id:
+                    String(Date.now()) +
+                    "-" +
+                    Math.random().toString(36).slice(2, 8),
+                title:
+                    (titleInput?.value || "").trim() ||
+                    "Nota personale",
                 text: textValue
             });
 
             saveNotesForItem(state, item, notes);
-
-            input.value = "";
-            if (titleInput) titleInput.value = "";
-
-            const message = document.getElementById("personalNoteMessage");
-            if (message) message.textContent = "✅ Nota aggiunta.";
 
             renderPersonalNotesPage(
                 state,
@@ -784,167 +867,6 @@ function setupPersonalNotes() {
         }
     });
 }
-
-function collectOrderPreferences() {
-
-
-
-    const result = {};
-
-    for (const key of Object.keys(localStorage)) {
-
-        if (
-            key === PERSONALIZATION_KEYS.categoryOrder ||
-            key.startsWith("nursing-sections-") ||
-            key.startsWith("nursing-items-")
-        ) {
-            result[key] = localStorage.getItem(key);
-        }
-    }
-
-    return result;
-}
-
-function collectPersonalization() {
-
-    return {
-        app: "Nursing Shot",
-        type: "personalization",
-        version: PERSONALIZATION_VERSION,
-        exportedAt: new Date().toISOString(),
-        theme:
-            localStorage.getItem(PERSONALIZATION_KEYS.theme) ||
-            "dark",
-        orders: collectOrderPreferences(),
-        notes: getPersonalNotes()
-    };
-}
-
-function exportPersonalization() {
-
-    const data = collectPersonalization();
-
-    const blob = new Blob(
-        [JSON.stringify(data, null, 2)],
-        { type: "application/json" }
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "nursing-shot-personalizzazione.json";
-    link.click();
-
-    URL.revokeObjectURL(url);
-}
-
-function importPersonalization(file, setMessage) {
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-
-        try {
-
-            const data =
-                JSON.parse(reader.result);
-
-            if (
-                !data ||
-                data.type !== "personalization" ||
-                data.app !== "Nursing Shot"
-            ) {
-                throw new Error("File di personalizzazione non valido.");
-            }
-
-            if (data.theme === "light" || data.theme === "dark") {
-                localStorage.setItem(
-                    PERSONALIZATION_KEYS.theme,
-                    data.theme
-                );
-            }
-
-            const orders =
-                data.orders &&
-                typeof data.orders === "object"
-                    ? data.orders
-                    : {};
-
-            resetOrderPreferences();
-
-            for (const [key, value] of Object.entries(orders)) {
-
-                if (
-                    key === PERSONALIZATION_KEYS.categoryOrder ||
-                    key.startsWith("nursing-sections-") ||
-                    key.startsWith("nursing-items-")
-                ) {
-                    localStorage.setItem(key, String(value));
-                }
-            }
-
-            const notes =
-                data.notes &&
-                typeof data.notes === "object"
-                    ? data.notes
-                    : {};
-
-            localStorage.setItem(
-                PERSONALIZATION_KEYS.notes,
-                JSON.stringify(notes)
-            );
-
-            setupTheme();
-
-            setMessage("✅ Personalizzazione importata.");
-
-            if (state) {
-                loadState();
-            } else {
-                loadCategories();
-            }
-
-        } catch (error) {
-
-            console.error(error);
-            setMessage("❌ File di personalizzazione non valido.");
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-function resetOrderPreferences() {
-
-    const keys = Object.keys(localStorage)
-        .filter(key =>
-            key === PERSONALIZATION_KEYS.categoryOrder ||
-            key.startsWith("nursing-sections-") ||
-            key.startsWith("nursing-items-")
-        );
-
-    keys.forEach(key => localStorage.removeItem(key));
-}
-
-function resetAllPersonalization() {
-
-    resetOrderPreferences();
-
-    localStorage.removeItem(
-        PERSONALIZATION_KEYS.notes
-    );
-
-    localStorage.removeItem(
-        PERSONALIZATION_KEYS.theme
-    );
-
-    applyTheme("dark");
-    orderEditMode = false;
-    document.body.classList.remove("order-editing");
-}
-
-
 
 /* =========================================================
    NAVIGAZIONE
