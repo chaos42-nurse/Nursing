@@ -929,10 +929,10 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 }
 
 function setupPatients() {
-    const searchInput = document.getElementById("patientSearch");
+    document.addEventListener("input", event => {
+        if (event.target.id !== "patientSearch") return;
 
-    searchInput?.addEventListener("input", () => {
-        const query = searchInput.value.trim().toLocaleLowerCase("it-IT");
+        const query = event.target.value.trim().toLocaleLowerCase("it-IT");
 
         document.querySelectorAll("[data-patient-open]").forEach(button => {
             const name = button.querySelector("strong")?.textContent
