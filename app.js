@@ -941,26 +941,17 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 }
 
 function setupPatients() {
-    document.addEventListener("input", event => {
-        if (event.target.id !== "patientSearch") return;
+    document.addEventListener("click", event => {
+        const suggestion = event.target.closest("[data-patient-suggestion]");
+        if (!suggestion) return;
 
-        const query = event.target.value.trim().toLocaleLowerCase("it-IT");
+        const patientId = suggestion.dataset.patientSuggestion || "";
+        if (!patientId) return;
 
-        document.querySelectorAll("[data-patient-open]").forEach(button => {
-            const name = button.querySelector("strong")?.textContent || "";
-            const words = name
-                .trim()
-                .split(/[\\s']+/)
-                .filter(Boolean);
-
-            const matches =
-                !query ||
-                words.some(word =>
-                    word.toLocaleLowerCase("it-IT").startsWith(query)
-                );
-
-            button.style.display = matches ? "" : "none";
-        });
+        const url = new URL(window.location.href);
+        url.searchParams.set("patients", "1");
+        url.searchParams.set("patient", patientId);
+        window.location.href = url.toString();
     });
 
     document.addEventListener("click", event => {
@@ -7897,29 +7888,79 @@ if (incomingPersonalization) {
     description.textContent =
         "Gestione locale dei pazienti.";
     shortcuts.style.display = "none";
-    stateTitle.insertAdjacentHTML("afterend", `
+    document.querySelector(".page-title-row")?.insertAdjacentHTML("beforeend", `
         <button id="patientSearchToggle" class="patient-search-toggle" type="button" aria-label="Cerca paziente">🔍</button>
-        <input id="patientSearch" class="patient-search-input" type="search"
-            placeholder="Cerca paziente..." autocomplete="off" list="patientNames">
-        <datalist id="patientNames"></datalist>
     `);
-    const patientSearchList = document.getElementById("patientNames");
-    getPatients().forEach(patient => {
-        const initials = getPatientInitials(patient.name);
-        if (!initials) return;
 
-        const option = document.createElement("option");
-        option.value = patient.name || initials;
-        option.label = initials;
-        option.dataset.initials = initials;
-        patientSearchList?.appendChild(option);
+    stateTitle.insertAdjacentHTML("afterend", `
+        <input id="patientSearch" class="patient-search-input" type="search"
+            placeholder="Cerca paziente..." autocomplete="off">
+        <div id="patientSearchSuggestions" class="patient-search-suggestions" hidden></div>
+    `);
+
+    const patientSearch = document.getElementById("patientSearch");
+    const patientSearchSuggestions =
+        document.getElementById("patientSearchSuggestions");
+
+    function updatePatientSearch(queryValue = "") {
+        const query = queryValue.trim().toLocaleLowerCase("it-IT");
+        const patients = getPatients();
+
+        document.querySelectorAll("[data-patient-open]").forEach(button => {
+            const name = button.querySelector("strong")?.textContent || "";
+            const words = name.trim().split(/[\\s']+/).filter(Boolean);
+
+            const matches =
+                !query ||
+                words.some(word =>
+                    word.toLocaleLowerCase("it-IT").startsWith(query)
+                );
+
+            button.style.display = matches ? "" : "none";
+        });
+
+        if (!patientSearchSuggestions) return;
+
+        if (!query) {
+            patientSearchSuggestions.hidden = true;
+            patientSearchSuggestions.innerHTML = "";
+            return;
+        }
+
+        const matches = patients.filter(patient => {
+            const words = String(patient.name || "")
+                .trim()
+                .split(/[\\s']+/)
+                .filter(Boolean);
+
+            return words.some(word =>
+                word.toLocaleLowerCase("it-IT").startsWith(query)
+            );
+        });
+
+        patientSearchSuggestions.innerHTML = matches.map(patient => `
+            <button type="button" class="patient-search-suggestion"
+                data-patient-suggestion="${escapeAttribute(patient.id)}">
+                <strong>${escapeHtml(getPatientInitials(patient.name))}</strong>
+                <span>${escapeHtml(patient.name)}</span>
+            </button>
+        `).join("");
+
+        patientSearchSuggestions.hidden = matches.length === 0;
+    }
+
+    patientSearch?.addEventListener("input", () => {
+        updatePatientSearch(patientSearch.value);
     });
     document.getElementById("patientSearchToggle")?.addEventListener("click", () => {
         const input = document.getElementById("patientSearch");
         if (!input) return;
+
         input.classList.toggle("is-open");
-        if (input.classList.contains("is-open")) input.focus();
-        else {
+
+        if (input.classList.contains("is-open")) {
+            input.focus();
+        } else {
             input.value = "";
             input.dispatchEvent(new Event("input"));
         }
