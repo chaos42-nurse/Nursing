@@ -1110,11 +1110,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             </p>
 
             <div class="personal-notes-share-actions">
-                <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi collegamento</button>
-                <button id="qrPersonalNotes" class="settings-action" type="button">▦ Mostra QR</button>
-                <button id="readQrPersonalNotes" class="settings-action" type="button">📷 Leggi QR</button>
-                <button id="readNfcPersonalNotes" class="settings-action" type="button">📡 Leggi NFC</button>
-                <button id="writeNfcPersonalNotes" class="settings-action" type="button">📳 Scrivi su NFC</button>
+                <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi / importa</button>
             </div>
 
             <div class="personal-notes-list">
@@ -1159,27 +1155,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
 function setupPersonalNotes() {
     document.addEventListener("click", event => {
         if (event.target.closest("#sharePersonalNotes")) {
-            shareCurrentNotes(state, item);
-            return;
-        }
-
-        if (event.target.closest("#qrPersonalNotes")) {
-            showNotesQr(state, item);
-            return;
-        }
-
-        if (event.target.closest("#readQrPersonalNotes")) {
-            readNotesQr();
-            return;
-        }
-
-        if (event.target.closest("#readNfcPersonalNotes")) {
-            readNotesNfc();
-            return;
-        }
-
-        if (event.target.closest("#writeNfcPersonalNotes")) {
-            writeNotesNfc(state, item);
+            showShareCenter();
             return;
         }
 
@@ -1455,6 +1431,68 @@ function getSelectedNotesFromDialog(dialog) {
             'input[data-share-note]:checked'
         )
     ).map(input => input.dataset.shareNote);
+}
+
+
+function showShareCenter() {
+    document.getElementById("shareCenterDialog")?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "shareCenterDialog";
+    dialog.className = "notes-qr-dialog";
+
+    dialog.innerHTML = `
+        <div class="notes-qr-card personalization-share-card">
+            <button
+                class="notes-qr-close"
+                type="button"
+                aria-label="Chiudi"
+            >×</button>
+
+            <h3>🔗 Condividi / importa</h3>
+
+            <button id="shareCenterSend" class="settings-action" type="button">
+                📤 Condividi
+            </button>
+
+            <button id="shareCenterQr" class="settings-action" type="button">
+                📷 Importa da QR
+            </button>
+
+            <button id="shareCenterNfc" class="settings-action" type="button">
+                📡 Importa da NFC
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const close = () => dialog.remove();
+
+    dialog.querySelector(".notes-qr-close")
+        ?.addEventListener("click", close);
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) close();
+    });
+
+    dialog.querySelector("#shareCenterSend")
+        ?.addEventListener("click", () => {
+            close();
+            showPersonalizationShareDialog();
+        });
+
+    dialog.querySelector("#shareCenterQr")
+        ?.addEventListener("click", () => {
+            close();
+            readNotesQr();
+        });
+
+    dialog.querySelector("#shareCenterNfc")
+        ?.addEventListener("click", () => {
+            close();
+            readNotesNfc();
+        });
 }
 
 function showPersonalizationShareDialog() {
