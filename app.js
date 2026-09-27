@@ -298,20 +298,31 @@ function escapeNoteText(value) {
 
 function extractPlaceorders(text) {
     const matches = [];
-    const regex = /<placeorder>([\s\S]*?)<\/placeorder>/gi;
-    let match;
+    const patterns = [
+        /<placeorder>([\s\S]*?)<\/placeorder>/gi,
+        /\[\[([\s\S]*?)\]\]/g
+    ];
 
-    while ((match = regex.exec(String(text || ""))) !== null) {
-        const term = match[1].trim();
-        if (term && !matches.includes(term)) {
-            matches.push(term);
+    for (const regex of patterns) {
+        let match;
+
+        while ((match = regex.exec(String(text || ""))) !== null) {
+            const term = match[1].trim();
+
+            if (
+                term &&
+                !matches.some(existing =>
+                    normalizeLinkTerm(existing) ===
+                    normalizeLinkTerm(term)
+                )
+            ) {
+                matches.push(term);
+            }
         }
     }
 
     return matches;
 }
-
-
 function getAllPersonalNoteRecords() {
     const notes = getPersonalNotes();
     const records = [];
@@ -323,7 +334,7 @@ function getAllPersonalNoteRecords() {
         const stateId = key.slice(0, separator);
         const itemId = key.slice(separator + 2);
 
-        itemNotes_ForEach(note => {
+        itemNotes.forEach(note => {
             records.push({ stateId, itemId, note });
         });
     }
@@ -364,24 +375,41 @@ function makeNoteUrl(stateId, itemId, noteId, term = "") {
 }
 
 
-function renderPlaceorders(text) {
+function renderPlaceorders(text, sourceStateId, sourceItemId, sourceNoteId) {
     const terms = extractPlaceorders(text);
 
-    if (!terms.length) {
-        return "";
-    }
+    if (!terms.length) return "";
 
-    return `
-        <div class="personal-note-links">
-            <span>Collegamenti:</span>
-            ${terms.map(term => `
-                <a
-                    class="personal-note-link"
-                    href="?state=${encodeURIComponent(state)}&item=${encodeURIComponent(item)}&notes=1&placeorder=${encodeURIComponent(term)}"
-                >↗ ${escapeHtml(term)}</a>
-            `).join("")}
-        </div>
-    `;
+    return [
+        '<div class="personal-note-links">',
+        '<span>🔗 Parole collegate:</span>',
+        terms.map(term => {
+            const targets = getLinkedNoteRecords(
+                term,
+                sourceStateId,
+                sourceItemId,
+                sourceNoteId
+            );
+
+            const targetLinks = targets.map(target =>
+                '<a class="personal-note-link" href="' +
+                makeNoteUrl(target.stateId, target.itemId, target.note.id, term) +
+                '">' +
+                escapeHtml(target.stateId) +
+                ' › ' +
+                escapeHtml(target.itemId) +
+                ' — ' +
+                escapeHtml(target.note.title || "Nota personale") +
+                '</a>'
+            ).join("");
+
+            return '<div class="personal-note-link-group">' +
+                '<strong>' + escapeHtml(term) + '</strong>' +
+                (targetLinks || '<span class="personal-note-link-empty">Nessun altro collegamento</span>') +
+                '</div>';
+        }).join(""),
+        '</div>'
+    ].join("");
 }
 
 function renderNoteText(text) {
@@ -441,7 +469,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                                 <button class="personal-note-delete" type="button" data-note-delete="${escapeAttribute(note.id)}">🗑️</button>
                             </div>
                             <div class="personal-note-text">${renderNoteText(note.text)}</div>
-                            ${renderPlaceorders(note.text)}
+                            ${renderPlaceorders(note.text, stateId, itemId, note.id)}
                         </article>
                     `).join("")
                     : `
@@ -469,6 +497,42 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
 
 function setupPersonalNotes() {
     document.addEventListener("click", event => {
+        const editButton = event.target.closest("[data-note-edit]");
+
+        if (editButton) {
+            const noteId = editButton.dataset.noteEdit;
+            const notes = getNotesForItem(state, item);
+            const note = notes.find(current => String(current.id) === String(noteId));
+
+            if (!note) return;
+
+            const newTitle = window.prompt("Titolo della nota:", note.title || "Nota personale");
+            if (newTitle === null) return;
+
+            const newText = window.prompt("Testo della nota:", note.text || "");
+            if (newText === null) return;
+
+            if (!newText.trim()) {
+                window.alert("La nota non può essere vuota.");
+                return;
+            }
+
+            note.title = newTitle.trim() || "Nota personale";
+            note.text = newText.trim();
+            note.updatedAt = new Date().toISOString();
+
+            saveNotesForItem(state, item, notes);
+
+            renderPersonalNotesPage(
+                state,
+                item,
+                window.__currentData || {},
+                window.__currentItemTitle || ""
+            );
+
+            return;
+        }
+
         const deleteButton = event.target.closest("[data-note-delete]");
 
         if (deleteButton) {
