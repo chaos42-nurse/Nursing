@@ -316,84 +316,252 @@ function renderPatientPvHistory(history) {
     }).join("");
 }
 
-function renderPatientsPage(selectedPatientId = "") {
+function calculatePatientAge(birthDate) {
+    if (!birthDate) return "";
+
+    const birth = new Date(birthDate + "T00:00:00");
+    if (Number.isNaN(birth.getTime())) return "";
+
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+
+    const beforeBirthday =
+        today.getMonth() < birth.getMonth() ||
+        (
+            today.getMonth() === birth.getMonth() &&
+            today.getDate() < birth.getDate()
+        );
+
+    if (beforeBirthday) age--;
+
+    return age >= 0 ? String(age) : "";
+}
+
+function renderPatientField(label, value) {
+    return `
+        <div class="patient-readonly-field">
+            <strong>${escapeHtml(label)}</strong>
+            <span>${escapeHtml(value || "—").replace(/\\n/g, "<br>")}</span>
+        </div>
+    `;
+}
+
+function renderPatientPvHistory(history) {
+    if (!Array.isArray(history) || !history.length) {
+        return '<div class="personal-note-empty">Nessuna rilevazione registrata.</div>';
+    }
+
+    return history.slice().reverse().map(entry => {
+        const date = entry.recordedAt
+            ? new Date(entry.recordedAt).toLocaleString("it-IT")
+            : "Data non disponibile";
+
+        return `
+            <article class="patient-pv-entry">
+                <strong>${escapeHtml(date)}</strong>
+                <div class="patient-pv-grid">
+                    <span><b>P.A.</b> ${escapeHtml(entry.pa || "—")}</span>
+                    <span><b>F.C.</b> ${escapeHtml(entry.fc || "—")}</span>
+                    <span><b>Sat.</b> ${escapeHtml(entry.sat || "—")}</span>
+                    <span><b>T°</b> ${escapeHtml(entry.temperature || "—")}</span>
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+function renderPatientsPage(selectedPatientId = "", editMode = false) {
     const patients = getPatients();
-    const selectedPatient = patients.find(patient => patient.id === selectedPatientId) || null;
+    const selectedPatient =
+        patients.find(patient => patient.id === selectedPatientId) || null;
 
     content.innerHTML = `
         <section class="detail-page patients-page">
-            <div class="detail-header-row"><h2>👤 Pazienti</h2></div>
+            <div class="detail-header-row">
+                <h2>👤 Pazienti</h2>
+            </div>
 
             <div class="patient-privacy-warning">
                 <strong>⚠️ Dati sensibili</strong>
-                <p>I dati paziente restano salvati localmente e vengono condivisi solo se scegli esplicitamente di includerli nella condivisione dell'intera personalizzazione.</p>
+                <p>
+                    I dati paziente restano salvati localmente sul dispositivo
+                    e vengono condivisi solo se scegli esplicitamente di
+                    includerli nella condivisione dell'intera personalizzazione.
+                </p>
             </div>
 
             <div class="patients-list">
                 ${patients.length
                     ? patients.map(patient => `
-                        <button class="patient-card patient-card-name" type="button" data-patient-open="${escapeAttribute(patient.id)}">
+                        <button
+                            class="patient-card patient-card-name"
+                            type="button"
+                            data-patient-open="${escapeAttribute(patient.id)}"
+                        >
                             <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
                             <span class="arrow">→</span>
                         </button>
                     `).join("")
-                    : '<div class="personal-note-empty">Nessun paziente inserito.</div>'}
+                    : '<div class="personal-note-empty">Nessun paziente inserito.</div>'
+                }
             </div>
 
-            <div class="patient-editor">
-                <h3>${selectedPatient ? "✏️ Scheda paziente" : "➕ Nuovo paziente"}</h3>
+            ${selectedPatient ? `
+                <div class="patient-editor" data-selected-id="${escapeAttribute(selectedPatient.id)}">
+                    <div class="detail-header-row">
+                        <h3>👤 ${escapeHtml(selectedPatient.name || "Paziente senza nome")}</h3>
+                    </div>
 
-                <input id="patientName" class="personal-note-title-input" type="text" placeholder="Nominativo" value="${escapeAttribute(selectedPatient?.name || "")}">
+                    ${editMode ? `
+                        <p class="personal-notes-context">✏️ Modalità modifica attiva</p>
 
-                <div class="patient-fields-grid">
-                    <input id="patientBirthDate" class="personal-note-title-input" type="date" value="${escapeAttribute(selectedPatient?.birthDate || "")}">
-                    <input id="patientAge" class="personal-note-title-input" type="number" min="0" max="150" placeholder="Età" value="${escapeAttribute(selectedPatient?.age || "")}">
-                    <input id="patientRoom" class="personal-note-title-input" type="text" placeholder="Reparto" value="${escapeAttribute(selectedPatient?.room || "")}">
-                    <input id="patientBed" class="personal-note-title-input" type="text" placeholder="Stanza / letto" value="${escapeAttribute(selectedPatient?.bed || "")}">
+                        <input id="patientName" class="personal-note-title-input" type="text"
+                            placeholder="Nominativo"
+                            value="${escapeAttribute(selectedPatient.name)}">
+
+                        <div class="patient-fields-grid">
+                            <input id="patientBirthDate" class="personal-note-title-input" type="date"
+                                value="${escapeAttribute(selectedPatient.birthDate)}">
+                            <input id="patientAge" class="personal-note-title-input" type="text"
+                                placeholder="Età" readonly
+                                value="${escapeAttribute(calculatePatientAge(selectedPatient.birthDate))}">
+                            <input id="patientRoom" class="personal-note-title-input" type="text"
+                                placeholder="Reparto"
+                                value="${escapeAttribute(selectedPatient.room)}">
+                            <input id="patientBed" class="personal-note-title-input" type="text"
+                                placeholder="Stanza / letto"
+                                value="${escapeAttribute(selectedPatient.bed)}">
+                        </div>
+
+                        <textarea id="patientPathologies" class="personal-note-input" placeholder="Patologie" rows="3">${escapeHtml(selectedPatient.pathologies)}</textarea>
+                        <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="3">${escapeHtml(selectedPatient.admissionReason)}</textarea>
+                        <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3">${escapeHtml(selectedPatient.allergies)}</textarea>
+                        <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="4">${escapeHtml(selectedPatient.medications)}</textarea>
+                        <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="4">${escapeHtml(selectedPatient.notes)}</textarea>
+
+                        <div class="patient-pv-section">
+                            <h4>🩺 Parametri vitali</h4>
+                            <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
+
+                            <div class="patient-pv-grid patient-pv-inputs">
+                                <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A.">
+                                <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C.">
+                                <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat.">
+                                <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T°">
+                            </div>
+                            <button id="addPatientPv" class="settings-action" type="button">➕ Registra PV</button>
+                        </div>
+
+                        <button id="savePatient" class="settings-action" type="button"
+                            data-editing-id="${escapeAttribute(selectedPatient.id)}">
+                            💾 Salva modifiche
+                        </button>
+                        <button id="cancelPatientEdit" class="settings-action" type="button">
+                            ↩️ Annulla modifiche
+                        </button>
+                        <button id="deleteCurrentPatient" class="settings-action settings-danger" type="button">
+                            🗑️ Elimina paziente
+                        </button>
+                        <p id="patientMessage" class="personal-note-message"></p>
+                    ` : `
+                        ${renderPatientField("Data di nascita", selectedPatient.birthDate)}
+                        ${renderPatientField("Età", calculatePatientAge(selectedPatient.birthDate))}
+                        ${renderPatientField("Reparto", selectedPatient.room)}
+                        ${renderPatientField("Stanza / letto", selectedPatient.bed)}
+                        ${renderPatientField("Patologie", selectedPatient.pathologies)}
+                        ${renderPatientField("Motivo di ricovero", selectedPatient.admissionReason)}
+                        ${renderPatientField("Allergie", selectedPatient.allergies)}
+                        ${renderPatientField("Farmaci", selectedPatient.medications)}
+                        ${renderPatientField("Note", selectedPatient.notes)}
+
+                        <div class="patient-pv-section">
+                            <h4>🩺 Parametri vitali</h4>
+                            <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory)}</div>
+                        </div>
+
+                        <button id="editCurrentPatient" class="settings-action" type="button">
+                            ✏️ Modifica scheda
+                        </button>
+                        <button id="closePatientCard" class="settings-action" type="button">
+                            ← Torna all'elenco
+                        </button>
+                    `}
                 </div>
+            ` : `
+                <div class="patient-editor">
+                    <h3>➕ Nuovo paziente</h3>
 
-                <h4>🩺 Parametri vitali</h4>
-                <div class="patient-pv-grid patient-pv-inputs">
-                    <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A.">
-                    <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C.">
-                    <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat.">
-                    <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T°">
+                    <input id="patientName" class="personal-note-title-input" type="text"
+                        placeholder="Nominativo">
+
+                    <div class="patient-fields-grid">
+                        <input id="patientBirthDate" class="personal-note-title-input" type="date">
+                        <input id="patientAge" class="personal-note-title-input" type="text"
+                            placeholder="Età" readonly>
+                        <input id="patientRoom" class="personal-note-title-input" type="text"
+                            placeholder="Reparto">
+                        <input id="patientBed" class="personal-note-title-input" type="text"
+                            placeholder="Stanza / letto">
+                    </div>
+
+                    <textarea id="patientPathologies" class="personal-note-input" placeholder="Patologie" rows="3"></textarea>
+                    <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="3"></textarea>
+                    <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3"></textarea>
+                    <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="4"></textarea>
+                    <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="4"></textarea>
+
+                    <div class="patient-pv-section">
+                        <h4>🩺 Parametri vitali</h4>
+                        <p class="personal-notes-context">Potrai aggiungere le rilevazioni dalla scheda dopo aver salvato il paziente.</p>
+                    </div>
+
+                    <button id="savePatient" class="settings-action" type="button">💾 Salva paziente</button>
+                    <p id="patientMessage" class="personal-note-message"></p>
                 </div>
-
-                <button id="addPatientPv" class="settings-action" type="button">➕ Registra PV</button>
-
-                <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient?.pvHistory || [])}</div>
-
-                <textarea id="patientPathologies" class="personal-note-input" placeholder="Patologie" rows="4">${escapeHtml(selectedPatient?.pathologies || "")}</textarea>
-                <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="4">${escapeHtml(selectedPatient?.admissionReason || "")}</textarea>
-                <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3">${escapeHtml(selectedPatient?.allergies || "")}</textarea>
-                <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="5">${escapeHtml(selectedPatient?.medications || "")}</textarea>
-                <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="5">${escapeHtml(selectedPatient?.notes || "")}</textarea>
-
-                <button id="savePatient" class="settings-action" type="button" data-editing-id="${escapeAttribute(selectedPatient?.id || "")}">💾 ${selectedPatient ? "Salva modifiche" : "Salva paziente"}</button>
-                ${selectedPatient ? '<button id="deleteCurrentPatient" class="settings-action settings-danger" type="button">🗑️ Elimina paziente</button>' : ""}
-                <p id="patientMessage" class="personal-note-message"></p>
-            </div>
+            `}
 
             <a class="personal-notes-back" href="./">← Torna alla home</a>
         </section>
     `;
+
+    const birthInput = document.getElementById("patientBirthDate");
+    const ageInput = document.getElementById("patientAge");
+
+    birthInput?.addEventListener("change", () => {
+        if (ageInput) {
+            ageInput.value = calculatePatientAge(birthInput.value);
+        }
+    });
 }
 
 function setupPatients() {
     document.addEventListener("click", event => {
         const openButton = event.target.closest("[data-patient-open]");
         if (openButton) {
-            renderPatientsPage(openButton.dataset.patientOpen);
+            renderPatientsPage(openButton.dataset.patientOpen, false);
+            return;
+        }
+
+        if (event.target.closest("#editCurrentPatient")) {
+            const id = document.querySelector(".patient-editor")?.dataset.selectedId || "";
+            renderPatientsPage(id, true);
+            return;
+        }
+
+        if (event.target.closest("#cancelPatientEdit")) {
+            const id = document.querySelector(".patient-editor")?.dataset.selectedId || "";
+            renderPatientsPage(id, false);
+            return;
+        }
+
+        if (event.target.closest("#closePatientCard")) {
+            renderPatientsPage();
             return;
         }
 
         if (event.target.closest("#addPatientPv")) {
             const editingId = document.getElementById("savePatient")?.dataset.editingId || "";
-            if (!editingId) {
-                window.alert("Salva prima il paziente, poi potrai registrare i PV nella sua scheda.");
-                return;
-            }
+            if (!editingId) return;
 
             const pa = document.getElementById("patientPa")?.value.trim() || "";
             const fc = document.getElementById("patientFc")?.value.trim() || "";
@@ -416,7 +584,7 @@ function setupPatients() {
             });
 
             savePatients(patients);
-            renderPatientsPage(editingId);
+            renderPatientsPage(editingId, true);
             return;
         }
 
@@ -432,10 +600,12 @@ function setupPatients() {
 
             const patients = getPatients();
             const editingId = saveButton.dataset.editingId || "";
+            const birthDate = document.getElementById("patientBirthDate")?.value || "";
+
             const patientData = {
                 name,
-                birthDate: document.getElementById("patientBirthDate")?.value || "",
-                age: document.getElementById("patientAge")?.value.trim() || "",
+                birthDate,
+                age: calculatePatientAge(birthDate),
                 room: document.getElementById("patientRoom")?.value.trim() || "",
                 bed: document.getElementById("patientBed")?.value.trim() || "",
                 pathologies: document.getElementById("patientPathologies")?.value.trim() || "",
@@ -450,7 +620,7 @@ function setupPatients() {
                 if (!patient) return;
                 Object.assign(patient, patientData);
                 savePatients(patients);
-                renderPatientsPage(editingId);
+                renderPatientsPage(editingId, false);
                 return;
             }
 
