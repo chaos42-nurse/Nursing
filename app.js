@@ -42,6 +42,13 @@ const backButton =
     document.getElementById("backButton");
 
 
+/* =========================================================
+   MODALITÀ MODIFICA ORDINE
+========================================================= */
+
+let orderEditMode = false;
+
+
 function renderPatientsPage() {
     const patients = getPatients();
 
