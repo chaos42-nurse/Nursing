@@ -7952,12 +7952,20 @@ if (incomingPersonalization) {
 
         document.querySelectorAll("[data-patient-open]").forEach(button => {
             const name = button.querySelector("strong")?.textContent || "";
-            const words = name.trim().split(/[\\s']+/).filter(Boolean);
+            const words = name
+                .trim()
+                .split(/[\s']+/)
+                .filter(Boolean);
+
+            const normalizedWords = words.map(word =>
+                word.toLocaleLowerCase("it-IT")
+            );
 
             const matches =
                 !query ||
-                words.some(word =>
-                    word.toLocaleLowerCase("it-IT").startsWith(query)
+                normalizedWords.some(word =>
+                    word.startsWith(query) ||
+                    word.includes(query)
                 );
 
             button.style.display = matches ? "" : "none";
@@ -7974,11 +7982,13 @@ if (incomingPersonalization) {
         const matches = patients.filter(patient => {
             const words = String(patient.name || "")
                 .trim()
-                .split(/[\\s']+/)
-                .filter(Boolean);
+                .split(/[\s']+/)
+                .filter(Boolean)
+                .map(word => word.toLocaleLowerCase("it-IT"));
 
             return words.some(word =>
-                word.toLocaleLowerCase("it-IT").startsWith(query)
+                word.startsWith(query) ||
+                word.includes(query)
             );
         });
 
