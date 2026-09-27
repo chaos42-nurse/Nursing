@@ -480,8 +480,7 @@ function renderGlobalNoteLinks() {
                         makeNoteUrl(
                             target.stateId,
                             target.itemId,
-                            target.note.id,
-                            group.term
+                            target.note.id
                         ) +
                         '">' +
                         escapeHtml(target.stateId) +
@@ -578,6 +577,7 @@ function renderAllNoteLinksPage(termFilter = "") {
 
 function renderPersonalNotesPage(stateId, itemId, data, title) {
     const notes = getNotesForItem(stateId, itemId);
+    const filteredNotes = notes;
 
     content.innerHTML = `
         <section class="detail-page personal-notes-page">
@@ -590,8 +590,8 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             </p>
 
             <div class="personal-notes-list">
-                ${notes.length
-                    ? notes.map(note => `
+                ${filteredNotes.length
+                    ? filteredNotes.map(note => `
                         <article class="personal-note-card" data-note-id="${escapeAttribute(note.id)}">
                             <div class="personal-note-card-header">
                                 <div>
@@ -609,41 +609,14 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                         <div class="personal-note-empty">
                             Nessuna nota personale in questa sottocategoria.
                         </div>
-                    `
+                    `}
             </div>
 
-            <button id="openPersonalNoteEditor" class="settings-action personal-note-open-editor" type="button">
-                ➕ Nuova nota
-            </button>
-
-            <div id="personalNoteEditor" class="personal-note-editor" hidden>
-                <div class="personal-note-editor-header">
-                    <h3 id="personalNoteEditorTitle">➕ Nuova nota</h3>
-                    <button id="closePersonalNoteEditor" class="personal-note-editor-close" type="button" title="Chiudi editor">✕</button>
-                </div>
-
-                <input
-                    id="personalNoteTitle"
-                    class="personal-note-title-input"
-                    type="text"
-                    placeholder="Titolo della nota"
-                >
-
-                <textarea
-                    id="personalNoteInput"
-                    class="personal-note-input"
-                    placeholder="Scrivi la nota...\n\nPer collegarla ad altre note usa: [[parola]]"
-                    rows="12"
-                ></textarea>
-
-                <button id="savePersonalNote" class="settings-action" type="button">
-                    💾 Aggiungi nota
-                </button>
-
-                <button id="cancelPersonalNoteEdit" class="settings-action personal-note-cancel" type="button">
-                    Annulla
-                </button>
-
+            <div class="personal-note-editor">
+                <h3>➕ Nuova nota</h3>
+                <input id="personalNoteTitle" class="personal-note-title-input" type="text" placeholder="Titolo della nota">
+                <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]" rows="7"></textarea>
+                <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>
             </div>
 
@@ -657,87 +630,6 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
 
 function setupPersonalNotes() {
     document.addEventListener("click", event => {
-        const editor = document.getElementById("personalNoteEditor");
-        const titleInput = document.getElementById("personalNoteTitle");
-        const input = document.getElementById("personalNoteInput");
-        const saveButton = document.getElementById("savePersonalNote");
-        const editorTitle = document.getElementById("personalNoteEditorTitle");
-
-        const openEditor = () => {
-            if (!editor) return;
-
-            editor.hidden = false;
-
-            const openButton =
-                document.getElementById("openPersonalNoteEditor");
-
-            if (openButton) {
-                openButton.hidden = true;
-            }
-
-            setTimeout(() => {
-                (titleInput || input)?.focus();
-                editor.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-            }, 0);
-        };
-
-        const closeEditor = () => {
-            if (!editor) return;
-
-            editor.hidden = true;
-
-            const openButton =
-                document.getElementById("openPersonalNoteEditor");
-
-            if (openButton) {
-                openButton.hidden = false;
-            }
-
-            editor.dataset.editingId = "";
-
-            if (titleInput) titleInput.value = "";
-            if (input) input.value = "";
-
-            if (editorTitle) {
-                editorTitle.textContent = "➕ Nuova nota";
-            }
-
-            if (saveButton) {
-                saveButton.textContent = "💾 Aggiungi nota";
-            }
-        };
-
-        if (event.target.closest("#openPersonalNoteEditor")) {
-            if (editorTitle) {
-                editorTitle.textContent = "➕ Nuova nota";
-            }
-
-            if (saveButton) {
-                saveButton.textContent = "💾 Aggiungi nota";
-            }
-
-            if (editor) {
-                editor.dataset.editingId = "";
-            }
-
-            if (titleInput) titleInput.value = "";
-            if (input) input.value = "";
-
-            openEditor();
-            return;
-        }
-
-        if (
-            event.target.closest("#closePersonalNoteEditor") ||
-            event.target.closest("#cancelPersonalNoteEdit")
-        ) {
-            closeEditor();
-            return;
-        }
-
         const editButton = event.target.closest("[data-note-edit]");
 
         if (editButton) {
@@ -749,32 +641,31 @@ function setupPersonalNotes() {
 
             if (!note) return;
 
-            openEditor();
+            const editor = document.querySelector(".personal-note-editor");
+            const titleInput = document.getElementById("personalNoteTitle");
+            const input = document.getElementById("personalNoteInput");
+            const saveButton = document.getElementById("savePersonalNote");
 
-            if (editor) {
-                editor.dataset.editingId = String(note.id);
-            }
+            if (!editor || !titleInput || !input) return;
 
-            if (editorTitle) {
-                editorTitle.textContent = "✏️ Modifica nota";
-            }
+            editor.dataset.editingId = String(note.id);
+            titleInput.value = note.title || "";
+            input.value = note.text || "";
 
             if (saveButton) {
                 saveButton.textContent = "💾 Salva modifiche";
             }
 
-            if (titleInput) {
-                titleInput.value = note.title || "";
-            }
+            editor.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
 
-            if (input) {
-                input.value = note.text || "";
-                input.focus();
-                input.setSelectionRange(
-                    input.value.length,
-                    input.value.length
-                );
-            }
+            input.focus();
+            input.setSelectionRange(
+                input.value.length,
+                input.value.length
+            );
 
             return;
         }
@@ -784,9 +675,12 @@ function setupPersonalNotes() {
         if (deleteButton) {
             const noteId = deleteButton.dataset.noteDelete;
             const notes = getNotesForItem(state, item)
-                .filter(note => String(note.id) !== String(noteId));
+                .filter(note => note.id !== noteId);
 
             saveNotesForItem(state, item, notes);
+
+            const activePlaceorder =
+                new URLSearchParams(window.location.search).get("placeorder") || "";
 
             renderPersonalNotesPage(
                 state,
@@ -798,37 +692,32 @@ function setupPersonalNotes() {
         }
 
         if (event.target.closest("#savePersonalNote")) {
+            const titleInput = document.getElementById("personalNoteTitle");
+            const input = document.getElementById("personalNoteInput");
+
             if (!input) return;
 
             const textValue = input.value.trim();
 
             if (!textValue) {
-                const message =
-                    document.getElementById("personalNoteMessage");
-
-                if (message) {
-                    message.textContent =
-                        "✏️ Scrivi prima il testo della nota.";
-                }
-
+                const message = document.getElementById("personalNoteMessage");
+                if (message) message.textContent = "✏️ Scrivi prima il testo della nota.";
                 return;
             }
 
             const notes = getNotesForItem(state, item);
-            const editingId =
-                editor?.dataset.editingId || "";
+            const editor = document.querySelector(".personal-note-editor");
+            const editingId = editor?.dataset.editingId || "";
 
             if (editingId) {
-                const note =
-                    notes.find(current =>
-                        String(current.id) === String(editingId)
-                    );
+                const note = notes.find(current =>
+                    String(current.id) === String(editingId)
+                );
 
                 if (note) {
                     note.title =
                         (titleInput?.value || "").trim() ||
                         "Nota personale";
-
                     note.text = textValue;
                     note.updatedAt = new Date().toISOString();
                 }
@@ -841,22 +730,22 @@ function setupPersonalNotes() {
                     window.__currentData || {},
                     window.__currentItemTitle || ""
                 );
-
                 return;
             }
 
             notes.push({
-                id:
-                    String(Date.now()) +
-                    "-" +
-                    Math.random().toString(36).slice(2, 8),
-                title:
-                    (titleInput?.value || "").trim() ||
-                    "Nota personale",
+                id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+                title: (titleInput?.value || "").trim() || "Nota personale",
                 text: textValue
             });
 
             saveNotesForItem(state, item, notes);
+
+            input.value = "";
+            if (titleInput) titleInput.value = "";
+
+            const message = document.getElementById("personalNoteMessage");
+            if (message) message.textContent = "✅ Nota aggiunta.";
 
             renderPersonalNotesPage(
                 state,
@@ -867,6 +756,167 @@ function setupPersonalNotes() {
         }
     });
 }
+
+function collectOrderPreferences() {
+
+
+
+    const result = {};
+
+    for (const key of Object.keys(localStorage)) {
+
+        if (
+            key === PERSONALIZATION_KEYS.categoryOrder ||
+            key.startsWith("nursing-sections-") ||
+            key.startsWith("nursing-items-")
+        ) {
+            result[key] = localStorage.getItem(key);
+        }
+    }
+
+    return result;
+}
+
+function collectPersonalization() {
+
+    return {
+        app: "Nursing Shot",
+        type: "personalization",
+        version: PERSONALIZATION_VERSION,
+        exportedAt: new Date().toISOString(),
+        theme:
+            localStorage.getItem(PERSONALIZATION_KEYS.theme) ||
+            "dark",
+        orders: collectOrderPreferences(),
+        notes: getPersonalNotes()
+    };
+}
+
+function exportPersonalization() {
+
+    const data = collectPersonalization();
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "nursing-shot-personalizzazione.json";
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+function importPersonalization(file, setMessage) {
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+        try {
+
+            const data =
+                JSON.parse(reader.result);
+
+            if (
+                !data ||
+                data.type !== "personalization" ||
+                data.app !== "Nursing Shot"
+            ) {
+                throw new Error("File di personalizzazione non valido.");
+            }
+
+            if (data.theme === "light" || data.theme === "dark") {
+                localStorage.setItem(
+                    PERSONALIZATION_KEYS.theme,
+                    data.theme
+                );
+            }
+
+            const orders =
+                data.orders &&
+                typeof data.orders === "object"
+                    ? data.orders
+                    : {};
+
+            resetOrderPreferences();
+
+            for (const [key, value] of Object.entries(orders)) {
+
+                if (
+                    key === PERSONALIZATION_KEYS.categoryOrder ||
+                    key.startsWith("nursing-sections-") ||
+                    key.startsWith("nursing-items-")
+                ) {
+                    localStorage.setItem(key, String(value));
+                }
+            }
+
+            const notes =
+                data.notes &&
+                typeof data.notes === "object"
+                    ? data.notes
+                    : {};
+
+            localStorage.setItem(
+                PERSONALIZATION_KEYS.notes,
+                JSON.stringify(notes)
+            );
+
+            setupTheme();
+
+            setMessage("✅ Personalizzazione importata.");
+
+            if (state) {
+                loadState();
+            } else {
+                loadCategories();
+            }
+
+        } catch (error) {
+
+            console.error(error);
+            setMessage("❌ File di personalizzazione non valido.");
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function resetOrderPreferences() {
+
+    const keys = Object.keys(localStorage)
+        .filter(key =>
+            key === PERSONALIZATION_KEYS.categoryOrder ||
+            key.startsWith("nursing-sections-") ||
+            key.startsWith("nursing-items-")
+        );
+
+    keys.forEach(key => localStorage.removeItem(key));
+}
+
+function resetAllPersonalization() {
+
+    resetOrderPreferences();
+
+    localStorage.removeItem(
+        PERSONALIZATION_KEYS.notes
+    );
+
+    localStorage.removeItem(
+        PERSONALIZATION_KEYS.theme
+    );
+
+    applyTheme("dark");
+    orderEditMode = false;
+    document.body.classList.remove("order-editing");
+}
+
+
 
 /* =========================================================
    NAVIGAZIONE
