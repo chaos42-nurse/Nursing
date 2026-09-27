@@ -22,5 +22,12 @@
     "icon": "🚨",
     "title": "Emergenze",
     "description": "Gestione delle emergenze"
+  },
+  {
+    "id": "pazienti",
+    "icon": "👤",
+    "title": "Pazienti",
+    "description": "Schede e parametri vitali",
+    "route": "patients"
   }
 ]
