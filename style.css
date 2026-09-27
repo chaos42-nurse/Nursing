@@ -2300,3 +2300,75 @@ section h2 {
 .patient-search-input::placeholder {
     color: var(--text-secondary);
 }
+
+
+/* Ricerca pazienti — mobile e suggerimenti */
+.patient-search-toggle {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    font-size: 1.15rem;
+}
+
+.patient-search-input {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.patient-search-suggestions {
+    width: min(320px, 100%);
+    margin: 6px 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+}
+
+.patient-search-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.patient-search-suggestion:last-child {
+    border-bottom: 0;
+}
+
+.patient-search-suggestion strong {
+    min-width: 32px;
+    color: var(--text);
+}
+
+.patient-search-suggestion span {
+    color: var(--text);
+}
+
+@media (max-width: 600px) {
+    .page-title-row {
+        width: 100%;
+    }
+
+    .patient-search-toggle {
+        margin-left: 2px;
+    }
+
+    .patient-search-input {
+        width: 100%;
+    }
+
+    .patient-search-suggestions {
+        width: 100%;
+    }
+}
