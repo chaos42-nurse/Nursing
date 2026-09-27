@@ -711,10 +711,19 @@ function showNotesQrReader() {
         return;
     }
 
-    const detector = new BarcodeDetector({ formats: ["qr_code"] });
-
     (async () => {
         try {
+            const supportedFormats =
+                await BarcodeDetector.getSupportedFormats();
+
+            if (!supportedFormats.includes("qr_code")) {
+                throw new Error("qr-not-supported");
+            }
+
+            const detector =
+                new BarcodeDetector({
+                    formats: ["qr_code"]
+                });
             if (!navigator.mediaDevices?.getUserMedia) throw new Error("camera");
             stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: { ideal: "environment" } },
@@ -847,6 +856,13 @@ function handleNfcShareUrl(url) {
 }
 
 async function scanNotesNfc() {
+    if (backgroundNfcReaderActive) {
+        window.alert(
+            "La lettura NFC è già attiva in background. Avvicina semplicemente la card o il chip al telefono."
+        );
+        return;
+    }
+
     if (!("NDEFReader" in window)) {
         window.alert(
             "La lettura NFC non è supportata da questo browser. Su Android usa Chrome con NFC attivo e HTTPS."
