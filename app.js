@@ -672,6 +672,377 @@ function showNotesQr(stateId, itemId) {
     });
 }
 
+
+function getInternalNotesShareUrl(rawValue) {
+    const value = String(rawValue || "").trim();
+
+    if (!value) return null;
+
+    try {
+        const url = new URL(value, window.location.href);
+
+        if (url.origin !== window.location.origin) return null;
+
+        if (!url.hash.startsWith("#nursing-notes=")) return null;
+
+        return url.href;
+    } catch (_) {
+        return null;
+    }
+}
+
+function closeNotesQrReader(dialog, stream, animationId) {
+    if (animationId) cancelAnimationFrame(animationId);
+
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+
+    dialog?.remove();
+}
+
+async function readNotesQr() {
+    if (!window.isSecureContext) {
+        window.alert("La lettura QR richiede una connessione HTTPS.");
+        return;
+    }
+
+    if (!("BarcodeDetector" in window)) {
+        window.alert(
+            "Questo browser non supporta la lettura QR integrata."
+        );
+        return;
+    }
+
+    try {
+        const supportedFormats =
+            await BarcodeDetector.getSupportedFormats();
+
+        if (!supportedFormats.includes("qr_code")) {
+            window.alert(
+                "Questo browser non supporta la lettura dei QR code tramite fotocamera."
+            );
+            return;
+        }
+    } catch (_) {}
+
+    document.getElementById("notesQrReaderDialog")?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "notesQrReaderDialog";
+    dialog.className = "notes-qr-dialog";
+
+    dialog.innerHTML = [
+        '<div class="notes-qr-card notes-qr-reader-card">',
+        '<button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>',
+        '<h3>📷 Leggi QR</h3>',
+        '<p>Inquadra il QR delle note personali.</p>',
+        '<video class="notes-qr-video" id="notesQrVideo" autoplay muted playsinline></video>',
+        '<p id="notesQrReaderStatus" class="settings-message">Richiesta accesso alla fotocamera…</p>',
+        '</div>'
+    ].join("");
+
+    document.body.appendChild(dialog);
+
+    const video = dialog.querySelector("#notesQrVideo");
+    const status = dialog.querySelector("#notesQrReaderStatus");
+
+    let stream = null;
+    let animationId = null;
+    let stopped = false;
+
+    const stop = () => {
+        stopped = true;
+        closeNotesQrReader(dialog, stream, animationId);
+    };
+
+    dialog.querySelector(".notes-qr-close")?.addEventListener("click", stop);
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) stop();
+    });
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: "environment" }
+            },
+            audio: false
+        });
+
+        video.srcObject = stream;
+        await video.play();
+
+        status.textContent = "Fotocamera attiva. Inquadra il QR…";
+
+        const detector = new BarcodeDetector({
+            formats: ["qr_code"]
+        });
+
+        const scan = async () => {
+            if (stopped) return;
+
+            try {
+                const results = await detector.detect(video);
+                const result = results.find(current => current.rawValue);
+
+                if (result?.rawValue) {
+                    const internalUrl =
+                        getInternalNotesShareUrl(result.rawValue);
+
+                    if (internalUrl) {
+                        stop();
+                        window.location.href = internalUrl;
+                        return;
+                    }
+
+                    status.textContent =
+                        "QR non riconosciuto. Cerca un QR generato da Nursing Shot.";
+                }
+            } catch (_) {}
+
+            if (!stopped) {
+                animationId = requestAnimationFrame(scan);
+            }
+        };
+
+        scan();
+
+    } catch (error) {
+        status.textContent =
+            "Impossibile accedere alla fotocamera.";
+
+        window.setTimeout(() => {
+            if (dialog.isConnected) {
+                closeNotesQrReader(dialog, stream, animationId);
+            }
+        }, 1600);
+
+        console.error("Errore lettura QR:", error);
+    }
+}
+
+function decodeNfcRecord(record) {
+    if (!record) return "";
+
+    if (typeof record.data === "string") {
+        return record.data.trim();
+    }
+
+    if (!record.data) return "";
+
+    try {
+        const bytes = new Uint8Array(
+            record.data.buffer,
+            record.data.byteOffset,
+            record.data.byteLength
+        );
+
+        if (record.recordType === "url") {
+            if (!bytes.length) return "";
+
+            const prefixes = {
+                0x00: "",
+                0x01: "http://www.",
+                0x02: "https://www.",
+                0x03: "http://",
+                0x04: "https://",
+                0x05: "tel:",
+                0x06: "mailto:",
+                0x0F: "news:",
+                0x10: "telnet://",
+                0x11: "imap:",
+                0x12: "rtsp://",
+                0x13: "urn:",
+                0x14: "pop:",
+                0x15: "sip:",
+                0x16: "sips:",
+                0x17: "tftp:",
+                0x1D: "file://",
+                0x23: "urn:nfc:"
+            };
+
+            const prefix = prefixes[bytes[0]] ?? "";
+            const suffix = new TextDecoder().decode(bytes.slice(1));
+
+            return prefix + suffix;
+        }
+
+        return new TextDecoder().decode(bytes).trim();
+
+    } catch (_) {
+        return "";
+    }
+}
+
+function getNfcShareUrl(message) {
+    if (!message?.records) return null;
+
+    for (const record of message.records) {
+        const value = decodeNfcRecord(record);
+        const internalUrl = getInternalNotesShareUrl(value);
+
+        if (internalUrl) return internalUrl;
+    }
+
+    return null;
+}
+
+async function readNotesNfc() {
+    if (!window.isSecureContext) {
+        window.alert("La lettura NFC richiede una connessione HTTPS.");
+        return;
+    }
+
+    if (!("NDEFReader" in window)) {
+        window.alert(
+            "Questo browser non supporta Web NFC. Su Android serve un browser compatibile con Web NFC."
+        );
+        return;
+    }
+
+    document.getElementById("notesNfcDialog")?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "notesNfcDialog";
+    dialog.className = "notes-qr-dialog";
+
+    dialog.innerHTML = [
+        '<div class="notes-qr-card notes-nfc-card">',
+        '<button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>',
+        '<h3>📡 Leggi NFC</h3>',
+        '<div class="notes-nfc-icon">📳</div>',
+        '<p id="notesNfcStatus">Avvicina il telefono al tag NFC…</p>',
+        '</div>'
+    ].join("");
+
+    document.body.appendChild(dialog);
+
+    let controller = null;
+
+    const close = () => {
+        controller?.abort();
+        dialog.remove();
+    };
+
+    dialog.querySelector(".notes-qr-close")?.addEventListener("click", close);
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) close();
+    });
+
+    try {
+        const reader = new NDEFReader();
+
+        controller = new AbortController();
+
+        reader.addEventListener("reading", event => {
+            const internalUrl = getNfcShareUrl(event.message);
+
+            if (!internalUrl) {
+                const status =
+                    dialog.querySelector("#notesNfcStatus");
+
+                if (status) {
+                    status.textContent =
+                        "Tag letto, ma non contiene un collegamento Nursing Shot.";
+                }
+
+                return;
+            }
+
+            close();
+            window.location.href = internalUrl;
+
+        }, { signal: controller.signal });
+
+        reader.addEventListener("readingerror", () => {
+            const status =
+                dialog.querySelector("#notesNfcStatus");
+
+            if (status) {
+                status.textContent =
+                    "Non riesco a leggere questo tag NFC. Prova ad avvicinarlo meglio.";
+            }
+        }, { signal: controller.signal });
+
+        await reader.scan({
+            signal: controller.signal
+        });
+
+    } catch (error) {
+        const status =
+            dialog.querySelector("#notesNfcStatus");
+
+        if (status) {
+            status.textContent =
+                "Impossibile avviare la lettura NFC.";
+        }
+
+        console.error("Errore lettura NFC:", error);
+    }
+}
+
+async function writeNotesNfc(stateId, itemId) {
+    const notes = getNotesForItem(stateId, itemId);
+
+    if (!notes.length) {
+        window.alert("Non ci sono note da condividere.");
+        return;
+    }
+
+    if (!window.isSecureContext) {
+        window.alert("La scrittura NFC richiede una connessione HTTPS.");
+        return;
+    }
+
+    if (!("NDEFReader" in window)) {
+        window.alert("Questo browser non supporta Web NFC.");
+        return;
+    }
+
+    const url = buildNotesShareUrl(
+        stateId,
+        itemId,
+        notes
+    );
+
+    if (!window.confirm(
+        "Il collegamento alle note verrà scritto sul tag NFC. Continuare?"
+    )) {
+        return;
+    }
+
+    try {
+        const writer = new NDEFReader();
+
+        await writer.write({
+            records: [
+                {
+                    recordType: "url",
+                    data: url
+                }
+            ]
+        });
+
+        window.alert("✅ Collegamento scritto sul tag NFC.");
+
+    } catch (error) {
+        console.error("Errore scrittura NFC:", error);
+
+        if (error?.name === "NotAllowedError") {
+            window.alert(
+                "Scrittura NFC non autorizzata o tag non scrivibile."
+            );
+            return;
+        }
+
+        window.alert(
+            "Non è stato possibile scrivere il tag NFC."
+        );
+    }
+}
+
 function renderSharedNotesImport(shared) {
     if (!shared) return "";
 
@@ -751,6 +1122,9 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             <div class="personal-notes-share-actions">
                 <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi collegamento</button>
                 <button id="qrPersonalNotes" class="settings-action" type="button">▦ Mostra QR</button>
+                <button id="readQrPersonalNotes" class="settings-action" type="button">📷 Leggi QR</button>
+                <button id="readNfcPersonalNotes" class="settings-action" type="button">📡 Leggi NFC</button>
+                <button id="writeNfcPersonalNotes" class="settings-action" type="button">📳 Scrivi su NFC</button>
             </div>
 
             <div class="personal-notes-list">
@@ -801,6 +1175,21 @@ function setupPersonalNotes() {
 
         if (event.target.closest("#qrPersonalNotes")) {
             showNotesQr(state, item);
+            return;
+        }
+
+        if (event.target.closest("#readQrPersonalNotes")) {
+            readNotesQr();
+            return;
+        }
+
+        if (event.target.closest("#readNfcPersonalNotes")) {
+            readNotesNfc();
+            return;
+        }
+
+        if (event.target.closest("#writeNfcPersonalNotes")) {
+            writeNotesNfc(state, item);
             return;
         }
 
