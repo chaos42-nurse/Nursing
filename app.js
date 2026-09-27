@@ -5762,7 +5762,7 @@ function closeNotesQrReader(dialog, stream, animationId) {
     dialog?.remove();
 }
 
-function readNotesQr() {
+async function readNotesQr() {
     if (!window.isSecureContext) {
         window.alert("La lettura QR richiede una connessione HTTPS.");
         return;
@@ -5949,7 +5949,7 @@ function getNfcShareUrl(message) {
     return null;
 }
 
-function readNotesNfc() {
+async function readNotesNfc() {
     if (!window.isSecureContext) {
         window.alert("La lettura NFC richiede una connessione HTTPS.");
         return;
@@ -6044,7 +6044,7 @@ function readNotesNfc() {
     }
 }
 
-function writeNotesNfc(stateId, itemId) {
+async function writeNotesNfc(stateId, itemId) {
     const notes = getNotesForItem(stateId, itemId);
 
     if (!notes.length) {
