@@ -499,12 +499,247 @@ function renderAllNoteLinksPage(termFilter = "") {
     `;
 }
 
+function toBase64(value) {
+    const bytes = new TextEncoder().encode(String(value ?? ""));
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary);
+}
+
+function fromBase64(value) {
+    const binary = atob(value);
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
+function createNotesSharePayload(stateId, itemId, notes) {
+    const noteParts = notes.map(note =>
+        [
+            toBase64(note.id || ""),
+            toBase64(note.title || "Nota personale"),
+            toBase64(note.text || "")
+        ].join(".")
+    );
+
+    return [
+        "NS1",
+        toBase64(stateId),
+        toBase64(itemId),
+        noteParts.join(",")
+    ].join("|");
+}
+
+function readNotesSharePayload() {
+    const hash = window.location.hash || "";
+
+    if (!hash.startsWith("#nursing-notes=")) {
+        return null;
+    }
+
+    try {
+        const payload = decodeURIComponent(
+            hash.slice("#nursing-notes=".length)
+        );
+
+        const parts = payload.split("|");
+
+        if (parts.length !== 4 || parts[0] !== "NS1") {
+            return null;
+        }
+
+        const sharedStateId = fromBase64(parts[1]);
+        const sharedItemId = fromBase64(parts[2]);
+
+        const notes = parts[3]
+            ? parts[3].split(",").map(part => {
+                const fields = part.split(".");
+
+                if (fields.length !== 3) {
+                    return null;
+                }
+
+                return {
+                    id: fromBase64(fields[0]),
+                    title: fromBase64(fields[1]) || "Nota personale",
+                    text: fromBase64(fields[2])
+                };
+            }).filter(Boolean)
+            : [];
+
+        if (!sharedStateId || !sharedItemId || !notes.length) {
+            return null;
+        }
+
+        return {
+            stateId: sharedStateId,
+            itemId: sharedItemId,
+            notes
+        };
+    } catch (error) {
+        console.error("Collegamento note non valido:", error);
+        return null;
+    }
+}
+
+function buildNotesShareUrl(stateId, itemId, notes) {
+    const payload = createNotesSharePayload(
+        stateId,
+        itemId,
+        notes
+    );
+
+    return window.location.origin +
+        window.location.pathname +
+        "?state=" + encodeURIComponent(stateId) +
+        "&item=" + encodeURIComponent(itemId) +
+        "&notes=1" +
+        "#nursing-notes=" +
+        encodeURIComponent(payload);
+}
+
+function shareCurrentNotes(stateId, itemId) {
+    const notes = getNotesForItem(stateId, itemId);
+
+    if (!notes.length) {
+        window.alert("Non ci sono note da condividere.");
+        return;
+    }
+
+    const url = buildNotesShareUrl(stateId, itemId, notes);
+
+    if (navigator.share) {
+        navigator.share({
+            title: "Note personali — Nursing Shot",
+            text: "Note personali collegate",
+            url
+        }).catch(() => {});
+        return;
+    }
+
+    navigator.clipboard?.writeText(url).then(() => {
+        window.alert("Collegamento copiato. Puoi inviarlo al telefono o a un altro PC.");
+    }).catch(() => {
+        window.prompt("Copia questo collegamento:", url);
+    });
+}
+
+function showNotesQr(stateId, itemId) {
+    const notes = getNotesForItem(stateId, itemId);
+
+    if (!notes.length) {
+        window.alert("Non ci sono note da condividere.");
+        return;
+    }
+
+    const url = buildNotesShareUrl(stateId, itemId, notes);
+    const qrUrl =
+        "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" +
+        encodeURIComponent(url);
+
+    const existing = document.getElementById("notesQrDialog");
+    existing?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "notesQrDialog";
+    dialog.className = "notes-qr-dialog";
+    dialog.innerHTML = `
+        <div class="notes-qr-card">
+            <button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>
+            <h3>📱 Condividi tramite QR</h3>
+            <p>Scansiona questo QR con il telefono per importare le note.</p>
+            <img src="${qrUrl}" alt="QR per condividere le note personali">
+            <button class="settings-action" type="button" id="copyNotesShareLink">🔗 Copia collegamento</button>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    dialog.querySelector(".notes-qr-close")?.addEventListener("click", () => {
+        dialog.remove();
+    });
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) dialog.remove();
+    });
+
+    dialog.querySelector("#copyNotesShareLink")?.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(url);
+            window.alert("Collegamento copiato.");
+        } catch (_) {
+            window.prompt("Copia questo collegamento:", url);
+        }
+    });
+}
+
+function renderSharedNotesImport(shared) {
+    if (!shared) return "";
+
+    const sameTarget =
+        shared.stateId === state &&
+        shared.itemId === item;
+
+    return `
+        <section class="personal-notes-import">
+            <div>
+                <strong>📥 Note ricevute</strong>
+                <span>
+                    ${shared.notes.length} ${shared.notes.length === 1 ? "nota" : "note"} da importare
+                    ${sameTarget ? "" : " in un'altra scheda"}
+                </span>
+            </div>
+            <div class="personal-notes-import-actions">
+                <button
+                    id="importSharedNotes"
+                    class="settings-action"
+                    type="button"
+                >📥 Importa note</button>
+                <button
+                    id="cancelSharedNotes"
+                    class="settings-action"
+                    type="button"
+                >✕ Ignora</button>
+            </div>
+        </section>
+    `;
+}
+
+function importSharedNotes(shared) {
+    if (!shared) return;
+
+    const existing = getNotesForItem(
+        shared.stateId,
+        shared.itemId
+    );
+
+    const imported = shared.notes.map(note => ({
+        id: String(Date.now()) + "-" +
+            Math.random().toString(36).slice(2, 8),
+        title: note.title || "Nota personale",
+        text: note.text || ""
+    }));
+
+    saveNotesForItem(
+        shared.stateId,
+        shared.itemId,
+        [...existing, ...imported]
+    );
+
+    window.location.hash = "";
+    window.location.href =
+        "?state=" + encodeURIComponent(shared.stateId) +
+        "&item=" + encodeURIComponent(shared.itemId) +
+        "&notes=1";
+}
+
 function renderPersonalNotesPage(stateId, itemId, data, title) {
     const notes = getNotesForItem(stateId, itemId);
     const filteredNotes = notes;
+    const sharedNotes = readNotesSharePayload();
 
     content.innerHTML = `
         <section class="detail-page personal-notes-page">
+            ${renderSharedNotesImport(sharedNotes)}
             <div class="detail-header-row">
                 <h2>📝 Note personali</h2>
             </div>
@@ -512,6 +747,11 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             <p class="personal-notes-context">
                 ${escapeHtml(title)}
             </p>
+
+            <div class="personal-notes-share-actions">
+                <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi collegamento</button>
+                <button id="qrPersonalNotes" class="settings-action" type="button">▦ Mostra QR</button>
+            </div>
 
             <div class="personal-notes-list">
                 ${filteredNotes.length
@@ -554,6 +794,32 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
 
 function setupPersonalNotes() {
     document.addEventListener("click", event => {
+        if (event.target.closest("#sharePersonalNotes")) {
+            shareCurrentNotes(state, item);
+            return;
+        }
+
+        if (event.target.closest("#qrPersonalNotes")) {
+            showNotesQr(state, item);
+            return;
+        }
+
+        if (event.target.closest("#importSharedNotes")) {
+            const shared = readNotesSharePayload();
+            importSharedNotes(shared);
+            return;
+        }
+
+        if (event.target.closest("#cancelSharedNotes")) {
+            window.location.hash = "";
+            renderPersonalNotesPage(
+                state,
+                item,
+                window.__currentData || {},
+                window.__currentItemTitle || ""
+            );
+            return;
+        }
         const editButton = event.target.closest("[data-note-edit]");
 
         if (editButton) {
