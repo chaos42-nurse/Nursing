@@ -1411,3 +1411,104 @@ section h2 {
     font-size: .86rem;
 }
 
+
+
+/* =========================================================
+   PERSONALIZZAZIONE UTENTE
+========================================================= */
+
+.settings-divider {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--border);
+}
+
+.settings-danger {
+    border-color: rgba(255, 90, 90, 0.28);
+}
+
+.personal-note {
+    margin-top: 18px;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.personal-note-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.personal-note-header h3 {
+    margin: 0;
+}
+
+.personal-note-header span {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.personal-note-input {
+    display: block;
+    width: 100%;
+    min-height: 110px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    resize: vertical;
+    background: #0f141b;
+    color: var(--text);
+    font: inherit;
+    line-height: 1.45;
+    box-sizing: border-box;
+}
+
+.personal-note-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(92, 200, 255, 0.10);
+}
+
+.personal-note-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 9px;
+}
+
+.personal-note-actions .settings-action {
+    flex: 1;
+    text-align: center;
+}
+
+.personal-note-message {
+    min-height: 1.3em;
+    margin: 8px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.detail-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-header-row h2 {
+    flex: 1;
+}
+
+@media (max-width: 560px) {
+    .personal-note-header {
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .personal-note-actions {
+        flex-direction: column;
+    }
+}
+
