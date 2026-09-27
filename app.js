@@ -752,8 +752,204 @@ function scanNotesQr() {
     showNotesQrReader();
 }
 
+function readNdefUrlRecord(record) {
+    if (!record) return "";
+
+    try {
+        const decoded = new TextDecoder(
+            record.encoding || "utf-8"
+        ).decode(record.data).replace(/\u0000/g, "").trim();
+
+        if (
+            decoded.startsWith("http://") ||
+            decoded.startsWith("https://")
+        ) {
+            return decoded;
+        }
+
+        const bytes = new Uint8Array(
+            record.data.buffer,
+            record.data.byteOffset,
+            record.data.byteLength
+        );
+
+        if (!bytes.length) return "";
+
+        const prefixes = {
+            0x00: "",
+            0x01: "http://www.",
+            0x02: "https://www.",
+            0x03: "http://",
+            0x04: "https://",
+            0x05: "tel:",
+            0x06: "mailto:",
+            0x0F: "news:",
+            0x10: "telnet://",
+            0x11: "imap:",
+            0x12: "rtsp://",
+            0x13: "urn:",
+            0x14: "pop:",
+            0x15: "sip:",
+            0x16: "sips:",
+            0x1D: "file://",
+            0x23: "urn:nfc:"
+        };
+
+        const prefix = prefixes[bytes[0]];
+
+        if (prefix === undefined) return "";
+
+        return prefix +
+            new TextDecoder().decode(bytes.slice(1)).trim();
+    } catch (_) {
+        return "";
+    }
+}
+
+function readNdefTextRecord(record) {
+    if (!record) return "";
+
+    try {
+        return new TextDecoder(
+            record.encoding || "utf-8"
+        ).decode(record.data).trim();
+    } catch (_) {
+        return "";
+    }
+}
+
+function handleNfcShareUrl(url) {
+    const value = String(url || "").trim();
+
+    if (!value.includes("#nursing-notes=")) {
+        window.alert(
+            "Il tag NFC è stato letto, ma non contiene un collegamento Nursing Shot valido."
+        );
+        return false;
+    }
+
+    try {
+        const parsed = new URL(value, window.location.href);
+
+        if (parsed.origin !== window.location.origin) {
+            window.alert(
+                "Il collegamento NFC non appartiene a questa app."
+            );
+            return false;
+        }
+
+        window.location.href = parsed.href;
+        return true;
+    } catch (_) {
+        window.alert("Il collegamento NFC non è valido.");
+        return false;
+    }
+}
+
+async function scanNotesNfc() {
+    if (!("NDEFReader" in window)) {
+        window.alert(
+            "La lettura NFC non è supportata da questo browser. Su Android usa Chrome con NFC attivo e HTTPS."
+        );
+        return;
+    }
+
+    const existing = document.getElementById("notesNfcDialog");
+    existing?.remove();
+
+    const dialog = document.createElement("div");
+    dialog.id = "notesNfcDialog";
+    dialog.className = "notes-qr-dialog";
+    dialog.innerHTML = `
+        <div class="notes-qr-card notes-nfc-card">
+            <button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>
+            <h3>📡 Leggi NFC</h3>
+            <p>Avvicina al telefono la card o il chip NFC contenente il collegamento.</p>
+            <div class="notes-nfc-icon">📳</div>
+            <p id="notesNfcMessage" class="personal-note-message">Attendo un tag NFC…</p>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const message = dialog.querySelector("#notesNfcMessage");
+    let active = true;
+
+    const close = () => {
+        active = false;
+        dialog.remove();
+    };
+
+    dialog.querySelector(".notes-qr-close")?.addEventListener("click", close);
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) close();
+    });
+
+    try {
+        const ndef = new NDEFReader();
+
+        ndef.addEventListener("readingerror", () => {
+            if (active) {
+                message.textContent =
+                    "Tag NFC non leggibile. Prova ad avvicinarlo di nuovo.";
+            }
+        });
+
+        ndef.addEventListener("reading", event => {
+            if (!active) return;
+
+            let foundUrl = "";
+
+            for (const record of event.message.records) {
+                if (
+                    record.recordType === "url" ||
+                    record.recordType === "absolute-url"
+                ) {
+                    foundUrl = readNdefUrlRecord(record);
+                } else if (record.recordType === "text" && !foundUrl) {
+                    const text = readNdefTextRecord(record);
+
+                    if (
+                        text.startsWith("http://") ||
+                        text.startsWith("https://")
+                    ) {
+                        foundUrl = text;
+                    }
+                }
+
+                if (foundUrl) break;
+            }
+
+            if (!foundUrl) {
+                message.textContent =
+                    "Tag letto, ma non contiene un URL Nursing Shot.";
+                return;
+            }
+
+            handleNfcShareUrl(foundUrl);
+        });
+
+        await ndef.scan();
+
+        if (active) {
+            message.textContent =
+                "NFC attivo: avvicina ora la card o il chip al telefono.";
+        }
+    } catch (error) {
+        console.error("Errore lettura NFC:", error);
+
+        if (active) {
+            message.textContent =
+                error.name === "NotAllowedError"
+                    ? "Permesso NFC negato. Consenti l'accesso quando richiesto."
+                    : "Impossibile avviare la lettura NFC. Controlla che NFC sia attivo.";
+        }
+    }
+}
+
 async function shareNotesViaNfc(stateId, itemId) {
     const notes = getNotesForItem(stateId, itemId);
+
     if (!notes.length) {
         window.alert("Non ci sono note da condividere.");
         return;
@@ -761,20 +957,36 @@ async function shareNotesViaNfc(stateId, itemId) {
 
     const url = buildNotesShareUrl(stateId, itemId, notes);
 
-    if (!("NDEFWriter" in window)) {
-        window.alert("La scrittura NFC non è supportata da questo browser. Su Android usa Chrome con NFC attivo e HTTPS.");
+    if (!("NDEFReader" in window)) {
+        window.alert(
+            "La scrittura NFC non è supportata da questo browser. Su Android usa Chrome con NFC attivo e HTTPS."
+        );
         return;
     }
 
     try {
-        const writer = new NDEFWriter();
-        await writer.write({ records: [{ recordType: "url", data: url }] });
-        window.alert("✅ Collegamento scritto sul tag NFC. Ora puoi avvicinare il telefono al tag per aprire le note.");
+        const writer = new NDEFReader();
+
+        await writer.write({
+            records: [
+                {
+                    recordType: "url",
+                    data: url
+                }
+            ]
+        });
+
+        window.alert(
+            "✅ Collegamento scritto sul tag NFC. Ora puoi leggerlo dall'altra parte con "📡 Leggi NFC"."
+        );
     } catch (error) {
         console.error("Errore scrittura NFC:", error);
-        window.alert(error.name === "NotAllowedError"
-            ? "Scrittura NFC non autorizzata. Attiva NFC e consenti l\'accesso quando richiesto."
-            : "Impossibile scrivere il collegamento sul tag NFC.");
+
+        window.alert(
+            error.name === "NotAllowedError"
+                ? "Scrittura NFC non autorizzata. Attiva NFC e consenti l'accesso quando richiesto."
+                : "Impossibile scrivere il collegamento sul tag NFC."
+        );
     }
 }
 function renderSharedNotesImport(shared) {
@@ -857,6 +1069,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi collegamento</button>
                 <button id="qrPersonalNotes" class="settings-action" type="button">▦ Mostra QR</button>
                 <button id="scanNotesQr" class="settings-action" type="button">📷 Leggi QR</button>
+                <button id="scanNotesNfc" class="settings-action" type="button">📡 Leggi NFC</button>
                 <button id="nfcPersonalNotes" class="settings-action" type="button">📳 Scrivi su NFC</button>
             </div>
 
@@ -913,6 +1126,11 @@ function setupPersonalNotes() {
 
         if (event.target.closest("#scanNotesQr")) {
             scanNotesQr();
+            return;
+        }
+
+        if (event.target.closest("#scanNotesNfc")) {
+            scanNotesNfc();
             return;
         }
 
