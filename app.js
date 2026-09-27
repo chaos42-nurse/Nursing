@@ -369,8 +369,11 @@ function makeNoteUrl(stateId, itemId, noteId, term = "") {
     params.set("state", stateId);
     params.set("item", itemId);
     params.set("notes", "1");
-    params.set("note", noteId);
-    if (term) params.set("link", term);
+
+    if (term) {
+        params.set("placeorder", term);
+    }
+
     return "?" + params.toString();
 }
 
@@ -413,10 +416,12 @@ function renderPlaceorders(text, sourceStateId, sourceItemId, sourceNoteId) {
 }
 
 function renderNoteText(text) {
-    return escapeNoteText(text).replace(
-        /&lt;placeorder&gt;([\s\S]*?)&lt;\/placeorder&gt;/gi,
-        ""
-    );
+    return escapeNoteText(text)
+        .replace(
+            /&lt;placeorder&gt;([\s\S]*?)&lt;\/placeorder&gt;/gi,
+            ""
+        )
+        .replace(/\[\[([\s\S]*?)\]\]/g, "");
 }
 
 function renderPersonalNotesButton(stateId, itemId) {
@@ -429,6 +434,83 @@ function renderPersonalNotesButton(stateId, itemId) {
             <span class="arrow">→</span>
         </a>
     `;
+}
+
+function renderGlobalNoteLinks() {
+    const groups = new Map();
+
+    for (const record of getAllPersonalNoteRecords()) {
+        for (const term of extractPlaceorders(record.note.text)) {
+            const targets = getLinkedNoteRecords(
+                term,
+                record.stateId,
+                record.itemId,
+                record.note.id
+            );
+
+            if (!targets.length) continue;
+
+            const key = normalizeLinkTerm(term);
+
+            if (!groups.has(key)) {
+                groups.set(key, {
+                    term,
+                    targets: []
+                });
+            }
+
+            const group = groups.get(key);
+
+            targets.forEach(target => {
+                const exists = group.targets.some(
+                    current =>
+                        current.stateId === target.stateId &&
+                        current.itemId === target.itemId &&
+                        String(current.note.id) === String(target.note.id)
+                );
+
+                if (!exists) {
+                    group.targets.push(target);
+                }
+            });
+        }
+    }
+
+    if (!groups.size) return "";
+
+    return [
+        '<section class="personal-note-index">',
+        '<div class="personal-note-index-title">🔎 Collegamenti tra note</div>',
+        '<p>Parole presenti in più note. Clicca una destinazione per aprirla.</p>',
+        '<div class="personal-note-index-list">',
+        Array.from(groups.values()).map(group =>
+            '<div class="personal-note-index-group">' +
+                '<strong class="personal-note-index-term">' +
+                    escapeHtml(group.term) +
+                '</strong>' +
+                '<div class="personal-note-index-links">' +
+                    group.targets.map(target =>
+                        '<a class="personal-note-index-link" href="' +
+                        makeNoteUrl(
+                            target.stateId,
+                            target.itemId,
+                            target.note.id,
+                            group.term
+                        ) +
+                        '">' +
+                        escapeHtml(target.stateId) +
+                        ' › ' +
+                        escapeHtml(target.itemId) +
+                        ' — ' +
+                        escapeHtml(target.note.title || "Nota personale") +
+                        '</a>'
+                    ).join("") +
+                '</div>' +
+            '</div>'
+        ).join(""),
+        '</div>',
+        '</section>'
+    ].join("");
 }
 
 function renderPersonalNotesPage(stateId, itemId, data, title) {
@@ -460,13 +542,20 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 </div>
             ` : ""}
 
+            ${renderGlobalNoteLinks()}
+
             <div class="personal-notes-list">
                 ${filteredNotes.length
                     ? filteredNotes.map(note => `
                         <article class="personal-note-card" data-note-id="${escapeAttribute(note.id)}">
                             <div class="personal-note-card-header">
-                                <h3>${escapeHtml(note.title || "Nota personale")}</h3>
-                                <button class="personal-note-delete" type="button" data-note-delete="${escapeAttribute(note.id)}">🗑️</button>
+                                <div>
+                                    <h3>${escapeHtml(note.title || "Nota personale")}</h3>
+                                </div>
+                                <div class="personal-note-actions">
+                                    <button class="personal-note-edit" type="button" data-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
+                                    <button class="personal-note-delete" type="button" data-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
+                                </div>
                             </div>
                             <div class="personal-note-text">${renderNoteText(note.text)}</div>
                             ${renderPlaceorders(note.text, stateId, itemId, note.id)}
