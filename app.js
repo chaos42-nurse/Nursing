@@ -1744,6 +1744,16 @@ async function writeGenericNfc(url) {
         return;
     }
 
+    const byteLength =
+        new TextEncoder().encode(url).length;
+
+    if (byteLength > 450) {
+        window.alert(
+            "La condivisione è troppo grande per essere scritta in modo affidabile su un tag NFC. Usa il collegamento o il QR."
+        );
+        return;
+    }
+
     if (!window.confirm(
         "Il collegamento verrà scritto sul tag NFC. Continuare?"
     )) {
@@ -1823,6 +1833,20 @@ function importSharedPersonalization(payload) {
             data.type !== "personalization"
         ) {
             return false;
+        }
+
+        const incomingPatients =
+            Array.isArray(data.patients)
+                ? data.patients
+                : [];
+
+        if (
+            incomingPatients.length &&
+            !window.confirm(
+                "Questa personalizzazione contiene dati paziente. Vuoi importarli su questo dispositivo?"
+            )
+        ) {
+            data.patients = [];
         }
 
         if (
@@ -2015,22 +2039,90 @@ function setupPatients() {
             }
 
             const patients = getPatients();
+            const editor =
+                document.querySelector(".patient-editor");
+            const editingId =
+                editor?.dataset.editingId || "";
 
-            patients.push({
-                id:
-                    String(Date.now()) +
-                    "-" +
-                    Math.random().toString(36).slice(2, 8),
-                name,
-                room,
-                bed,
-                pv,
-                medications,
-                notes
-            });
+            if (editingId) {
+                const patient =
+                    patients.find(
+                        current => current.id === editingId
+                    );
+
+                if (patient) {
+                    patient.name = name;
+                    patient.room = room;
+                    patient.bed = bed;
+                    patient.pv = pv;
+                    patient.medications = medications;
+                    patient.notes = notes;
+                }
+            } else {
+                patients.push({
+                    id:
+                        String(Date.now()) +
+                        "-" +
+                        Math.random().toString(36).slice(2, 8),
+                    name,
+                    room,
+                    bed,
+                    pv,
+                    medications,
+                    notes
+                });
+            }
 
             savePatients(patients);
             renderPatientsPage();
+            return;
+        }
+
+        const editButton =
+            event.target.closest("[data-patient-edit]");
+
+        if (editButton) {
+            const patient =
+                getPatients().find(
+                    current => current.id === editButton.dataset.patientEdit
+                );
+
+            if (!patient) return;
+
+            const nameInput = document.getElementById("patientName");
+            const roomInput = document.getElementById("patientRoom");
+            const bedInput = document.getElementById("patientBed");
+            const pvInput = document.getElementById("patientPv");
+            const medicationsInput = document.getElementById("patientMedications");
+            const notesInput = document.getElementById("patientNotes");
+            const saveButton = document.getElementById("savePatient");
+
+            if (!nameInput || !roomInput || !bedInput || !pvInput ||
+                !medicationsInput || !notesInput) {
+                return;
+            }
+
+            nameInput.value = patient.name;
+            roomInput.value = patient.room;
+            bedInput.value = patient.bed;
+            pvInput.value = patient.pv;
+            medicationsInput.value = patient.medications;
+            notesInput.value = patient.notes;
+
+            const editor = document.querySelector(".patient-editor");
+
+            if (editor) {
+                editor.dataset.editingId = patient.id;
+                editor.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+
+            if (saveButton) {
+                saveButton.textContent = "💾 Salva modifiche";
+            }
+
             return;
         }
 
