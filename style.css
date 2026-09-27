@@ -1528,6 +1528,38 @@ section h2 {
     border-radius: 8px;
 }
 
+.notes-qr-reader-card {
+    width: min(420px, 100%);
+}
+
+.notes-qr-video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    margin: 14px 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #000;
+}
+
+.notes-nfc-card {
+    text-align: center;
+}
+
+.notes-nfc-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 92px;
+    height: 92px;
+    margin: 20px auto 14px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--accent-soft);
+    font-size: 2.4rem;
+}
+
 .notes-qr-close {
     position: absolute;
     top: 8px;
