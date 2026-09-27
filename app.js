@@ -988,7 +988,63 @@ async function shareNotesViaNfc(stateId, itemId) {
                 : "Impossibile scrivere il collegamento sul tag NFC."
         );
     }
+}let backgroundNfcReaderActive = false;
+
+async function setupBackgroundNfcReader() {
+    if (
+        backgroundNfcReaderActive ||
+        !("NDEFReader" in window) ||
+        !navigator.permissions?.query
+    ) {
+        return;
+    }
+
+    try {
+        const permission = await navigator.permissions.query({
+            name: "nfc"
+        });
+
+        if (permission.state !== "granted") {
+            return;
+        }
+
+        const ndef = new NDEFReader();
+
+        ndef.addEventListener("reading", event => {
+            for (const record of event.message.records) {
+                let url = "";
+
+                if (
+                    record.recordType === "url" ||
+                    record.recordType === "absolute-url"
+                ) {
+                    url = readNdefUrlRecord(record);
+                } else if (record.recordType === "text") {
+                    const text = readNdefTextRecord(record);
+
+                    if (
+                        text.startsWith("http://") ||
+                        text.startsWith("https://")
+                    ) {
+                        url = text;
+                    }
+                }
+
+                if (url && url.includes("#nursing-notes=")) {
+                    handleNfcShareUrl(url);
+                    break;
+                }
+            }
+        });
+
+        await ndef.scan();
+        backgroundNfcReaderActive = true;
+    } catch (error) {
+        console.debug("Lettura NFC automatica non disponibile:", error);
+    }
 }
+
+
 function renderSharedNotesImport(shared) {
     if (!shared) return "";
 
@@ -6064,6 +6120,7 @@ function applyLocalOverride(stateId, data) {
 setupTheme();
 setupSettings();
 setupPersonalNotes();
+setupBackgroundNfcReader();
 
 if (editor === "1") {
 
