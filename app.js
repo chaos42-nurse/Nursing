@@ -1,3 +1,47 @@
+/* =========================================================
+   PULIZIA VECCHIA SCHERMATA DI CARICAMENTO
+========================================================= */
+
+const oldLoadingScreen = document.getElementById("appLoadingScreen");
+if (oldLoadingScreen) {
+    oldLoadingScreen.remove();
+}
+
+
+/* =========================================================
+   PARAMETRI URL
+========================================================= */
+
+const params = new URLSearchParams(
+    window.location.search
+);
+
+const state = params.get("state");
+const item = params.get("item");
+const editor =
+    params.get("editor");
+
+
+/* =========================================================
+   ELEMENTI HTML
+========================================================= */
+
+const stateTitle =
+    document.getElementById("state");
+
+const description =
+    document.getElementById("description");
+
+const content =
+    document.getElementById("content");
+
+const shortcuts =
+    document.getElementById("shortcuts");
+
+const backButton =
+    document.getElementById("backButton");
+
+
 function renderPatientsPage() {
     const patients = getPatients();
 
