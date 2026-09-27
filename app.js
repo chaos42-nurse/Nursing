@@ -5054,8 +5054,68 @@ function applyLocalOverride(stateId, data) {
 
 
 /* =========================================================
+   LETTURA CONDIVISIONE
+========================================================= */
+
+function readSharePayload() {
+
+    const hash = window.location.hash || "";
+
+    if (!hash.startsWith("#nursing-share=")) {
+        return null;
+    }
+
+    try {
+
+        const payload =
+            decodeURIComponent(
+                hash.slice("#nursing-share=".length)
+            );
+
+        const parts =
+            payload.split("|");
+
+        if (
+            parts.length !== 3 ||
+            parts[0] !== "NS2"
+        ) {
+            return null;
+        }
+
+        const type =
+            fromBase64(parts[1]);
+
+        const data =
+            JSON.parse(
+                fromBase64(parts[2])
+            );
+
+        return {
+            type,
+            data
+        };
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Collegamento di condivisione non valido:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================================================
    ROUTE CONDIVISIONE / PAZIENTI
 ========================================================= */
+
+
 
 const incomingPersonalization =
     readSharePayload();
