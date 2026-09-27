@@ -772,7 +772,7 @@ function renderPatientPvHistory(history, patientId = "") {
         </div>
     `;
 }
-function renderPatientsPage(selectedPatientId = "", editMode = false) {
+function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
     const patients = getPatients();
     const selectedPatient =
         patients.find(patient => patient.id === selectedPatientId) || null;
@@ -782,6 +782,10 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
             <div class="detail-header-row">
                 <h2>👤 Pazienti</h2>
             </div>
+
+            <button id="newPatientButton" class="settings-action patient-new-button" type="button">
+                ➕ Nuovo paziente
+            </button>
 
             <div class="patient-privacy-warning">
                 <strong>⚠️ Dati sensibili</strong>
@@ -880,13 +884,10 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
                         <button id="editCurrentPatient" class="settings-action" type="button">
                             ✏️ Modifica scheda
                         </button>
-                        <button id="closePatientCard" class="settings-action" type="button">
-                            ← Torna all'elenco
-                        </button>
                     `}
                 </div>
             ` : `
-                <div class="patient-editor">
+                <div class="patient-editor ${newPatientMode ? "" : "patient-new-form-hidden"}">
                     <h3>➕ Nuovo paziente</h3>
 
                     <input id="patientName" class="personal-note-title-input" type="text"
@@ -918,7 +919,6 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
                 </div>
             `}
 
-            <a class="personal-notes-back" href="./">← Torna alla home</a>
         </section>
     `;
 
@@ -934,6 +934,16 @@ function renderPatientsPage(selectedPatientId = "", editMode = false) {
 
 function setupPatients() {
     document.addEventListener("click", event => {
+        if (event.target.closest("#newPatientButton")) {
+            renderPatientsPage("", false, true);
+            return;
+        }
+
+        if (event.target.closest("#cancelNewPatient")) {
+            renderPatientsPage();
+            return;
+        }
+
         const openButton = event.target.closest("[data-patient-open]");
         if (openButton) {
             renderPatientsPage(openButton.dataset.patientOpen, false);
@@ -949,11 +959,6 @@ function setupPatients() {
         if (event.target.closest("#cancelPatientEdit")) {
             const id = document.querySelector(".patient-editor")?.dataset.selectedId || "";
             renderPatientsPage(id, false);
-            return;
-        }
-
-        if (event.target.closest("#closePatientCard")) {
-            renderPatientsPage();
             return;
         }
 
@@ -6042,6 +6047,7 @@ function setupSettings() {
     });
 
     shareButton?.addEventListener("click", () => {
+        panel.hidden = true;
         showPersonalizationShareDialog();
     });
 
