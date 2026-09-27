@@ -48,6 +48,41 @@ const backButton =
 
 let orderEditMode = false;
 
+const PATIENTS_KEY = "nursing-patients";
+const PERSONALIZATION_VERSION = 2;
+
+const PERSONALIZATION_KEYS = {
+    theme: "nursing-theme",
+    categoryOrder: "nursing-category-order",
+    notes: "nursing-personal-notes"
+};
+
+function normalizePatient(patient = {}) {
+    return {
+        id: String(patient.id || ""),
+        name: String(patient.name || ""),
+        birthDate: String(patient.birthDate || ""),
+        age: String(patient.age || ""),
+        room: String(patient.room || ""),
+        bed: String(patient.bed || ""),
+        pathologies: String(patient.pathologies || ""),
+        admissionReason: String(patient.admissionReason || ""),
+        allergies: String(patient.allergies || ""),
+        medications: String(patient.medications || ""),
+        notes: String(patient.notes || ""),
+        pvHistory: Array.isArray(patient.pvHistory)
+            ? patient.pvHistory.map(entry => ({
+                id: String(entry?.id || ""),
+                recordedAt: String(entry?.recordedAt || ""),
+                pa: String(entry?.pa || ""),
+                fc: String(entry?.fc || ""),
+                sat: String(entry?.sat || ""),
+                temperature: String(entry?.temperature || "")
+            }))
+            : []
+    };
+}
+
 
 function renderPatientsPage() {
     const patients = getPatients();
@@ -6445,15 +6480,7 @@ function getPatients() {
 
         return raw
             .filter(patient => patient && typeof patient === "object")
-            .map(patient => ({
-                id: String(patient.id || ""),
-                name: String(patient.name || ""),
-                room: String(patient.room || ""),
-                bed: String(patient.bed || ""),
-                pv: String(patient.pv || ""),
-                medications: String(patient.medications || ""),
-                notes: String(patient.notes || "")
-            }));
+            .map(normalizePatient);
     } catch (_) {
         return [];
     }
