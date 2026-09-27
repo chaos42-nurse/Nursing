@@ -20,6 +20,8 @@ const state = params.get("state");
 const item = params.get("item");
 const editor =
     params.get("editor");
+const patientRouteId =
+    params.get("patient") || "";
 
 
 /* =========================================================
@@ -955,7 +957,15 @@ function setupPatients() {
 
         const openButton = event.target.closest("[data-patient-open]");
         if (openButton) {
-            renderPatientsPage(openButton.dataset.patientOpen, false);
+            const patientId = openButton.dataset.patientOpen || "";
+            if (!patientId) return;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("patients", "1");
+            url.searchParams.set("patient", patientId);
+            window.history.pushState({}, "", url);
+
+            renderPatientsPage(patientId, false);
             return;
         }
 
@@ -7881,7 +7891,7 @@ if (incomingPersonalization) {
             input.dispatchEvent(new Event("input"));
         }
     });
-    renderPatientsPage();
+    renderPatientsPage(patientRouteId, false);
 
 } else if (editor === "1") {
 
