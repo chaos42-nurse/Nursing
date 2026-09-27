@@ -108,7 +108,7 @@ function renderPatientsPage() {
             <div class="patients-list">
                 ${patients.length
                     ? patients.map(patient => `
-                        <article class="patient-card" data-patient-id="${escapeAttribute(patient.id)}">
+                        <article class="patient-card" data-patient-id="${escapeAttribute(patient.id)}" data-patient-name="${escapeAttribute(patient.name || "Paziente senza nome")}">
                             <div class="patient-card-header">
                                 <h3>${escapeHtml(patient.name || "Paziente senza nome")}</h3>
                                 <div>
@@ -5923,7 +5923,7 @@ function buildShareUrl(type, data) {
 
     return window.location.origin +
         window.location.pathname +
-        "#nursing-share=" +
+        "?share=" +
         encodeURIComponent(
             createSharePayload(type, data)
         );
@@ -5938,18 +5938,33 @@ function buildShareUrl(type, data) {
 
 function readSharePayload() {
 
-    const hash = window.location.hash || "";
+    const searchParams =
+        new URLSearchParams(window.location.search);
 
-    if (!hash.startsWith("#nursing-share=")) {
+    const queryPayload =
+        searchParams.get("share");
+
+    const hash =
+        window.location.hash || "";
+
+    let encodedPayload = queryPayload || "";
+
+    if (
+        !encodedPayload &&
+        hash.startsWith("#nursing-share=")
+    ) {
+        encodedPayload =
+            hash.slice("#nursing-share=".length);
+    }
+
+    if (!encodedPayload) {
         return null;
     }
 
     try {
 
         const payload =
-            decodeURIComponent(
-                hash.slice("#nursing-share=".length)
-            );
+            decodeURIComponent(encodedPayload);
 
         const parts =
             payload.split("|");
@@ -5974,9 +5989,7 @@ function readSharePayload() {
             data
         };
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Collegamento di condivisione non valido:",
@@ -6568,10 +6581,14 @@ function getInternalNotesShareUrl(rawValue) {
 
         if (url.origin !== window.location.origin) return null;
 
-        if (
-            !url.hash.startsWith("#nursing-notes=") &&
-            !url.hash.startsWith("#nursing-share=")
-        ) {
+        const hasShareQuery =
+            url.searchParams.has("share");
+
+        const hasShareHash =
+            url.hash.startsWith("#nursing-notes=") ||
+            url.hash.startsWith("#nursing-share=");
+
+        if (!hasShareQuery && !hasShareHash) {
             return null;
         }
 
@@ -7715,13 +7732,16 @@ function importSharedPersonalization(payload) {
                 ? data.patients
                 : [];
 
+        let patientsToImport =
+            incomingPatients;
+
         if (
             incomingPatients.length &&
             !window.confirm(
                 "Questa personalizzazione contiene dati paziente. Vuoi importarli su questo dispositivo?"
             )
         ) {
-            data.patients = [];
+            patientsToImport = [];
         }
 
         if (
@@ -7794,11 +7814,11 @@ function importSharedPersonalization(payload) {
             );
         }
 
-        if (Array.isArray(data.patients)) {
+        if (patientsToImport.length) {
             const existingPatients = getPatients();
             const mergedPatients = existingPatients.map(normalizePatient);
 
-            for (const incomingPatient of data.patients) {
+            for (const incomingPatient of patientsToImport) {
                 const normalizedIncoming = normalizePatient(incomingPatient);
                 const incomingId = String(normalizedIncoming.id || "");
 
@@ -7933,10 +7953,24 @@ setupPersonalNotes();
 setupPatients();
 
 if (incomingPersonalization) {
-    loadCategories();
-    content.innerHTML = renderSharedPersonalizationImport(
-        incomingPersonalization
-    );
+
+    document.body.classList.remove("home-page");
+    shortcuts.style.display = "none";
+
+    if (backButton) {
+        backButton.style.display = "flex";
+    }
+
+    stateTitle.textContent =
+        "📥 Importazione";
+
+    description.textContent =
+        "Dati ricevuti da un altro dispositivo.";
+
+    content.innerHTML =
+        renderSharedPersonalizationImport(
+            incomingPersonalization
+        );
 
     const importButton =
         document.getElementById(
@@ -7944,21 +7978,43 @@ if (incomingPersonalization) {
         );
 
     importButton?.addEventListener("click", () => {
-        if (importSharedPersonalization(incomingPersonalization)) {
-            window.location.hash = "";
-            window.location.href = "./";
+
+        const imported =
+            importSharedPersonalization(
+                incomingPersonalization
+            );
+
+        if (imported) {
+
+            window.history.replaceState(
+                {},
+                "",
+                window.location.pathname
+            );
+
+            window.location.reload();
+
         } else {
+
             window.alert(
                 "Collegamento di personalizzazione non valido."
             );
+
         }
     });
 
     document.getElementById(
         "cancelSharedPersonalization"
     )?.addEventListener("click", () => {
-        window.location.hash = "";
-        window.location.href = "./";
+
+        window.history.replaceState(
+            {},
+            "",
+            window.location.pathname
+        );
+
+        window.location.reload();
+
     });
 
 } else if (patientsRoute === "1") {
@@ -8019,7 +8075,7 @@ if (incomingPersonalization) {
         const query = queryValue.trim();
         const patients = getPatients();
 
-        document.querySelectorAll("[data-patient-open]").forEach(button => {
+        document.querySelectorAll("[data-patient-id]").forEach(button => {
             const name =
                 button.dataset.patientName ||
                 button.querySelector("strong")?.textContent ||
