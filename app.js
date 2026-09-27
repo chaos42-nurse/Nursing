@@ -944,14 +944,22 @@ function setupPatients() {
     document.addEventListener("input", event => {
         if (event.target.id !== "patientSearch") return;
 
-        const query = event.target.value.trim().toLocaleUpperCase("it-IT");
+        const query = event.target.value.trim().toLocaleLowerCase("it-IT");
 
         document.querySelectorAll("[data-patient-open]").forEach(button => {
             const name = button.querySelector("strong")?.textContent || "";
-            const initials = getPatientInitials(name);
+            const words = name
+                .trim()
+                .split(/[\\s']+/)
+                .filter(Boolean);
 
-            button.style.display =
-                !query || initials.startsWith(query) ? "" : "none";
+            const matches =
+                !query ||
+                words.some(word =>
+                    word.toLocaleLowerCase("it-IT").startsWith(query)
+                );
+
+            button.style.display = matches ? "" : "none";
         });
     });
 
@@ -7896,8 +7904,9 @@ if (incomingPersonalization) {
         if (!initials) return;
 
         const option = document.createElement("option");
-        option.value = initials;
-        option.label = patient.name || initials;
+        option.value = patient.name || initials;
+        option.label = initials;
+        option.dataset.initials = initials;
         patientSearchList?.appendChild(option);
     });
     document.getElementById("patientSearchToggle")?.addEventListener("click", () => {
