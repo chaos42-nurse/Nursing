@@ -1703,6 +1703,74 @@ section h2 {
 }
 
 
+.personal-note-index {
+    order: 2;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+}
+
+.personal-note-index-title {
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.personal-note-index p {
+    margin: 0 0 11px;
+    color: var(--text-secondary);
+    font-size: .82rem;
+}
+
+.personal-note-index-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.personal-note-index-group {
+    padding: 9px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.personal-note-index-term {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--accent);
+}
+
+.personal-note-index-links {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.personal-note-index-link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: .78rem;
+}
+
+.personal-note-index-link:hover {
+    background: var(--surface-hover);
+}
+
+.personal-note-index-link strong {
+    font-size: .82rem;
+}
+
+.personal-note-card-focused {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
 /* Parole collegate dentro il testo delle note */
 .personal-note-linked-term {
     color: var(--accent);
