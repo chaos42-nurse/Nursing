@@ -1,14 +1,12 @@
-const CACHE_NAME = "nursing-v49";
+const CACHE_NAME = "nursing-v50";
 
 const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
-    "./app.js?v=49",
+    "./app.js?v=50",
     "./manifest.json",
-    "./icon.svg",
     "./icon-192.png",
-    "./icon-512.png",
     "./data/categories.json",
     "./data/ecg.json",
     "./data/farmaci.json",
