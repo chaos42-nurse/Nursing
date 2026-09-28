@@ -8088,6 +8088,7 @@ if (incomingPersonalization) {
         document.querySelectorAll("[data-patient-id]").forEach(button => {
             const name =
                 button.dataset.patientName ||
+                button.querySelector("h3")?.textContent ||
                 button.querySelector("strong")?.textContent ||
                 "";
 
