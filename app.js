@@ -950,7 +950,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                     <button id="cancelNewPatient" class="settings-action" type="button">↩️ Annulla</button>
                     <p id="patientMessage" class="personal-note-message"></p>
                 </div>
-            `}
+            ` : ""}
         </section>
     `;
 
