@@ -793,13 +793,13 @@ function getPatientInitials(name = "") {
 }
 
 function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
-    const patients = getPatients();
+    const patients = applyPatientOrder(getPatients());
     const selectedPatient =
         patients.find(patient => patient.id === selectedPatientId) || null;
 
     content.innerHTML = `
         <section class="detail-page patients-page">
-            ${selectedPatient ? "" : `
+            ${selectedPatient ? "" : newPatientMode ? "" : `
                 <button id="newPatientButton" class="settings-action patient-new-button" type="button">
                     ➕ Nuovo paziente
                 </button>
@@ -815,16 +815,22 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 
                 <div class="patients-list">
                     ${patients.length
-                        ? patients.map(patient => `
-                            <button
-                                class="patient-card patient-card-name"
-                                type="button"
-                                data-patient-open="${escapeAttribute(patient.id)}"
-                                data-patient-name="${escapeAttribute(patient.name || "Paziente senza nome")}"
-                            >
-                                <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
-                                <span class="arrow">→</span>
-                            </button>
+                        ? patients.map((patient, index) => `
+                            <div class="patient-card-row">
+                                <button
+                                    class="patient-card patient-card-name"
+                                    type="button"
+                                    data-patient-open="${escapeAttribute(patient.id)}"
+                                    data-patient-id="${escapeAttribute(patient.id)}"
+                                    data-patient-name="${escapeAttribute(patient.name || "Paziente senza nome")}"
+                                >
+                                    <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
+                                    <span class="arrow">→</span>
+                                </button>
+                                ${isOrderEditMode() ? `
+                                    ${createOrderControls(index, patients.length, "paziente").outerHTML}
+                                ` : ""}
+                            </div>
                         `).join("")
                         : '<div class="personal-note-empty">Nessun paziente inserito.</div>'
                     }
@@ -868,7 +874,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                             <h4>🩺 Parametri vitali</h4>
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory, selectedPatient.id)}</div>
                             <button id="openPvRecorder" class="settings-action" type="button"
-    data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
+                                data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
                         </div>
 
                         <button id="savePatient" class="settings-action" type="button"
@@ -894,7 +900,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                             <h4>🩺 Parametri vitali</h4>
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory, selectedPatient.id)}</div>
                             <button id="openPvRecorder" class="settings-action" type="button"
-    data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
+                                data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
                         </div>
 
                         <button id="editCurrentPatient" class="settings-action" type="button">
@@ -905,9 +911,11 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         </button>
                     `}
                 </div>
-            ` : `
-                <div class="patient-editor ${newPatientMode ? "" : "patient-new-form-hidden"}">
-                    <h3>➕ Nuovo paziente</h3>
+            ` : newPatientMode ? `
+                <div class="patient-editor patient-new-editor">
+                    <div class="detail-header-row">
+                        <h3>➕ Nuovo paziente</h3>
+                    </div>
 
                     <input id="patientName" class="personal-note-title-input" type="text"
                         placeholder="Nominativo">
@@ -930,14 +938,19 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 
                     <div class="patient-pv-section">
                         <h4>🩺 Parametri vitali</h4>
-                        <p class="personal-notes-context">Potrai aggiungere le rilevazioni dalla scheda dopo aver salvato il paziente.</p>
+                        <button id="openNewPatientPvRecorder" class="settings-action" type="button">
+                            ➕ Inserisci PV
+                        </button>
+                        <p id="newPatientPvMessage" class="personal-notes-context">
+                            Nessuna rilevazione iniziale.
+                        </p>
                     </div>
 
                     <button id="savePatient" class="settings-action" type="button">💾 Salva paziente</button>
+                    <button id="cancelNewPatient" class="settings-action" type="button">↩️ Annulla</button>
                     <p id="patientMessage" class="personal-note-message"></p>
                 </div>
             `}
-
         </section>
     `;
 
@@ -949,8 +962,10 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
             ageInput.value = calculatePatientAge(birthInput.value);
         }
     });
-}
 
+    setupPatientOrderControls();
+    refreshOrderControls();
+}
 function setupPatients() {
     document.addEventListener("click", event => {
         const suggestion = event.target.closest("[data-patient-suggestion]");
@@ -967,7 +982,62 @@ function setupPatients() {
 
     document.addEventListener("click", event => {
         if (event.target.closest("#newPatientButton")) {
+            window.__newPatientPvDraft = [];
             renderPatientsPage("", false, true);
+            return;
+        }
+
+        if (event.target.closest("#openNewPatientPvRecorder")) {
+            const modal = document.createElement("div");
+            modal.className = "patient-pv-modal";
+            modal.dataset.newPatient = "1";
+            modal.innerHTML = `
+                <div class="patient-pv-modal-card">
+                    <h3>🩺 Nuova rilevazione PV</h3>
+                    <div class="patient-pv-input-form">
+                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
+                        <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
+                        <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
+                        <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
+                    </div>
+                    <button id="addNewPatientPv" class="settings-action" type="button">💾 Registra PV</button>
+                    <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setupPvInputFormatting(modal);
+            return;
+        }
+
+        if (event.target.closest("#addNewPatientPv")) {
+            const modal = event.target.closest(".patient-pv-modal");
+            const pa = document.getElementById("patientPa")?.value.trim() || "";
+            const fc = document.getElementById("patientFc")?.value.trim() || "";
+            const sat = document.getElementById("patientSat")?.value.trim() || "";
+            const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
+
+            if (!pa && !fc && !sat && !temperature) {
+                window.alert("Inserisci almeno un parametro vitale.");
+                return;
+            }
+
+            window.__newPatientPvDraft = Array.isArray(window.__newPatientPvDraft)
+                ? window.__newPatientPvDraft
+                : [];
+
+            window.__newPatientPvDraft.push({
+                id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+                recordedAt: new Date().toISOString(),
+                pa, fc, sat, temperature
+            });
+
+            modal.remove();
+
+            const message = document.getElementById("newPatientPvMessage");
+            if (message) {
+                const count = window.__newPatientPvDraft.length;
+                message.textContent = `${count} rilevazione iniziale pronta per il salvataggio.`;
+            }
             return;
         }
 
@@ -1173,12 +1243,17 @@ function setupPatients() {
                 return;
             }
 
+            const newPatientPvHistory = Array.isArray(window.__newPatientPvDraft)
+                ? window.__newPatientPvDraft
+                : [];
+
             patients.push(normalizePatient({
                 id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
                 ...patientData,
-                pvHistory: []
+                pvHistory: newPatientPvHistory
             }));
 
+            window.__newPatientPvDraft = [];
             savePatients(patients);
             renderPatientsPage();
             return;
@@ -1217,7 +1292,8 @@ function resetOrderPreferences() {
         .filter(key =>
             key === PERSONALIZATION_KEYS.categoryOrder ||
             key.startsWith("nursing-sections-") ||
-            key.startsWith("nursing-items-")
+            key.startsWith("nursing-items-") ||
+            key === "nursing-patient-order"
         );
 
     keys.forEach(key => localStorage.removeItem(key));
@@ -6107,7 +6183,9 @@ function setupSettings() {
 
         if (panel) panel.hidden = false;
 
-        if (state) {
+        if (patientsRoute === "1") {
+            renderPatientsPage(patientRouteId, false);
+        } else if (state) {
             loadState();
         } else {
             loadCategories();
@@ -7233,7 +7311,8 @@ function collectOrderPreferences() {
         if (
             key === PERSONALIZATION_KEYS.categoryOrder ||
             key.startsWith("nursing-sections-") ||
-            key.startsWith("nursing-items-")
+            key.startsWith("nursing-items-") ||
+            key === "nursing-patient-order"
         ) {
             result[key] = localStorage.getItem(key);
         }
@@ -7264,6 +7343,65 @@ function savePatients(patients) {
         JSON.stringify(patients)
     );
 }
+
+function getPatientOrder() {
+    try {
+        const raw = JSON.parse(
+            localStorage.getItem("nursing-patient-order") || "null"
+        );
+        return Array.isArray(raw) ? raw.map(String) : null;
+    } catch (_) {
+        localStorage.removeItem("nursing-patient-order");
+        return null;
+    }
+}
+
+function applyPatientOrder(patients) {
+    const savedOrder = getPatientOrder();
+    if (!savedOrder) return [...patients];
+
+    return [...patients].sort((a, b) => {
+        const aIndex = savedOrder.indexOf(String(a.id));
+        const bIndex = savedOrder.indexOf(String(b.id));
+        return (
+            (aIndex === -1 ? 999999 : aIndex) -
+            (bIndex === -1 ? 999999 : bIndex)
+        );
+    });
+}
+
+function savePatientOrder() {
+    const order = Array.from(
+        content.querySelectorAll(".patient-card-row .patient-card")
+    ).map(card => card.dataset.patientId);
+
+    localStorage.setItem(
+        "nursing-patient-order",
+        JSON.stringify(order)
+    );
+}
+
+function setupPatientOrderControls() {
+    content
+        .querySelectorAll(".patient-order-controls .order-button")
+        .forEach(button => {
+            button.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const row = button.closest(".patient-card-row");
+                if (!row) return;
+
+                moveElement(
+                    row,
+                    button.dataset.order,
+                    ".patient-card-row",
+                    savePatientOrder
+                );
+            });
+        });
+}
+
 
 function collectPersonalization(includePatients = false) {
     return {
