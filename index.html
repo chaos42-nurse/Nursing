@@ -47,6 +47,23 @@
         href="./manifest.json"
     >
 
+    <script>
+        (() => {
+            const params = new URLSearchParams(window.location.search);
+
+            if (
+                params.has("state") ||
+                params.has("item") ||
+                params.has("patients") ||
+                params.has("patient") ||
+                params.has("editor") ||
+                params.has("links")
+            ) {
+                document.documentElement.classList.add("app-internal-route");
+            }
+        })();
+    </script>
+
 </head>
 
 
@@ -58,6 +75,10 @@
     </div>
 
     <style>
+        html.app-internal-route #appLoadingScreen {
+            display: none;
+        }
+
         #appLoadingScreen {
             position: fixed;
             inset: 0;
