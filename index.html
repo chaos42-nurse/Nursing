@@ -188,13 +188,13 @@
 
     <!-- JAVASCRIPT -->
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=47"></script>
 
     <!-- SERVICE WORKER PWA -->
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./service-worker.js")
+                navigator.serviceWorker.register("./service-worker.js?v=47")
                     .then(() => {
                         console.log("Service worker registrato correttamente.");
                     })
