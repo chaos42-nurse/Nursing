@@ -6446,7 +6446,7 @@ function renderAllNoteLinksPage(termFilter = "") {
     }
 
     let visibleGroups = Array.from(groups.values())
-        .filter(group => group.records.length >= 2)
+        .filter(group => group.records.length >= 1)
         .sort((a, b) =>
             normalizeLinkTerm(a.term).localeCompare(
                 normalizeLinkTerm(b.term), "it"
