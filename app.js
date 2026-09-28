@@ -8077,7 +8077,7 @@ if (incomingPersonalization) {
 
         return queryWords.every(queryWord =>
             nameWords.some(nameWord =>
-                nameWord.includes(queryWord)
+                nameWord.startsWith(queryWord)
             )
         );
     }
