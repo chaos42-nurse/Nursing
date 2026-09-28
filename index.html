@@ -100,7 +100,12 @@
              * Solo la home senza parametri deve mostrare lo splash.
              * Tutte le pagine interne partono direttamente dal contenuto.
              */
-            if (!window.location.search) {
+            const isHome = !window.location.search;
+            const splashAlreadyShown =
+                sessionStorage.getItem("nursing-splash-shown") === "1";
+
+            if (isHome && !splashAlreadyShown) {
+                sessionStorage.setItem("nursing-splash-shown", "1");
                 document.documentElement.classList.add("app-show-loading");
             }
         })();
