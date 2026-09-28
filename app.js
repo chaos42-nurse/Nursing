@@ -8033,6 +8033,7 @@ if (incomingPersonalization) {
     description.textContent =
         "Gestione locale dei pazienti.";
     shortcuts.style.display = "none";
+
     document.querySelector(".page-title-row")?.insertAdjacentHTML("beforeend", `
         <button id="patientSearchToggle" class="patient-search-toggle" type="button" aria-label="Cerca paziente">🔍</button>
     `);
@@ -8043,17 +8044,19 @@ if (incomingPersonalization) {
         <div id="patientSearchSuggestions" class="patient-search-suggestions" hidden></div>
     `);
 
-    const patientSearch = document.getElementById("patientSearch");
+    const patientSearch =
+        document.getElementById("patientSearch");
+
     const patientSearchSuggestions =
         document.getElementById("patientSearchSuggestions");
 
     function normalizePatientSearchText(value = "") {
-        return String(value || "")
+        return String(value ?? "")
             .normalize("NFD")
-            .replace(/[\\u0300-\\u036f]/g, "")
+            .replace(/[\u0300-\u036f]/g, "")
             .toLocaleLowerCase("it-IT")
             .trim()
-            .replace(/\\s+/g, " ");
+            .replace(/\s+/g, " ");
     }
 
     function patientNameMatches(name, queryValue) {
@@ -8065,12 +8068,10 @@ if (incomingPersonalization) {
 
         if (!queryNormalized) return true;
 
-        if (nameNormalized.includes(queryNormalized)) {
-            return true;
-        }
-
+        // Cerca anche una sequenza di parole non necessariamente adiacenti.
         const queryWords =
             queryNormalized.split(" ").filter(Boolean);
+
         const nameWords =
             nameNormalized.split(" ").filter(Boolean);
 
@@ -8082,19 +8083,26 @@ if (incomingPersonalization) {
     }
 
     function updatePatientSearch(queryValue = "") {
-        const query = queryValue.trim();
-        const patients = getPatients();
+        const query =
+            normalizePatientSearchText(queryValue);
 
-        document.querySelectorAll("[data-patient-id]").forEach(button => {
-            const name =
-                button.dataset.patientName ||
-                button.querySelector("h3")?.textContent ||
-                button.querySelector("strong")?.textContent ||
-                "";
+        const patients =
+            getPatients();
 
-            button.style.display =
-                patientNameMatches(name, query) ? "" : "none";
-        });
+        // Filtra esclusivamente le schede paziente.
+        document
+            .querySelectorAll(".patients-list .patient-card")
+            .forEach(card => {
+                const name =
+                    card.getAttribute("data-patient-name") ||
+                    card.querySelector("h3")?.textContent ||
+                    "";
+
+                card.style.display =
+                    patientNameMatches(name, query)
+                        ? ""
+                        : "none";
+            });
 
         if (!patientSearchSuggestions) return;
 
@@ -8104,47 +8112,81 @@ if (incomingPersonalization) {
             return;
         }
 
-        const matches = patients.filter(patient =>
-            patientNameMatches(patient.name, query)
-        );
+        const matches =
+            patients.filter(patient =>
+                patientNameMatches(patient.name, query)
+            );
 
-        patientSearchSuggestions.innerHTML = matches.map(patient => `
-            <button type="button" class="patient-search-suggestion"
-                data-patient-suggestion="${escapeAttribute(patient.id)}">
-                <strong>${escapeHtml(getPatientInitials(patient.name))}</strong>
-                <span>${escapeHtml(patient.name)}</span>
-            </button>
-        `).join("");
+        patientSearchSuggestions.innerHTML =
+            matches.map(patient => `
+                <button
+                    type="button"
+                    class="patient-search-suggestion"
+                    data-patient-suggestion="${escapeAttribute(patient.id)}"
+                >
+                    <strong>${escapeHtml(getPatientInitials(patient.name))}</strong>
+                    <span>${escapeHtml(patient.name)}</span>
+                </button>
+            `).join("");
 
-        patientSearchSuggestions.hidden = matches.length === 0;
+        patientSearchSuggestions.hidden =
+            matches.length === 0;
     }
 
     patientSearch?.addEventListener("input", () => {
         updatePatientSearch(patientSearch.value);
     });
-    document.getElementById("patientSearchToggle")?.addEventListener("click", () => {
-        const input = document.getElementById("patientSearch");
-        if (!input) return;
 
-        input.classList.toggle("is-open");
+    document
+        .getElementById("patientSearchToggle")
+        ?.addEventListener("click", () => {
+            const input =
+                document.getElementById("patientSearch");
 
-        if (input.classList.contains("is-open")) {
-            input.focus();
-        } else {
-            input.value = "";
-            input.dispatchEvent(new Event("input"));
-        }
+            if (!input) return;
+
+            input.classList.toggle("is-open");
+
+            if (input.classList.contains("is-open")) {
+                input.focus();
+                updatePatientSearch(input.value);
+            } else {
+                input.value = "";
+                updatePatientSearch("");
+            }
+        });
+
+    patientSearchSuggestions?.addEventListener("click", event => {
+        const suggestion =
+            event.target.closest("[data-patient-suggestion]");
+
+        if (!suggestion) return;
+
+        const patientId =
+            suggestion.dataset.patientSuggestion;
+
+        if (!patientId) return;
+
+        window.location.href =
+            "?patients=1&patient=" +
+            encodeURIComponent(patientId);
     });
+
     const patientSearchToggle =
         document.getElementById("patientSearchToggle");
 
     if (patientRouteId) {
         patientSearchToggle?.remove();
         document.getElementById("patientSearch")?.remove();
-        document.getElementById("patientNames")?.remove();
+        document.getElementById("patientSearchSuggestions")?.remove();
     }
 
     renderPatientsPage(patientRouteId, false);
+
+    // Applica subito l'eventuale ricerca già presente nel campo.
+    if (patientSearch && !patientRouteId) {
+        updatePatientSearch(patientSearch.value);
+    }
 
 } else if (editor === "1") {
 
