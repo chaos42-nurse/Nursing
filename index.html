@@ -47,39 +47,18 @@
         href="./manifest.json"
     >
 
-    <script>
-        (() => {
-            const params = new URLSearchParams(window.location.search);
-
-            if (
-                params.has("state") ||
-                params.has("item") ||
-                params.has("patients") ||
-                params.has("patient") ||
-                params.has("editor") ||
-                params.has("links")
-            ) {
-                document.documentElement.classList.add("app-internal-route");
-            }
-        })();
-    </script>
-
-</head>
-
-
-<body>
-
-    <div id="appLoadingScreen" aria-hidden="true">
-        <img src="./icon.svg" alt="" class="app-loading-icon">
-        <div class="app-loading-title">Nursing Shot</div>
-    </div>
-
     <style>
-        html.app-internal-route #appLoadingScreen {
+        /*
+         * Lo splash è NASCOSTO per impostazione predefinita.
+         * Viene mostrato solo quando siamo sulla home dell'app.
+         * In questo modo una navigazione interna non può produrre
+         * nemmeno un singolo frame della schermata d'avvio.
+         */
+        #appLoadingScreen {
             display: none;
         }
 
-        #appLoadingScreen {
+        html.app-show-loading #appLoadingScreen {
             position: fixed;
             inset: 0;
             z-index: 99999;
@@ -94,7 +73,7 @@
             transition: opacity .18s ease, visibility .18s ease;
         }
 
-        #appLoadingScreen.app-loading-hidden {
+        html.app-show-loading #appLoadingScreen.app-loading-hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -114,6 +93,28 @@
             line-height: 1.1;
         }
     </style>
+
+    <script>
+        (() => {
+            /*
+             * Solo la home senza parametri deve mostrare lo splash.
+             * Tutte le pagine interne partono direttamente dal contenuto.
+             */
+            if (!window.location.search) {
+                document.documentElement.classList.add("app-show-loading");
+            }
+        })();
+    </script>
+
+</head>
+
+
+<body>
+
+    <div id="appLoadingScreen" aria-hidden="true">
+        <img src="./icon.svg" alt="" class="app-loading-icon">
+        <div class="app-loading-title">Nursing Shot</div>
+    </div>
 
     <div id="settingsPanel" class="settings-panel" hidden>
         <div class="settings-card">
