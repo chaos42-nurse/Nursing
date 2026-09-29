@@ -808,7 +808,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                                     data-patient-id="${escapeAttribute(patient.id)}"
                                     data-patient-name="${escapeAttribute(patient.name || "Paziente senza nome")}"
                                 >
-                                    <strong>${escapeHtml(patient.name || "Paziente senza nome")}</strong>
+                                    <strong>${renderNoteText(patient.name || "Paziente senza nome")}</strong>
                                     <span class="arrow">→</span>
                                 </button>
                                 ${isOrderEditMode() ? `
@@ -824,7 +824,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
             ${selectedPatient ? `
                 <div class="patient-editor" data-selected-id="${escapeAttribute(selectedPatient.id)}">
                     <div class="detail-header-row">
-                        <h3>👤 ${escapeHtml(selectedPatient.name || "Paziente senza nome")}</h3>
+                        <h3>👤 ${renderNoteText(selectedPatient.name || "Paziente senza nome")}</h3>
                     </div>
 
                     ${editMode ? `
