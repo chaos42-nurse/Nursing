@@ -6408,28 +6408,93 @@ function renderPersonalNotesButton(stateId, itemId) {
     `;
 }
 
+function getPatientShortcutText(patient) {
+    const parts = [
+        patient?.name,
+        patient?.birthDate,
+        patient?.age,
+        patient?.room,
+        patient?.bed,
+        patient?.pathologies,
+        patient?.admissionReason,
+        patient?.allergies,
+        patient?.medications,
+        patient?.notes
+    ];
+
+    if (Array.isArray(patient?.pvHistory)) {
+        for (const entry of patient.pvHistory) {
+            parts.push(
+                entry?.recordedAt,
+                entry?.pa,
+                entry?.fc,
+                entry?.sat,
+                entry?.temperature
+            );
+        }
+    }
+
+    return parts.filter(value => String(value || "").trim()).join("\n");
+}
+
+function makePatientUrl(patientId) {
+    return "?patients=1&patient=" + encodeURIComponent(patientId);
+}
+
 function renderAllNoteLinksPage(termFilter = "") {
     const groups = new Map();
 
+    function addShortcutSource(term, source) {
+        const key = normalizeLinkTerm(term);
+
+        if (!key) return;
+
+        if (!groups.has(key)) {
+            groups.set(key, { term, records: [] });
+        }
+
+        const group = groups.get(key);
+
+        const alreadyExists = group.records.some(existing => {
+            if (existing.type !== source.type) return false;
+
+            if (source.type === "patient") {
+                return existing.patient.id === source.patient.id;
+            }
+
+            return (
+                existing.stateId === source.stateId &&
+                existing.itemId === source.itemId &&
+                String(existing.note.id) === String(source.note.id)
+            );
+        });
+
+        if (!alreadyExists) {
+            group.records.push(source);
+        }
+    }
+
+    // Shortcut presenti nelle note personali.
     for (const record of getAllPersonalNoteRecords()) {
         for (const term of extractPlaceorders(
             String(record.note.title || "") + "\n" + String(record.note.text || "")
         )) {
-            const key = normalizeLinkTerm(term);
+            addShortcutSource(term, {
+                type: "note",
+                ...record
+            });
+        }
+    }
 
-            if (!groups.has(key)) {
-                groups.set(key, { term, records: [] });
-            }
-
-            const group = groups.get(key);
-
-            if (!group.records.some(existing =>
-                existing.stateId === record.stateId &&
-                existing.itemId === record.itemId &&
-                String(existing.note.id) === String(record.note.id)
-            )) {
-                group.records.push(record);
-            }
+    // Shortcut presenti in qualsiasi dato testuale del paziente.
+    for (const patient of getPatients()) {
+        for (const term of extractPlaceorders(
+            getPatientShortcutText(patient)
+        )) {
+            addShortcutSource(term, {
+                type: "patient",
+                patient
+            });
         }
     }
 
@@ -6454,7 +6519,7 @@ function renderAllNoteLinksPage(termFilter = "") {
                 <h2>🔗 Collegamenti tra note</h2>
             </div>
             <p class="personal-notes-context">
-                Tutti i collegamenti creati con [[parola]].
+                Tutti i collegamenti creati con [[parola]], comprese le schede paziente.
             </p>
             ${termFilter ? `
                 <div class="personal-note-filter">
@@ -6468,19 +6533,28 @@ function renderAllNoteLinksPage(termFilter = "") {
                         <article class="personal-note-index-group">
                             <strong class="personal-note-index-term">${escapeHtml(group.term)}</strong>
                             <div class="personal-note-index-links">
-                                ${group.records.map(record => `
-                                    <a class="personal-note-index-link"
-                                       href="${makeNoteUrl(record.stateId, record.itemId, record.note.id)}">
-                                        <span>${escapeHtml(record.stateId)} › ${escapeHtml(record.itemId)}</span>
-                                        <strong>${escapeHtml(record.note.title || "Nota personale")}</strong>
-                                    </a>
-                                `).join("")}
+                                ${group.records.map(record => record.type === "patient"
+                                    ? `
+                                        <a class="personal-note-index-link"
+                                           href="${makePatientUrl(record.patient.id)}">
+                                            <span>👤 Pazienti</span>
+                                            <strong>${escapeHtml(record.patient.name || "Paziente senza nome")}</strong>
+                                        </a>
+                                    `
+                                    : `
+                                        <a class="personal-note-index-link"
+                                           href="${makeNoteUrl(record.stateId, record.itemId, record.note.id)}">
+                                            <span>${escapeHtml(record.stateId)} › ${escapeHtml(record.itemId)}</span>
+                                            <strong>${escapeHtml(record.note.title || "Nota personale")}</strong>
+                                        </a>
+                                    `
+                                ).join("")}
                             </div>
                         </article>
                     `).join("")
                     : `<div class="personal-note-empty">${termFilter
                         ? "Nessun collegamento trovato per questa parola."
-                        : "Non ci sono ancora parole presenti in più note."}</div>`
+                        : "Non ci sono ancora parole presenti nelle note o nei pazienti."}</div>`
                 }
             </div>
         </section>
