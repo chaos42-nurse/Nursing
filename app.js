@@ -6349,7 +6349,9 @@ function getLinkedNoteRecords(term, sourceStateId, sourceItemId, sourceNoteId) {
             return false;
         }
 
-        return extractPlaceorders(record.note.text).some(
+        return extractPlaceorders(
+            String(record.note.title || "") + "\n" + String(record.note.text || "")
+        ).some(
             linkedTerm => normalizeLinkTerm(linkedTerm) === normalized
         );
     });
@@ -6410,7 +6412,9 @@ function renderAllNoteLinksPage(termFilter = "") {
     const groups = new Map();
 
     for (const record of getAllPersonalNoteRecords()) {
-        for (const term of extractPlaceorders(record.note.text)) {
+        for (const term of extractPlaceorders(
+            String(record.note.title || "") + "\n" + String(record.note.text || "")
+        )) {
             const key = normalizeLinkTerm(term);
 
             if (!groups.has(key)) {
@@ -7108,7 +7112,12 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                         <article class="personal-note-card" data-note-id="${escapeAttribute(note.id)}">
                             <div class="personal-note-card-header">
                                 <div>
-                                    <h3>${escapeHtml(note.title || "Nota personale")}</h3>
+                                    <h3>${renderNoteText(
+                                    note.title || "Nota personale",
+                                    stateId,
+                                    itemId,
+                                    note.id
+                                )}</h3>
                                 </div>
                                 <div class="personal-note-actions">
                                     <button class="personal-note-edit" type="button" data-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
