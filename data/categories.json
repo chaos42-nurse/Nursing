@@ -1,11 +1,5 @@
 [
   {
-    "id": "ecg",
-    "icon": "🫀",
-    "title": "ECG",
-    "description": "Elettrocardiogramma"
-  },
-  {
     "id": "farmaci",
     "icon": "💊",
     "title": "Farmaci",
@@ -14,8 +8,8 @@
   {
     "id": "laboratorio",
     "icon": "🧪",
-    "title": "Laboratorio",
-    "description": "Esami e provette"
+    "title": "Esami e laboratorio",
+    "description": "Esami, prelievi ed elettrocardiogramma"
   },
   {
     "id": "emergenze",
