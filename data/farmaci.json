@@ -103,6 +103,18 @@
 
 
     {
+      "title": "Interazioni",
+      "items": [
+        {
+          "id": "interazioni-farmaci",
+          "title": "Interazioni tra farmaci",
+          "type": "interaction-db"
+        }
+      ]
+    },
+
+
+    {
       "title": "Monitoraggio",
       "items": [
 
