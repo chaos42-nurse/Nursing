@@ -2372,3 +2372,41 @@ section h2 {
         width: 100%;
     }
 }
+
+
+.patient-checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.patient-checkbox-field input {
+    width: 18px !important;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent);
+}
+
+.patient-card-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.patient-card-row .patient-card-name {
+    flex: 1;
+}
+
+.patient-diabetic-marker {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .85;
+}
