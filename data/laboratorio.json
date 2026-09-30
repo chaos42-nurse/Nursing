@@ -13,7 +13,27 @@
         "Funzionalità epatica",
         "Coagulazione",
         "Glicemia",
-        "EGA"
+        "EGA",
+        {
+          "id": "ecg",
+          "title": "ECG",
+          "blocks": [
+            {
+              "type": "text",
+              "title": "Valori principali",
+              "content": "Frequenza cardiaca\nIntervallo PR\nDurata QRS\nIntervallo QT/QTc"
+            },
+            {
+              "type": "list",
+              "title": "Argomenti",
+              "items": [
+                "Onde P, QRS e T",
+                "Ritmo sinusale",
+                "Alterazioni del ritmo"
+              ]
+            }
+          ]
+        }
       ]
     },
     {
@@ -23,18 +43,6 @@
         "Ordine di prelievo",
         "Identificazione del paziente",
         "Conservazione dei campioni"
-      ]
-    },
-    {
-      "title": "ECG",
-      "items": [
-        "Frequenza cardiaca",
-        "Intervallo PR",
-        "Durata QRS",
-        "Intervallo QT/QTc",
-        "Onde P, QRS e T",
-        "Ritmo sinusale",
-        "Alterazioni del ritmo"
       ]
     }
   ]
