@@ -344,9 +344,6 @@ function renderPatientPvHistory(history, patientId = "") {
                         const glucose = entry.glucose
                             ? escapeHtml(entry.glucose) + " mg/dL"
                             : "—";
-                        const glucose = entry.glucose
-                            ? escapeHtml(entry.glucose) + " mg/dL"
-                            : "—";
 
                         return `
                             <tr>
@@ -443,6 +440,9 @@ function renderPatientPvHistory(history) {
                         const temperature = entry.temperature
                             ? escapeHtml(entry.temperature) + " °C"
                             : "—";
+                        const glucose = entry.glucose
+                            ? escapeHtml(entry.glucose) + " mg/dL"
+                            : "—";
 
                         return `
                             <tr>
@@ -451,6 +451,7 @@ function renderPatientPvHistory(history) {
                                 <td>${fc}</td>
                                 <td>${sat}</td>
                                 <td>${temperature}</td>
+                                <td>${glucose}</td>
                             </tr>
                         `;
                     }).join("")}
@@ -1004,6 +1005,7 @@ function setupPatients() {
                     <div class="patient-pv-input-form">
                         <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
+                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
                     </div>
@@ -1207,7 +1209,7 @@ function setupPatients() {
             patient.pvHistory.push({
                 id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
                 recordedAt: new Date().toISOString(),
-                pa, fc, sat, temperature
+                pa, fc, glucose, sat, temperature
             });
 
             savePatients(patients);
