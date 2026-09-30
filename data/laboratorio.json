@@ -1,8 +1,8 @@
 {
   "id": "laboratorio",
-  "title": "Laboratorio",
+  "title": "Esami e laboratorio",
   "icon": "🧪",
-  "description": "Archivio infermieristico dedicato agli esami di laboratorio e ai prelievi.",
+  "description": "Archivio infermieristico dedicato agli esami, ai prelievi e all'elettrocardiogramma.",
   "sections": [
     {
       "title": "Esami principali",
@@ -23,6 +23,18 @@
         "Ordine di prelievo",
         "Identificazione del paziente",
         "Conservazione dei campioni"
+      ]
+    },
+    {
+      "title": "ECG",
+      "items": [
+        "Frequenza cardiaca",
+        "Intervallo PR",
+        "Durata QRS",
+        "Intervallo QT/QTc",
+        "Onde P, QRS e T",
+        "Ritmo sinusale",
+        "Alterazioni del ritmo"
       ]
     }
   ]
