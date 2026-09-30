@@ -1155,6 +1155,7 @@ function setupPatients() {
                     <div class="patient-pv-input-form">
                         <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
+                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
                     </div>
