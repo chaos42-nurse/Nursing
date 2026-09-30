@@ -2410,3 +2410,33 @@ section h2 {
     background: currentColor;
     opacity: .85;
 }
+
+.patient-diabetic-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 4px 0;
+}
+
+.patient-diabetic-label {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.patient-diabetic-choice {
+    min-width: 52px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+}
+
+.patient-diabetic-choice.is-active {
+    background: var(--surface-elevated);
+    border-color: var(--accent);
+    font-weight: 700;
+}
