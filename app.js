@@ -64,6 +64,7 @@ function normalizePatient(patient = {}) {
         pathologies: String(patient.pathologies || ""),
         admissionReason: String(patient.admissionReason || ""),
         allergies: String(patient.allergies || ""),
+        diabetic: Boolean(patient.diabetic),
         medications: String(patient.medications || ""),
         notes: String(patient.notes || ""),
         pvHistory: Array.isArray(patient.pvHistory)
@@ -73,7 +74,8 @@ function normalizePatient(patient = {}) {
                 pa: String(entry?.pa || ""),
                 fc: String(entry?.fc || ""),
                 sat: String(entry?.sat || ""),
-                temperature: String(entry?.temperature || "")
+                temperature: String(entry?.temperature || ""),
+                glucose: String(entry?.glucose || "")
             }))
             : []
     };
@@ -339,6 +341,12 @@ function renderPatientPvHistory(history, patientId = "") {
                         const temperature = entry.temperature
                             ? escapeHtml(entry.temperature) + " °C"
                             : "—";
+                        const glucose = entry.glucose
+                            ? escapeHtml(entry.glucose) + " mg/dL"
+                            : "—";
+                        const glucose = entry.glucose
+                            ? escapeHtml(entry.glucose) + " mg/dL"
+                            : "—";
 
                         return `
                             <tr>
@@ -347,6 +355,7 @@ function renderPatientPvHistory(history, patientId = "") {
                                 <td>${fc}</td>
                                 <td>${sat}</td>
                                 <td>${temperature}</td>
+                                <td>${glucose}</td>
                                 <td class="patient-pv-actions">
                                     <button type="button" class="patient-pv-edit"
                                         data-patient-id="${escapeAttribute(patientId)}"
@@ -420,6 +429,7 @@ function renderPatientPvHistory(history) {
                         <th>F.C.<small>bpm</small></th>
                         <th>Sat.<small>%</small></th>
                         <th>T.°<small>°C</small></th>
+                        <th>Glicemia<small>mg/dL</small></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -809,6 +819,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                                     data-patient-name="${escapeAttribute(patient.name || "Paziente senza nome")}"
                                 >
                                     <strong>${renderNoteText(patient.name || "Paziente senza nome")}</strong>
+                                    ${patient.diabetic ? '<span class="patient-diabetic-marker" title="Paziente diabetico" aria-label="Paziente diabetico"></span>' : ""}
                                     <span class="arrow">→</span>
                                 </button>
                                 ${isOrderEditMode() ? `
@@ -851,6 +862,12 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         <textarea id="patientPathologies" class="personal-note-input" placeholder="Patologie" rows="3">${escapeHtml(selectedPatient.pathologies)}</textarea>
                         <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="3">${escapeHtml(selectedPatient.admissionReason)}</textarea>
                         <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3">${escapeHtml(selectedPatient.allergies)}</textarea>
+
+                        <label class="patient-checkbox-field">
+                            <input id="patientDiabetic" type="checkbox" ${selectedPatient.diabetic ? "checked" : ""}>
+                            <span>Paziente diabetico</span>
+                        </label>
+
                         <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="4">${escapeHtml(selectedPatient.medications)}</textarea>
                         <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="4">${escapeHtml(selectedPatient.notes)}</textarea>
 
@@ -917,6 +934,12 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                     <textarea id="patientPathologies" class="personal-note-input" placeholder="Patologie" rows="3"></textarea>
                     <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="3"></textarea>
                     <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3"></textarea>
+
+                    <label class="patient-checkbox-field">
+                        <input id="patientDiabetic" type="checkbox">
+                        <span>Paziente diabetico</span>
+                    </label>
+
                     <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="4"></textarea>
                     <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="4"></textarea>
 
@@ -997,10 +1020,11 @@ function setupPatients() {
             const modal = event.target.closest(".patient-pv-modal");
             const pa = document.getElementById("patientPa")?.value.trim() || "";
             const fc = document.getElementById("patientFc")?.value.trim() || "";
+            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
             const sat = document.getElementById("patientSat")?.value.trim() || "";
             const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
 
-            if (!pa && !fc && !sat && !temperature) {
+            if (!pa && !fc && !glucose && !sat && !temperature) {
                 window.alert("Inserisci almeno un parametro vitale.");
                 return;
             }
@@ -1012,7 +1036,7 @@ function setupPatients() {
             window.__newPatientPvDraft.push({
                 id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
                 recordedAt: new Date().toISOString(),
-                pa, fc, sat, temperature
+                pa, fc, glucose, sat, temperature
             });
 
             modal.remove();
@@ -1072,6 +1096,7 @@ function setupPatients() {
                     <div class="patient-pv-input-form">
                         <input id="patientPa" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh (es. 120/80)">
                         <input id="patientFc" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.fc || "")}" placeholder="F.C. bpm">
+                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" value="${escapeAttribute(entry.glucose || "")}" placeholder="Glicemia mg/dL">
                         <input id="patientSat" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.sat || "")}" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
                     </div>
@@ -1150,7 +1175,7 @@ function setupPatients() {
 
             patient.pvHistory[index] = {
                 ...patient.pvHistory[index],
-                pa, fc, sat, temperature
+                pa, fc, glucose, sat, temperature
             };
 
             savePatients(patients);
@@ -1214,6 +1239,7 @@ function setupPatients() {
                 pathologies: document.getElementById("patientPathologies")?.value.trim() || "",
                 admissionReason: document.getElementById("patientAdmissionReason")?.value.trim() || "",
                 allergies: document.getElementById("patientAllergies")?.value.trim() || "",
+                diabetic: document.getElementById("patientDiabetic")?.checked || false,
                 medications: document.getElementById("patientMedications")?.value.trim() || "",
                 notes: document.getElementById("patientNotes")?.value.trim() || ""
             };
