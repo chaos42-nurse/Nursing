@@ -974,6 +974,23 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 }
 function setupPatients() {
     document.addEventListener("click", event => {
+        const diabeticButton = event.target.closest("[data-diabetic-choice]");
+        if (diabeticButton) {
+            const value = diabeticButton.dataset.diabeticChoice === "yes";
+            const input = document.getElementById("patientDiabetic");
+            if (input) input.checked = value;
+
+            document.querySelectorAll("[data-diabetic-choice]").forEach(button => {
+                button.classList.toggle(
+                    "is-active",
+                    button.dataset.diabeticChoice === (value ? "yes" : "no")
+                );
+            });
+            return;
+        }
+    });
+
+    document.addEventListener("click", event => {
         const suggestion = event.target.closest("[data-patient-suggestion]");
         if (!suggestion) return;
 
