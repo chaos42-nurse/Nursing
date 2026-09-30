@@ -2374,6 +2374,155 @@ function saveItemOrder(sectionKey, list) {
 }
 
 
+
+/* =========================================================
+   DATABASE LOCALE — INTERAZIONI FARMACI
+   Struttura tecnica offline predisposta per dati autorizzati.
+========================================================= */
+
+const DRUG_DB_NAME = "nursing-drug-database";
+const DRUG_DB_VERSION = 1;
+const DRUG_DB_STORE = "metadata";
+
+function openDrugDatabase() {
+    return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) {
+            reject(new Error("IndexedDB non disponibile."));
+            return;
+        }
+
+        const request = indexedDB.open(DRUG_DB_NAME, DRUG_DB_VERSION);
+
+        request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(DRUG_DB_STORE)) {
+                db.createObjectStore(DRUG_DB_STORE, { keyPath: "key" });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Impossibile aprire il database locale."));
+    });
+}
+
+async function getDrugDatabaseMetadata() {
+    const db = await openDrugDatabase();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(DRUG_DB_STORE, "readonly");
+        const store = transaction.objectStore(DRUG_DB_STORE);
+        const request = store.get("dataset");
+
+        request.onsuccess = () => {
+            db.close();
+            resolve(request.result || null);
+        };
+
+        request.onerror = () => {
+            db.close();
+            reject(request.error);
+        };
+    });
+}
+
+async function initializeDrugDatabaseMetadata() {
+    const existing = await getDrugDatabaseMetadata().catch(() => null);
+
+    if (existing) {
+        return existing;
+    }
+
+    const metadata = {
+        key: "dataset",
+        source: "Da configurare — dataset autorizzato",
+        version: "0",
+        updatedAt: null,
+        recordCount: 0,
+        status: "empty"
+    };
+
+    const db = await openDrugDatabase();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(DRUG_DB_STORE, "readwrite");
+        transaction.objectStore(DRUG_DB_STORE).put(metadata);
+
+        transaction.oncomplete = () => {
+            db.close();
+            resolve(metadata);
+        };
+
+        transaction.onerror = () => {
+            db.close();
+            reject(transaction.error);
+        };
+    });
+}
+
+async function renderDrugInteractionDatabase() {
+    const metadata = await initializeDrugDatabaseMetadata();
+
+    content.innerHTML = `
+        <section class="detail-page composable-page">
+            ${detailHeader("Interazioni tra farmaci", window.__currentData)}
+
+            <div class="detail-content">
+                <article class="info-block info-block-note">
+                    <strong>Database locale</strong>
+                    <p>
+                        Questa sezione utilizza un archivio locale IndexedDB.
+                        I dati possono essere mantenuti sul dispositivo e
+                        consultati offline.
+                    </p>
+                </article>
+
+                <article class="info-block">
+                    <h3>Stato archivio</h3>
+                    <p><strong>Fonte:</strong> ${escapeHtml(metadata.source)}</p>
+                    <p><strong>Versione:</strong> ${escapeHtml(metadata.version)}</p>
+                    <p><strong>Record:</strong> ${escapeHtml(String(metadata.recordCount))}</p>
+                    <p><strong>Ultimo aggiornamento:</strong> ${metadata.updatedAt ? escapeHtml(metadata.updatedAt) : "Non ancora disponibile"}</p>
+                </article>
+
+                <article class="info-block info-block-warning">
+                    <span class="info-block-icon">ℹ️</span>
+                    <div>
+                        <strong>Archivio non ancora popolato</strong>
+                        <p>
+                            La struttura offline è pronta, ma non contiene
+                            ancora dati di interazione. Prima di importarli
+                            occorre utilizzare un dataset con autorizzazione
+                            alla redistribuzione nell'app.
+                        </p>
+                    </div>
+                </article>
+
+                <button id="refreshDrugDatabaseStatus" class="settings-action" type="button">
+                    ↻ Aggiorna stato archivio
+                </button>
+                <p id="drugDatabaseMessage" class="personal-note-message"></p>
+            </div>
+        </section>
+    `;
+
+    document.getElementById("refreshDrugDatabaseStatus")?.addEventListener("click", async () => {
+        const message = document.getElementById("drugDatabaseMessage");
+        try {
+            const current = await getDrugDatabaseMetadata();
+            if (message) {
+                message.textContent =
+                    "Archivio locale disponibile. Nessun dataset remoto configurato.";
+            }
+            console.log("Nursing Shot — database farmaci:", current);
+        } catch (error) {
+            if (message) {
+                message.textContent = "Impossibile leggere il database locale.";
+            }
+            console.error(error);
+        }
+    });
+}
+
 /* =========================================================
    TROVA ELEMENTO
 ========================================================= */
@@ -2548,6 +2697,15 @@ function loadItem(data) {
             data
         );
 
+        return;
+    }
+
+
+    /*
+     * DATABASE LOCALE — INTERAZIONI
+     */
+    if (selectedItem.type === "interaction-db") {
+        renderDrugInteractionDatabase();
         return;
     }
 
