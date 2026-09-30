@@ -738,21 +738,19 @@ function renderPatientPvHistory(history, patientId = "") {
                         <th>F.C.<small>bpm</small></th>
                         <th>Sat.<small>%</small></th>
                         <th>T.°<small>°C</small></th>
+                        <th>Glicemia<small>mg/dL</small></th>
                         <th>Azioni</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${history.slice().reverse().map((entry, reversedIndex) => {
                         const index = history.length - 1 - reversedIndex;
-                        const date = entry.recordedAt
-                            ? new Date(entry.recordedAt).toLocaleString("it-IT")
-                            : "—";
+                        const date = entry.recordedAt ? new Date(entry.recordedAt).toLocaleString("it-IT") : "—";
                         const pa = formatBloodPressure(entry.pa);
                         const fc = entry.fc ? escapeHtml(entry.fc) + " bpm" : "—";
                         const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
-                        const temperature = entry.temperature
-                            ? escapeHtml(entry.temperature) + " °C"
-                            : "—";
+                        const temperature = entry.temperature ? escapeHtml(entry.temperature) + " °C" : "—";
+                        const glucose = entry.glucose ? escapeHtml(entry.glucose) + " mg/dL" : "—";
 
                         return `
                             <tr>
@@ -761,15 +759,10 @@ function renderPatientPvHistory(history, patientId = "") {
                                 <td>${fc}</td>
                                 <td>${sat}</td>
                                 <td>${temperature}</td>
+                                <td>${glucose}</td>
                                 <td class="patient-pv-actions">
-                                    <button type="button" class="patient-pv-edit"
-                                        data-patient-id="${escapeAttribute(patientId)}"
-                                        data-pv-index="${index}"
-                                        title="Modifica">✏️</button>
-                                    <button type="button" class="patient-pv-delete"
-                                        data-patient-id="${escapeAttribute(patientId)}"
-                                        data-pv-index="${index}"
-                                        title="Elimina">🗑️</button>
+                                    <button type="button" class="patient-pv-edit" data-patient-id="${escapeAttribute(patientId)}" data-pv-index="${index}" title="Modifica">✏️</button>
+                                    <button type="button" class="patient-pv-delete" data-patient-id="${escapeAttribute(patientId)}" data-pv-index="${index}" title="Elimina">🗑️</button>
                                 </td>
                             </tr>
                         `;
@@ -864,10 +857,12 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="3">${escapeHtml(selectedPatient.admissionReason)}</textarea>
                         <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3">${escapeHtml(selectedPatient.allergies)}</textarea>
 
-                        <label class="patient-checkbox-field">
-                            <input id="patientDiabetic" type="checkbox" ${selectedPatient.diabetic ? "checked" : ""}>
-                            <span>Paziente diabetico</span>
-                        </label>
+                        <div class="patient-diabetic-field">
+                            <span class="patient-diabetic-label">Pz. diabetico:</span>
+                            <input id="patientDiabetic" type="checkbox" ${selectedPatient.diabetic ? "checked" : ""} hidden>
+                            <button type="button" class="patient-diabetic-choice ${selectedPatient.diabetic ? "is-active" : ""}" data-diabetic-choice="yes">Sì</button>
+                            <button type="button" class="patient-diabetic-choice ${!selectedPatient.diabetic ? "is-active" : ""}" data-diabetic-choice="no">No</button>
+                        </div>
 
                         <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="4">${escapeHtml(selectedPatient.medications)}</textarea>
                         <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="4">${escapeHtml(selectedPatient.notes)}</textarea>
@@ -895,6 +890,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         ${renderPatientField("Patologie", selectedPatient.pathologies)}
                         ${renderPatientField("Motivo di ricovero", selectedPatient.admissionReason)}
                         ${renderPatientField("Allergie", selectedPatient.allergies)}
+                        ${renderPatientField("Pz. diabetico", selectedPatient.diabetic ? "Sì" : "No")}
                         ${renderPatientField("Farmaci", selectedPatient.medications)}
                         ${renderPatientField("Note", selectedPatient.notes)}
 
@@ -936,10 +932,12 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                     <textarea id="patientAdmissionReason" class="personal-note-input" placeholder="Motivo di ricovero" rows="3"></textarea>
                     <textarea id="patientAllergies" class="personal-note-input" placeholder="Allergie" rows="3"></textarea>
 
-                    <label class="patient-checkbox-field">
-                        <input id="patientDiabetic" type="checkbox">
-                        <span>Paziente diabetico</span>
-                    </label>
+                    <div class="patient-diabetic-field">
+                        <span class="patient-diabetic-label">Pz. diabetico:</span>
+                        <input id="patientDiabetic" type="checkbox" hidden>
+                        <button type="button" class="patient-diabetic-choice is-active" data-diabetic-choice="no">No</button>
+                        <button type="button" class="patient-diabetic-choice" data-diabetic-choice="yes">Sì</button>
+                    </div>
 
                     <textarea id="patientMedications" class="personal-note-input" placeholder="Farmaci" rows="4"></textarea>
                     <textarea id="patientNotes" class="personal-note-input" placeholder="Note varie" rows="4"></textarea>
@@ -1167,10 +1165,11 @@ function setupPatients() {
 
             const pa = document.getElementById("patientPa")?.value.trim() || "";
             const fc = document.getElementById("patientFc")?.value.trim() || "";
+            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
             const sat = document.getElementById("patientSat")?.value.trim() || "";
             const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
 
-            if (!pa && !fc && !sat && !temperature) {
+            if (!pa && !fc && !glucose && !sat && !temperature) {
                 window.alert("Inserisci almeno un parametro vitale.");
                 return;
             }
