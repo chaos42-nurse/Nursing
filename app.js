@@ -1041,7 +1041,7 @@ function setupPatients() {
             const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
             const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
 
-            if (!pa && !fc && !glucose && !sat && !temperature) {
+            if (!pa && !fc  && !sat && !temperature  && !glucose) {
                 window.alert("Inserisci almeno un parametro vitale.");
                 return;
             }
@@ -1053,7 +1053,7 @@ function setupPatients() {
             window.__newPatientPvDraft.push({
                 id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
                 recordedAt: new Date().toISOString(),
-                pa, fc, glucose, sat, temperature
+                pa, fc, sat, temperature, glucose
             });
 
             modal.remove();
@@ -1154,10 +1154,10 @@ function setupPatients() {
                     <h3>🩺 Nuova rilevazione PV</h3>
                     <div class="patient-pv-input-form">
                         <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
-                        <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
-                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
+                        <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">                        
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
+                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addPatientPv" class="settings-action" type="button">💾 Registra PV</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
