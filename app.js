@@ -1020,9 +1020,9 @@ function setupPatients() {
                     <div class="patient-pv-input-form">
                         <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
-                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
+                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addNewPatientPv" class="settings-action" type="button">💾 Registra PV</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
@@ -1113,9 +1113,9 @@ function setupPatients() {
                     <div class="patient-pv-input-form">
                         <input id="patientPa" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh (es. 120/80)">
                         <input id="patientFc" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.fc || "")}" placeholder="F.C. bpm">
-                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" value="${escapeAttribute(entry.glucose || "")}" placeholder="Glicemia mg/dL">
                         <input id="patientSat" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.sat || "")}" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
+                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" value="${escapeAttribute(entry.glucose || "")}" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="savePatientPv" class="settings-action" type="button">💾 Salva rilevazione</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
@@ -1183,9 +1183,9 @@ function setupPatients() {
 
             const pa = document.getElementById("patientPa")?.value.trim() || "";
             const fc = document.getElementById("patientFc")?.value.trim() || "";
-            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
             const sat = document.getElementById("patientSat")?.value.trim() || "";
             const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
+            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
 
             if (!pa && !fc && !glucose && !sat && !temperature) {
                 window.alert("Inserisci almeno un parametro vitale.");
@@ -1210,10 +1210,10 @@ function setupPatients() {
             if (!editingId) return;
 
             const pa = document.getElementById("patientPa")?.value.trim() || "";
-            const fc = document.getElementById("patientFc")?.value.trim() || "";
-            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
+            const fc = document.getElementById("patientFc")?.value.trim() || "";            
             const sat = document.getElementById("patientSat")?.value.trim() || "";
             const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
+            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
 
             if (!pa && !fc && !glucose && !sat && !temperature) {
                 window.alert("Inserisci almeno un parametro vitale.");
