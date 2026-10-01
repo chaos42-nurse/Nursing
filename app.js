@@ -1018,7 +1018,7 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>🩺 Nuova rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
+                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh">
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
@@ -1111,7 +1111,7 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>✏️ Modifica rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh (es. 120/80)">
+                        <input id="patientPa" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh">
                         <input id="patientFc" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.fc || "")}" placeholder="F.C. bpm">
                         <input id="patientSat" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.sat || "")}" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
@@ -1153,7 +1153,7 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>🩺 Nuova rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh (es. 120/80)">
+                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh">
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">                        
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
