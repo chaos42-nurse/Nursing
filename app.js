@@ -747,7 +747,7 @@ function renderPatientPvHistory(history, patientId = "") {
                         const index = history.length - 1 - reversedIndex;
                         const date = entry.recordedAt ? new Date(entry.recordedAt).toLocaleString("it-IT") : "—";
                         const pa = formatBloodPressure(entry.pa);
-                        const fc = entry.fc ? escapeHtml(entry.fc) + " bpm" : "—";
+                        const fc = entry.fc ? escapeHtml(entry.fc) : "—";
                         const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
                         const temperature = entry.temperature ? escapeHtml(entry.temperature) + " °C" : "—";
                         const glucose = entry.glucose ? escapeHtml(entry.glucose) + " mg/dL" : "—";
@@ -756,10 +756,10 @@ function renderPatientPvHistory(history, patientId = "") {
                             <tr>
                                 <td>${escapeHtml(date)}</td>
                                 <td>${pa !== "—" ? pa + " <small>mm/Mh</small>" : "—"}</td>
-                                <td>${fc}</td>
+                                <td>${fc !== "—" ? fc + " <small>bpm</small>" : "—"}</td>
                                 <td>${sat}</td>
                                 <td>${temperature}</td>
-                                <td>${glucose}</td>
+                                <td>${glucose !== "—" ? glucose + " <small>mg/dL</small>" : "—"}</td>
                                 <td class="patient-pv-actions">
                                     <button type="button" class="patient-pv-edit" data-patient-id="${escapeAttribute(patientId)}" data-pv-index="${index}" title="Modifica">✏️</button>
                                     <button type="button" class="patient-pv-delete" data-patient-id="${escapeAttribute(patientId)}" data-pv-index="${index}" title="Elimina">🗑️</button>
@@ -1022,7 +1022,7 @@ function setupPatients() {
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
-                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
+                        <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addNewPatientPv" class="settings-action" type="button">💾 Registra PV</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
@@ -1115,7 +1115,7 @@ function setupPatients() {
                         <input id="patientFc" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.fc || "")}" placeholder="F.C. bpm">
                         <input id="patientSat" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.sat || "")}" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
-                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" value="${escapeAttribute(entry.glucose || "")}" placeholder="Glicemia mg/dL">
+                        <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="decimal" min="0" step="1" value="${escapeAttribute(entry.glucose || "")}" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="savePatientPv" class="settings-action" type="button">💾 Salva rilevazione</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
@@ -1157,7 +1157,7 @@ function setupPatients() {
                         <input id="patientFc" class="personal-note-title-input" type="text" placeholder="F.C. bpm">                        
                         <input id="patientSat" class="personal-note-title-input" type="text" placeholder="Sat. %">
                         <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
-                        <input id="patientGlucose" class="personal-note-title-input" type="number" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
+                        <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="decimal" min="0" step="1" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addPatientPv" class="settings-action" type="button">💾 Registra PV</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
