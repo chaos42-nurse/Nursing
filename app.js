@@ -441,7 +441,7 @@ function renderPatientPvHistory(history) {
                             ? escapeHtml(entry.temperature) + " °C"
                             : "—";
                         const glucose = entry.glucose
-                            ? escapeHtml(entry.glucose) + " mg/dL"
+                            ? escapeHtml(entry.glucose)
                             : "—";
 
                         return `
@@ -750,7 +750,7 @@ function renderPatientPvHistory(history, patientId = "") {
                         const fc = entry.fc ? escapeHtml(entry.fc) : "—";
                         const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
                         const temperature = entry.temperature ? escapeHtml(entry.temperature) + " °C" : "—";
-                        const glucose = entry.glucose ? escapeHtml(entry.glucose) + " mg/dL" : "—";
+                        const glucose = entry.glucose ? escapeHtml(entry.glucose) : "—";
 
                         return `
                             <tr>
