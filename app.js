@@ -1037,9 +1037,9 @@ function setupPatients() {
             const modal = event.target.closest(".patient-pv-modal");
             const pa = document.getElementById("patientPa")?.value.trim() || "";
             const fc = document.getElementById("patientFc")?.value.trim() || "";
-            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
             const sat = document.getElementById("patientSat")?.value.trim() || "";
             const temperature = document.getElementById("patientTemperature")?.value.trim() || "";
+            const glucose = document.getElementById("patientGlucose")?.value.trim() || "";
 
             if (!pa && !fc && !glucose && !sat && !temperature) {
                 window.alert("Inserisci almeno un parametro vitale.");
