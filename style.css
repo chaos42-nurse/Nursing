@@ -587,14 +587,13 @@ section h2 {
 .related-link::after,
 .personal-notes-button::after {
     content: "";
-    width: 9px;
-    height: 9px;
-    flex: 0 0 9px;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
     border-top: 2px solid var(--accent);
     border-right: 2px solid var(--accent);
     border-radius: 0 100% 0 0;
     opacity: 0.85;
-    transform: rotate(45deg);
     margin-left: auto;
 }
 
