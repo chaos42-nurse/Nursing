@@ -814,7 +814,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                                 >
                                     <strong>${renderNoteText(patient.name || "Paziente senza nome")}</strong>
                                     ${patient.diabetic ? '<span class="patient-diabetic-marker" title="Paziente diabetico" aria-label="Paziente diabetico"></span>' : ""}
-                                    <span class="arrow">→</span>
+                                    
                                 </button>
                                 ${isOrderEditMode() ? `
                                     ${createOrderControls(index, patients.length, "paziente").outerHTML}
@@ -2005,7 +2005,7 @@ function renderSections(data) {
                             href="?state=${encodeURIComponent(state)}&item=${encodeURIComponent(itemId)}"
                         >
                             <span>${itemTitle}</span>
-                            <span class="arrow">→</span>
+                            
                         </a>
 
                         ${isOrderEditMode() ? `
@@ -2953,7 +2953,7 @@ function renderContentBlock(block) {
                         return `
                             <a class="related-link" href="?state=${encodeURIComponent(data.id || state)}&item=${encodeURIComponent(relatedId)}">
                                 <span>${escapeHtml(relatedTitle)}</span>
-                                <span class="arrow">→</span>
+                                
                             </a>
                         `;
                     }).join("")}
@@ -6607,7 +6607,7 @@ function renderPersonalNotesButton(stateId, itemId) {
             href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(itemId)}&notes=1"
         >
             <span>📝 Note personali</span>
-            <span class="arrow">→</span>
+            
         </a>
     `;
 }
