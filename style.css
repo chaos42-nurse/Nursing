@@ -582,16 +582,20 @@ section h2 {
 }
 
 
-.arrow {
-
-    color: var(--accent);
-
-    font-size: 1.1rem;
-
-    flex-shrink: 0;
-
+.patient-card-name::after,
+.content-button::after,
+.related-link::after,
+.personal-notes-button::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border-top: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+    border-radius: 0 100% 0 0;
     opacity: 0.85;
-
+    transform: rotate(45deg);
+    margin-left: auto;
 }
 
 
