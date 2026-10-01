@@ -336,23 +336,23 @@ function renderPatientPvHistory(history, patientId = "") {
                             ? new Date(entry.recordedAt).toLocaleString("it-IT")
                             : "—";
                         const pa = formatBloodPressure(entry.pa);
-                        const fc = entry.fc ? escapeHtml(entry.fc) + " bpm" : "—";
+                        const fc = entry.fc ? escapeHtml(entry.fc) : "—";
                         const sat = entry.sat ? escapeHtml(entry.sat) + " %" : "—";
                         const temperature = entry.temperature
                             ? escapeHtml(entry.temperature) + " °C"
                             : "—";
                         const glucose = entry.glucose
-                            ? escapeHtml(entry.glucose) + " mg/dL"
+                            ? escapeHtml(entry.glucose)
                             : "—";
 
                         return `
                             <tr>
                                 <td>${escapeHtml(date)}</td>
                                 <td>${pa !== "—" ? pa + " <small>mm/Mh</small>" : "—"}</td>
-                                <td>${fc}</td>
+                                <td>${fc !== "—" ? fc + " <small>bpm</small>" : "—"}</td>
                                 <td>${sat}</td>
                                 <td>${temperature}</td>
-                                <td>${glucose}</td>
+                                <td>${glucose !== "—" ? glucose + " <small>mg/dL</small>" : "—"}</td>
                                 <td class="patient-pv-actions">
                                     <button type="button" class="patient-pv-edit"
                                         data-patient-id="${escapeAttribute(patientId)}"
