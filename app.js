@@ -3273,10 +3273,6 @@ function renderCalculatorHub(item, data) {
                             <span>
                                 ${calculator.title}
                             </span>
-
-                            <span class="arrow">
-                                →
-                            </span>
                         </a>
 
                     `).join("")}
