@@ -1,9 +1,9 @@
-name: Aggiornamento automatico dati farmaci
+name: Aggiornamento automatico dati
 
 on:
   schedule:
-    # Primo giorno di ogni mese alle 02:00 UTC
-    - cron: "0 2 1 * *"
+    # Primo giorno di ogni mese alle 01:00 UTC
+    - cron: "0 1 1 * *"
   workflow_dispatch:
 
 permissions:
@@ -22,19 +22,29 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Aggiorna dati AIFA
+      - name: Aggiorna dati
         run: python scripts/update_drugs.py
+
+      - name: Verifica aggiornamento
+        run: |
+          if [ ! -f data/version.json ]; then
+            echo "::error::Aggiornamento fallito: data/version.json non è stato creato."
+            exit 1
+          fi
+
+          echo "Aggiornamento completato."
+          cat data/version.json
 
       - name: Commit e push se ci sono modifiche
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
 
-          git add data/ scripts/update_drugs.py
+          git add data/
 
           if git diff --cached --quiet; then
             echo "Nessuna modifica da salvare."
           else
-            git commit -m "Auto-update: dati farmaci AIFA"
+            git commit -m "Auto-update: aggiornamento dati"
             git push
           fi
