@@ -59,6 +59,69 @@
       "items": [
         "BLS",
         "Arresto cardiaco",
+        {
+          "id": "farmaci-emergenza",
+          "title": "Farmaci d'emergenza",
+          "type": "emergency-drugs",
+          "blocks": [
+            {
+              "type": "note",
+              "title": "Principi attivi",
+              "content": "Riferimento sintetico a principi attivi utilizzati in specifici contesti di emergenza. Le informazioni non sostituiscono protocolli locali, prescrizione o linee guida aggiornate."
+            },
+            {
+              "type": "table",
+              "title": "Riferimento rapido",
+              "headers": [
+                "Principio attivo",
+                "A cosa serve",
+                "Cosa controllare"
+              ],
+              "rows": [
+                [
+                  "Adrenalina",
+                  "Supporto farmacologico in specifiche emergenze cardiovascolari e reazioni anafilattiche.",
+                  "PA, FC, ritmo ECG e risposta clinica."
+                ],
+                [
+                  "Atropina",
+                  "Utilizzata in specifiche situazioni di bradicardia.",
+                  "FC, ritmo ECG, PA e risposta clinica."
+                ],
+                [
+                  "Amiodarone",
+                  "Antiaritmico utilizzato in specifiche aritmie.",
+                  "Ritmo ECG, FC, PA e intervallo QT."
+                ],
+                [
+                  "Adenosina",
+                  "Antiaritmico utilizzato in specifiche tachicardie sopraventricolari.",
+                  "ECG continuo, FC, PA e risposta clinica."
+                ],
+                [
+                  "Naloxone",
+                  "Antagonista degli oppioidi, utilizzato in specifici casi di depressione respiratoria da oppioidi.",
+                  "FR, SpO₂, stato di coscienza e risposta clinica."
+                ],
+                [
+                  "Glucagone",
+                  "Utilizzato in specifiche situazioni di ipoglicemia quando indicato.",
+                  "Glicemia, stato di coscienza e risposta clinica."
+                ],
+                [
+                  "Flumazenil",
+                  "Antagonista delle benzodiazepine in circostanze selezionate.",
+                  "Stato di coscienza, FR, SpO₂ e risposta clinica."
+                ]
+              ]
+            },
+            {
+              "type": "note",
+              "title": "Nota",
+              "content": "Per dose, via di somministrazione, diluizione e criteri operativi fare riferimento alle fonti ufficiali e ai protocolli locali."
+            }
+          ]
+        },
         "Shock",
         "Emergenze respiratorie"
       ]
