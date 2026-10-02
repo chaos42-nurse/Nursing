@@ -1500,45 +1500,6 @@ function createShortcuts(categories) {
 
         row.appendChild(link);
 
-        if (category.id === "farmaci") {
-            const searchButton = document.createElement("button");
-            searchButton.type = "button";
-            searchButton.className = "shortcut-search-toggle";
-            searchButton.textContent = "🔎";
-            searchButton.setAttribute("aria-label", "Cerca principio attivo");
-            searchButton.title = "Cerca principio attivo";
-            searchButton.dataset.drugSearchToggle = "1";
-
-            const searchBox = document.createElement("div");
-            searchBox.className = "shortcut-search-box";
-            searchBox.hidden = true;
-            searchBox.innerHTML = `
-                <input
-                    class="drug-home-search-input"
-                    type="search"
-                    placeholder="Cerca principio attivo..."
-                    autocomplete="off"
-                >
-                <div class="drug-home-search-results" hidden></div>
-            `;
-
-            row.appendChild(searchButton);
-            row.appendChild(searchBox);
-        }
-
-        if (isOrderEditMode()) {
-            row.appendChild(
-                createOrderControls(
-                    index,
-                    orderedCategories.length,
-                    "categoria"
-                )
-            );
-        }
-
-        shortcuts.appendChild(row);
-    });
-
     setupHomeOrderControls();
 
     shortcuts.querySelectorAll("[data-drug-search-toggle]").forEach(button => {
