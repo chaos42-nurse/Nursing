@@ -2595,7 +2595,7 @@ function renderDrugClassCategory(item, data) {
 
     content.innerHTML = `
         <section class="detail-page">
-            <div class="detail-header-row">
+            <div class="detail-header-row drug-class-header-row">
                 <h2>Classi farmacologiche</h2>
                 <button id="drugClassSearchToggle" class="patient-search-toggle" type="button" aria-label="Cerca principio attivo">🔍</button>
             </div>
@@ -2722,7 +2722,6 @@ function drugSearchScore(query, name) {
     if (!q || !n) return 0;
     if (n === q) return 100;
     if (n.startsWith(q)) return 80;
-    if (n.includes(q)) return 60;
     return 0;
 }
 
