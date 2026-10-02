@@ -2460,3 +2460,35 @@ section h2 {
 .drug-class-header-row {
     gap: 2px;
 }
+
+
+/* =========================================================
+   FARMACI — FONTE E AGGIORNAMENTO CATALOGO
+========================================================= */
+
+.drug-catalog-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 8px 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--accent-soft);
+    color: var(--text-secondary);
+    font-size: .78rem;
+}
+
+.drug-catalog-info strong {
+    color: var(--text);
+    font-size: .84rem;
+}
+
+.drug-catalog-info a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.drug-catalog-info a:hover {
+    text-decoration: underline;
+}
