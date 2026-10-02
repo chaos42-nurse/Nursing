@@ -7,7 +7,48 @@
     {
       "title": "Valutazione iniziale",
       "items": [
-        "Valutazione Primo Soccorso",
+        {
+          "id": "valutazione-primo-soccorso",
+          "title": "Valutazione Primo Soccorso",
+          "blocks": [
+            {
+              "type": "note",
+              "title": "Legenda",
+              "content": "A = Airway (vie aeree) · B = Breathing (respirazione) · C = Circulation (circolazione) · D = Disability (valutazione neurologica) · E = Exposure/Environment (esposizione e controllo dell'ambiente) · x = ricerca e controllo immediato di un'emorragia esterna potenzialmente letale."
+            },
+            {
+              "type": "table",
+              "title": "Approcci alla valutazione primaria",
+              "headers": [
+                "Approccio",
+                "Sequenza",
+                "Quando considerarlo"
+              ],
+              "rows": [
+                [
+                  "ABCDE",
+                  "A → B → C → D → E",
+                  "Valutazione primaria strutturata del paziente critico."
+                ],
+                [
+                  "xABCDE",
+                  "x → A → B → C → D → E",
+                  "Trauma con emorragia esterna massiva o potenzialmente letale: la priorità emorragica precede la valutazione ABCDE."
+                ],
+                [
+                  "Arresto cardiaco",
+                  "Riconoscimento → RCP/BLS → DAE/ALS secondo algoritmo",
+                  "Quando il paziente è incosciente e non respira normalmente: seguire l'algoritmo BLS/ERC appropriato."
+                ]
+              ]
+            },
+            {
+              "type": "note",
+              "title": "Riferimenti",
+              "content": "European Resuscitation Council (ERC), European Resuscitation Council Guidelines 2025 – First Aid; European Resuscitation Council Guidelines 2025 – Adult Basic Life Support; American College of Surgeons (ACS), Advanced Trauma Life Support (ATLS), 11th edition, 2025."
+            }
+          ]
+        },
         "Parametri vitali",
         "Stato di coscienza",
         "Monitoraggio"
