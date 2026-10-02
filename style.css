@@ -2454,3 +2454,9 @@ section h2 {
     border-color: var(--accent);
     font-weight: 700;
 }
+
+
+/* Lente della ricerca delle classi farmacologiche più vicina al titolo */
+.drug-class-header-row {
+    gap: 2px;
+}
