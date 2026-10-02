@@ -685,21 +685,6 @@
       ]
     },
     {
-      "title": "Ricerca",
-      "items": [
-        {
-          "id": "cerca-principi-attivi",
-          "title": "🔎 Cerca",
-          "type": "drug-search"
-        }
-      ]
-    },
-    {
-      "id": "cerca-principi-attivi",
-      "title": "🔎 Cerca",
-      "type": "drug-search"
-    },
-    {
       "title": "Interazioni",
       "items": [
         {
