@@ -2587,6 +2587,80 @@ function findItem(data, itemId) {
 }
 
 /* =========================================================
+   CATEGORIA CLASSI FARMACOLOGICHE
+========================================================= */
+
+function renderDrugClassCategory(item, data) {
+    const classes = Array.isArray(item.items) ? item.items : [];
+    content.innerHTML = `
+        <section class="detail-page">
+            ${detailHeader("Classi farmacologiche", data)}
+            <div class="detail-content">
+                <div class="item-list">
+                    ${classes.map(currentItem => `
+                        <a class="content-button" href="?state=${encodeURIComponent(data.id)}&item=${encodeURIComponent(currentItem.id)}">
+                            <span>${escapeHtml(currentItem.title)}</span>
+                            <span class="arrow">→</span>
+                        </a>
+                    `).join("")}
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+/* =========================================================
+   RICERCA PRINCIPI ATTIVI
+========================================================= */
+
+let drugActiveIngredientIndex = null;
+
+function normalizeDrugSearchText(value) {
+    return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+}
+
+async function loadDrugActiveIngredientIndex() {
+    if (Array.isArray(drugActiveIngredientIndex)) return drugActiveIngredientIndex;
+    const response = await fetch("./data/farmaci-principi-attivi.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Indice non disponibile");
+    drugActiveIngredientIndex = await response.json();
+    return drugActiveIngredientIndex;
+}
+
+function drugSearchScore(query, name) {
+    const q = normalizeDrugSearchText(query), n = normalizeDrugSearchText(name);
+    if (!q || !n) return 0;
+    if (n === q) return 100;
+    if (n.startsWith(q)) return 80;
+    if (n.includes(q)) return 60;
+    return 0;
+}
+
+async function renderDrugSearch() {
+    content.innerHTML = `
+        <section class="detail-page">
+            ${detailHeader("Cerca principi attivi", window.__currentData)}
+            <div class="detail-content">
+                <div class="info-block">
+                    <input id="drugActiveSearchInput" class="personal-note-title-input" type="search" placeholder="Cerca un principio attivo..." autocomplete="off">
+                    <p class="personal-note-message">La ricerca collega il principio attivo alla classe farmacologica.</p>
+                </div>
+                <div id="drugActiveSearchResults" class="item-list"></div>
+            </div>
+        </section>
+    `;
+    const input=document.getElementById("drugActiveSearchInput"), results=document.getElementById("drugActiveSearchResults");
+    input?.addEventListener("input", async () => {
+        const query=input.value.trim();
+        if(!query){results.innerHTML="";return;}
+        try{
+            const matches=(await loadDrugActiveIngredientIndex()).map(entry=>({...entry,score:drugSearchScore(query,entry.principioAttivo)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.principioAttivo.localeCompare(b.principioAttivo,"it")).slice(0,20);
+            results.innerHTML=matches.length?matches.map(entry=>`<a class="content-button" href="?state=farmaci&item=${encodeURIComponent(entry.classeId)}"><span><strong>${escapeHtml(entry.principioAttivo)}</strong><small> → ${escapeHtml(entry.classeNome)}</small></span><span class="arrow">→</span></a>`).join(""):"<div class=\"personal-note-empty\">Nessun principio attivo trovato.</div>";
+        }catch(error){console.error(error);results.innerHTML="<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>";}
+    });
+}
+
+/* =========================================================
    CARICA ELEMENTO
 ========================================================= */
 
@@ -2708,6 +2782,17 @@ function loadItem(data) {
         renderDrugInteractionDatabase();
         return;
     }
+
+    if (selectedItem.type === "category-section") {
+        renderDrugClassCategory(selectedItem, data);
+        return;
+    }
+
+    if (selectedItem.type === "drug-search") {
+        renderDrugSearch();
+        return;
+    }
+
 
 
     /*
@@ -3040,7 +3125,7 @@ function renderDrug(item, data) {
                 )}
 
                 ${renderListField(
-                    "Indicazioni",
+                    "Esempi",
                     drug.indications
                 )}
 
