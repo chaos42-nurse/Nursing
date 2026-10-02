@@ -1,11 +1,13 @@
-name: Aggiornamento Automatico Principi Attivi AIFA
+name: Aggiornamento automatico dati farmaci
 
 on:
   schedule:
-    # Esegue il primo giorno di ogni mese alle 02:00 UTC
-    - cron: '0 2 1 * *'
-  # Permette anche di avviarlo manualmente dalla sezione Actions
+    # Primo giorno di ogni mese alle 02:00 UTC
+    - cron: "0 2 1 * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update-db:
@@ -18,14 +20,21 @@ jobs:
       - name: Configura Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
-      - name: Esegui script di aggiornamento farmaci
+      - name: Aggiorna dati AIFA
         run: python scripts/update_drugs.py
 
-      - name: Salva e fai il Commit delle modifiche
+      - name: Commit e push se ci sono modifiche
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add public/data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: aggiornato database farmaci e versione [skip ci]" && git push)
+
+          git add data/ scripts/update_drugs.py
+
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica da salvare."
+          else
+            git commit -m "Auto-update: dati farmaci AIFA"
+            git push
+          fi
