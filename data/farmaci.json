@@ -11,96 +11,404 @@
       "items": [
 
         {
+          "id": "ace-inibitori",
+          "title": "ACE-inibitori",
+          "type": "drug",
+          "content": {
+            "class": "ACE-inibitori",
+            "effects": ["Riduzione della pressione arteriosa mediante inibizione dell'enzima di conversione dell'angiotensina"],
+            "indications": ["Esempi: Enalapril, Ramipril, Lisinopril"],
+            "monitoring": ["PA", "Creatinina", "Potassio", "Tosse"]
+          }
+        },
+        {
+          "id": "antiaggreganti",
+          "title": "Antiaggreganti",
+          "type": "drug",
+          "content": {
+            "class": "Antiaggreganti",
+            "effects": ["Inibizione dell'aggregazione piastrinica"],
+            "indications": ["Esempi: Acido acetilsalicilico, Clopidogrel"],
+            "monitoring": ["Segni di sanguinamento", "Emocromo"]
+          }
+        },
+        {
           "id": "antibiotici",
           "title": "Antibiotici",
           "type": "drug",
           "content": {
             "class": "Antibatterici",
-            "indications": [
-              "Da compilare"
-            ],
-            "effects": [
-              "Da compilare"
-            ],
-            "monitoring": [
-              "Da compilare"
-            ],
-            "adverseEffects": [
-              "Da compilare"
-            ],
-            "notes": "Contenuto da completare."
+            "effects": ["Inibizione o distruzione dei batteri"],
+            "indications": ["Esempi: Amoxicillina, Ceftriaxone, Azitromicina"],
+            "monitoring": ["Reazioni allergiche", "Temperatura", "Funzione renale"]
           }
         },
-
-        {
-          "id": "antipertensivi",
-          "title": "Antipertensivi",
-          "type": "drug",
-          "content": {
-            "class": "Farmaci antipertensivi",
-            "indications": [
-              "Da compilare"
-            ],
-            "effects": [
-              "Da compilare"
-            ],
-            "monitoring": [
-              "Da compilare"
-            ],
-            "adverseEffects": [
-              "Da compilare"
-            ],
-            "notes": "Contenuto da completare."
-          }
-        },
-
-        {
-          "id": "diuretici",
-          "title": "Diuretici",
-          "type": "drug",
-          "content": {
-            "class": "Diuretici",
-            "indications": [
-              "Da compilare"
-            ],
-            "effects": [
-              "Da compilare"
-            ],
-            "monitoring": [
-              "Da compilare"
-            ],
-            "adverseEffects": [
-              "Da compilare"
-            ],
-            "notes": "Contenuto da completare."
-          }
-        },
-
         {
           "id": "anticoagulanti",
           "title": "Anticoagulanti",
           "type": "drug",
           "content": {
             "class": "Anticoagulanti",
-            "indications": [
-              "Da compilare"
-            ],
-            "effects": [
-              "Da compilare"
-            ],
-            "monitoring": [
-              "Da compilare"
-            ],
-            "adverseEffects": [
-              "Da compilare"
-            ],
-            "notes": "Contenuto da completare."
+            "effects": ["Inibizione della cascata della coagulazione"],
+            "indications": ["Esempi: Warfarin, Eparina, Apixaban"],
+            "monitoring": ["INR (warfarin)", "aPTT (eparina)", "Segni di emorragia"]
+          }
+        },
+        {
+          "id": "antidepressivi-ssri",
+          "title": "Antidepressivi SSRI",
+          "type": "drug",
+          "content": {
+            "class": "Antidepressivi SSRI",
+            "effects": ["Inibizione della ricaptazione della serotonina"],
+            "indications": ["Esempi: Sertralina, Fluoxetina, Citalopram"],
+            "monitoring": ["Umore", "Effetti gastrointestinali"]
+          }
+        },
+        {
+          "id": "antidiarroici",
+          "title": "Antidiarroici",
+          "type": "drug",
+          "content": {
+            "class": "Antidiarroici",
+            "effects": ["Riduzione della motilità intestinale"],
+            "indications": ["Esempio: Loperamide"],
+            "monitoring": ["Numero delle scariche", "Segni di disidratazione"]
+          }
+        },
+        {
+          "id": "fans",
+          "title": "Antidolorifici (FANS)",
+          "type": "drug",
+          "content": {
+            "class": "FANS",
+            "effects": ["Inibizione della COX con effetto analgesico e antinfiammatorio"],
+            "indications": ["Esempi: Ibuprofene, Ketoprofene, Naprossene"],
+            "monitoring": ["Dolore", "Funzione renale", "Segni di sanguinamento gastrointestinale"]
+          }
+        },
+        {
+          "id": "antiemetici",
+          "title": "Antiemetici",
+          "type": "drug",
+          "content": {
+            "class": "Antiemetici",
+            "effects": ["Riduzione dei meccanismi responsabili del vomito"],
+            "indications": ["Esempi: Metoclopramide, Ondansetron, Domperidone"],
+            "monitoring": ["Numero degli episodi emetici", "Idratazione"]
+          }
+        },
+        {
+          "id": "antiepilettici",
+          "title": "Antiepilettici",
+          "type": "drug",
+          "content": {
+            "class": "Antiepilettici",
+            "effects": ["Modulazione e stabilizzazione dell'attività elettrica neuronale"],
+            "indications": ["Esempi: Levetiracetam, Acido valproico, Carbamazepina"],
+            "monitoring": ["Stato neurologico", "Livelli plasmatici quando indicato"]
+          }
+        },
+        {
+          "id": "antifungini",
+          "title": "Antifungini",
+          "type": "drug",
+          "content": {
+            "class": "Antifungini",
+            "effects": ["Inibizione o distruzione dei miceti"],
+            "indications": ["Esempi: Fluconazolo, Caspofungina, Amfotericina B"],
+            "monitoring": ["Funzione epatica", "Funzione renale"]
+          }
+        },
+        {
+          "id": "antistaminici",
+          "title": "Antistaminici",
+          "type": "drug",
+          "content": {
+            "class": "Antistaminici H1",
+            "effects": ["Antagonismo dei recettori H1"],
+            "indications": ["Esempi: Loratadina, Cetirizina, Clorfenamina"],
+            "monitoring": ["Sedazione", "Stato di vigilanza"]
+          }
+        },
+        {
+          "id": "antivirali",
+          "title": "Antivirali",
+          "type": "drug",
+          "content": {
+            "class": "Antivirali",
+            "effects": ["Inibizione della replicazione virale"],
+            "indications": ["Esempi: Oseltamivir, Aciclovir, Remdesivir"],
+            "monitoring": ["Funzione renale", "Miglioramento clinico"]
+          }
+        },
+        {
+          "id": "beta-bloccanti",
+          "title": "Beta-bloccanti",
+          "type": "drug",
+          "content": {
+            "class": "Beta-bloccanti",
+            "effects": ["Riduzione della frequenza cardiaca e della contrattilità miocardica"],
+            "indications": ["Esempi: Metoprololo, Bisoprololo, Carvedilolo"],
+            "monitoring": ["FC", "PA", "Bradicardia", "Glicemia"]
+          }
+        },
+        {
+          "id": "broncodilatatori",
+          "title": "Broncodilatatori",
+          "type": "drug",
+          "content": {
+            "class": "Broncodilatatori",
+            "effects": ["Rilassamento della muscolatura bronchiale"],
+            "indications": ["Esempi: Salbutamolo, Formoterolo, Clenil"],
+            "monitoring": ["FR", "SpO₂", "Broncospasmo"]
+          }
+        },
+        {
+          "id": "calcio-antagonisti",
+          "title": "Calcio-antagonisti",
+          "type": "drug",
+          "content": {
+            "class": "Calcio-antagonisti",
+            "effects": ["Blocco dei canali del calcio con effetto vasodilatatore"],
+            "indications": ["Esempi: Amlodipina, Verapamil, Diltiazem"],
+            "monitoring": ["PA", "FC", "Edema periferico"]
+          }
+        },
+        {
+          "id": "chemioterapici-antineoplastici",
+          "title": "Chemioterapici antineoplastici",
+          "type": "drug",
+          "content": {
+            "class": "Chemioterapici antineoplastici",
+            "effects": ["Inibizione della proliferazione cellulare tumorale"],
+            "indications": ["Esempi: Cisplatino, Ciclofosfamide, Doxorubicina"],
+            "monitoring": ["Emocromo", "Nausea", "Funzione renale"]
+          }
+        },
+        {
+          "id": "colloidi",
+          "title": "Colloidi",
+          "type": "drug",
+          "content": {
+            "class": "Soluzioni colloidali",
+            "effects": ["Espansione del volume plasmatico"],
+            "indications": ["Esempio: Albumina"],
+            "monitoring": ["PA", "Segni di sovraccarico"]
+          }
+        },
+        {
+          "id": "corticosteroidi",
+          "title": "Corticosteroidi",
+          "type": "drug",
+          "content": {
+            "class": "Corticosteroidi",
+            "effects": ["Effetto antinfiammatorio e immunosoppressivo"],
+            "indications": ["Esempi: Prednisone, Desametasone, Betametasone"],
+            "monitoring": ["Glicemia", "PA", "Segni di infezione"]
+          }
+        },
+        {
+          "id": "diuretici",
+          "title": "Diuretici",
+          "type": "drug",
+          "content": {
+            "class": "Diuretici",
+            "effects": ["Aumento dell'escrezione di sodio e acqua"],
+            "indications": ["Esempi: Furosemide, Idroclorotiazide, Spironolattone"],
+            "monitoring": ["PA", "Peso", "Bilancio idrico", "Elettroliti"]
+          }
+        },
+        {
+          "id": "emostatici",
+          "title": "Emostatici",
+          "type": "drug",
+          "content": {
+            "class": "Emostatici",
+            "effects": ["Favoriscono la stabilizzazione del coagulo"],
+            "indications": ["Esempio: Acido tranexamico"],
+            "monitoring": ["Valutazione del sanguinamento", "Funzione renale"]
+          }
+        },
+        {
+          "id": "anti-parkinson",
+          "title": "Farmaci anti-Parkinson",
+          "type": "drug",
+          "content": {
+            "class": "Farmaci anti-Parkinson",
+            "effects": ["Modulazione della trasmissione dopaminergica"],
+            "indications": ["Esempi: Levodopa/Carbidopa, Pramipexolo"],
+            "monitoring": ["Pressione ortostatica", "Controllo dei sintomi motori"]
+          }
+        },
+        {
+          "id": "biologici",
+          "title": "Farmaci biologici (anticorpi monoclonali)",
+          "type": "drug",
+          "content": {
+            "class": "Farmaci biologici",
+            "effects": ["Modulazione di specifici target immunologici"],
+            "indications": ["Esempi: Adalimumab, Infliximab, Rituximab"],
+            "monitoring": ["Segni di infezione", "Reazioni da infusione"]
+          }
+        },
+        {
+          "id": "farmaci-urgenza",
+          "title": "Farmaci d'urgenza",
+          "type": "drug",
+          "content": {
+            "class": "Farmaci d'urgenza",
+            "effects": ["Stabilizzazione delle funzioni vitali"],
+            "indications": ["Esempi: Adrenalina, Atropina, Naloxone, Flumazenil, Glucagone"],
+            "monitoring": ["Monitoraggio continuo dei parametri vitali"]
+          }
+        },
+        {
+          "id": "immunosoppressori",
+          "title": "Immunosoppressori",
+          "type": "drug",
+          "content": {
+            "class": "Immunosoppressori",
+            "effects": ["Inibizione della risposta immunitaria cellulare"],
+            "indications": ["Esempi: Tacrolimus, Ciclosporina, Azatioprina"],
+            "monitoring": ["Segni di infezione", "Funzione renale"]
+          }
+        },
+        {
+          "id": "ipp",
+          "title": "Inibitori pompa protonica (IPP)",
+          "type": "drug",
+          "content": {
+            "class": "Inibitori della pompa protonica",
+            "effects": ["Blocco della secrezione acida gastrica"],
+            "indications": ["Esempi: Omeprazolo, Pantoprazolo, Lansoprazolo"],
+            "monitoring": ["Sintomi gastrointestinali", "Funzione renale in caso di uso prolungato"]
+          }
+        },
+        {
+          "id": "insuline",
+          "title": "Insuline",
+          "type": "drug",
+          "content": {
+            "class": "Insuline",
+            "effects": ["Aumento dell'utilizzo periferico del glucosio"],
+            "indications": ["Esempi: Insulina Lispro, Insulina Glargine"],
+            "monitoring": ["Glicemia capillare", "Segni di ipoglicemia"]
+          }
+        },
+        {
+          "id": "ipoglicemizzanti-orali",
+          "title": "Ipoglicemizzanti orali",
+          "type": "drug",
+          "content": {
+            "class": "Ipoglicemizzanti orali",
+            "effects": ["Riduzione della glicemia"],
+            "indications": ["Esempi: Metformina, Glibenclamide, Sitagliptin"],
+            "monitoring": ["Glicemia", "Funzione renale", "Rischio di ipoglicemia"]
+          }
+        },
+        {
+          "id": "lassativi",
+          "title": "Lassativi",
+          "type": "drug",
+          "content": {
+            "class": "Lassativi",
+            "effects": ["Facilitazione dell'evacuazione intestinale"],
+            "indications": ["Esempi: Lattulosio, Macrogol, Bisacodile"],
+            "monitoring": ["Alvo", "Bilancio idrico"]
+          }
+        },
+        {
+          "id": "mucolitici",
+          "title": "Mucolitici",
+          "type": "drug",
+          "content": {
+            "class": "Mucolitici",
+            "effects": ["Fluidificazione delle secrezioni bronchiali"],
+            "indications": ["Esempi: Acetilcisteina, Ambroxolo"],
+            "monitoring": ["Valutazione delle secrezioni", "Efficacia della tosse"]
+          }
+        },
+        {
+          "id": "neurolettici",
+          "title": "Neurolettici (antipsicotici)",
+          "type": "drug",
+          "content": {
+            "class": "Neurolettici / antipsicotici",
+            "effects": ["Antagonismo dopaminergico"],
+            "indications": ["Esempi: Risperidone, Olanzapina, Aloperidolo"],
+            "monitoring": ["QT", "Effetti extrapiramidali"]
+          }
+        },
+        {
+          "id": "oppioidi",
+          "title": "Oppioidi",
+          "type": "drug",
+          "content": {
+            "class": "Oppioidi",
+            "effects": ["Attivazione dei recettori oppioidi centrali"],
+            "indications": ["Esempi: Morfina, Ossicodone, Fentanyl"],
+            "monitoring": ["FR", "Stato di coscienza", "SpO₂", "Alvo"]
+          }
+        },
+        {
+          "id": "benzodiazepine",
+          "title": "Psicofarmaci (benzodiazepine)",
+          "type": "drug",
+          "content": {
+            "class": "Benzodiazepine",
+            "effects": ["Potenziamento della trasmissione mediata dal GABA"],
+            "indications": ["Esempi: Lorazepam, Diazepam, Alprazolam"],
+            "monitoring": ["Stato di coscienza", "FR", "Rischio di cadute"]
+          }
+        },
+        {
+          "id": "sartani",
+          "title": "Sartani (ARB)",
+          "type": "drug",
+          "content": {
+            "class": "Antagonisti del recettore AT1 dell'angiotensina II",
+            "effects": ["Blocco del recettore AT1 dell'angiotensina II"],
+            "indications": ["Esempi: Losartan, Valsartan, Candesartan"],
+            "monitoring": ["PA", "Funzione renale", "Potassio"]
+          }
+        },
+        {
+          "id": "cristalloidi",
+          "title": "Soluzioni cristalloidi",
+          "type": "drug",
+          "content": {
+            "class": "Soluzioni cristalloidi",
+            "effects": ["Ripristino del volume intravascolare"],
+            "indications": ["Esempi: NaCl 0,9%, Ringer lattato"],
+            "monitoring": ["PA", "Bilancio idrico", "Elettroliti"]
+          }
+        },
+        {
+          "id": "statine",
+          "title": "Statine",
+          "type": "drug",
+          "content": {
+            "class": "Statine",
+            "effects": ["Riduzione del colesterolo mediante inibizione della HMG-CoA reduttasi"],
+            "indications": ["Esempi: Atorvastatina, Simvastatina, Rosuvastatina"],
+            "monitoring": ["Transaminasi", "CPK", "Segni di miopatia"]
+          }
+        },
+        {
+          "id": "trombolitici",
+          "title": "Trombolitici",
+          "type": "drug",
+          "content": {
+            "class": "Trombolitici",
+            "effects": ["Attivazione della fibrinolisi con lisi del trombo"],
+            "indications": ["Esempi: Alteplase, Tenecteplase"],
+            "monitoring": ["Segni di emorragia", "Stato neurologico", "PA"]
           }
         }
 
       ]
     },
-
 
     {
       "title": "Interazioni",
@@ -113,11 +421,9 @@
       ]
     },
 
-
     {
       "title": "Monitoraggio",
       "items": [
-
         {
           "id": "indicazioni",
           "title": "Indicazioni",
@@ -126,7 +432,6 @@
             "text": "Sezione dedicata alle indicazioni farmacologiche."
           }
         },
-
         {
           "id": "effetti-indesiderati",
           "title": "Effetti indesiderati",
@@ -135,7 +440,6 @@
             "text": "Sezione dedicata agli effetti indesiderati."
           }
         },
-
         {
           "id": "parametri-monitorare",
           "title": "Parametri da monitorare",
@@ -144,10 +448,8 @@
             "text": "Sezione dedicata ai parametri da monitorare."
           }
         }
-
       ]
     },
-
 
     {
       "title": "Calcolatori",
