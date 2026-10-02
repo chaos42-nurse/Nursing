@@ -2592,11 +2592,20 @@ function findItem(data, itemId) {
 
 function renderDrugClassCategory(item, data) {
     const classes = Array.isArray(item.items) ? item.items : [];
+
     content.innerHTML = `
         <section class="detail-page">
-            ${detailHeader("Classi farmacologiche", data)}
+            <div class="detail-header-row">
+                <h2>Classi farmacologiche</h2>
+                <button id="drugClassSearchToggle" class="patient-search-toggle" type="button" aria-label="Cerca principio attivo">🔍</button>
+            </div>
+
+            <input id="drugClassSearchInput" class="patient-search-input" type="search"
+                placeholder="Cerca principio attivo..." autocomplete="off">
+            <div id="drugClassSearchSuggestions" class="patient-search-suggestions" hidden></div>
+
             <div class="detail-content">
-                <div class="item-list">
+                <div class="item-list" id="drugClassList">
                     ${classes.map(currentItem => `
                         <a class="content-button" href="?state=${encodeURIComponent(data.id)}&item=${encodeURIComponent(currentItem.id)}">
                             <span>${escapeHtml(currentItem.title)}</span>
@@ -2607,7 +2616,88 @@ function renderDrugClassCategory(item, data) {
             </div>
         </section>
     `;
+
+    const searchInput = document.getElementById("drugClassSearchInput");
+    const suggestions = document.getElementById("drugClassSearchSuggestions");
+    const classList = document.getElementById("drugClassList");
+
+    function updateDrugClassSearch(queryValue = "") {
+        const query = queryValue.trim();
+
+        if (!query) {
+            suggestions.hidden = true;
+            suggestions.innerHTML = "";
+            classList.style.display = "";
+            return;
+        }
+
+        classList.style.display = "none";
+
+        loadDrugActiveIngredientIndex()
+            .then(index => {
+                const matches = index
+                    .map(entry => ({
+                        ...entry,
+                        score: drugSearchScore(query, entry.principioAttivo)
+                    }))
+                    .filter(entry => entry.score > 0)
+                    .sort((a, b) =>
+                        b.score - a.score ||
+                        a.principioAttivo.localeCompare(b.principioAttivo, "it-IT")
+                    )
+                    .slice(0, 20);
+
+                suggestions.innerHTML = matches.length
+                    ? matches.map(entry => `
+                        <button
+                            type="button"
+                            class="patient-search-suggestion"
+                            data-drug-class-id="${escapeAttribute(entry.classeId)}"
+                        >
+                            <strong>${escapeHtml(entry.principioAttivo)}</strong>
+                            <span>${escapeHtml(entry.classeNome)}</span>
+                        </button>
+                    `).join("")
+                    : '<div class="personal-note-empty">Nessun principio attivo trovato.</div>';
+
+                suggestions.hidden = false;
+            })
+            .catch(error => {
+                console.error(error);
+                suggestions.innerHTML =
+                    '<div class="personal-note-empty">Indice dei principi attivi non disponibile.</div>';
+                suggestions.hidden = false;
+            });
+    }
+
+    searchInput?.addEventListener("input", () => {
+        updateDrugClassSearch(searchInput.value);
+    });
+
+    document.getElementById("drugClassSearchToggle")?.addEventListener("click", () => {
+        searchInput?.classList.toggle("is-open");
+
+        if (searchInput?.classList.contains("is-open")) {
+            searchInput.focus();
+            updateDrugClassSearch(searchInput.value);
+        } else {
+            searchInput.value = "";
+            updateDrugClassSearch("");
+        }
+    });
+
+    suggestions?.addEventListener("click", event => {
+        const result = event.target.closest("[data-drug-class-id]");
+        if (!result) return;
+
+        const classId = result.dataset.drugClassId;
+        if (!classId) return;
+
+        window.location.href =
+            "?state=farmaci&item=" + encodeURIComponent(classId);
+    });
 }
+
 
 /* =========================================================
    RICERCA PRINCIPI ATTIVI
