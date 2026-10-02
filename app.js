@@ -1500,6 +1500,32 @@ function createShortcuts(categories) {
 
         row.appendChild(link);
 
+        if (category.id === "farmaci") {
+            const searchButton = document.createElement("button");
+            searchButton.type = "button";
+            searchButton.className = "shortcut-search-toggle";
+            searchButton.textContent = "🔎";
+            searchButton.setAttribute("aria-label", "Cerca principio attivo");
+            searchButton.title = "Cerca principio attivo";
+            searchButton.dataset.drugSearchToggle = "1";
+
+            const searchBox = document.createElement("div");
+            searchBox.className = "shortcut-search-box";
+            searchBox.hidden = true;
+            searchBox.innerHTML = `
+                <input
+                    class="drug-home-search-input"
+                    type="search"
+                    placeholder="Cerca principio attivo..."
+                    autocomplete="off"
+                >
+                <div class="drug-home-search-results" hidden></div>
+            `;
+
+            row.appendChild(searchButton);
+            row.appendChild(searchBox);
+        }
+
         if (isOrderEditMode()) {
             row.appendChild(
                 createOrderControls(
@@ -1514,6 +1540,93 @@ function createShortcuts(categories) {
     });
 
     setupHomeOrderControls();
+
+    shortcuts.querySelectorAll("[data-drug-search-toggle]").forEach(button => {
+        button.addEventListener("click", async event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const row = button.closest(".shortcut-row");
+            const box = row?.querySelector(".shortcut-search-box");
+            const input = row?.querySelector(".drug-home-search-input");
+            const results = row?.querySelector(".drug-home-search-results");
+
+            if (!box || !input || !results) return;
+
+            box.hidden = !box.hidden;
+
+            if (!box.hidden) {
+                input.focus();
+                return;
+            }
+
+            input.value = "";
+            results.hidden = true;
+            results.innerHTML = "";
+        });
+    });
+
+    shortcuts.querySelectorAll(".drug-home-search-input").forEach(input => {
+        input.addEventListener("input", async () => {
+            const row = input.closest(".shortcut-row");
+            const results = row?.querySelector(".drug-home-search-results");
+            if (!results) return;
+
+            const query = input.value.trim();
+
+            if (!query) {
+                results.hidden = true;
+                results.innerHTML = "";
+                return;
+            }
+
+            try {
+                const index = await loadDrugActiveIngredientIndex();
+
+                const matches = index
+                    .map(entry => ({
+                        ...entry,
+                        score: drugSearchScore(query, entry.principioAttivo)
+                    }))
+                    .filter(entry => entry.score > 0)
+                    .sort((x, y) => y.score - x.score || x.principioAttivo.localeCompare(y.principioAttivo, "it-IT"))
+                    .slice(0, 8);
+
+                results.innerHTML = matches.length
+                    ? matches.map(entry => `
+                        <button
+                            type="button"
+                            class="drug-home-search-result"
+                            data-drug-class-id="${escapeAttribute(entry.classeId)}"
+                        >
+                            <strong>${escapeHtml(entry.principioAttivo)}</strong>
+                            <span>${escapeHtml(entry.classeNome)}</span>
+                        </button>
+                    `).join("")
+                    : '<div class="drug-home-search-empty">Nessun principio attivo trovato.</div>';
+
+                results.hidden = false;
+            } catch (error) {
+                console.error(error);
+                results.innerHTML = '<div class="drug-home-search-empty">Impossibile caricare la ricerca.</div>';
+                results.hidden = false;
+            }
+        });
+    });
+
+    shortcuts.querySelectorAll(".drug-home-search-results").forEach(results => {
+        results.addEventListener("click", event => {
+            const result = event.target.closest("[data-drug-class-id]");
+            if (!result) return;
+
+            const classId = result.dataset.drugClassId;
+            if (!classId) return;
+
+            window.location.href =
+                "?state=farmaci&item=" +
+                encodeURIComponent(classId);
+        });
+    });
 }
 
 
