@@ -2593,11 +2593,41 @@ function findItem(data, itemId) {
 function renderDrugClassCategory(item, data) {
     const classes = Array.isArray(item.items) ? item.items : [];
 
+    function renderDrugCatalogInfo(versionData) {
+        const container = document.getElementById("drugCatalogInfo");
+        if (!container) return;
+
+        const updatedAt = versionData?.last_updated;
+        let formattedDate = "non disponibile";
+
+        if (updatedAt) {
+            const date = new Date(updatedAt);
+            if (!Number.isNaN(date.getTime())) {
+                formattedDate = date.toLocaleDateString("it-IT", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                });
+            }
+        }
+
+        container.innerHTML =
+            `<strong>📚 Catalogo farmaci</strong>` +
+            `<span>Ultimo aggiornamento: ${formattedDate}</span>` +
+            `<span>Fonte: <a href="https://www.aifa.gov.it/liste-dei-farmaci" target="_blank" rel="noopener noreferrer">AIFA — Anagrafica dei farmaci</a></span>`;
+    }
+
     content.innerHTML = `
         <section class="detail-page">
             <div class="detail-header-row drug-class-header-row">
                 <h2>Classi farmacologiche</h2>
                 <button id="drugClassSearchToggle" class="patient-search-toggle" type="button" aria-label="Cerca principio attivo">🔍</button>
+            </div>
+
+            <div id="drugCatalogInfo" class="drug-catalog-info">
+                <strong>📚 Catalogo farmaci</strong>
+                <span>Ultimo aggiornamento: caricamento...</span>
+                <span>Fonte: <a href="https://www.aifa.gov.it/liste-dei-farmaci" target="_blank" rel="noopener noreferrer">AIFA — Anagrafica dei farmaci</a></span>
             </div>
 
             <input id="drugClassSearchInput" class="patient-search-input" type="search"
@@ -2609,13 +2639,21 @@ function renderDrugClassCategory(item, data) {
                     ${classes.map(currentItem => `
                         <a class="content-button" href="?state=${encodeURIComponent(data.id)}&item=${encodeURIComponent(currentItem.id)}">
                             <span>${escapeHtml(currentItem.title)}</span>
-                            <span class="arrow">→</span>
+                            
                         </a>
                     `).join("")}
                 </div>
             </div>
         </section>
     `;
+
+    fetch("./data/version.json", { cache: "no-store" })
+        .then(response => {
+            if (!response.ok) throw new Error("Versione catalogo non disponibile");
+            return response.json();
+        })
+        .then(renderDrugCatalogInfo)
+        .catch(() => renderDrugCatalogInfo(null));
 
     const searchInput = document.getElementById("drugClassSearchInput");
     const suggestions = document.getElementById("drugClassSearchSuggestions");
@@ -2744,7 +2782,7 @@ async function renderDrugSearch() {
         if(!query){results.innerHTML="";return;}
         try{
             const matches=(await loadDrugActiveIngredientIndex()).map(entry=>({...entry,score:drugSearchScore(query,entry.principioAttivo)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.principioAttivo.localeCompare(b.principioAttivo,"it")).slice(0,20);
-            results.innerHTML=matches.length?matches.map(entry=>`<a class="content-button" href="?state=farmaci&item=${encodeURIComponent(entry.classeId)}"><span><strong>${escapeHtml(entry.principioAttivo)}</strong><small> → ${escapeHtml(entry.classeNome)}</small></span><span class="arrow">→</span></a>`).join(""):"<div class=\"personal-note-empty\">Nessun principio attivo trovato.</div>";
+            results.innerHTML=matches.length?matches.map(entry=>`<a class="content-button" href="?state=farmaci&item=${encodeURIComponent(entry.classeId)}"><span><strong>${escapeHtml(entry.principioAttivo)}</strong><small> → ${escapeHtml(entry.classeNome)}</small></span></a>`).join(""):"<div class=\"personal-note-empty\">Nessun principio attivo trovato.</div>";
         }catch(error){console.error(error);results.innerHTML="<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>";}
     });
 }
