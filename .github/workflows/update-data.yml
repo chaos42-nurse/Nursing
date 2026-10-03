@@ -3,6 +3,7 @@ name: Aggiornamento Mensile Database AIFA
 on:
   schedule:
     # Esegue lo script alle 00:00 del primo giorno di ogni mese
+    # Trigger manuale di rigenerazione tramite push
     - cron: '0 0 1 * *'
   workflow_dispatch:
 
