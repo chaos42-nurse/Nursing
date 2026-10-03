@@ -1745,7 +1745,7 @@ async function loadState() {
      * HOME
      */
 
-    if (!state) {
+    if (state === "interazioni") {\n        renderGenericInteractionsPage();\n        return;\n    }\n\n    if (!state) {    if (!state) {
 
         document.body.classList.add("home-page");
 
