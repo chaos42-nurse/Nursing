@@ -79,8 +79,8 @@ jobs:
 
               def normalize(value):
                   value = str(value or "").casefold()
-                  value = re.sub(r"[\\(\\)\\-/]", " ", value)
-                  value = re.sub(r"\\s+", " ", value).strip()
+                  value = re.sub(r"[()/-]", " ", value)
+                  value = re.sub(r"\s+", " ", value).strip()
                   return value
 
               class_by_name = {}
@@ -134,7 +134,7 @@ jobs:
                   atc = (row.get("ATC") or "").strip()
                   if not value:
                       continue
-                  for part in re.split(r"\\s*\\+\\s*", value):
+                  for part in re.split(r"\s*\+\s*", value):
                       part = part.strip()
                       if not part:
                           continue
