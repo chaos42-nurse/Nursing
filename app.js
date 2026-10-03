@@ -2913,14 +2913,6 @@ async function renderDrugSearch() {
         }catch(error){console.error(error);results.innerHTML="<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>";}
     });
 }
-// ... [Fine della funzione renderDrugSearch che già possiedi]
-        } catch(error) { 
-            console.error(error); 
-            results.innerHTML = "<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>"; 
-        }
-    });
-} // <--- Questa è la parentesi graffa che chiude il vecchio renderDrugSearch
-
 /* =========================================================================
    INCOLLA DA QUI IL NUOVO CODICE PER LE INTERAZIONI
 ========================================================================= */
