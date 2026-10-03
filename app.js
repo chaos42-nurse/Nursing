@@ -2939,13 +2939,14 @@ async function loadInteractionsIndex() {
     
     const csvText = await response.text();
     
-    // Divide il testo in righe ed elimina gli spazi vuoti o le righe corrotte
     const righe = csvText.split(/\r?\n/).map(r => r.trim()).filter(r => r.length > 0);
     if (righe.length <= 1) return []; 
     
-    // Converte ogni riga del CSV in un oggetto JSON leggibile dall'app
+    // Rileva automaticamente se il CSV usa la virgola o il punto e virgola
+    const separatore = righe[0].includes(";") ? ";" : ",";
+    
     interactionsIndex = righe.slice(1).map(riga => {
-        const valori = riga.split(",");
+        const valori = riga.split(separatore);
         return {
             farmacoA: valori[0] ? valori[0].trim() : "",
             farmacoB: valori[1] ? valori[1].trim() : "",
