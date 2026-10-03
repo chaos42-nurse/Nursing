@@ -4,7 +4,10 @@ on:
   schedule:
     # Esegue lo script alle 00:00 del primo giorno di ogni mese
     - cron: '0 0 1 * *'
-  workflow_dispatch: # Ti permette di avviare l'aggiornamento anche a mano da GitHub
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update-data:
@@ -25,7 +28,6 @@ jobs:
           
           # Genera un file di testo con la data di oggi (formato GG/MM/AAAA)
           date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
-
 
       - name: Salva le modifiche nel repository
         run: |
