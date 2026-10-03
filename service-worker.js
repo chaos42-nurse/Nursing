@@ -4,7 +4,7 @@ const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
-    "./app.js?v=69",
+    "./app.js?v=76",
     "./manifest.json",
     "./icon-192.png",
     "./icon-512.png",
@@ -14,7 +14,8 @@ const CORE_FILES = [
     "./data/laboratorio.json",
     "./data/emergenze.json",
     "./data/version.json",
-    "./src/data/aifa-principi-attivi.json"
+    "./src/data/aifa-principi-attivi.json",
+    "./data/interazioni.csv"
 ];
 
 
