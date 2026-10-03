@@ -1745,11 +1745,6 @@ async function loadState() {
      * HOME
      */
 
-    if (state === "interazioni") {
-        renderGenericInteractionsPage();
-        return;
-    }
-
     if (!state) {
 
         document.body.classList.add("home-page");
@@ -1941,29 +1936,6 @@ async function loadState() {
 /* =========================================================
    RENDER SEZIONI
 ========================================================= */
-
-function renderGenericInteractionsPage() {
-    document.body.classList.remove("home-page");
-    shortcuts.style.display = "none";
-
-    if (backButton) {
-        backButton.style.display = "flex";
-    }
-
-    stateTitle.textContent = "🔄 Verifica Interazioni";
-    description.textContent = "Area informativa generica.";
-
-    content.innerHTML = `
-        <section class="detail-page">
-            <div class="detail-content">
-                <div class="info-block">
-                    <h2>🔄 Verifica Interazioni</h2>
-                    <p>Questa sezione è predisposta per contenuti informativi.</p>
-                </div>
-            </div>
-        </section>
-    `;
-}
 
 function renderSections(data) {
 
