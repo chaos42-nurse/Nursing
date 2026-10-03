@@ -6,6 +6,9 @@ on:
     # Trigger manuale di rigenerazione tramite push
     - cron: '0 0 1 * *'
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/update-data.yml'
 
 permissions:
   contents: write
