@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          mkdir -p src/data
+          mkdir -p src/data data
 
           TMP_CSV="src/data/farmaci.csv.tmp"
           TMP_INDEX="src/data/aifa-principi-attivi.json.tmp"
@@ -98,6 +98,28 @@ jobs:
           # Genera un file di testo con la data di oggi
           date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
 
+          # Metadata letto dalla PWA per mostrare la data dell'ultimo aggiornamento.
+          python - <<'PY'
+          import json
+          from datetime import date
+
+          today = date.today().isoformat()
+          version = int(today.replace("-", ""))
+
+          with open("data/version.json", "w", encoding="utf-8") as f:
+              json.dump(
+                  {
+                      "version": version,
+                      "last_updated": today,
+                      "source": "AIFA",
+                      "file": "src/data/farmaci.csv"
+                  },
+                  f,
+                  ensure_ascii=False,
+                  indent=2
+              )
+          PY
+
           echo "Aggiornamento AIFA completato."
           echo "Indice: src/data/aifa-principi-attivi.json"
 
@@ -105,6 +127,6 @@ jobs:
         run: |
           git config --global user.name "AIFA Update Bot"
           git config --global user.email "bot@github.com"
-          git add src/data/
+          git add src/data/ data/version.json
           git commit -m "Auto-aggiornamento database farmaci AIFA (Mensile)" || exit 0
           git push
