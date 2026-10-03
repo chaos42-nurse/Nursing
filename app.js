@@ -2728,7 +2728,6 @@ function renderDrugClassCategory(item, data) {
                     '<div class="personal-note-empty">Indice dei principi attivi non disponibile.</div>';
                 suggestions.hidden = false;
             });
-);
     }
 
     searchInput?.addEventListener("input", () => {
