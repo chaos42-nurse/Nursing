@@ -33,6 +33,50 @@
               }
             },
             {
+              "id": "antipertensivi",
+              "title": "Altri antipertensivi",
+              "type": "drug",
+              "content": {
+                "class": "Altri antipertensivi",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "anestetici",
+              "title": "Anestetici",
+              "type": "drug",
+              "content": {
+                "class": "Anestetici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiacidi",
+              "title": "Antiacidi",
+              "type": "drug",
+              "content": {
+                "class": "Antiacidi",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiadrenergici",
+              "title": "Antiadrenergici",
+              "type": "drug",
+              "content": {
+                "class": "Antiadrenergici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
               "id": "antiaggreganti",
               "title": "Antiaggreganti",
               "type": "drug",
@@ -48,6 +92,50 @@
                   "Segni di sanguinamento",
                   "Emocromo"
                 ]
+              }
+            },
+            {
+              "id": "antiemorragici",
+              "title": "Antiaggreganti ed emostatici",
+              "type": "drug",
+              "content": {
+                "class": "Antiaggreganti ed emostatici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiandrogeni",
+              "title": "Antiandrogeni",
+              "type": "drug",
+              "content": {
+                "class": "Antiandrogeni",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antianginosi",
+              "title": "Antianginosi",
+              "type": "drug",
+              "content": {
+                "class": "Antianginosi",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiaritmici",
+              "title": "Antiaritmici",
+              "type": "drug",
+              "content": {
+                "class": "Antiaritmici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
               }
             },
             {
@@ -144,6 +232,17 @@
               }
             },
             {
+              "id": "antidoti",
+              "title": "Antidoti",
+              "type": "drug",
+              "content": {
+                "class": "Antidoti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
               "id": "antiemetici",
               "title": "Antiemetici",
               "type": "drug",
@@ -198,6 +297,39 @@
               }
             },
             {
+              "id": "antigottosi",
+              "title": "Antigottosi",
+              "type": "drug",
+              "content": {
+                "class": "Antigottosi",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antimigraine",
+              "title": "Antimigraine",
+              "type": "drug",
+              "content": {
+                "class": "Antimigraine",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antispastici",
+              "title": "Antispastici",
+              "type": "drug",
+              "content": {
+                "class": "Antispastici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
               "id": "antistaminici",
               "title": "Antistaminici",
               "type": "drug",
@@ -213,6 +345,17 @@
                   "Sedazione",
                   "Stato di vigilanza"
                 ]
+              }
+            },
+            {
+              "id": "antitussivi",
+              "title": "Antitussivi",
+              "type": "drug",
+              "content": {
+                "class": "Antitussivi",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
               }
             },
             {
@@ -251,6 +394,17 @@
                   "Bradicardia",
                   "Glicemia"
                 ]
+              }
+            },
+            {
+              "id": "bisfosfonati",
+              "title": "Bisfosfonati",
+              "type": "drug",
+              "content": {
+                "class": "Bisfosfonati",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
               }
             },
             {
@@ -329,6 +483,17 @@
               }
             },
             {
+              "id": "contraccettivi-ormonali",
+              "title": "Contraccettivi ormonali",
+              "type": "drug",
+              "content": {
+                "class": "Contraccettivi ormonali",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
               "id": "corticosteroidi",
               "title": "Corticosteroidi",
               "type": "drug",
@@ -345,6 +510,17 @@
                   "PA",
                   "Segni di infezione"
                 ]
+              }
+            },
+            {
+              "id": "decongestionanti",
+              "title": "Decongestionanti",
+              "type": "drug",
+              "content": {
+                "class": "Decongestionanti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
               }
             },
             {
@@ -439,6 +615,28 @@
               }
             },
             {
+              "id": "broncocostrittori",
+              "title": "Farmaci respiratori diversi dai broncodilatatori",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci respiratori diversi dai broncodilatatori",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "gastroprotettori",
+              "title": "Gastroprotettori",
+              "type": "drug",
+              "content": {
+                "class": "Gastroprotettori",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
               "id": "immunosoppressori",
               "title": "Immunosoppressori",
               "type": "drug",
@@ -512,6 +710,17 @@
               }
             },
             {
+              "id": "ipolipemizzanti",
+              "title": "Ipolipemizzanti",
+              "type": "drug",
+              "content": {
+                "class": "Ipolipemizzanti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
               "id": "lassativi",
               "title": "Lassativi",
               "type": "drug",
@@ -527,6 +736,17 @@
                   "Alvo",
                   "Bilancio idrico"
                 ]
+              }
+            },
+            {
+              "id": "miorilassanti",
+              "title": "Miorilassanti",
+              "type": "drug",
+              "content": {
+                "class": "Miorilassanti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
               }
             },
             {
@@ -583,6 +803,50 @@
                   "SpO₂",
                   "Alvo"
                 ]
+              }
+            },
+            {
+              "id": "ormoni-sessuali",
+              "title": "Ormoni sessuali",
+              "type": "drug",
+              "content": {
+                "class": "Ormoni sessuali",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "ormoni-tiroidei",
+              "title": "Ormoni tiroidei",
+              "type": "drug",
+              "content": {
+                "class": "Ormoni tiroidei",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "procinetici",
+              "title": "Procinetici",
+              "type": "drug",
+              "content": {
+                "class": "Procinetici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "protettori-mucosa",
+              "title": "Protettori della mucosa gastrointestinale",
+              "type": "drug",
+              "content": {
+                "class": "Protettori della mucosa gastrointestinale",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
               }
             },
             {
@@ -681,275 +945,11 @@
               }
             },
             {
-              "id": "gastroprotettori",
-              "title": "Gastroprotettori",
-              "type": "drug",
-              "content": {
-                "class": "Gastroprotettori",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antiaritmici",
-              "title": "Antiaritmici",
-              "type": "drug",
-              "content": {
-                "class": "Antiaritmici",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antianginosi",
-              "title": "Antianginosi",
-              "type": "drug",
-              "content": {
-                "class": "Antianginosi",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antipertensivi",
-              "title": "Altri antipertensivi",
-              "type": "drug",
-              "content": {
-                "class": "Altri antipertensivi",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antiadrenergici",
-              "title": "Antiadrenergici",
-              "type": "drug",
-              "content": {
-                "class": "Antiadrenergici",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
               "id": "vasodilatatori",
               "title": "Vasodilatatori",
               "type": "drug",
               "content": {
                 "class": "Vasodilatatori",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antiemorragici",
-              "title": "Antiaggreganti ed emostatici",
-              "type": "drug",
-              "content": {
-                "class": "Antiaggreganti ed emostatici",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "ipolipemizzanti",
-              "title": "Ipolipemizzanti",
-              "type": "drug",
-              "content": {
-                "class": "Ipolipemizzanti",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antigottosi",
-              "title": "Antigottosi",
-              "type": "drug",
-              "content": {
-                "class": "Antigottosi",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antimigraine",
-              "title": "Antimigraine",
-              "type": "drug",
-              "content": {
-                "class": "Antimigraine",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antispastici",
-              "title": "Antispastici",
-              "type": "drug",
-              "content": {
-                "class": "Antispastici",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "procinetici",
-              "title": "Procinetici",
-              "type": "drug",
-              "content": {
-                "class": "Procinetici",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antiacidi",
-              "title": "Antiacidi",
-              "type": "drug",
-              "content": {
-                "class": "Antiacidi",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "protettori-mucosa",
-              "title": "Protettori della mucosa gastrointestinale",
-              "type": "drug",
-              "content": {
-                "class": "Protettori della mucosa gastrointestinale",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "ormoni-tiroidei",
-              "title": "Ormoni tiroidei",
-              "type": "drug",
-              "content": {
-                "class": "Ormoni tiroidei",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "ormoni-sessuali",
-              "title": "Ormoni sessuali",
-              "type": "drug",
-              "content": {
-                "class": "Ormoni sessuali",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "contraccettivi-ormonali",
-              "title": "Contraccettivi ormonali",
-              "type": "drug",
-              "content": {
-                "class": "Contraccettivi ormonali",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antiandrogeni",
-              "title": "Antiandrogeni",
-              "type": "drug",
-              "content": {
-                "class": "Antiandrogeni",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "bisfosfonati",
-              "title": "Bisfosfonati",
-              "type": "drug",
-              "content": {
-                "class": "Bisfosfonati",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "broncocostrittori",
-              "title": "Farmaci respiratori diversi dai broncodilatatori",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci respiratori diversi dai broncodilatatori",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antitussivi",
-              "title": "Antitussivi",
-              "type": "drug",
-              "content": {
-                "class": "Antitussivi",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "decongestionanti",
-              "title": "Decongestionanti",
-              "type": "drug",
-              "content": {
-                "class": "Decongestionanti",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "anestetici",
-              "title": "Anestetici",
-              "type": "drug",
-              "content": {
-                "class": "Anestetici",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "miorilassanti",
-              "title": "Miorilassanti",
-              "type": "drug",
-              "content": {
-                "class": "Miorilassanti",
-                "indications": [],
-                "effects": [],
-                "monitoring": []
-              }
-            },
-            {
-              "id": "antidoti",
-              "title": "Antidoti",
-              "type": "drug",
-              "content": {
-                "class": "Antidoti",
                 "indications": [],
                 "effects": [],
                 "monitoring": []
