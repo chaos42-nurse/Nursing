@@ -24,11 +24,82 @@ jobs:
 
       - name: Scarica e organizza il file AIFA
         run: |
+          set -euo pipefail
+
           mkdir -p src/data
-          curl -L -o src/data/farmaci.csv "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
+
+          TMP_CSV="src/data/farmaci.csv.tmp"
+          TMP_INDEX="src/data/aifa-principi-attivi.json.tmp"
+
+          # Il download avviene prima su un file temporaneo:
+          # se il file non è valido, i dati già presenti non vengono toccati.
+          curl -fL --retry 3 -o "$TMP_CSV" "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
+
+          python - <<'PY'
+          import csv
+          import json
+          import os
+          import re
+
+          csv_path = "src/data/farmaci.csv.tmp"
+          index_path = "src/data/aifa-principi-attivi.json.tmp"
+
+          with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
+              sample = f.read(8192)
+              f.seek(0)
+
+              try:
+                  dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
+              except csv.Error:
+                  dialect = csv.excel
+
+              reader = csv.DictReader(f, dialect=dialect)
+
+              if not reader.fieldnames:
+                  raise RuntimeError("File AIFA non valido: intestazione assente.")
+
+              fields = [field.strip() for field in reader.fieldnames if field]
+              if "Principio attivo" not in fields:
+                  raise RuntimeError(
+                      "File AIFA non valido: colonna 'Principio attivo' assente. "
+                      "Nessun dato esistente è stato modificato."
+                  )
+
+              active_ingredients = set()
+
+              for row in reader:
+                  value = (row.get("Principio attivo") or "").strip()
+                  if not value:
+                      continue
+
+                  # L'indice contiene i singoli principi attivi.
+                  # Le associazioni A + B vengono quindi rese ricercabili
+                  # anche per ciascun componente.
+                  for part in re.split(r"\s*\+\s*", value):
+                      part = part.strip()
+                      if part:
+                          active_ingredients.add(part)
+
+          index = sorted(
+              active_ingredients,
+              key=lambda value: value.casefold()
+          )
+
+          with open(index_path, "w", encoding="utf-8") as f:
+              json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
+
+          print(f"Indice AIFA creato: {len(index)} principi attivi unici.")
+          PY
+
+          # Sostituzione atomica solo dopo che CSV e indice hanno superato i controlli.
+          mv "$TMP_CSV" src/data/farmaci.csv
+          mv "$TMP_INDEX" src/data/aifa-principi-attivi.json
 
           # Genera un file di testo con la data di oggi
           date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
+
+          echo "Aggiornamento AIFA completato."
+          echo "Indice: src/data/aifa-principi-attivi.json"
 
       - name: Salva le modifiche nel repository
         run: |
