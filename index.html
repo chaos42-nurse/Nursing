@@ -1,146 +1,57 @@
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#0d1117"
-    >
-
-    <meta
-        name="description"
-        content="Archivio infermieristico in pillole"
-    >
-
-    <title>Nursing Shot</title>
-
-
-    <!-- FAVICON -->
-
-    <link
-        rel="icon"
-        href="./icon-192.png"
-        type="image/png"
-    >
-
-
-    <!-- CSS -->
-
-    <link
-        rel="stylesheet"
-        href="./style.css"
-    >
-
-
-    <!-- PWA -->
-
-    <link
-        rel="manifest"
-        href="./manifest.json"
-    >
-
-    
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d1117">
+<meta name="description" content="Archivio infermieristico in pillole">
+<title>Nursing Shot</title>
+<link rel="icon" href="./icon-192.png" type="image/png">
+<link rel="stylesheet" href="./style.css">
+<link rel="manifest" href="./manifest.json">
 </head>
-
 <body>
-
-    <div id="settingsPanel" class="settings-panel" hidden>
-        <div class="settings-card">
-            <div class="settings-header">
-                <h2>Impostazioni</h2>
-                <button id="settingsClose" class="home-button" type="button" aria-label="Chiudi impostazioni">×</button>
-            </div>
-            <div class="settings-group">
-                <button id="orderModeButton" class="settings-action" type="button">↕️ Modifica ordine</button>
-                <button id="resetOrderButton" class="settings-action" type="button">↩️ Ripristina ordini</button>
-                <button id="settingsThemeButton" class="settings-action" type="button">🌙 Tema</button>
-                <button id="noteLinksButton" class="settings-action" type="button">🔗 Collegamenti tra note</button>
-
-                <div class="settings-divider"></div>
-
-                <button id="sharePersonalizationButton" class="settings-action" type="button">📤 Condividi personalizzazione</button>
-
-                <div class="settings-divider"></div>
-
-                <button id="resetPersonalizationButton" class="settings-action settings-danger" type="button">↩️ Ripristino completo</button>
-            </div>
-            <p id="settingsMessage" class="settings-message"></p>
-        </div>
-    </div>
-
-    <main>
-
-        <header>
-
-            <button
-                id="backButton"
-                class="home-button"
-                type="button"
-                aria-label="Torna indietro"
-            >
-                ←
-            </button>
-
-            <h1>
-                🩺 Nursing Shot
-            </h1>
-
-            <button
-                id="settingsButton"
-                class="home-button settings-button"
-                type="button"
-                aria-label="Impostazioni"
-            >
-                ⚙️
-            </button>
-
-        </header>
-
-
-        <div id="shortcuts"></div>
-
-        <div id="pageHeader">
-
-            <div class="page-title-row"><h2 id="state"></h2></div>
-
-            <p id="description"></p>
-
-        </div>
-
-
-        <div id="content"></div>
-
-    </main>
-
-
-    <!-- JAVASCRIPT -->
-
-    <script src="./app.js?v=77"></script>
-
-    <!-- SERVICE WORKER PWA -->
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./service-worker.js?v=77")
-                    .then(() => {
-                        console.log("Service worker registrato correttamente.");
-                    })
-                    .catch(error => {
-                        console.error("Errore registrazione service worker:", error);
-                    });
-            });
-        }
-    </script>
-
+<div id="settingsPanel" class="settings-panel" hidden>
+<div class="settings-card">
+<div class="settings-header">
+<h2>Impostazioni</h2>
+<button id="settingsClose" class="home-button" type="button" aria-label="Chiudi impostazioni">×</button>
+</div>
+<div class="settings-group">
+<button id="orderModeButton" class="settings-action" type="button">↕️ Modifica ordine</button>
+<button id="resetOrderButton" class="settings-action" type="button">↩️ Ripristina ordini</button>
+<button id="settingsThemeButton" class="settings-action" type="button">🌙 Tema</button>
+<button id="noteLinksButton" class="settings-action" type="button">🔗 Collegamenti tra note</button>
+<div class="settings-divider"></div>
+<button id="sharePersonalizationButton" class="settings-action" type="button">📤 Condividi personalizzazione</button>
+<div class="settings-divider"></div>
+<button id="resetPersonalizationButton" class="settings-action settings-danger" type="button">↩️ Ripristino completo</button>
+</div>
+<p id="settingsMessage" class="settings-message"></p>
+</div>
+</div>
+<main>
+<header>
+<button id="backButton" class="home-button" type="button" aria-label="Torna indietro">←</button>
+<h1>🩺 Nursing Shot</h1>
+<button id="settingsButton" class="home-button settings-button" type="button" aria-label="Impostazioni">⚙️</button>
+</header>
+<div id="shortcuts"></div>
+<div id="pageHeader">
+<div class="page-title-row"><h2 id="state"></h2></div>
+<p id="description"></p>
+</div>
+<div id="content"></div>
+</main>
+<script src="./app.js?v=78"></script>
+<script>
+if ("serviceWorker" in navigator) {
+window.addEventListener("load", () => {
+navigator.serviceWorker.register("./service-worker.js?v=78")
+.then(() => console.log("Service worker registrato correttamente."))
+.catch(error => console.error("Errore registrazione service worker:", error));
+});
+}
+</script>
 </body>
-
 </html>
