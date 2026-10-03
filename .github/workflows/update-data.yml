@@ -21,7 +21,7 @@ jobs:
       - name: Scarica e converti il file AIFA
         run: |
           # Sostituisci questo URL con il link effettivo del file CSV/Excel di AIFA
-          curl -o src/data/farmaci_nuovi.csv "https://aifa.gov.it"
+          curl -o src/data/farmaci_nuovi.csv "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
           
           # Opzionale: Se usi uno script Node/Python per ripulire i dati o convertirli in JSON
           # node scripts/parse-aifa.js
