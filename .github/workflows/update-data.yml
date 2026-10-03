@@ -44,7 +44,16 @@ jobs:
           csv_path = "src/data/farmaci.csv.tmp"
           index_path = "src/data/aifa-principi-attivi.json.tmp"
 
-          with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
+          # AIFA può pubblicare il CSV con una codifica Windows-1252.
+          # Prova prima UTF-8 e, solo se necessario, usa CP1252.
+          try:
+              with open(csv_path, "r", encoding="utf-8-sig", newline="") as test:
+                  test.read(8192)
+              csv_encoding = "utf-8-sig"
+          except UnicodeDecodeError:
+              csv_encoding = "cp1252"
+
+          with open(csv_path, "r", encoding=csv_encoding, newline="") as f:
               sample = f.read(8192)
               f.seek(0)
 
