@@ -34,7 +34,7 @@
                     !classifiedNames.has(normalizeDrugSearchText(entry.principioAttivo))
                 );
 
-                const combined = [...matches, ...aifaMatches]
+                const combined = [...matches, ...filteredAifaMatches]
                     .sort((a, b) =>
                         b.score - a.score ||
                         a.principioAttivo.localeCompare(b.principioAttivo, "it-IT")
