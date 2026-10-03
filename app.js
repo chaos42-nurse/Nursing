@@ -2930,42 +2930,70 @@ async function renderDrugSearch() {
 ========================================================================= */
 let interactionsIndex = null;
 
-// Funzione aggiornata che scarica il file CSV e lo trasforma in dati pronti per l'applicazione
+// Lettore CSV corretto per aggirare il blocco di IndexedDB e popolare l'archivio al volo
 async function loadInteractionsIndex() {
     if (Array.isArray(interactionsIndex)) return interactionsIndex;
     
-    const response = await fetch("./data/interazioni.csv", { cache: "no-store" });
-    if (!response.ok) throw new Error("File CSV delle interazioni non disponibile");
-    
-    const csvText = await response.text();
-    
-    // Divide il testo in righe ed elimina gli spazi vuoti
-    const righe = csvText.split(/\r?\n/).map(r => r.trim()).filter(r => r.length > 0);
-    if (righe.length <= 1) return []; 
-    
-    // Rileva il separatore guardando la prima riga di intestazione
-    const separatore = csvText.split(/\r?\n/)[0].includes(";") ? ";" : ",";
-    
-    // Converte ogni riga del CSV in un oggetto JSON per l'applicazione
-    interactionsIndex = righe.slice(1).map(riga => {
-        const valori = riga.split(separatore);
-        return {
-            farmacoA: valori[0] ? valori[0].trim() : "",
-            farmacoB: valori[1] ? valori[1].trim() : "",
-            stato: valori[2] ? valori[2].trim().toLowerCase() : "",
-            nota: valori[3] ? valori[3].trim() : ""
-        };
-    });
-    
-    return interactionsIndex;
+    try {
+        const response = await fetch("./data/interazioni.csv", { cache: "no-store" });
+        if (!response.ok) throw new Error("File CSV non trovato");
+        
+        const csvText = await response.text();
+        const righe = csvText.split(/\r?\n/).map(r => r.trim()).filter(r => r.length > 0);
+        
+        if (righe.length <= 1) return []; 
+        
+        // Rileva automaticamente se il separatore è "," o ";"
+        const primaRiga = righe[0];
+        const separatore = primaRiga.includes(";") ? ";" : ",";
+        
+        interactionsIndex = righe.slice(1).map(riga => {
+            const valori = riga.split(separatore);
+            return {
+                farmacoA: valori[0] ? valori[0].trim() : "",
+                farmacoB: valori[1] ? valori[1].trim() : "",
+                stato: valori[2] ? valori[2].trim().toLowerCase() : "",
+                nota: valori[3] ? valori[3].trim() : ""
+            };
+        });
+        
+        return interactionsIndex;
+    } catch (error) {
+        console.error("Errore nel caricamento del CSV:", error);
+        return [];
+    }
 }
 
 async function renderDrugInteractions() {
-    // Carica la lista dei farmaci per popolare i menu a tendina
-    const farmaci = await loadDrugActiveIngredientIndex();
+    let farmaci = [];
+    let interazioni = [];
+    let totalRecord = 0;
+
+    try {
+        farmaci = await loadDrugActiveIngredientIndex();
+    } catch(e) {
+        console.error("Errore principi attivi:", e);
+    }
     
-    // Genera una lista ordinata e univoca dei nomi dei farmaci
-    const nomiFarmaci = [...new Set(farmaci.map(f => f.principioAttivo))].sort();
+    try {
+        // Forza il caricamento dal CSV prima di generare l'HTML della pagina
+        interazioni = await loadInteractionsIndex();
+        totalRecord = interazioni.length;
+    } catch(e) {
+        console.error("Errore conteggio interazioni:", e);
+    }
+    
+    const nomiFarmaci = [...new Set(farmaci.map(f => f.principioAttivo))].filter(Boolean).sort();
+
+    // Se l'archivio si è popolato dal CSV, nasconde il messaggio di errore fisso
+    const haDati = totalRecord > 0;
+    const messaggioInfo = haDati 
+        ? `<div class="info-block" style="background:#d4edda; color:#155724; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #28a745;">
+            <strong>✓ Database CSV Attivo</strong> | Record pronti offline: ${totalRecord}
+           </div>`
+        : `<div class="info-block" style="background:#fff3cd; color:#856404; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #ffc107;">
+            <strong>⚠️ Archivio non ancora popolato</strong>. Verifica il file data/interazioni.csv.
+           </div>`;
 
     content.innerHTML = `
         <section class="detail-page">
@@ -2973,16 +3001,18 @@ async function renderDrugInteractions() {
                 <h2>Verifica Compatibilità Farmaci</h2>
             </div>
             <div class="detail-content">
+                ${messaggioInfo}
+                
                 <div class="info-block">
                     <label for="drugA">Seleziona il Primo Farmaco:</label>
-                    <select id="drugA" class="personal-note-title-input">
+                    <select id="drugA" class="personal-note-title-input" style="width:100%; padding:8px; margin-top:5px;">
                         <option value="">-- Scegli farmaco --</option>
                         ${nomiFarmaci.map(nome => `<option value="escapeHtml(nome)">{escapeHtml(nome)}</option>`).join("")}
                     </select>
                 </div>
                 <div class="info-block" style="margin-top: 15px;">
-                    <label for="drugB">Seleziona il Secondo Farmaco:</label>
-                    <select id="drugB" class="personal-note-title-input">
+                    <label for="drugB">Seleziona il Segundo Farmaco:</label>
+                    <select id="drugB" class="personal-note-title-input" style="width:100%; padding:8px; margin-top:5px;">
                         <option value="">-- Scegli farmaco --</option>
                         ${nomiFarmaci.map(nome => `<option value="escapeHtml(nome)">{escapeHtml(nome)}</option>`).join("")}
                     </select>
@@ -2995,7 +3025,7 @@ async function renderDrugInteractions() {
         </section>
     `;
 
-    document.getElementById("btnCheckCompatibility").addEventListener("click", async () => {
+    document.getElementById("btnCheckCompatibility")?.addEventListener("click", async () => {
         const dA = document.getElementById("drugA").value;
         const dB = document.getElementById("drugB").value;
         const resDiv = document.getElementById("interactionResult");
@@ -3010,9 +3040,9 @@ async function renderDrugInteractions() {
         }
 
         try {
-            const interazioni = await loadInteractionsIndex();
+            const elencoInterazioni = await loadInteractionsIndex();
             
-            const match = interazioni.find(i => 
+            const match = elencoInterazioni.find(i => 
                 (i.farmacoA === dA && i.farmacoB === dB) || 
                 (i.farmacoA === dB && i.farmacoB === dA)
             );
@@ -3020,8 +3050,8 @@ async function renderDrugInteractions() {
             if (!match) {
                 resDiv.innerHTML = `
                     <div class="info-block" style="border-left: 4px solid #6c757d; background: #f8f9fa; padding: 15px;">
-                        <h4 style="color: #6c757d;">⚠️ Dati non noti / Mancanti</h4>
-                        <p class="personal-note-message">Nessuno studio registrato in archivio per questa specifica combinazione. Procedere con cautela e lavare la linea infusiva.</p>
+                        <h4 style="color: #6c757d; margin:0;">⚠️ Dati non noti / Mancanti</h4>
+                        <p class="personal-note-message" style="margin-top: 5px;">Nessuno studio registrato in archivio per questa specifica combinazione. Procedere con cautela e lavare la linea infusiva.</p>
                     </div>`;
                 return;
             }
@@ -3031,8 +3061,8 @@ async function renderDrugInteractions() {
 
             resDiv.innerHTML = `
                 <div class="info-block" style="border-left: 4px solid ${coloreStato}; background: #f8f9fa; padding: 15px;">
-                    <h4 style="color: ${coloreStato};">${titoloStato}</h4>
-                    <p style="margin-top: 8px; font-weight: bold;">${escapeHtml(dA)} + ${escapeHtml(dB)}</p>
+                    <h4 style="color: ${coloreStato}; margin:0;">${titoloStato}</h4>
+                    <p style="margin-top: 8px; font-weight: bold; margin-bottom:0;">${escapeHtml(dA)} + ${escapeHtml(dB)}</p>
                     <p class="personal-note-message" style="margin-top: 5px; color:#333;">${escapeHtml(match.nota)}</p>
                 </div>`;
 
