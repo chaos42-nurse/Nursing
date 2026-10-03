@@ -12,21 +12,22 @@ permissions:
 jobs:
   update-data:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout del codice
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configura Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-js-version: '24'
+          node-version: '24'
 
       - name: Scarica e organizza il file AIFA
         run: |
           mkdir -p src/data
           curl -L -o src/data/farmaci.csv "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
-          
-          # Genera un file di testo con la data di oggi (formato GG/MM/AAAA)
+
+          # Genera un file di testo con la data di oggi
           date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
 
       - name: Salva le modifiche nel repository
