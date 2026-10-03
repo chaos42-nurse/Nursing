@@ -2918,11 +2918,30 @@ async function renderDrugSearch() {
 ========================================================================= */
 let interactionsIndex = null;
 
+// Funzione aggiornata che scarica il file CSV e lo trasforma in dati pronti per l'applicazione
 async function loadInteractionsIndex() {
     if (Array.isArray(interactionsIndex)) return interactionsIndex;
-    const response = await fetch("./data/interazioni-farmaci.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("Dati interazioni non disponibili");
-    interactionsIndex = await response.json();
+    
+    const response = await fetch("./data/interazioni.csv", { cache: "no-store" });
+    if (!response.ok) throw new Error("File CSV delle interazioni non disponibile");
+    
+    const csvText = await response.text();
+    
+    // Divide il testo in righe ed elimina gli spazi vuoti o le righe corrotte
+    const righe = csvText.split(/\r?\n/).map(r => r.trim()).filter(r => r.length > 0);
+    if (righe.length <= 1) return []; 
+    
+    // Converte ogni riga del CSV in un oggetto JSON leggibile dall'app
+    interactionsIndex = righe.slice(1).map(riga => {
+        const valori = riga.split(",");
+        return {
+            farmacoA: valori[0] ? valori[0].trim() : "",
+            farmacoB: valori[1] ? valori[1].trim() : "",
+            stato: valori[2] ? valori[2].trim().toLowerCase() : "",
+            nota: valori[3] ? valori[3].trim() : ""
+        };
+    });
+    
     return interactionsIndex;
 }
 
@@ -2954,7 +2973,7 @@ async function renderDrugInteractions() {
                     </select>
                 </div>
                 <div style="margin-top: 20px; text-align: center;">
-                    <button id="btnCheckCompatibility" class="content-button" style="display:inline-block; width:auto; padding:10px 20px;">Verifica Incompatibilità</button>
+                    <button id="btnCheckCompatibility" class="content-button" style="display:inline-block; width:auto; padding:10px 20px;">Verifica Compatibilità</button>
                 </div>
                 <div id="interactionResult" style="margin-top: 25px;"></div>
             </div>
