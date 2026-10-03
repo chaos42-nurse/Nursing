@@ -69,25 +69,78 @@ jobs:
                       "Nessun dato esistente è stato modificato."
                   )
 
-              active_ingredients = set()
+              # Collega i principi attivi AIFA alle classi già presenti nell'app.
+              with open("data/farmaci-principi-attivi.json", "r", encoding="utf-8") as f:
+                  existing_index = json.load(f)
 
+              def normalize(value):
+                  value = str(value or "").casefold()
+                  value = re.sub(r"[\\(\\)\\-/]", " ", value)
+                  value = re.sub(r"\\s+", " ", value).strip()
+                  return value
+
+              class_by_name = {}
+              for entry in existing_index:
+                  name = normalize(entry.get("principioAttivo"))
+                  if name and entry.get("classeId"):
+                      class_by_name[name] = {
+                          "classeId": entry["classeId"],
+                          "classeNome": entry["classeNome"]
+                      }
+
+              atc_classes = {
+                  "C09A": ("ace-inibitori", "ACE-inibitori"), "C09B": ("ace-inibitori", "ACE-inibitori"),
+                  "C09C": ("sartani", "Sartani (ARB)"), "C09D": ("sartani", "Sartani (ARB)"),
+                  "C07": ("beta-bloccanti", "Beta-bloccanti"), "C08": ("calcio-antagonisti", "Calcio-antagonisti"),
+                  "C03": ("diuretici", "Diuretici"), "C10AA": ("statine", "Statine"),
+                  "B01AC": ("antiaggreganti", "Antiaggreganti"), "B01AA": ("anticoagulanti", "Anticoagulanti"),
+                  "B01AB": ("anticoagulanti", "Anticoagulanti"), "B01AE": ("anticoagulanti", "Anticoagulanti"),
+                  "B01AF": ("anticoagulanti", "Anticoagulanti"), "B01AD": ("trombolitici", "Trombolitici"),
+                  "B02": ("emostatici", "Emostatici"), "A02BC": ("ipp", "Inibitori pompa protonica (IPP)"),
+                  "A04": ("antiemetici", "Antiemetici"), "A06": ("lassativi", "Lassativi"),
+                  "A07": ("antidiarroici", "Antidiarroici"), "A10A": ("insuline", "Insuline"),
+                  "A10B": ("ipoglicemizzanti-orali", "Ipoglicemizzanti orali"), "J01": ("antibiotici", "Antibiotici"),
+                  "J02": ("antifungini", "Antifungini"), "J05": ("antivirali", "Antivirali"),
+                  "L01": ("chemioterapici-antineoplastici", "Chemioterapici antineoplastici"),
+                  "L04": ("immunosoppressori", "Immunosoppressori"), "N02A": ("oppioidi", "Oppioidi"),
+                  "N03": ("antiepilettici", "Antiepilettici"), "N04": ("anti-parkinson", "Farmaci anti-Parkinson"),
+                  "N05A": ("neurolettici", "Neurolettici (antipsicotici)"),
+                  "N05B": ("benzodiazepine", "Psicofarmaci (benzodiazepine)"),
+                  "N05C": ("benzodiazepine", "Psicofarmaci (benzodiazepine)"),
+                  "N06AB": ("antidepressivi-ssri", "Antidepressivi SSRI"),
+                  "R03A": ("broncodilatatori", "Broncodilatatori"), "R03B": ("broncodilatatori", "Broncodilatatori"),
+                  "R05CB": ("mucolitici", "Mucolitici"), "R06": ("antistaminici", "Antistaminici"),
+                  "H02": ("corticosteroidi", "Corticosteroidi"), "B05": ("cristalloidi", "Soluzioni cristalloidi")
+              }
+
+              def classify(name, atc):
+                  exact = class_by_name.get(normalize(name))
+                  if exact:
+                      return exact
+                  atc = str(atc or "").upper().replace(" ", "")
+                  for prefix in sorted(atc_classes, key=len, reverse=True):
+                      if atc.startswith(prefix):
+                          class_id, class_name = atc_classes[prefix]
+                          return {"classeId": class_id, "classeNome": class_name}
+                  return {"classeId": "", "classeNome": "Catalogo AIFA"}
+
+              indexed = {}
               for row in reader:
                   value = (row.get("Principio attivo") or "").strip()
+                  atc = (row.get("ATC") or "").strip()
                   if not value:
                       continue
-
-                  # L'indice contiene i singoli principi attivi.
-                  # Le associazioni A + B vengono quindi rese ricercabili
-                  # anche per ciascun componente.
-                  for part in re.split(r"\s*\+\s*", value):
+                  for part in re.split(r"\\s*\\+\\s*", value):
                       part = part.strip()
-                      if part:
-                          active_ingredients.add(part)
+                      if not part:
+                          continue
+                      indexed[normalize(part)] = {
+                          "principioAttivo": part,
+                          **classify(part, atc),
+                          "atc": atc
+                      }
 
-          index = sorted(
-              active_ingredients,
-              key=lambda value: value.casefold()
-          )
+          index = sorted(indexed.values(), key=lambda entry: entry["principioAttivo"].casefold())
 
           with open(index_path, "w", encoding="utf-8") as f:
               json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
