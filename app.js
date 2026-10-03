@@ -2784,7 +2784,32 @@ function renderDrugClassCategory(item, data) {
 
 let aifaActiveIngredientIndex = null;
 
-// Dizionario globale per lo smistamento automatico in tempo reale basato sulla prima lettera del codice ATC
+// Dizionario delle sottoclassi terapeutiche specifiche per i farmaci più diffusi
+const sottoclassiSpecificheATC = {
+    'M01A': { id: 'fans', nome: 'FANS / Antinfiammatori' },
+    'J01C': { id: 'antibiotici', nome: 'Antibiotici (Penicilline/Beta-lattamici)' },
+    'J01D': { id: 'antibiotici', nome: 'Antibiotici (Cefalosporine)' },
+    'J01F': { id: 'antibiotici', nome: 'Antibiotici (Macrolidi)' },
+    'J01G': { id: 'antibiotici', nome: 'Antibiotici (Aminoglicosidi)' },
+    'N02A': { id: 'oppioidi', nome: 'Oppioidi' },
+    'N03A': { id: 'antiepilettici', nome: 'Antiepilettici' },
+    'N05A': { id: 'neurolettici', nome: 'Neurolettici (Antipsicotici)' },
+    'C07A': { id: 'beta-bloccanti', nome: 'Beta-bloccanti' },
+    'C08C': { id: 'calcio-antagonisti', nome: 'Calcio-antagonisti' },
+    'C09A': { id: 'ace-inibitori', nome: 'ACE-inibitori' },
+    'C09C': { id: 'sartani', nome: 'Sartani (ARB)' },
+    'R03A': { id: 'broncodilatatori', nome: 'Broncodilatatori' },
+    'H02A': { id: 'corticosteroidi', nome: 'Corticosteroidi sistemici' },
+    'D07A': { id: 'corticosteroidi', nome: 'Corticosteroidi dermatologici' },
+    'B01A': { id: 'antiaggreganti', nome: 'Antiaggreganti / Anticoagulanti' },
+    'B02A': { id: 'emostatici', nome: 'Emostatici' },
+    'J05A': { id: 'antivirali', nome: 'Antivirali' },
+    'A10B': { id: 'ipoglicemizzanti-orali', nome: 'Ipoglicemizzanti orali' },
+    'M05B': { id: 'metabolismo-osseo', nome: 'Farmaci per il metabolismo osseo' },
+    'N06A': { id: 'antidepressivi', nome: 'Antidepressivi' }
+};
+
+// Dizionario di fallback basato sulle macro-aree (se non c'è una sottoclasse mappata sopra)
 const macroClassiATC = {
     'A': { id: 'gastrointestinali-metabolismo', nome: 'Apparato Gastrointestinale e Metabolismo' },
     'B': { id: 'sangue-emopoietici', nome: 'Sangue ed Organi Emopoietici' },
@@ -2801,14 +2826,26 @@ const macroClassiATC = {
     'V': { id: 'vari', nome: 'Vari' }
 };
 
-// Funzione jolly che intercetta qualsiasi variante di "AIFA" e la corregge in tempo reale
+// Funzione intelligente che effettua lo smistamento a due livelli (Sottoclasse -> Macroarea)
 function mappaEUnisciClassiATC(listaGrezza) {
     return listaGrezza.map(farmaco => {
         const cNome = String(farmaco.classeNome || "").trim().toLowerCase();
         
-        // Controlla se la stringa contiene "aifa" o se manca l'ID della classe
         if (cNome.includes("aifa") || !farmaco.classeId) {
-            const primaLetteraATC = farmaco.atc ? farmaco.atc.trim().charAt(0).toUpperCase() : 'V';
+            const atcCompleto = farmaco.atc ? farmaco.atc.trim().toUpperCase() : "";
+            
+            // 1. Prova prima a cercare nei primi 4 caratteri (es. "M01A") per trovare la sottoclasse esatta come i FANS
+            const prefisso4 = atcCompleto.substring(0, 4);
+            if (sottoclassiSpecificheATC[prefisso4]) {
+                return {
+                    ...farmaco,
+                    classeId: sottoclassiSpecificheATC[prefisso4].id,
+                    classeNome: sottoclassiSpecificheATC[prefisso4].nome
+                };
+            }
+            
+            // 2. Se non la trova, ripiega sulla macro-area generale (la prima lettera, es. "M")
+            const primaLetteraATC = atcCompleto.charAt(0) || 'V';
             const classeReale = macroClassiATC[primaLetteraATC] || { id: 'altro', nome: 'Altre classi terapeutiche' };
             
             return {
@@ -2826,7 +2863,7 @@ async function loadAifaActiveIngredientIndex() {
     const response = await fetch("./src/data/aifa-principi-attivi.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Indice AIFA non disponibile");
     const rawData = await response.json();
-    aifaActiveIngredientIndex = mappaEUnisciClassiATC(rawData); // Correzione automatica
+    aifaActiveIngredientIndex = mappaEUnisciClassiATC(rawData); 
     return aifaActiveIngredientIndex;
 }
 
@@ -2841,7 +2878,7 @@ async function loadDrugActiveIngredientIndex() {
     const response = await fetch("./data/farmaci-principi-attivi.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Indice non disponibile");
     const rawData = await response.json();
-    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData); // Correzione automatica
+    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData); 
     return drugActiveIngredientIndex;
 }
 
@@ -2876,6 +2913,7 @@ async function renderDrugSearch() {
         }catch(error){console.error(error);results.innerHTML="<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>";}
     });
 }
+
 
 /* =========================================================
    CARICA ELEMENTO
