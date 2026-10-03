@@ -2671,31 +2671,53 @@ function renderDrugClassCategory(item, data) {
 
         classList.style.display = "none";
 
-        loadDrugActiveIngredientIndex()
-            .then(index => {
+        Promise.all([
+            loadDrugActiveIngredientIndex(),
+            loadAifaActiveIngredientIndex()
+        ])
+            .then(([index, aifaIndex]) => {
                 const matches = index
                     .map(entry => ({
                         ...entry,
                         score: drugSearchScore(query, entry.principioAttivo)
                     }))
-                    .filter(entry => entry.score > 0)
+                    .filter(entry => entry.score > 0);
+
+                const aifaMatches = aifaIndex
+                    .map(name => ({
+                        principioAttivo: name,
+                        classeId: "",
+                        classeNome: "Catalogo AIFA",
+                        score: drugSearchScore(query, name)
+                    }))
+                    .filter(entry => entry.score > 0);
+
+                const combined = [...matches, ...aifaMatches]
                     .sort((a, b) =>
                         b.score - a.score ||
                         a.principioAttivo.localeCompare(b.principioAttivo, "it-IT")
                     )
                     .slice(0, 20);
 
-                suggestions.innerHTML = matches.length
-                    ? matches.map(entry => `
+                suggestions.innerHTML = combined.length
+                    ? combined.map(entry => entry.classeId
+                        ? `
                         <button
                             type="button"
                             class="patient-search-suggestion"
-                            data-drug-class-id="${escapeAttribute(entry.classeId)}"
+                            data-drug-class-id="${entry.classeId}"
                         >
                             <strong>${escapeHtml(entry.principioAttivo)}</strong>
                             <span>${escapeHtml(entry.classeNome)}</span>
                         </button>
-                    `).join("")
+                        `
+                        : `
+                        <div class="patient-search-suggestion">
+                            <strong>${escapeHtml(entry.principioAttivo)}</strong>
+                            <span>Catalogo AIFA</span>
+                        </div>
+                        `
+                    ).join("")
                     : '<div class="personal-note-empty">Nessun principio attivo trovato.</div>';
 
                 suggestions.hidden = false;
@@ -2706,6 +2728,7 @@ function renderDrugClassCategory(item, data) {
                     '<div class="personal-note-empty">Indice dei principi attivi non disponibile.</div>';
                 suggestions.hidden = false;
             });
+);
     }
 
     searchInput?.addEventListener("input", () => {
@@ -2740,6 +2763,16 @@ function renderDrugClassCategory(item, data) {
 /* =========================================================
    RICERCA PRINCIPI ATTIVI
 ========================================================= */
+
+let aifaActiveIngredientIndex = null;
+
+async function loadAifaActiveIngredientIndex() {
+    if (Array.isArray(aifaActiveIngredientIndex)) return aifaActiveIngredientIndex;
+    const response = await fetch("./src/data/aifa-principi-attivi.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Indice AIFA non disponibile");
+    aifaActiveIngredientIndex = await response.json();
+    return aifaActiveIngredientIndex;
+}
 
 let drugActiveIngredientIndex = null;
 
