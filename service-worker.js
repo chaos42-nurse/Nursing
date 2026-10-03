@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-v65";
+const CACHE_NAME = "nursing-v66";
 
 const CORE_FILES = [
     "./",
@@ -12,7 +12,9 @@ const CORE_FILES = [
     "./data/ecg.json",
     "./data/farmaci.json",
     "./data/laboratorio.json",
-    "./data/emergenze.json"
+    "./data/emergenze.json",
+    "./data/version.json",
+    "./src/data/aifa-principi-attivi.json"
 ];
 
 
