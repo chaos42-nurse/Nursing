@@ -2500,10 +2500,22 @@ async function renderDrugInteractionDatabase() {
                 <button id="refreshDrugDatabaseStatus" class="settings-action" type="button">
                     ↻ Aggiorna stato archivio
                 </button>
+                <button id="verifyDrugInteractionsButton" class="settings-action" type="button">
+                    🔄 Verifica Interazioni
+                </button>
                 <p id="drugDatabaseMessage" class="personal-note-message"></p>
             </div>
         </section>
     `;
+
+    document.getElementById("verifyDrugInteractionsButton")?.addEventListener("click", () => {
+        const interactionItem = {
+            id: "interazioni-farmaci",
+            title: "Interazioni tra farmaci",
+            type: "interaction-db"
+        };
+        renderDrugInteractionDatabase();
+    });
 
     document.getElementById("refreshDrugDatabaseStatus")?.addEventListener("click", async () => {
         const message = document.getElementById("drugDatabaseMessage");
