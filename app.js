@@ -2784,11 +2784,49 @@ function renderDrugClassCategory(item, data) {
 
 let aifaActiveIngredientIndex = null;
 
+// Dizionario globale per lo smistamento automatico in tempo reale basato sulla prima lettera del codice ATC
+const macroClassiATC = {
+    'A': { id: 'gastrointestinali-metabolismo', nome: 'Apparato Gastrointestinale e Metabolismo' },
+    'B': { id: 'sangue-emopoietici', nome: 'Sangue ed Organi Emopoietici' },
+    'C': { id: 'sistema-cardiovascolare', nome: 'Sistema Cardiovascolare' },
+    'D': { id: 'dermatologici', nome: 'Dermatologici' },
+    'G': { id: 'genito-urinario-ormoni', nome: 'Sistema Genito-Urinario ed Ormoni Sessuali' },
+    'H': { id: 'preparati-ormonali', nome: 'Preparati Ormonali Sistemici' },
+    'J': { id: 'antinfettivi-sistemici', nome: 'Antinfettivi per Uso Sistemico' },
+    'L': { id: 'antineoplastici-immunomodulatori', nome: 'Agenti Antineoplastici ed Immunomodulatori' },
+    'M': { id: 'sistema-muscolo-scheletrico', nome: 'Sistema Muscolo-Scheletrico' },
+    'N': { id: 'sistema-nervoso', nome: 'Sistema Nervoso' },
+    'R': { id: 'sistema-respiratorio', nome: 'Sistema Respiratorio' },
+    'S': { id: 'organi-di-senso', nome: 'Organi di Senso' },
+    'V': { id: 'vari', nome: 'Vari' }
+};
+
+// Funzione jolly che intercetta qualsiasi variante di "AIFA" e la corregge in tempo reale
+function mappaEUnisciClassiATC(listaGrezza) {
+    return listaGrezza.map(farmaco => {
+        const cNome = String(farmaco.classeNome || "").trim().toLowerCase();
+        
+        // Controlla se la stringa contiene "aifa" o se manca l'ID della classe
+        if (cNome.includes("aifa") || !farmaco.classeId) {
+            const primaLetteraATC = farmaco.atc ? farmaco.atc.trim().charAt(0).toUpperCase() : 'V';
+            const classeReale = macroClassiATC[primaLetteraATC] || { id: 'altro', nome: 'Altre classi terapeutiche' };
+            
+            return {
+                ...farmaco,
+                classeId: classeReale.id,
+                classeNome: classeReale.nome
+            };
+        }
+        return farmaco;
+    });
+}
+
 async function loadAifaActiveIngredientIndex() {
     if (Array.isArray(aifaActiveIngredientIndex)) return aifaActiveIngredientIndex;
     const response = await fetch("./src/data/aifa-principi-attivi.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Indice AIFA non disponibile");
-    aifaActiveIngredientIndex = await response.json();
+    const rawData = await response.json();
+    aifaActiveIngredientIndex = mappaEUnisciClassiATC(rawData); // Correzione automatica
     return aifaActiveIngredientIndex;
 }
 
@@ -2802,7 +2840,8 @@ async function loadDrugActiveIngredientIndex() {
     if (Array.isArray(drugActiveIngredientIndex)) return drugActiveIngredientIndex;
     const response = await fetch("./data/farmaci-principi-attivi.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Indice non disponibile");
-    drugActiveIngredientIndex = await response.json();
+    const rawData = await response.json();
+    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData); // Correzione automatica
     return drugActiveIngredientIndex;
 }
 
