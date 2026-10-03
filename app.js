@@ -2913,6 +2913,109 @@ async function renderDrugSearch() {
         }catch(error){console.error(error);results.innerHTML="<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>";}
     });
 }
+// ... [Fine della funzione renderDrugSearch che già possiedi]
+        } catch(error) { 
+            console.error(error); 
+            results.innerHTML = "<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>"; 
+        }
+    });
+} // <--- Questa è la parentesi graffa che chiude il vecchio renderDrugSearch
+
+/* =========================================================================
+   INCOLLA DA QUI IL NUOVO CODICE PER LE INTERAZIONI
+========================================================================= */
+let interactionsIndex = null;
+
+async function loadInteractionsIndex() {
+    if (Array.isArray(interactionsIndex)) return interactionsIndex;
+    const response = await fetch("./data/interazioni-farmaci.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Dati interazioni non disponibili");
+    interactionsIndex = await response.json();
+    return interactionsIndex;
+}
+
+async function renderDrugInteractions() {
+    // Carica la lista dei farmaci per popolare i menu a tendina
+    const farmaci = await loadDrugActiveIngredientIndex();
+    
+    // Genera una lista ordinata e univoca dei nomi dei farmaci
+    const nomiFarmaci = [...new Set(farmaci.map(f => f.principioAttivo))].sort();
+
+    content.innerHTML = `
+        <section class="detail-page">
+            <div class="detail-header">
+                <h2>Verifica Compatibilità Farmaci</h2>
+            </div>
+            <div class="detail-content">
+                <div class="info-block">
+                    <label for="drugA">Seleziona il Primo Farmaco:</label>
+                    <select id="drugA" class="personal-note-title-input">
+                        <option value="">-- Scegli farmaco --</option>
+                        ${nomiFarmaci.map(nome => `<option value="escapeHtml(nome)">{escapeHtml(nome)}</option>`).join("")}
+                    </select>
+                </div>
+                <div class="info-block" style="margin-top: 15px;">
+                    <label for="drugB">Seleziona il Secondo Farmaco:</label>
+                    <select id="drugB" class="personal-note-title-input">
+                        <option value="">-- Scegli farmaco --</option>
+                        ${nomiFarmaci.map(nome => `<option value="escapeHtml(nome)">{escapeHtml(nome)}</option>`).join("")}
+                    </select>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button id="btnCheckCompatibility" class="content-button" style="display:inline-block; width:auto; padding:10px 20px;">Verifica Incompatibilità</button>
+                </div>
+                <div id="interactionResult" style="margin-top: 25px;"></div>
+            </div>
+        </section>
+    `;
+
+    document.getElementById("btnCheckCompatibility").addEventListener("click", async () => {
+        const dA = document.getElementById("drugA").value;
+        const dB = document.getElementById("drugB").value;
+        const resDiv = document.getElementById("interactionResult");
+
+        if (!dA || !dB) {
+            resDiv.innerHTML = `<div class="personal-note-empty">Seleziona entrambi i farmaci per effettuare il controllo.</div>`;
+            return;
+        }
+        if (dA === dB) {
+            resDiv.innerHTML = `<div class="personal-note-empty">Hai selezionato lo stesso farmaco.</div>`;
+            return;
+        }
+
+        try {
+            const interazioni = await loadInteractionsIndex();
+            
+            const match = interazioni.find(i => 
+                (i.farmacoA === dA && i.farmacoB === dB) || 
+                (i.farmacoA === dB && i.farmacoB === dA)
+            );
+
+            if (!match) {
+                resDiv.innerHTML = `
+                    <div class="info-block" style="border-left: 4px solid #6c757d; background: #f8f9fa; padding: 15px;">
+                        <h4 style="color: #6c757d;">⚠️ Dati non noti / Mancanti</h4>
+                        <p class="personal-note-message">Nessuno studio registrato in archivio per questa specifica combinazione. Procedere con cautela e lavare la linea infusiva.</p>
+                    </div>`;
+                return;
+            }
+
+            const coloreStato = match.stato === "incompatibile" ? "#dc3545" : "#28a745";
+            const titoloStato = match.stato === "incompatibile" ? "❌ INCOMPATIBILE / PRECIPITA" : "✅ COMPATIBILE";
+
+            resDiv.innerHTML = `
+                <div class="info-block" style="border-left: 4px solid ${coloreStato}; background: #f8f9fa; padding: 15px;">
+                    <h4 style="color: ${coloreStato};">${titoloStato}</h4>
+                    <p style="margin-top: 8px; font-weight: bold;">${escapeHtml(dA)} + ${escapeHtml(dB)}</p>
+                    <p class="personal-note-message" style="margin-top: 5px; color:#333;">${escapeHtml(match.nota)}</p>
+                </div>`;
+
+        } catch (error) {
+            console.error(error);
+            resDiv.innerHTML = `<div class="personal-note-empty">Errore nel caricamento del registro interazioni.</div>`;
+        }
+    });
+}
 
 
 /* =========================================================
