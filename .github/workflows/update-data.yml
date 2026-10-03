@@ -18,13 +18,14 @@ jobs:
         with:
           node-js-version: '18'
 
-      - name: Scarica e converti il file AIFA
+      - name: Scarica e organizza il file AIFA
         run: |
-          # Sostituisci questo URL con il link effettivo del file CSV/Excel di AIFA
-          curl -o src/data/farmaci_nuovi.csv "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
+          mkdir -p src/data
+          curl -L -o src/data/farmaci.csv "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
           
-          # Opzionale: Se usi uno script Node/Python per ripulire i dati o convertirli in JSON
-          # node scripts/parse-aifa.js
+          # Genera un file di testo con la data di oggi (formato GG/MM/AAAA)
+          date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
+
 
       - name: Salva le modifiche nel repository
         run: |
