@@ -1,50 +1,35 @@
-name: Aggiornamento automatico dati
+name: Aggiornamento Mensile Database AIFA
 
 on:
   schedule:
-    # Primo giorno di ogni mese alle 01:00 UTC
-    - cron: "0 1 1 * *"
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    # Esegue lo script alle 00:00 del primo giorno di ogni mese
+    - cron: '0 0 1 * *'
+  workflow_dispatch: # Ti permette di avviare l'aggiornamento anche a mano da GitHub
 
 jobs:
-  update-db:
+  update-data:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout del codice
         uses: actions/checkout@v4
 
-      - name: Configura Python
-        uses: actions/setup-python@v5
+      - name: Configura Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.x"
+          node-js-version: '18'
 
-      - name: Aggiorna dati
-        run: python scripts/update_drugs.py
-
-      - name: Verifica aggiornamento
+      - name: Scarica e converti il file AIFA
         run: |
-          if [ ! -f data/version.json ]; then
-            echo "::error::Aggiornamento fallito: data/version.json non è stato creato."
-            exit 1
-          fi
+          # Sostituisci questo URL con il link effettivo del file CSV/Excel di AIFA
+          curl -o src/data/farmaci_nuovi.csv "https://aifa.gov.it"
+          
+          # Opzionale: Se usi uno script Node/Python per ripulire i dati o convertirli in JSON
+          # node scripts/parse-aifa.js
 
-          echo "Aggiornamento completato."
-          cat data/version.json
-
-      - name: Commit e push se ci sono modifiche
+      - name: Salva le modifiche nel repository
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Bot"
-
-          git add data/
-
-          if git diff --cached --quiet; then
-            echo "Nessuna modifica da salvare."
-          else
-            git commit -m "Auto-update: aggiornamento dati"
-            git push
-          fi
+          git config --global user.name "AIFA Update Bot"
+          git config --global user.email "bot@github.com"
+          git add src/data/
+          git commit -m "Auto-aggiornamento database farmaci AIFA (Mensile)" || exit 0
+          git push
