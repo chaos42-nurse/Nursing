@@ -51,11 +51,6 @@
 
 </head>
 
-<!-- Libreria Dexie.js per IndexedDB -->
-<script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-<!-- Il tuo script di sincronizzazione -->
-<script src="js/app-sync.js"></script>
-    
 <body>
 
     <div id="settingsPanel" class="settings-panel" hidden>
@@ -130,13 +125,13 @@
 
     <!-- JAVASCRIPT -->
 
-    <script src="./app.js?v=66"></script>
+    <script src="./app.js?v=67"></script>
 
     <!-- SERVICE WORKER PWA -->
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./service-worker.js?v=66")
+                navigator.serviceWorker.register("./service-worker.js?v=67")
                     .then(() => {
                         console.log("Service worker registrato correttamente.");
                     })
