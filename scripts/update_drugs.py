@@ -22,6 +22,7 @@ VERSION_PATH = os.path.join(DATA_DIR, "version.json")
 # AIFA Open Data: anagrafica dei farmaci.
 # La pagina AIFA indica che l'anagrafica contiene anche principio attivo e codice ATC.
 AIFA_FARMACI_URL = "https://drive.aifa.gov.it/farmaci/confezioni_fornitura.csv"
+AIFA_PRINCIPI_ATTIVI_URL = "https://drive.aifa.gov.it/farmaci/PA_confezioni.csv"
 
 # Licenza dichiarata da AIFA per gli open data: CC BY 4.0.
 AIFA_SOURCE = "AIFA Open Data - Anagrafica dei farmaci"
@@ -88,14 +89,23 @@ def fetch_aifa_data():
 
     fieldnames = list(rows[0].keys())
 
-    principle_column = find_column(
-        fieldnames,
-        [
-            "PRINCIPIO ATTIVO",
-            "PRINCIPIO ATTIVO ESPRESSO IN FORMA COMPATTA",
-            "PRINCIPIO_ATTIVO"
-        ]
-    )
+    fieldnames = list(rows[0].keys())
+
+principle_column = find_column(
+    fieldnames,
+    [
+        "PA_ASSOCIATI"
+    ]
+)
+
+atc_column = find_column(
+    fieldnames,
+    [
+        "CODICE ATC",
+        "CODICE_ATC",
+        "ATC"
+    ]
+)
 
     atc_column = find_column(
         fieldnames,
