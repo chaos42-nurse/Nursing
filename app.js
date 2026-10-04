@@ -1787,8 +1787,10 @@ async function loadState() {
          * del file JSON.
          */
 
-        const filePath =
-            `./data/${state}.json`;
+       // Se l'item è interazioni-farmaci carica il file corretto, altrimenti usa lo state
+const fileName = (item === "interazioni-farmaci") ? "interazioni_farmaci.json" : `${state}.json`;
+const filePath = `./data/${fileName}`;
+
 
         console.log(
             "Caricamento archivio:",
