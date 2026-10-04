@@ -2887,10 +2887,13 @@ function normalizeDrugSearchText(value) {
 
 async function loadDrugActiveIngredientIndex() {
     if (Array.isArray(drugActiveIngredientIndex)) return drugActiveIngredientIndex;
-    const response = await fetch("./data/farmaci-principi-attivi.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("Indice non disponibile");
+
+    // L'indice aggiornato viene generato dal workflow AIFA in src/data/.
+    const response = await fetch("./src/data/aifa-principi-attivi.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Indice AIFA non disponibile");
+
     const rawData = await response.json();
-    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData); 
+    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData);
     return drugActiveIngredientIndex;
 }
 
