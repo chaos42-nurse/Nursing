@@ -2934,68 +2934,123 @@ async function renderDrugSearch() {
 ========================================================================= */
 let interactionsIndex = null;
 
-// Lettore CSV corretto per aggirare il blocco di IndexedDB e popolare l'archivio al volo
+function parseInteractionCsv(csvText) {
+    const rows = [];
+    let row = [];
+    let field = "";
+    let quoted = false;
+
+    for (let i = 0; i < csvText.length; i++) {
+        const ch = csvText[i];
+        const next = csvText[i + 1];
+
+        if (ch === '"' && quoted && next === '"') {
+            field += '"';
+            i++;
+            continue;
+        }
+
+        if (ch === '"') {
+            quoted = !quoted;
+            continue;
+        }
+
+        if (ch === "," && !quoted) {
+            row.push(field.trim());
+            field = "";
+            continue;
+        }
+
+        if ((ch === "\n" || ch === "\r") && !quoted) {
+            if (ch === "\r" && next === "\n") i++;
+            row.push(field.trim());
+            field = "";
+            if (row.some(value => value !== "")) rows.push(row);
+            row = [];
+            continue;
+        }
+
+        field += ch;
+    }
+
+    row.push(field.trim());
+    if (row.some(value => value !== "")) rows.push(row);
+
+    return rows;
+}
+
 async function loadInteractionsIndex() {
     if (Array.isArray(interactionsIndex)) return interactionsIndex;
-    
+
     try {
         const response = await fetch("./data/interazioni.csv", { cache: "no-store" });
-        if (!response.ok) throw new Error("File CSV non trovato");
-        
+        if (!response.ok) {
+            throw new Error(`File interazioni.csv non trovato — HTTP ${response.status}`);
+        }
+
         const csvText = await response.text();
-        const righe = csvText.split(/\r?\n/).map(r => r.trim()).filter(r => r.length > 0);
-        
-        if (righe.length <= 1) return []; 
-        
-        // Rileva automaticamente se il separatore è "," o ";"
-        const primaRiga = righe[0];
-        const separatore = primaRiga.includes(";") ? ";" : ",";
-        
-        interactionsIndex = righe.slice(1).map(riga => {
-            const valori = riga.split(separatore);
-            return {
-                farmacoA: valori[0] ? valori[0].trim() : "",
-                farmacoB: valori[1] ? valori[1].trim() : "",
-                stato: valori[2] ? valori[2].trim().toLowerCase() : "",
-                nota: valori[3] ? valori[3].trim() : ""
-            };
-        });
-        
+        const rows = parseInteractionCsv(csvText);
+
+        if (rows.length <= 1) {
+            interactionsIndex = [];
+            return interactionsIndex;
+        }
+
+        const header = rows[0].map(value => value.toLowerCase());
+        const getColumn = (names) => {
+            for (const name of names) {
+                const index = header.indexOf(name);
+                if (index !== -1) return index;
+            }
+            return -1;
+        };
+
+        const aIndex = getColumn(["farmacoa", "farmaco a"]);
+        const bIndex = getColumn(["farmacob", "farmaco b"]);
+        const statoIndex = getColumn(["stato", "compatibilita", "compatibilità"]);
+        const notaIndex = getColumn(["nota", "note", "descrizione"]);
+
+        if (aIndex === -1 || bIndex === -1) {
+            throw new Error("Il CSV deve contenere almeno le colonne farmacoA e farmacoB.");
+        }
+
+        interactionsIndex = rows.slice(1)
+            .map(row => ({
+                farmacoA: row[aIndex] || "",
+                farmacoB: row[bIndex] || "",
+                stato: statoIndex >= 0 ? (row[statoIndex] || "") : "",
+                nota: notaIndex >= 0 ? (row[notaIndex] || "") : ""
+            }))
+            .filter(row => row.farmacoA && row.farmacoB);
+
         return interactionsIndex;
     } catch (error) {
-        console.error("Errore nel caricamento del CSV:", error);
-        return [];
+        console.error("Errore nel caricamento delle interazioni:", error);
+        interactionsIndex = [];
+        return interactionsIndex;
     }
 }
 
 async function renderDrugInteractions() {
     let interazioni = [];
-    let totalRecord = 0;
-    
-    // 1. Scarica direttamente il tuo file JSON delle interazioni senza passare da IndexedDB o CSV
+
     try {
-        const response = await fetch('./data/interazioni_farmaci.json', { cache: 'no-store' });
-        if (response.ok) {
-            interazioni = await response.json();
-            totalRecord = interazioni.length;
-        } else {
-            console.error("File interazioni_farmaci.json non trovato sul server.");
-        }
-    } catch(e) {
-        console.error("Errore caricamento registro interazioni:", e);
+        interazioni = await loadInteractionsIndex();
+    } catch (error) {
+        console.error("Errore caricamento interazioni:", error);
     }
-    
-    // Mostra il banner di stato in base alla presenza dei record
+
+    const totalRecord = interazioni.length;
     const haDati = totalRecord > 0;
-    const messaggioInfo = haDati 
+
+    const messaggioInfo = haDati
         ? `<div class="info-block" style="background:#d4edda; color:#155724; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #28a745;">
             <strong>✓ Archivio Interazioni Attivo</strong> | Record pronti offline: ${totalRecord}
            </div>`
         : `<div class="info-block" style="background:#fff3cd; color:#856404; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #ffc107;">
-            <strong>⚠️ Archivio vuoto</strong>. Verifica la presenza del file data/interazioni_farmaci.json su GitHub.
+            <strong>⚠️ Archivio vuoto</strong>. Verifica il file data/interazioni.csv.
            </div>`;
 
-    // Rendering dell'interfaccia con input di testo liberi (non serve l'anagrafica AIFA per sbloccarsi!)
     content.innerHTML = `
         <section class="detail-page">
             <div class="detail-header">
@@ -3003,66 +3058,70 @@ async function renderDrugInteractions() {
             </div>
             <div class="detail-content">
                 ${messaggioInfo}
-                
+
                 <div class="info-block">
                     <label for="drugA"><strong>Inserisci il Primo Farmaco (Farmaco A):</strong></label>
-                    <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Es: Aciclovir, Fentanyl...">
+                    <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Es: Aciclovir, Fentanyl...">
                 </div>
-                <div class="info-block" style="margin-top: 15px;">
+
+                <div class="info-block" style="margin-top:15px;">
                     <label for="drugB"><strong>Inserisci il Secondo Farmaco (Farmaco B):</strong></label>
-                    <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Es: Diazepam, Midazolam...">
+                    <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Es: Diazepam, Midazolam...">
                 </div>
-                <div style="margin-top: 20px; text-align: center;">
+
+                <div style="margin-top:20px; text-align:center;">
                     <button id="btnCheckCompatibility" class="content-button" style="display:inline-block; width:100%; padding:12px 20px; font-weight:bold;">Verifica Compatibilità</button>
                 </div>
-                <div id="interactionResult" style="margin-top: 25px;"></div>
+
+                <div id="interactionResult" style="margin-top:25px;"></div>
             </div>
         </section>
     `;
 
-    // Gestore del click sul bottone di controllo compatibilità
     document.getElementById("btnCheckCompatibility")?.addEventListener("click", () => {
-        const dA = document.getElementById("drugA").value.trim().toLowerCase();
-        const dB = document.getElementById("drugB").value.trim().toLowerCase();
+        const dA = document.getElementById("drugA")?.value.trim().toLowerCase() || "";
+        const dB = document.getElementById("drugB")?.value.trim().toLowerCase() || "";
         const resDiv = document.getElementById("interactionResult");
 
         if (!resDiv) return;
 
         if (!dA || !dB) {
-            resDiv.innerHTML = `<div class="personal-note-empty" style="background:#fff3cd; color:#856404; padding:10px; border-radius:4px;">Seleziona o inserisci entrambi i farmaci per effettuare il controllo.</div>`;
-            return;
-        }
-        if (dA === dB) {
-            resDiv.innerHTML = `<div class="personal-note-empty" style="background:#fff3cd; color:#856404; padding:10px; border-radius:4px;">Hai inserito lo stesso farmaco nei due campi.</div>`;
+            resDiv.innerHTML = `<div class="personal-note-empty">Inserisci entrambi i farmaci per effettuare il controllo.</div>`;
             return;
         }
 
-        // Cerca l'interazione in modo bidirezionale nell'array scaricato (A+B o B+A)
-        const match = interazioni.find(i => {
-            if (!i.farmacoA || !i.farmacoB) return false;
-            const fA = i.farmacoA.toLowerCase().trim();
-            const fB = i.farmacoB.toLowerCase().trim();
+        if (dA === dB) {
+            resDiv.innerHTML = `<div class="personal-note-empty">Hai inserito lo stesso farmaco nei due campi.</div>`;
+            return;
+        }
+
+        const match = interazioni.find(entry => {
+            const fA = String(entry.farmacoA || "").trim().toLowerCase();
+            const fB = String(entry.farmacoB || "").trim().toLowerCase();
             return (fA === dA && fB === dB) || (fA === dB && fB === dA);
         });
 
         if (!match) {
             resDiv.innerHTML = `
-                <div class="info-block" style="border-left: 4px solid #6c757d; background: #f8f9fa; padding: 15px; border-radius:4px;">
-                    <h4 style="color: #6c757d; margin:0;">⚠️ Dati non noti / Mancanti</h4>
-                    <p class="personal-note-message" style="margin-top: 8px; color:#333;">Nessuno studio registrato in archivio per questa specifica combinazione. Procedere con cautela e lavare la linea infusiva prima della somministrazione.</p>
+                <div class="info-block">
+                    <h4 style="margin:0;">⚠️ Nessun dato trovato</h4>
+                    <p class="personal-note-message" style="margin-top:8px;">
+                        Non è presente un record per questa specifica combinazione nell'archivio.
+                        L'assenza di un record non significa che la combinazione sia compatibile.
+                    </p>
                 </div>`;
             return;
         }
 
-        const èIncompatibile = match.stato.toLowerCase().trim() === "incompatibile";
-        const coloreStato = èIncompatibile ? "#dc3545" : "#28a745";
-        const titoloStato = èIncompatibile ? "❌ INCOMPATIBILE / PRECIPITA" : "✅ COMPATIBILE";
+        const stato = String(match.stato || "").trim().toLowerCase();
+        const incompatibile = stato === "incompatibile";
+        const titolo = incompatibile ? "❌ INCOMPATIBILE" : "✅ COMPATIBILE";
 
         resDiv.innerHTML = `
-            <div class="info-block" style="border-left: 4px solid ${coloreStato}; background: #f8f9fa; padding: 15px; border-radius:4px;">
-                <h4 style="color: ${coloreStato}; margin:0; font-weight:bold;">${titoloStato}</h4>
-                <p style="margin-top: 8px; font-weight: bold; margin-bottom:4px; color:#111;">${match.farmacoA} + ${match.farmacoB}</p>
-                <p class="personal-note-message" style="margin-top: 5px; color:#333; line-height:1.4;">${match.nota}</p>
+            <div class="info-block">
+                <h4 style="margin:0;">${titolo}</h4>
+                <p style="margin-top:8px; font-weight:bold;">${escapeHtml(match.farmacoA)} + ${escapeHtml(match.farmacoB)}</p>
+                <p class="personal-note-message" style="margin-top:5px;">${escapeHtml(match.nota || "Nessuna nota disponibile.")}</p>
             </div>`;
     });
 }
@@ -3187,7 +3246,7 @@ function loadItem(data) {
      * DATABASE LOCALE — INTERAZIONI
      */
     if (selectedItem.type === "interaction-db") {
-        renderDrugInteractionDatabase();
+        renderDrugInteractions();
         return;
     }
 
