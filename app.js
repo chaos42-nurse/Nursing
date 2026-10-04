@@ -67,6 +67,8 @@ function normalizePatient(patient = {}) {
         diabetic: Boolean(patient.diabetic),
         medications: String(patient.medications || ""),
         notes: String(patient.notes || ""),
+        // Mantiene compatibilità con i vecchi record che salvavano i PV in un unico campo.
+        pv: String(patient.pv || ""),
         pvHistory: Array.isArray(patient.pvHistory)
             ? patient.pvHistory.map(entry => ({
                 id: String(entry?.id || ""),
