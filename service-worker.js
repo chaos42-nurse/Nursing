@@ -1,10 +1,10 @@
-const CACHE_NAME = "nursing-v79";
+const CACHE_NAME = "nursing-v80";
 
 const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
-    "./app.js?v=79",
+    "./app.js?v=80",
     "./manifest.json",
     "./icon-192.png",
     "./icon-512.png",
