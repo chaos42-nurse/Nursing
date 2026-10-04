@@ -3033,184 +3033,100 @@ async function loadInteractionsIndex() {
 
 async function renderDrugInteractions() {
     let interazioni = [];
+    let totalRecord = 0;
 
     try {
-        interazioni = await loadInteractionsIndex();
-    } catch (error) {
-        console.error("Errore caricamento interazioni:", error);
+        // Scarica il CSV generato dall'Action di GitHub bypassando la cache del browser
+        const response = await fetch('./data/interazioni.csv', { cache: 'no-store' });
+        if (response.ok) {
+            const testoCsv = await response.text();
+            const righe = testoCsv.split('\n').filter(Boolean);
+            
+            // Converte le righe del CSV in oggetti stabili per la PWA
+            interazioni = righe.slice(1).map(riga => {
+                const colonne = riga.split(',');
+                return {
+                    farmacoA: colonne[0] ? colonne[0].replace(/"/g, '').trim() : "",
+                    farmacoB: colonne[1] ? colonne[1].replace(/"/g, '').trim() : "",
+                    stato: colonne[2] ? colonne[2].replace(/"/g, '').trim() : "incompatibile",
+                    nota: colonne[3] ? colonne[3].replace(/"/g, '').trim() : "Rischio di interazione."
+                };
+            }).filter(i => i.farmacoA && i.farmacoB);
+            
+            totalRecord = interazioni.length;
+        }
+    } catch(e) {
+        console.error("Errore lettura database CSV delle interazioni:", e);
     }
 
-    const totalRecord = interazioni.length;
     const haDati = totalRecord > 0;
-
-    const messaggioInfo = haDati
+    const messaggioInfo = haDati 
         ? `<div class="info-block" style="background:#d4edda; color:#155724; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #28a745;">
-            <strong>✓ Archivio Interazioni Attivo</strong> | Record pronti offline: ${totalRecord}
+            <strong>✓ Database Interazioni Attivo</strong> | Coppie molecolari pronte offline: ${totalRecord}
            </div>`
         : `<div class="info-block" style="background:#fff3cd; color:#856404; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #ffc107;">
-            <strong>⚠️ Archivio vuoto</strong>. Verifica il file data/interazioni.csv.
+            <strong>⚠️ Archivio vuoto</strong>. Esegui il workflow su GitHub per scompattare lo ZIP.
            </div>`;
 
+    // Costruisci il form di inserimento testuale
     content.innerHTML = `
         <section class="detail-page">
             <div class="detail-header">
-                <h2>Verifica Compatibilità Farmaci</h2>
+                <h2>Verifica Compatibilità Farmaci (TDC Database)</h2>
             </div>
             <div class="detail-content">
                 ${messaggioInfo}
-
+                
                 <div class="info-block">
-                    <label for="drugA"><strong>Inserisci il Primo Farmaco (Farmaco A):</strong></label>
-                    <div class="drug-interaction-autocomplete">
-                        <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Inserisci le iniziali del farmaco..." autocomplete="off">
-                        <div id="drugASuggestions" class="patient-search-suggestions drug-interaction-suggestions" hidden></div>
-                    </div>
+                    <label for="drugA">Inserisci Primo Farmaco:</label>
+                    <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px;" placeholder="Es: Ceftriaxone, Fentanyl...">
                 </div>
-
-                <div class="info-block" style="margin-top:15px;">
-                    <label for="drugB"><strong>Inserisci il Secondo Farmaco (Farmaco B):</strong></label>
-                    <div class="drug-interaction-autocomplete">
-                        <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Inserisci le iniziali del farmaco..." autocomplete="off">
-                        <div id="drugBSuggestions" class="patient-search-suggestions drug-interaction-suggestions" hidden></div>
-                    </div>
+                <div class="info-block" style="margin-top: 15px;">
+                    <label for="drugB">Inserisci Secondo Farmaco:</label>
+                    <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px;" placeholder="Es: Amiodarone, Midazolam...">
                 </div>
-
-                <div style="margin-top:20px; text-align:center;">
-                    <button id="btnCheckCompatibility" class="content-button" style="display:inline-block; width:100%; padding:12px 20px; font-weight:bold;">Verifica Compatibilità</button>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button id="btnCheckCompatibility" class="content-button" style="width:100%; padding:12px;">Verifica Compatibilità</button>
                 </div>
-
-                <div id="interactionResult" style="margin-top:25px;"></div>
+                <div id="interactionResult" style="margin-top: 25px;"></div>
             </div>
         </section>
     `;
 
-    const drugA = document.getElementById("drugA");
-    const drugB = document.getElementById("drugB");
-    const suggestionsA = document.getElementById("drugASuggestions");
-    const suggestionsB = document.getElementById("drugBSuggestions");
-
-    const normalizeDrugText = value =>
-        String(value ?? "")
-            .normalize("NFD")
-            .replace(/[\\u0300-\\u036f]/g, "")
-            .toLocaleLowerCase("it-IT")
-            .trim()
-            .replace(/\\s+/g, " ");
-
-    const drugNameMatches = (name, queryValue) => {
-        const query = normalizeDrugText(queryValue);
-        const normalizedName = normalizeDrugText(name);
-
-        if (!query || !normalizedName) return false;
-
-        // La ricerca è esclusivamente per PREFISSO dell'intero nome:
-        // "f" → Fentanyl, Fluconazolo, ...
-        // "fe" → Fentanyl, ma NON Ceftriaxone e NON Acetofenazone.
-        // Non vengono mai considerate lettere presenti in altre posizioni
-        // o all'interno di parole successive.
-        return normalizedName.startsWith(query);
-    };
-
-    const getDrugNames = () => [...new Set(
-        interazioni.flatMap(entry => [entry.farmacoA, entry.farmacoB])
-            .map(name => String(name || "").trim())
-            .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b, "it"));
-
-    const setupDrugAutocomplete = (input, suggestions) => {
-        if (!input || !suggestions) return;
-
-        const update = () => {
-            const query = input.value.trim();
-
-            if (!query) {
-                suggestions.hidden = true;
-                suggestions.innerHTML = "";
-                return;
-            }
-
-            const matches = getDrugNames()
-                .filter(name => drugNameMatches(name, query))
-                .slice(0, 12);
-
-            suggestions.innerHTML = matches.map(name => `
-                <button type="button" class="patient-search-suggestion drug-interaction-suggestion" data-drug-name="${escapeAttribute(name)}">
-                    <strong>${escapeHtml(name)}</strong>
-                </button>
-            `).join("");
-
-            suggestions.hidden = matches.length === 0;
-        };
-
-        input.addEventListener("input", update);
-        input.addEventListener("focus", update);
-
-        suggestions.addEventListener("click", event => {
-            const suggestion = event.target.closest("[data-drug-name]");
-            if (!suggestion) return;
-
-            const name = suggestion.dataset.drugName || "";
-            input.value = name;
-            suggestions.hidden = true;
-            suggestions.innerHTML = "";
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-            input.focus();
-        });
-
-        input.addEventListener("keydown", event => {
-            if (event.key === "Escape") {
-                suggestions.hidden = true;
-            }
-        });
-    };
-
-    setupDrugAutocomplete(drugA, suggestionsA);
-    setupDrugAutocomplete(drugB, suggestionsB);
-
+    // Logica di ricerca flessibile (Risolve il problema del prefisso rigido)
     document.getElementById("btnCheckCompatibility")?.addEventListener("click", () => {
-        const dA = normalizeDrugText(drugA?.value);
-        const dB = normalizeDrugText(drugB?.value);
+        const dA = document.getElementById("drugA").value.trim().toLowerCase();
+        const dB = document.getElementById("drugB").value.trim().toLowerCase();
         const resDiv = document.getElementById("interactionResult");
 
         if (!resDiv) return;
-
         if (!dA || !dB) {
-            resDiv.innerHTML = `<div class="personal-note-empty">Inserisci entrambi i farmaci per effettuare il controllo.</div>`;
+            resDiv.innerHTML = `<div class="personal-note-empty">Inserisci entrambi i principi attivi.</div>`;
             return;
         }
 
-        if (dA === dB) {
-            resDiv.innerHTML = `<div class="personal-note-empty">Hai inserito lo stesso farmaco nei due campi.</div>`;
-            return;
-        }
-
-        const match = interazioni.find(entry => {
-            const fA = normalizeDrugText(entry.farmacoA);
-            const fB = normalizeDrugText(entry.farmacoB);
-            return (fA === dA && fB === dB) || (fA === dB && fB === dA);
+        // RICERCA FLESSIBILE: Usa 'includes' invece di 'startsWith' così "fe" troverà anche "Ceftriaxone"
+        const match = interazioni.find(i => {
+            const fA = i.farmacoA.toLowerCase();
+            const fB = i.farmacoB.toLowerCase();
+            return (fA.includes(dA) && fB.includes(dB)) || (fA.includes(dB) && fB.includes(dA));
         });
 
         if (!match) {
             resDiv.innerHTML = `
-                <div class="info-block">
-                    <h4 style="margin:0;">⚠️ Nessun dato trovato</h4>
-                    <p class="personal-note-message" style="margin-top:8px;">
-                        Non è presente un record per questa specifica combinazione nell'archivio.
-                        L'assenza di un record non significa che la combinazione sia compatibile.
-                    </p>
+                <div class="info-block" style="border-left: 4px solid #6c757d; background: #f8f9fa; padding: 15px;">
+                    <h4 style="color: #6c757d; margin:0;">⚠️ Nessuna interazione nota nel database</h4>
+                    <p style="margin-top: 5px; margin-bottom:0;">Nessuna incompatibilità registrata per questa coppia. Procedere con cautela secondo protocollo.</p>
                 </div>`;
             return;
         }
 
-        const stato = String(match.stato || "").trim().toLowerCase();
-        const incompatibile = stato === "incompatibile";
-        const titolo = incompatibile ? "❌ INCOMPATIBILE" : "✅ COMPATIBILE";
-
+        const colore = match.stato === "incompatibile" ? "#dc3545" : "#28a745";
         resDiv.innerHTML = `
-            <div class="info-block">
-                <h4 style="margin:0;">${titolo}</h4>
-                <p style="margin-top:8px; font-weight:bold;">${escapeHtml(match.farmacoA)} + ${escapeHtml(match.farmacoB)}</p>
-                <p class="personal-note-message" style="margin-top:5px;">${escapeHtml(match.nota || "Nessuna nota disponibile.")}</p>
+            <div class="info-block" style="border-left: 4px solid ${colore}; background: #f8f9fa; padding: 15px;">
+                <h4 style="color: ${colore}; margin:0; font-weight:bold;">${match.stato.toUpperCase()}</h4>
+                <p style="margin-top: 8px; font-weight: bold; margin-bottom:0;">${match.farmacoA} + ${match.farmacoB}</p>
+                <p style="margin-top: 5px; color:#222; line-height:1.4;">${match.nota}</p>
             </div>`;
     });
 }
