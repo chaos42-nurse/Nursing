@@ -134,19 +134,16 @@ function calculatePatientAge(birthDate) {
 
 function formatPatientDate(value) {
     const raw = String(value || "").trim();
-    const match = raw.match(/^(\\d{4})[-\\/](\\d{2})[-\\/](\\d{2})$/);
+    const match = raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
     if (!match) return raw;
-    return `${match[3]}/${match[2]}/${match[1]}`;
+    return `${match[3].padStart(2, "0")}-${match[2].padStart(2, "0")}-${match[1]}`;
 }
 
 function renderPatientField(label, value) {
     let displayValue = String(value ?? "").trim();
 
     if (label === "Data di nascita" && displayValue) {
-        const parts = displayValue.split(/[-\\/]/);
-        if (parts.length === 3 && parts[0].length === 4) {
-            displayValue = `${parts[2].padStart(2, "0")}-${parts[1].padStart(2, "0")}-${parts[0]}`;
-        }
+        displayValue = formatPatientDate(displayValue);
     }
 
     return `
@@ -175,45 +172,6 @@ function formatBloodPressure(value) {
 
 
 
-
-function calculatePatientAge(birthDate) {
-    if (!birthDate) return "";
-
-    const birth = new Date(birthDate + "T00:00:00");
-    if (Number.isNaN(birth.getTime())) return "";
-
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-
-    const beforeBirthday =
-        today.getMonth() < birth.getMonth() ||
-        (
-            today.getMonth() === birth.getMonth() &&
-            today.getDate() < birth.getDate()
-        );
-
-    if (beforeBirthday) age--;
-
-    return age >= 0 ? String(age) : "";
-}
-
-function renderPatientField(label, value) {
-    let displayValue = String(value ?? "").trim();
-
-    if (label === "Data di nascita" && displayValue) {
-        const parts = displayValue.split(/[-\\/]/);
-        if (parts.length === 3 && parts[0].length === 4) {
-            displayValue = `${parts[2].padStart(2, "0")}-${parts[1].padStart(2, "0")}-${parts[0]}`;
-        }
-    }
-
-    return `
-        <div class="patient-readonly-field">
-            <strong>${escapeHtml(label)}</strong>
-            <span>${displayValue ? renderNoteText(displayValue) : "—"}</span>
-        </div>
-    `;
-}
 
 function renderPatientPvHistory(history, patientId = "") {
     if (!Array.isArray(history) || !history.length) {
@@ -8549,7 +8507,7 @@ if (incomingPersonalization) {
             .forEach(card => {
                 const name =
                     card.getAttribute("data-patient-name") ||
-                    card.querySelector("h3")?.textContent ||
+                    card.querySelector("strong")?.textContent ||
                     "";
 
                 card.style.display =
@@ -8653,12 +8611,7 @@ if (incomingPersonalization) {
 
 }
 window.addEventListener("popstate", () => {
-    const search = new URLSearchParams(window.location.search);
-
-    if (search.get("patients") !== "1") return;
-
-    const patientId = search.get("patient") || "";
-    renderPatientsPage(patientId, false);
+    window.location.reload();
 });
 
 /* =========================================================
