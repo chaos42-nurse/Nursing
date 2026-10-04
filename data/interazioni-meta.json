@@ -1,0 +1,6 @@
+{
+  "source": "TDCommons (TDC) — Drug-Drug Interaction (DDI)",
+  "sourceUrl": "https://tdcommons.ai/multi_pred_tasks/ddi/",
+  "dataset": "DDI",
+  "output": "data/interazioni.csv"
+}
