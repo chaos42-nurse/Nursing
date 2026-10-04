@@ -132,11 +132,23 @@ function calculatePatientAge(birthDate) {
     return age >= 0 ? String(age) : "";
 }
 
+function formatPatientDate(value) {
+    const raw = String(value || "").trim();
+    const match = raw.match(/^(\\d{4})[-\\/](\\d{2})[-\\/](\\d{2})$/);
+    if (!match) return raw;
+    return `${match[3]}/${match[2]}/${match[1]}`;
+}
+
 function renderPatientField(label, value) {
+    const displayValue =
+        label === "Data di nascita"
+            ? formatPatientDate(value)
+            : value;
+
     return `
         <div class="patient-readonly-field">
             <strong>${escapeHtml(label)}</strong>
-            <span>${value ? renderNoteText(value) : "—"}</span>
+            <span>${displayValue ? renderNoteText(displayValue) : "—"}</span>
         </div>
     `;
 }
