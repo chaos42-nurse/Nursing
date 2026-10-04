@@ -1389,7 +1389,7 @@ async function loadState() {
 ========================================================= */
 
 // =========================================================================
-// SISTEMA AUTO-INSTALLANTE PER AUTOCOMPLETAMENTO FARMACI (RIGIDO PER INIZIALI)
+// SISTEMA AUTO-INSTALLANTE PER AUTOCOMPLETAMENTO FARMACI (SENZA DOPPIONI)
 // =========================================================================
 
 (function() {
@@ -1411,16 +1411,20 @@ async function loadState() {
             const testo = await response.text();
             const righe = testo.split(/\r?\n/);
             
-            listaFarmaciDati = righe.map(riga => {
+            const nomiGrezzi = righe.map(riga => {
                 const colonne = riga.split(/[,;]/);
-                return colonne[0]?.trim();
+                return colonne[0]?.trim(); // Prende il nome dalla prima colonna
             }).filter(nome => nome && nome.length > 0);
+
+            // RIMOZIONE DOPPIONI: Utilizza Set per tenere solo i nomi unici
+            listaFarmaciDati = [...new Set(nomiGrezzi)];
 
             if (listaFarmaciDati.length > 0 && ["nome", "farmaco"].includes(listaFarmaciDati[0].toLowerCase())) {
                 listaFarmaciDati.shift();
             }
         } catch (e) {
-            listaFarmaciDati = farmaciDiBackup;
+            // Rimuove i doppioni anche dalla lista di backup per sicurezza
+            listaFarmaciDati = [...new Set(farmaciDiBackup)];
         }
     }
     caricaDatabase();
@@ -1452,7 +1456,7 @@ async function loadState() {
                         f.toLowerCase().startsWith(valore)
                     ).slice(0, 15);
 
-                    // Popola il menu a tendina nativo
+                    // Popola il menu a tendina nativo senza duplicati
                     filtrati.forEach(farmaco => {
                         const option = document.createElement("option");
                         option.value = farmaco;
@@ -1466,6 +1470,7 @@ async function loadState() {
     // Avvia il controllo continuo sulla pagina HTML
     observer.observe(document.body, { childList: true, subtree: true });
 })();
+
 
 
 
