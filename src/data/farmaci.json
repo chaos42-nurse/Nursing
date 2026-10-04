@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "principioAttivo": "g.type = 'text/javascript'",
+    "classeId": "",
+    "classeNome": "Catalogo AIFA",
+    "atc": "g.src = u + 'piwik.js'"
+  },
+  {
+    "principioAttivo": "<script data-senna-track=temporary src=/combo?browserId=other&amp",
+    "classeId": "",
+    "classeNome": "Catalogo AIFA",
+    "atc": "languageId=it_IT&amp"
+  },
+  {
+    "principioAttivo": "<form action=https://www.aifa.gov.it:443/home?p_p_id=it_gov_aifa_portlet_GestioneCookies&amp",
+    "classeId": "",
+    "classeNome": "Catalogo AIFA",
+    "atc": "p_p_mode=view&amp"
+  }
+]
