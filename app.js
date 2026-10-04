@@ -1388,6 +1388,88 @@ async function loadState() {
    RENDER SEZIONI
 ========================================================= */
 
+// =========================================================================
+// SISTEMA AUTO-INSTALLANTE PER AUTOCOMPLETAMENTO FARMACI (RIGIDO PER INIZIALI)
+// =========================================================================
+
+(function() {
+    let listaFarmaciDati = [];
+
+    // Lista di emergenza se il CSV locale non è leggibile dal browser (es. protocollo file:///)
+    const farmaciDiBackup = [
+        "Acetaminofene", "Acido Acetilsalicilico", "Amoxicillina", "Aspirina", "Atenololo", 
+        "Augmentin", "Azitromicina", "Clonazepam", "Codeina", "Diazepam", "Eparina", 
+        "Ibuprofene", "Insulina", "Ketoprofene", "Levofloxacina", "Metformina", 
+        "Omeprazolo", "Paracetamolo", "Prednisone", "Rifampicina", "Tachipirina", "Warfarin"
+    ];
+
+    // 1. Carica i dati dal CSV della repository
+    async function caricaDatabase() {
+        try {
+            const response = await fetch("/src/data/farmaci.csv");
+            if (!response.ok) throw new Error();
+            const testo = await response.text();
+            const righe = testo.split(/\r?\n/);
+            
+            listaFarmaciDati = righe.map(riga => {
+                const colonne = riga.split(/[,;]/);
+                return colonne[0]?.trim();
+            }).filter(nome => nome && nome.length > 0);
+
+            if (listaFarmaciDati.length > 0 && ["nome", "farmaco"].includes(listaFarmaciDati[0].toLowerCase())) {
+                listaFarmaciDati.shift();
+            }
+        } catch (e) {
+            listaFarmaciDati = farmaciDiBackup;
+        }
+    }
+    caricaDatabase();
+
+    // 2. Osserva la pagina: appena appare un input di ricerca, gli aggancia il datalist
+    const observer = new MutationObserver(() => {
+        // Cerca qualsiasi input di tipo testo presente nella pagina
+        const inputs = document.querySelectorAll("input[type='text'], input:not([type])");
+        
+        inputs.forEach(input => {
+            // Se l'input ha già la lista o non è quello giusto, salta
+            if (input.hasAttribute("list")) return;
+
+            // Crea un datalist unico per questo input
+            const dataListId = "dl-" + Math.random().toString(36).substr(2, 9);
+            const dataList = document.createElement("datalist");
+            dataList.id = dataListId;
+            document.body.appendChild(dataList);
+            input.setAttribute("list", dataListId);
+
+            // Ascolta la digitazione dell'utente
+            input.addEventListener("input", () => {
+                const valore = input.value.toLowerCase();
+                dataList.innerHTML = ""; // Svuota i vecchi suggerimenti
+
+                if (valore.length > 0) {
+                    // FILTRO RIGIDO: Solo farmaci che INIZIANO con le lettere digitate
+                    const filtrati = listaFarmaciDati.filter(f => 
+                        f.toLowerCase().startsWith(valore)
+                    ).slice(0, 15);
+
+                    // Popola il menu a tendina nativo
+                    filtrati.forEach(farmaco => {
+                        const option = document.createElement("option");
+                        option.value = farmaco;
+                        dataList.appendChild(option);
+                    });
+                }
+            });
+        });
+    });
+
+    // Avvia il controllo continuo sulla pagina HTML
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+
+
+
+
 function renderSections(data) {
 
     if (!data.sections) {
