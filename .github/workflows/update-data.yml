@@ -2,192 +2,42 @@ name: Aggiornamento Mensile Database AIFA
 
 on:
   schedule:
-    # Esegue lo script alle 00:00 del primo giorno di ogni mese
-    # Trigger manuale di rigenerazione tramite push
-    - cron: '0 0 1 * *'
-  workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/update-data.yml'
-
-permissions:
-  contents: write
+    - cron: '0 0 1 * *' # Parte da solo il 1° giorno di ogni mese alle 00:00
+  workflow_dispatch: # Ti permette di avviarlo a mano quando vuoi
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout del codice
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Configura Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '18'
 
-      - name: Scarica e organizza il file AIFA
+      - name: Scarica e organizza i file AIFA
         run: |
-          set -euo pipefail
-
-          mkdir -p src/data data
-
-          TMP_CSV="src/data/farmaci.csv.tmp"
-          TMP_INDEX="src/data/aifa-principi-attivi.json.tmp"
-
-          # Il download avviene prima su un file temporaneo:
-          # se il file non è valido, i dati già presenti non vengono toccati.
-          curl -fL --retry 3 -o "$TMP_CSV" "https://www.aifa.gov.it/documents/20142/825643/Lista_farmaci_equivalenti.csv"
-
-          python - <<'PY'
-          import csv
-          import json
-          import os
-          import re
-
-          csv_path = "src/data/farmaci.csv.tmp"
-          index_path = "src/data/aifa-principi-attivi.json.tmp"
-
-          # Il file AIFA attualmente scaricato usa una codifica compatibile
-          # con Windows-1252 (il byte 0x80 non è valido in UTF-8).
-          csv_encoding = "cp1252"
-
-          with open(csv_path, "r", encoding=csv_encoding, newline="") as f:
-              sample = f.read(8192)
-              f.seek(0)
-
-              try:
-                  dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
-              except csv.Error:
-                  dialect = csv.excel
-
-              reader = csv.DictReader(f, dialect=dialect)
-
-              if not reader.fieldnames:
-                  raise RuntimeError("File AIFA non valido: intestazione assente.")
-
-              fields = [field.strip() for field in reader.fieldnames if field]
-              if "Principio attivo" not in fields:
-                  raise RuntimeError(
-                      "File AIFA non valido: colonna 'Principio attivo' assente. "
-                      "Nessun dato esistente è stato modificato."
-                  )
-
-              # Collega i principi attivi AIFA alle classi già presenti nell'app.
-              with open("data/farmaci-principi-attivi.json", "r", encoding="utf-8") as f:
-                  existing_index = json.load(f)
-
-              def normalize(value):
-                  value = str(value or "").casefold()
-                  value = re.sub(r"[()/-]", " ", value)
-                  value = re.sub(r"\s+", " ", value).strip()
-                  return value
-
-              class_by_name = {}
-              for entry in existing_index:
-                  name = normalize(entry.get("principioAttivo"))
-                  if name and entry.get("classeId"):
-                      class_by_name[name] = {
-                          "classeId": entry["classeId"],
-                          "classeNome": entry["classeNome"]
-                      }
-
-              atc_classes = {
-                  "C09A": ("ace-inibitori", "ACE-inibitori"), "C09B": ("ace-inibitori", "ACE-inibitori"),
-                  "C09C": ("sartani", "Sartani (ARB)"), "C09D": ("sartani", "Sartani (ARB)"),
-                  "C07": ("beta-bloccanti", "Beta-bloccanti"), "C08": ("calcio-antagonisti", "Calcio-antagonisti"),
-                  "C03": ("diuretici", "Diuretici"), "C10AA": ("statine", "Statine"),
-                  "B01AC": ("antiaggreganti", "Antiaggreganti"), "B01AA": ("anticoagulanti", "Anticoagulanti"),
-                  "B01AB": ("anticoagulanti", "Anticoagulanti"), "B01AE": ("anticoagulanti", "Anticoagulanti"),
-                  "B01AF": ("anticoagulanti", "Anticoagulanti"), "B01AD": ("trombolitici", "Trombolitici"),
-                  "B02": ("emostatici", "Emostatici"), "A02BC": ("ipp", "Inibitori pompa protonica (IPP)"),
-                  "A04": ("antiemetici", "Antiemetici"), "A06": ("lassativi", "Lassativi"),
-                  "A07": ("antidiarroici", "Antidiarroici"), "A10A": ("insuline", "Insuline"),
-                  "A10B": ("ipoglicemizzanti-orali", "Ipoglicemizzanti orali"), "J01": ("antibiotici", "Antibiotici"),
-                  "J02": ("antifungini", "Antifungini"), "J05": ("antivirali", "Antivirali"),
-                  "L01": ("chemioterapici-antineoplastici", "Chemioterapici antineoplastici"),
-                  "L04": ("immunosoppressori", "Immunosoppressori"), "N02A": ("oppioidi", "Oppioidi"),
-                  "N03": ("antiepilettici", "Antiepilettici"), "N04": ("anti-parkinson", "Farmaci anti-Parkinson"),
-                  "N05A": ("neurolettici", "Neurolettici (antipsicotici)"),
-                  "N05B": ("benzodiazepine", "Psicofarmaci (benzodiazepine)"),
-                  "N05C": ("benzodiazepine", "Psicofarmaci (benzodiazepine)"),
-                  "N06AB": ("antidepressivi-ssri", "Antidepressivi SSRI"),
-                  "R03A": ("broncodilatatori", "Broncodilatatori"), "R03B": ("broncodilatatori", "Broncodilatatori"),
-                  "R05CB": ("mucolitici", "Mucolitici"), "R06": ("antistaminici", "Antistaminici"),
-                  "H02": ("corticosteroidi", "Corticosteroidi"), "B05": ("cristalloidi", "Soluzioni cristalloidi")
-              }
-
-              def classify(name, atc):
-                  exact = class_by_name.get(normalize(name))
-                  if exact:
-                      return exact
-                  atc = str(atc or "").upper().replace(" ", "")
-                  for prefix in sorted(atc_classes, key=len, reverse=True):
-                      if atc.startswith(prefix):
-                          class_id, class_name = atc_classes[prefix]
-                          return {"classeId": class_id, "classeNome": class_name}
-                  return {"classeId": "", "classeNome": "Catalogo AIFA"}
-
-              indexed = {}
-              for row in reader:
-                  value = (row.get("Principio attivo") or "").strip()
-                  atc = (row.get("ATC") or "").strip()
-                  if not value:
-                      continue
-                  for part in re.split(r"\s*\+\s*", value):
-                      part = part.strip()
-                      if not part:
-                          continue
-                      indexed[normalize(part)] = {
-                          "principioAttivo": part,
-                          **classify(part, atc),
-                          "atc": atc
-                      }
-
-          index = sorted(indexed.values(), key=lambda entry: entry["principioAttivo"].casefold())
-
-          with open(index_path, "w", encoding="utf-8") as f:
-              json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
-
-          print(f"Indice AIFA creato: {len(index)} principi attivi unici.")
-          PY
-
-          # Sostituzione atomica solo dopo che CSV e indice hanno superato i controlli.
-          mv "$TMP_CSV" src/data/farmaci.csv
-          mv "$TMP_INDEX" src/data/aifa-principi-attivi.json
-
-          # Genera un file di testo con la data di oggi
+          # Crea la cartella dei dati se non esiste
+          mkdir -p src/data
+          
+          # Scarica il file CSV ufficiale salvandolo temporaneamente
+          curl -L -o src/data/farmaci_grezzi.csv "https://aifa.gov.it"
+          
+          # Lancia lo script per convertire in JSON e inserire le classi corrette
+          node smista-farmaci.js
+          
+          # Elimina il file CSV grezzo per non appesantire il repository
+          rm src/data/farmaci_grezzi.csv
+          
+          # Crea il file per aggiornare la data nella PWA
           date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
-
-          # Metadata letto dalla PWA per mostrare la data dell'ultimo aggiornamento.
-          python - <<'PY'
-          import json
-          from datetime import date
-
-          today = date.today().isoformat()
-          version = int(today.replace("-", ""))
-
-          with open("data/version.json", "w", encoding="utf-8") as f:
-              json.dump(
-                  {
-                      "version": version,
-                      "last_updated": today,
-                      "source": "AIFA",
-                      "file": "src/data/farmaci.csv"
-                  },
-                  f,
-                  ensure_ascii=False,
-                  indent=2
-              )
-          PY
-
-          echo "Aggiornamento AIFA completato."
-          echo "Indice: src/data/aifa-principi-attivi.json"
 
       - name: Salva le modifiche nel repository
         run: |
           git config --global user.name "AIFA Update Bot"
           git config --global user.email "bot@github.com"
-          git add src/data/ data/version.json
-          git commit -m "Auto-aggiornamento database farmaci AIFA (Mensile)" || exit 0
+          git add src/data/
+          git commit -m "Auto-aggiornamento mensile e smistamento classi farmaci JSON" || exit 0
           git push
