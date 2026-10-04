@@ -3101,11 +3101,21 @@ async function renderDrugInteractions() {
         const query = normalizeDrugText(queryValue);
         if (!query) return false;
 
+        // Il completamento usa esclusivamente l'inizio delle parole:
+        // "fe" trova Fentanyl, ma NON Ceftriaxone.
         const nameWords = normalizeDrugText(name).split(" ").filter(Boolean);
         const queryWords = query.split(" ").filter(Boolean);
 
+        if (queryWords.length === 1) {
+            return nameWords.some(nameWord =>
+                nameWord.startsWith(queryWords[0])
+            );
+        }
+
         return queryWords.every(queryWord =>
-            nameWords.some(nameWord => nameWord.startsWith(queryWord))
+            nameWords.some(nameWord =>
+                nameWord.startsWith(queryWord)
+            )
         );
     };
 
