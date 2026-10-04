@@ -18,576 +18,1323 @@
               "type": "drug",
               "content": {
                 "class": "ACE-inibitori",
-                "effects": ["Riduzione della pressione arteriosa mediante inibizione dell'enzima di conversione dell'angiotensina"],
-                "indications": ["Esempi: Enalapril, Ramipril, Lisinopril"],
+                "effects": [
+                  "Riduzione della pressione arteriosa mediante inibizione dell'enzima di conversione dell'angiotensina"
+                ],
+                "indications": [
+                  "Esempi: Enalapril, Ramipril, Lisinopril"
+                ],
                 "monitoring": [
-              "PA",
-              "Creatinina",
-              "Potassio",
-              "Tosse"
-            ]
+                  "PA",
+                  "Creatinina",
+                  "Potassio",
+                  "Tosse"
+                ]
               }
             },
             {
               "id": "antipertensivi",
               "title": "Altri antipertensivi",
               "type": "drug",
-              "content": {"class":"Altri antipertensivi","indications":[],"effects":["Riduzione della pressione arteriosa attraverso diversi meccanismi farmacologici."],"monitoring":[
-              "PA",
-              "FC",
-              "sintomi di ipotensione e risposta clinica."
-            ]}
+              "content": {
+                "class": "Altri antipertensivi",
+                "indications": [],
+                "effects": [
+                  "Riduzione della pressione arteriosa attraverso diversi meccanismi farmacologici."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "sintomi di ipotensione e risposta clinica."
+                ]
+              }
             },
             {
               "id": "anestetici",
               "title": "Anestetici",
               "type": "drug",
-              "content": {"class":"Anestetici","indications":[],"effects":["Riduzione o perdita reversibile della sensibilità e, secondo il tipo, della coscienza."],"monitoring":[
-              "Stato di coscienza",
-              "PA",
-              "FC",
-              "FR e SpO₂."
-            ]}
+              "content": {
+                "class": "Anestetici",
+                "indications": [],
+                "effects": [
+                  "Riduzione o perdita reversibile della sensibilità e, secondo il tipo, della coscienza."
+                ],
+                "monitoring": [
+                  "Stato di coscienza",
+                  "PA",
+                  "FC",
+                  "FR e SpO₂."
+                ]
+              }
             },
             {
               "id": "antiacidi",
               "title": "Antiacidi",
               "type": "drug",
-              "content": {"class":"Antiacidi","indications":[],"effects":["Neutralizzazione o riduzione dell'acidità gastrica."],"monitoring":[
-              "Sintomi gastrointestinali e risposta clinica; eventuali alterazioni dell'alvo."
-            ]}
+              "content": {
+                "class": "Antiacidi",
+                "indications": [],
+                "effects": [
+                  "Neutralizzazione o riduzione dell'acidità gastrica."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali e risposta clinica; eventuali alterazioni dell'alvo."
+                ]
+              }
             },
             {
               "id": "antiadrenergici",
               "title": "Antiadrenergici",
               "type": "drug",
-              "content": {"class":"Antiadrenergici","indications":[],"effects":["Riduzione degli effetti della stimolazione adrenergica."],"monitoring":[
-              "PA",
-              "FC",
-              "stato cardiovascolare e segni di ipotensione o bradicardia."
-            ]}
+              "content": {
+                "class": "Antiadrenergici",
+                "indications": [],
+                "effects": [
+                  "Riduzione degli effetti della stimolazione adrenergica."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "stato cardiovascolare e segni di ipotensione o bradicardia."
+                ]
+              }
             },
             {
               "id": "antiaggreganti",
               "title": "Antiaggreganti",
               "type": "drug",
-              "content": {"class":"Antiaggreganti","effects":["Inibizione dell'aggregazione piastrinica"],"indications":["Esempi: Acido acetilsalicilico, Clopidogrel"],"monitoring":[
-              "Segni di sanguinamento",
-              "Emocromo"
-            ]}
+              "content": {
+                "class": "Antiaggreganti",
+                "effects": [
+                  "Inibizione dell'aggregazione piastrinica"
+                ],
+                "indications": [
+                  "Esempi: Acido acetilsalicilico, Clopidogrel"
+                ],
+                "monitoring": [
+                  "Segni di sanguinamento",
+                  "Emocromo"
+                ]
+              }
             },
             {
               "id": "antiemorragici",
               "title": "Antiaggreganti ed emostatici",
               "type": "drug",
-              "content": {"class":"Antiaggreganti ed emostatici","indications":[],"effects":["Riduzione o controllo del sanguinamento attraverso meccanismi che favoriscono l'emostasi."],"monitoring":[
-              "Entità del sanguinamento",
-              "parametri vitali ed emocromo quando indicato."
-            ]}
+              "content": {
+                "class": "Antiaggreganti ed emostatici",
+                "indications": [],
+                "effects": [
+                  "Riduzione o controllo del sanguinamento attraverso meccanismi che favoriscono l'emostasi."
+                ],
+                "monitoring": [
+                  "Entità del sanguinamento",
+                  "parametri vitali ed emocromo quando indicato."
+                ]
+              }
             },
             {
               "id": "antiandrogeni",
               "title": "Antiandrogeni",
               "type": "drug",
-              "content": {"class":"Antiandrogeni","indications":[],"effects":["Riduzione degli effetti degli androgeni sui tessuti bersaglio."],"monitoring":[
-              "Risposta clinica ed eventuali effetti endocrini o metabolici rilevanti."
-            ]}
+              "content": {
+                "class": "Antiandrogeni",
+                "indications": [],
+                "effects": [
+                  "Riduzione degli effetti degli androgeni sui tessuti bersaglio."
+                ],
+                "monitoring": [
+                  "Risposta clinica ed eventuali effetti endocrini o metabolici rilevanti."
+                ]
+              }
             },
             {
               "id": "antianginosi",
               "title": "Antianginosi",
               "type": "drug",
-              "content": {"class":"Antianginosi","indications":[],"effects":["Riduzione della richiesta di ossigeno miocardico e/o miglioramento della perfusione coronarica."],"monitoring":[
-              "Dolore toracico",
-              "PA",
-              "FC e tolleranza al trattamento."
-            ]}
+              "content": {
+                "class": "Antianginosi",
+                "indications": [],
+                "effects": [
+                  "Riduzione della richiesta di ossigeno miocardico e/o miglioramento della perfusione coronarica."
+                ],
+                "monitoring": [
+                  "Dolore toracico",
+                  "PA",
+                  "FC e tolleranza al trattamento."
+                ]
+              }
             },
             {
               "id": "antiaritmici",
               "title": "Antiaritmici",
               "type": "drug",
-              "content": {"class":"Antiaritmici","indications":[],"effects":["Modulazione dell'attività elettrica cardiaca per favorire il controllo del ritmo."],"monitoring":[
-              "FC",
-              "ritmo/ECG quando indicato",
-              "PA e comparsa di nuovi sintomi."
-            ]}
+              "content": {
+                "class": "Antiaritmici",
+                "indications": [],
+                "effects": [
+                  "Modulazione dell'attività elettrica cardiaca per favorire il controllo del ritmo."
+                ],
+                "monitoring": [
+                  "FC",
+                  "ritmo/ECG quando indicato",
+                  "PA e comparsa di nuovi sintomi."
+                ]
+              }
             },
             {
               "id": "antibiotici",
               "title": "Antibiotici",
               "type": "drug",
-              "content": {"class":"Antibatterici","effects":["Inibizione o distruzione dei batteri"],"indications":["Esempi: Amoxicillina, Ceftriaxone, Azitromicina"],"monitoring":[
-              "Reazioni allergiche",
-              "Temperatura",
-              "Funzione renale"
-            ]}
+              "content": {
+                "class": "Antibatterici",
+                "effects": [
+                  "Inibizione o distruzione dei batteri"
+                ],
+                "indications": [
+                  "Esempi: Amoxicillina, Ceftriaxone, Azitromicina"
+                ],
+                "monitoring": [
+                  "Reazioni allergiche",
+                  "Temperatura",
+                  "Funzione renale"
+                ]
+              }
             },
             {
               "id": "anticoagulanti",
               "title": "Anticoagulanti",
               "type": "drug",
-              "content": {"class":"Anticoagulanti","effects":["Inibizione della cascata della coagulazione"],"indications":["Esempi: Warfarin, Eparina, Apixaban"],"monitoring":[
-              "INR (warfarin)",
-              "aPTT (eparina)",
-              "Segni di emorragia"
-            ]}
+              "content": {
+                "class": "Anticoagulanti",
+                "effects": [
+                  "Inibizione della cascata della coagulazione"
+                ],
+                "indications": [
+                  "Esempi: Warfarin, Eparina, Apixaban"
+                ],
+                "monitoring": [
+                  "INR (warfarin)",
+                  "aPTT (eparina)",
+                  "Segni di emorragia"
+                ]
+              }
             },
             {
               "id": "antidepressivi-ssri",
               "title": "Antidepressivi SSRI",
               "type": "drug",
-              "content": {"class":"Antidepressivi SSRI","effects":["Inibizione della ricaptazione della serotonina"],"indications":["Esempi: Sertralina, Fluoxetina, Citalopram"],"monitoring":[
-              "Umore",
-              "Effetti gastrointestinali"
-            ]}
+              "content": {
+                "class": "Antidepressivi SSRI",
+                "effects": [
+                  "Inibizione della ricaptazione della serotonina"
+                ],
+                "indications": [
+                  "Esempi: Sertralina, Fluoxetina, Citalopram"
+                ],
+                "monitoring": [
+                  "Umore",
+                  "Effetti gastrointestinali"
+                ]
+              }
             },
             {
               "id": "antidiarroici",
               "title": "Antidiarroici",
               "type": "drug",
-              "content": {"class":"Antidiarroici","effects":["Riduzione della motilità intestinale"],"indications":["Esempio: Loperamide"],"monitoring":[
-              "Numero delle scariche",
-              "Segni di disidratazione"
-            ]}
+              "content": {
+                "class": "Antidiarroici",
+                "effects": [
+                  "Riduzione della motilità intestinale"
+                ],
+                "indications": [
+                  "Esempio: Loperamide"
+                ],
+                "monitoring": [
+                  "Numero delle scariche",
+                  "Segni di disidratazione"
+                ]
+              }
             },
             {
               "id": "fans",
               "title": "Antidolorifici (FANS)",
               "type": "drug",
-              "content": {"class":"FANS","effects":["Inibizione della COX con effetto analgesico e antinfiammatorio"],"indications":["Esempi: Ibuprofene, Ketoprofene, Naprossene"],"monitoring":[
-              "Dolore",
-              "Funzione renale",
-              "Segni di sanguinamento gastrointestinale"
-            ]}
+              "content": {
+                "class": "FANS",
+                "effects": [
+                  "Inibizione della COX con effetto analgesico e antinfiammatorio"
+                ],
+                "indications": [
+                  "Esempi: Ibuprofene, Ketoprofene, Naprossene"
+                ],
+                "monitoring": [
+                  "Dolore",
+                  "Funzione renale",
+                  "Segni di sanguinamento gastrointestinale"
+                ]
+              }
             },
             {
               "id": "antidoti",
               "title": "Antidoti",
               "type": "drug",
-              "content": {"class":"Antidoti","indications":[],"effects":["Contrasto o riduzione degli effetti di specifiche sostanze o condizioni tossiche."],"monitoring":[
-              "Stato neurologico",
-              "parametri vitali e risposta clinica."
-            ]}
+              "content": {
+                "class": "Antidoti",
+                "indications": [],
+                "effects": [
+                  "Contrasto o riduzione degli effetti di specifiche sostanze o condizioni tossiche."
+                ],
+                "monitoring": [
+                  "Stato neurologico",
+                  "parametri vitali e risposta clinica."
+                ]
+              }
             },
             {
               "id": "antiemetici",
               "title": "Antiemetici",
               "type": "drug",
-              "content": {"class":"Antiemetici","effects":["Riduzione dei meccanismi responsabili del vomito"],"indications":["Esempi: Metoclopramide, Ondansetron, Domperidone"],"monitoring":[
-              "Numero degli episodi emetici",
-              "Idratazione"
-            ]}
+              "content": {
+                "class": "Antiemetici",
+                "effects": [
+                  "Riduzione dei meccanismi responsabili del vomito"
+                ],
+                "indications": [
+                  "Esempi: Metoclopramide, Ondansetron, Domperidone"
+                ],
+                "monitoring": [
+                  "Numero degli episodi emetici",
+                  "Idratazione"
+                ]
+              }
             },
             {
               "id": "antiepilettici",
               "title": "Antiepilettici",
               "type": "drug",
-              "content": {"class":"Antiepilettici","effects":["Modulazione e stabilizzazione dell'attività elettrica neuronale"],"indications":["Esempi: Levetiracetam, Acido valproico, Carbamazepina"],"monitoring":[
-              "Stato neurologico",
-              "Livelli plasmatici quando indicato"
-            ]}
+              "content": {
+                "class": "Antiepilettici",
+                "effects": [
+                  "Modulazione e stabilizzazione dell'attività elettrica neuronale"
+                ],
+                "indications": [
+                  "Esempi: Levetiracetam, Acido valproico, Carbamazepina"
+                ],
+                "monitoring": [
+                  "Stato neurologico",
+                  "Livelli plasmatici quando indicato"
+                ]
+              }
             },
             {
               "id": "antifungini",
               "title": "Antifungini",
               "type": "drug",
-              "content": {"class":"Antifungini","effects":["Inibizione o distruzione dei miceti"],"indications":["Esempi: Fluconazolo, Caspofungina, Amfotericina B"],"monitoring":[
-              "Funzione epatica",
-              "Funzione renale"
-            ]}
+              "content": {
+                "class": "Antifungini",
+                "effects": [
+                  "Inibizione o distruzione dei miceti"
+                ],
+                "indications": [
+                  "Esempi: Fluconazolo, Caspofungina, Amfotericina B"
+                ],
+                "monitoring": [
+                  "Funzione epatica",
+                  "Funzione renale"
+                ]
+              }
             },
             {
               "id": "antigottosi",
               "title": "Antigottosi",
               "type": "drug",
-              "content": {"class":"Antigottosi","indications":[],"effects":["Riduzione dell'accumulo di acido urico e/o della risposta infiammatoria associata alla gotta."],"monitoring":[
-              "Dolore e segni articolari",
-              "funzione renale e tollerabilità."
-            ]}
+              "content": {
+                "class": "Antigottosi",
+                "indications": [],
+                "effects": [
+                  "Riduzione dell'accumulo di acido urico e/o della risposta infiammatoria associata alla gotta."
+                ],
+                "monitoring": [
+                  "Dolore e segni articolari",
+                  "funzione renale e tollerabilità."
+                ]
+              }
             },
             {
               "id": "antimigraine",
               "title": "Antimigraine",
               "type": "drug",
-              "content": {"class":"Antimigraine","indications":[],"effects":["Riduzione dei meccanismi coinvolti nell'attacco emicranico e dei relativi sintomi."],"monitoring":[
-              "Intensità e frequenza della cefalea",
-              "nausea e risposta clinica."
-            ]}
+              "content": {
+                "class": "Antimigraine",
+                "indications": [],
+                "effects": [
+                  "Riduzione dei meccanismi coinvolti nell'attacco emicranico e dei relativi sintomi."
+                ],
+                "monitoring": [
+                  "Intensità e frequenza della cefalea",
+                  "nausea e risposta clinica."
+                ]
+              }
             },
             {
               "id": "antispastici",
               "title": "Antispastici",
               "type": "drug",
-              "content": {"class":"Antispastici","indications":[],"effects":["Riduzione degli spasmi della muscolatura liscia o scheletrica, secondo la classe."],"monitoring":[
-              "Dolore/spasmi",
-              "motilità interessata e possibili effetti indesiderati."
-            ]}
+              "content": {
+                "class": "Antispastici",
+                "indications": [],
+                "effects": [
+                  "Riduzione degli spasmi della muscolatura liscia o scheletrica, secondo la classe."
+                ],
+                "monitoring": [
+                  "Dolore/spasmi",
+                  "motilità interessata e possibili effetti indesiderati."
+                ]
+              }
             },
             {
               "id": "antistaminici",
               "title": "Antistaminici",
               "type": "drug",
-              "content": {"class":"Antistaminici H1","effects":["Antagonismo dei recettori H1"],"indications":["Esempi: Loratadina, Cetirizina, Clorfenamina"],"monitoring":[
-              "Sedazione",
-              "Stato di vigilanza"
-            ]}
+              "content": {
+                "class": "Antistaminici H1",
+                "effects": [
+                  "Antagonismo dei recettori H1"
+                ],
+                "indications": [
+                  "Esempi: Loratadina, Cetirizina, Clorfenamina"
+                ],
+                "monitoring": [
+                  "Sedazione",
+                  "Stato di vigilanza"
+                ]
+              }
             },
             {
               "id": "antitussivi",
               "title": "Antitussivi",
               "type": "drug",
-              "content": {"class":"Antitussivi","indications":[],"effects":["Riduzione dello stimolo della tosse."],"monitoring":[
-              "Frequenza della tosse",
-              "caratteristiche delle secrezioni e funzione respiratoria."
-            ]}
+              "content": {
+                "class": "Antitussivi",
+                "indications": [],
+                "effects": [
+                  "Riduzione dello stimolo della tosse."
+                ],
+                "monitoring": [
+                  "Frequenza della tosse",
+                  "caratteristiche delle secrezioni e funzione respiratoria."
+                ]
+              }
             },
             {
               "id": "antivirali",
               "title": "Antivirali",
               "type": "drug",
-              "content": {"class":"Antivirali","effects":["Inibizione della replicazione virale"],"indications":["Esempi: Oseltamivir, Aciclovir, Remdesivir"],"monitoring":[
-              "Funzione renale",
-              "Miglioramento clinico"
-            ]}
+              "content": {
+                "class": "Antivirali",
+                "effects": [
+                  "Inibizione della replicazione virale"
+                ],
+                "indications": [
+                  "Esempi: Oseltamivir, Aciclovir, Remdesivir"
+                ],
+                "monitoring": [
+                  "Funzione renale",
+                  "Miglioramento clinico"
+                ]
+              }
             },
             {
               "id": "beta-bloccanti",
               "title": "Beta-bloccanti",
               "type": "drug",
-              "content": {"class":"Beta-bloccanti","effects":["Riduzione della frequenza cardiaca e della contrattilità miocardica"],"indications":["Esempi: Metoprololo, Bisoprololo, Carvedilolo"],"monitoring":[
-              "FC",
-              "PA",
-              "Bradicardia",
-              "Glicemia"
-            ]}
+              "content": {
+                "class": "Beta-bloccanti",
+                "effects": [
+                  "Riduzione della frequenza cardiaca e della contrattilità miocardica"
+                ],
+                "indications": [
+                  "Esempi: Metoprololo, Bisoprololo, Carvedilolo"
+                ],
+                "monitoring": [
+                  "FC",
+                  "PA",
+                  "Bradicardia",
+                  "Glicemia"
+                ]
+              }
             },
             {
               "id": "bisfosfonati",
               "title": "Bisfosfonati",
               "type": "drug",
-              "content": {"class":"Bisfosfonati","indications":[],"effects":["Riduzione del riassorbimento osseo."],"monitoring":[
-              "Calcemia quando indicata",
-              "funzione renale e tollerabilità."
-            ]}
+              "content": {
+                "class": "Bisfosfonati",
+                "indications": [],
+                "effects": [
+                  "Riduzione del riassorbimento osseo."
+                ],
+                "monitoring": [
+                  "Calcemia quando indicata",
+                  "funzione renale e tollerabilità."
+                ]
+              }
             },
             {
               "id": "broncodilatatori",
               "title": "Broncodilatatori",
               "type": "drug",
-              "content": {"class":"Broncodilatatori","effects":["Rilassamento della muscolatura bronchiale"],"indications":["Esempi: Salbutamolo, Formoterolo, Clenil"],"monitoring":[
-              "FR",
-              "SpO₂",
-              "Broncospasmo"
-            ]}
+              "content": {
+                "class": "Broncodilatatori",
+                "effects": [
+                  "Rilassamento della muscolatura bronchiale"
+                ],
+                "indications": [
+                  "Esempi: Salbutamolo, Formoterolo, Clenil"
+                ],
+                "monitoring": [
+                  "FR",
+                  "SpO₂",
+                  "Broncospasmo"
+                ]
+              }
             },
             {
               "id": "calcio-antagonisti",
               "title": "Calcio-antagonisti",
               "type": "drug",
-              "content": {"class":"Calcio-antagonisti","effects":["Blocco dei canali del calcio con effetto vasodilatatore"],"indications":["Esempi: Amlodipina, Verapamil, Diltiazem"],"monitoring":[
-              "PA",
-              "FC",
-              "Edema periferico"
-            ]}
+              "content": {
+                "class": "Calcio-antagonisti",
+                "effects": [
+                  "Blocco dei canali del calcio con effetto vasodilatatore"
+                ],
+                "indications": [
+                  "Esempi: Amlodipina, Verapamil, Diltiazem"
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "Edema periferico"
+                ]
+              }
             },
             {
               "id": "chemioterapici-antineoplastici",
               "title": "Chemioterapici antineoplastici",
               "type": "drug",
-              "content": {"class":"Chemioterapici antineoplastici","effects":["Inibizione della proliferazione cellulare tumorale"],"indications":["Esempi: Cisplatino, Ciclofosfamide, Doxorubicina"],"monitoring":[
-              "Emocromo",
-              "Nausea",
-              "Funzione renale"
-            ]}
+              "content": {
+                "class": "Chemioterapici antineoplastici",
+                "effects": [
+                  "Inibizione della proliferazione cellulare tumorale"
+                ],
+                "indications": [
+                  "Esempi: Cisplatino, Ciclofosfamide, Doxorubicina"
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Nausea",
+                  "Funzione renale"
+                ]
+              }
             },
             {
               "id": "colloidi",
               "title": "Colloidi",
               "type": "drug",
-              "content": {"class":"Soluzioni colloidali","effects":["Espansione del volume plasmatico"],"indications":["Esempio: Albumina"],"monitoring":[
-              "PA",
-              "Segni di sovraccarico"
-            ]}
+              "content": {
+                "class": "Soluzioni colloidali",
+                "effects": [
+                  "Espansione del volume plasmatico"
+                ],
+                "indications": [
+                  "Esempio: Albumina"
+                ],
+                "monitoring": [
+                  "PA",
+                  "Segni di sovraccarico"
+                ]
+              }
             },
             {
               "id": "contraccettivi-ormonali",
               "title": "Contraccettivi ormonali",
               "type": "drug",
-              "content": {"class":"Contraccettivi ormonali","indications":[],"effects":["Modulazione dell'attività ormonale riproduttiva per prevenire l'ovulazione e/o modificare il tratto riproduttivo."],"monitoring":[
-              "Tollerabilità",
-              "eventuali effetti cardiovascolari e sintomi riferiti."
-            ]}
+              "content": {
+                "class": "Contraccettivi ormonali",
+                "indications": [],
+                "effects": [
+                  "Modulazione dell'attività ormonale riproduttiva per prevenire l'ovulazione e/o modificare il tratto riproduttivo."
+                ],
+                "monitoring": [
+                  "Tollerabilità",
+                  "eventuali effetti cardiovascolari e sintomi riferiti."
+                ]
+              }
             },
             {
               "id": "corticosteroidi",
               "title": "Corticosteroidi",
               "type": "drug",
-              "content": {"class":"Corticosteroidi","effects":["Effetto antinfiammatorio e immunosoppressivo"],"indications":["Esempi: Prednisone, Desametasone, Betametasone"],"monitoring":[
-              "Glicemia",
-              "PA",
-              "Segni di infezione"
-            ]}
+              "content": {
+                "class": "Corticosteroidi",
+                "effects": [
+                  "Effetto antinfiammatorio e immunosoppressivo"
+                ],
+                "indications": [
+                  "Esempi: Prednisone, Desametasone, Betametasone"
+                ],
+                "monitoring": [
+                  "Glicemia",
+                  "PA",
+                  "Segni di infezione"
+                ]
+              }
             },
             {
               "id": "decongestionanti",
               "title": "Decongestionanti",
               "type": "drug",
-              "content": {"class":"Decongestionanti","indications":[],"effects":["Riduzione della congestione delle mucose attraverso vasocostrizione locale o sistemica."],"monitoring":[
-              "PA",
-              "FC e risposta dei sintomi congestizi."
-            ]}
+              "content": {
+                "class": "Decongestionanti",
+                "indications": [],
+                "effects": [
+                  "Riduzione della congestione delle mucose attraverso vasocostrizione locale o sistemica."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC e risposta dei sintomi congestizi."
+                ]
+              }
             },
             {
               "id": "diuretici",
               "title": "Diuretici",
               "type": "drug",
-              "content": {"class":"Diuretici","effects":["Aumento dell'escrezione di sodio e acqua"],"indications":["Esempi: Furosemide, Idroclorotiazide, Spironolattone"],"monitoring":[
-              "PA",
-              "Peso",
-              "Bilancio idrico",
-              "Elettroliti"
-            ]}
+              "content": {
+                "class": "Diuretici",
+                "effects": [
+                  "Aumento dell'escrezione di sodio e acqua"
+                ],
+                "indications": [
+                  "Esempi: Furosemide, Idroclorotiazide, Spironolattone"
+                ],
+                "monitoring": [
+                  "PA",
+                  "Peso",
+                  "Bilancio idrico",
+                  "Elettroliti"
+                ]
+              }
             },
             {
               "id": "emostatici",
               "title": "Emostatici",
               "type": "drug",
-              "content": {"class":"Emostatici","effects":["Favoriscono la stabilizzazione del coagulo"],"indications":["Esempio: Acido tranexamico"],"monitoring":[
-              "Valutazione del sanguinamento",
-              "Funzione renale"
-            ]}
+              "content": {
+                "class": "Emostatici",
+                "effects": [
+                  "Favoriscono la stabilizzazione del coagulo"
+                ],
+                "indications": [
+                  "Esempio: Acido tranexamico"
+                ],
+                "monitoring": [
+                  "Valutazione del sanguinamento",
+                  "Funzione renale"
+                ]
+              }
             },
             {
               "id": "anti-parkinson",
               "title": "Farmaci anti-Parkinson",
               "type": "drug",
-              "content": {"class":"Farmaci anti-Parkinson","effects":["Modulazione della trasmissione dopaminergica"],"indications":["Esempi: Levodopa/Carbidopa, Pramipexolo"],"monitoring":[
-              "Pressione ortostatica",
-              "Controllo dei sintomi motori"
-            ]}
+              "content": {
+                "class": "Farmaci anti-Parkinson",
+                "effects": [
+                  "Modulazione della trasmissione dopaminergica"
+                ],
+                "indications": [
+                  "Esempi: Levodopa/Carbidopa, Pramipexolo"
+                ],
+                "monitoring": [
+                  "Pressione ortostatica",
+                  "Controllo dei sintomi motori"
+                ]
+              }
             },
             {
               "id": "biologici",
               "title": "Farmaci biologici (anticorpi monoclonali)",
               "type": "drug",
-              "content": {"class":"Farmaci biologici","effects":["Modulazione di specifici target immunologici"],"indications":["Esempi: Adalimumab, Infliximab, Rituximab"],"monitoring":[
-              "Segni di infezione",
-              "Reazioni da infusione"
-            ]}
+              "content": {
+                "class": "Farmaci biologici",
+                "effects": [
+                  "Modulazione di specifici target immunologici"
+                ],
+                "indications": [
+                  "Esempi: Adalimumab, Infliximab, Rituximab"
+                ],
+                "monitoring": [
+                  "Segni di infezione",
+                  "Reazioni da infusione"
+                ]
+              }
             },
             {
               "id": "farmaci-urgenza",
               "title": "Farmaci d'urgenza",
               "type": "drug",
-              "content": {"class":"Farmaci d'urgenza","effects":["Stabilizzazione delle funzioni vitali"],"indications":["Esempi: Adrenalina, Atropina, Naloxone, Flumazenil, Glucagone"],"monitoring":[
-              "Monitoraggio continuo dei parametri vitali"
-            ]}
+              "content": {
+                "class": "Farmaci d'urgenza",
+                "effects": [
+                  "Stabilizzazione delle funzioni vitali"
+                ],
+                "indications": [
+                  "Esempi: Adrenalina, Atropina, Naloxone, Flumazenil, Glucagone"
+                ],
+                "monitoring": [
+                  "Monitoraggio continuo dei parametri vitali"
+                ]
+              }
             },
             {
               "id": "broncocostrittori",
               "title": "Farmaci respiratori diversi dai broncodilatatori",
               "type": "drug",
-              "content": {"class":"Farmaci respiratori diversi dai broncodilatatori","indications":[],"effects":["Modulazione della funzione delle vie aeree con effetti sulla broncocostrizione, secondo la specifica classe."],"monitoring":[
-              "FR",
-              "SpO₂",
-              "rumori respiratori e andamento dei sintomi."
-            ]}
+              "content": {
+                "class": "Farmaci respiratori diversi dai broncodilatatori",
+                "indications": [],
+                "effects": [
+                  "Modulazione della funzione delle vie aeree con effetti sulla broncocostrizione, secondo la specifica classe."
+                ],
+                "monitoring": [
+                  "FR",
+                  "SpO₂",
+                  "rumori respiratori e andamento dei sintomi."
+                ]
+              }
             },
             {
               "id": "gastroprotettori",
               "title": "Gastroprotettori",
               "type": "drug",
-              "content": {"class":"Gastroprotettori","indications":[],"effects":["Riduzione dell'aggressione della mucosa gastrointestinale e/o della secrezione acida, secondo la classe."],"monitoring":[
-              "Sintomi gastrointestinali e risposta clinica."
-            ]}
+              "content": {
+                "class": "Gastroprotettori",
+                "indications": [],
+                "effects": [
+                  "Riduzione dell'aggressione della mucosa gastrointestinale e/o della secrezione acida, secondo la classe."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali e risposta clinica."
+                ]
+              }
             },
             {
               "id": "immunosoppressori",
               "title": "Immunosoppressori",
               "type": "drug",
-              "content": {"class":"Immunosoppressori","effects":["Inibizione della risposta immunitaria cellulare"],"indications":["Esempi: Tacrolimus, Ciclosporina, Azatioprina"],"monitoring":[
-              "Segni di infezione",
-              "Funzione renale"
-            ]}
+              "content": {
+                "class": "Immunosoppressori",
+                "effects": [
+                  "Inibizione della risposta immunitaria cellulare"
+                ],
+                "indications": [
+                  "Esempi: Tacrolimus, Ciclosporina, Azatioprina"
+                ],
+                "monitoring": [
+                  "Segni di infezione",
+                  "Funzione renale"
+                ]
+              }
             },
             {
               "id": "ipp",
               "title": "Inibitori pompa protonica (IPP)",
               "type": "drug",
-              "content": {"class":"Inibitori della pompa protonica","effects":["Blocco della secrezione acida gastrica"],"indications":["Esempi: Omeprazolo, Pantoprazolo, Lansoprazolo"],"monitoring":[
-              "Sintomi gastrointestinali",
-              "Funzione renale in caso di uso prolungato"
-            ]}
+              "content": {
+                "class": "Inibitori della pompa protonica",
+                "effects": [
+                  "Blocco della secrezione acida gastrica"
+                ],
+                "indications": [
+                  "Esempi: Omeprazolo, Pantoprazolo, Lansoprazolo"
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali",
+                  "Funzione renale in caso di uso prolungato"
+                ]
+              }
             },
             {
               "id": "insuline",
               "title": "Insuline",
               "type": "drug",
-              "content": {"class":"Insuline","effects":["Aumento dell'utilizzo periferico del glucosio"],"indications":["Esempi: Insulina Lispro, Insulina Glargine"],"monitoring":[
-              "Glicemia capillare",
-              "Segni di ipoglicemia"
-            ]}
+              "content": {
+                "class": "Insuline",
+                "effects": [
+                  "Aumento dell'utilizzo periferico del glucosio"
+                ],
+                "indications": [
+                  "Esempi: Insulina Lispro, Insulina Glargine"
+                ],
+                "monitoring": [
+                  "Glicemia capillare",
+                  "Segni di ipoglicemia"
+                ]
+              }
             },
             {
               "id": "ipoglicemizzanti-orali",
               "title": "Ipoglicemizzanti orali",
               "type": "drug",
-              "content": {"class":"Ipoglicemizzanti orali","effects":["Riduzione della glicemia"],"indications":["Esempi: Metformina, Glibenclamide, Sitagliptin"],"monitoring":[
-              "Glicemia",
-              "Funzione renale",
-              "Rischio di ipoglicemia"
-            ]}
+              "content": {
+                "class": "Ipoglicemizzanti orali",
+                "effects": [
+                  "Riduzione della glicemia"
+                ],
+                "indications": [
+                  "Esempi: Metformina, Glibenclamide, Sitagliptin"
+                ],
+                "monitoring": [
+                  "Glicemia",
+                  "Funzione renale",
+                  "Rischio di ipoglicemia"
+                ]
+              }
             },
             {
               "id": "ipolipemizzanti",
               "title": "Ipolipemizzanti",
               "type": "drug",
-              "content": {"class":"Ipolipemizzanti","indications":[],"effects":["Riduzione delle concentrazioni plasmatiche dei lipidi aterogeni."],"monitoring":[
-              "Profilo lipidico e",
-              "quando appropriato",
-              "funzione epatica e sintomi muscolari."
-            ]}
+              "content": {
+                "class": "Ipolipemizzanti",
+                "indications": [],
+                "effects": [
+                  "Riduzione delle concentrazioni plasmatiche dei lipidi aterogeni."
+                ],
+                "monitoring": [
+                  "Profilo lipidico e",
+                  "quando appropriato",
+                  "funzione epatica e sintomi muscolari."
+                ]
+              }
             },
             {
               "id": "lassativi",
               "title": "Lassativi",
               "type": "drug",
-              "content": {"class":"Lassativi","effects":["Facilitazione dell'evacuazione intestinale"],"indications":["Esempi: Lattulosio, Macrogol, Bisacodile"],"monitoring":[
-              "Alvo",
-              "Bilancio idrico"
-            ]}
+              "content": {
+                "class": "Lassativi",
+                "effects": [
+                  "Facilitazione dell'evacuazione intestinale"
+                ],
+                "indications": [
+                  "Esempi: Lattulosio, Macrogol, Bisacodile"
+                ],
+                "monitoring": [
+                  "Alvo",
+                  "Bilancio idrico"
+                ]
+              }
             },
             {
               "id": "miorilassanti",
               "title": "Miorilassanti",
               "type": "drug",
-              "content": {"class":"Miorilassanti","indications":[],"effects":["Riduzione del tono o della contrazione della muscolatura, secondo il meccanismo."],"monitoring":[
-              "Stato neurologico",
-              "forza muscolare e funzione respiratoria quando rilevante."
-            ]}
+              "content": {
+                "class": "Miorilassanti",
+                "indications": [],
+                "effects": [
+                  "Riduzione del tono o della contrazione della muscolatura, secondo il meccanismo."
+                ],
+                "monitoring": [
+                  "Stato neurologico",
+                  "forza muscolare e funzione respiratoria quando rilevante."
+                ]
+              }
             },
             {
               "id": "mucolitici",
               "title": "Mucolitici",
               "type": "drug",
-              "content": {"class":"Mucolitici","effects":["Fluidificazione delle secrezioni bronchiali"],"indications":["Esempi: Acetilcisteina, Ambroxolo"],"monitoring":[
-              "Valutazione delle secrezioni",
-              "Efficacia della tosse"
-            ]}
+              "content": {
+                "class": "Mucolitici",
+                "effects": [
+                  "Fluidificazione delle secrezioni bronchiali"
+                ],
+                "indications": [
+                  "Esempi: Acetilcisteina, Ambroxolo"
+                ],
+                "monitoring": [
+                  "Valutazione delle secrezioni",
+                  "Efficacia della tosse"
+                ]
+              }
             },
             {
               "id": "neurolettici",
               "title": "Neurolettici (antipsicotici)",
               "type": "drug",
-              "content": {"class":"Neurolettici / antipsicotici","effects":["Antagonismo dopaminergico"],"indications":["Esempi: Risperidone, Olanzapina, Aloperidolo"],"monitoring":[
-              "QT",
-              "Effetti extrapiramidali"
-            ]}
+              "content": {
+                "class": "Neurolettici / antipsicotici",
+                "effects": [
+                  "Antagonismo dopaminergico"
+                ],
+                "indications": [
+                  "Esempi: Risperidone, Olanzapina, Aloperidolo"
+                ],
+                "monitoring": [
+                  "QT",
+                  "Effetti extrapiramidali"
+                ]
+              }
             },
             {
               "id": "oppioidi",
               "title": "Oppioidi",
               "type": "drug",
-              "content": {"class":"Oppioidi","effects":["Attivazione dei recettori oppioidi centrali"],"indications":["Esempi: Morfina, Ossicodone, Fentanyl"],"monitoring":[
-              "FR",
-              "Stato di coscienza",
-              "SpO₂",
-              "Alvo"
-            ]}
+              "content": {
+                "class": "Oppioidi",
+                "effects": [
+                  "Attivazione dei recettori oppioidi centrali"
+                ],
+                "indications": [
+                  "Esempi: Morfina, Ossicodone, Fentanyl"
+                ],
+                "monitoring": [
+                  "FR",
+                  "Stato di coscienza",
+                  "SpO₂",
+                  "Alvo"
+                ]
+              }
             },
             {
               "id": "ormoni-sessuali",
               "title": "Ormoni sessuali",
               "type": "drug",
-              "content": {"class":"Ormoni sessuali","indications":[],"effects":["Sostituzione o modulazione degli effetti degli ormoni sessuali."],"monitoring":[
-              "Risposta clinica e parametri endocrini pertinenti quando indicati."
-            ]}
+              "content": {
+                "class": "Ormoni sessuali",
+                "indications": [],
+                "effects": [
+                  "Sostituzione o modulazione degli effetti degli ormoni sessuali."
+                ],
+                "monitoring": [
+                  "Risposta clinica e parametri endocrini pertinenti quando indicati."
+                ]
+              }
             },
             {
               "id": "ormoni-tiroidei",
               "title": "Ormoni tiroidei",
               "type": "drug",
-              "content": {"class":"Ormoni tiroidei","indications":[],"effects":["Sostituzione dell'ormone tiroideo o modulazione dell'attività tiroidea."],"monitoring":[
-              "Sintomi clinici e parametri tiroidei secondo prescrizione."
-            ]}
+              "content": {
+                "class": "Ormoni tiroidei",
+                "indications": [],
+                "effects": [
+                  "Sostituzione dell'ormone tiroideo o modulazione dell'attività tiroidea."
+                ],
+                "monitoring": [
+                  "Sintomi clinici e parametri tiroidei secondo prescrizione."
+                ]
+              }
             },
             {
               "id": "procinetici",
               "title": "Procinetici",
               "type": "drug",
-              "content": {"class":"Procinetici","indications":[],"effects":["Aumento della motilità gastrointestinale e facilitazione dello svuotamento gastrico, secondo la classe."],"monitoring":[
-              "Sintomi gastrointestinali",
-              "alvo e tollerabilità."
-            ]}
+              "content": {
+                "class": "Procinetici",
+                "indications": [],
+                "effects": [
+                  "Aumento della motilità gastrointestinale e facilitazione dello svuotamento gastrico, secondo la classe."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali",
+                  "alvo e tollerabilità."
+                ]
+              }
             },
             {
               "id": "protettori-mucosa",
               "title": "Protettori della mucosa gastrointestinale",
               "type": "drug",
-              "content": {"class":"Protettori della mucosa gastrointestinale","indications":[],"effects":["Protezione della mucosa gastrointestinale da agenti irritanti o dall'acidità."],"monitoring":[
-              "Sintomi gastrointestinali e risposta clinica."
-            ]}
+              "content": {
+                "class": "Protettori della mucosa gastrointestinale",
+                "indications": [],
+                "effects": [
+                  "Protezione della mucosa gastrointestinale da agenti irritanti o dall'acidità."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali e risposta clinica."
+                ]
+              }
             },
             {
               "id": "benzodiazepine",
               "title": "Psicofarmaci (benzodiazepine)",
               "type": "drug",
-              "content": {"class":"Benzodiazepine","effects":["Potenziamento della trasmissione mediata dal GABA"],"indications":["Esempi: Lorazepam, Diazepam, Alprazolam"],"monitoring":[
-              "Stato di coscienza",
-              "FR",
-              "Rischio di cadute"
-            ]}
+              "content": {
+                "class": "Benzodiazepine",
+                "effects": [
+                  "Potenziamento della trasmissione mediata dal GABA"
+                ],
+                "indications": [
+                  "Esempi: Lorazepam, Diazepam, Alprazolam"
+                ],
+                "monitoring": [
+                  "Stato di coscienza",
+                  "FR",
+                  "Rischio di cadute"
+                ]
+              }
             },
             {
               "id": "sartani",
               "title": "Sartani (ARB)",
               "type": "drug",
-              "content": {"class":"Antagonisti del recettore AT1 dell'angiotensina II","effects":["Blocco del recettore AT1 dell'angiotensina II"],"indications":["Esempi: Losartan, Valsartan, Candesartan"],"monitoring":[
-              "PA",
-              "Funzione renale",
-              "Potassio"
-            ]}
+              "content": {
+                "class": "Antagonisti del recettore AT1 dell'angiotensina II",
+                "effects": [
+                  "Blocco del recettore AT1 dell'angiotensina II"
+                ],
+                "indications": [
+                  "Esempi: Losartan, Valsartan, Candesartan"
+                ],
+                "monitoring": [
+                  "PA",
+                  "Funzione renale",
+                  "Potassio"
+                ]
+              }
             },
             {
               "id": "cristalloidi",
               "title": "Soluzioni cristalloidi",
               "type": "drug",
-              "content": {"class":"Soluzioni cristalloidi","effects":["Ripristino del volume intravascolare"],"indications":["Esempi: NaCl 0,9%, Ringer lattato"],"monitoring":[
-              "PA",
-              "Bilancio idrico",
-              "Elettroliti"
-            ]}
+              "content": {
+                "class": "Soluzioni cristalloidi",
+                "effects": [
+                  "Ripristino del volume intravascolare"
+                ],
+                "indications": [
+                  "Esempi: NaCl 0,9%, Ringer lattato"
+                ],
+                "monitoring": [
+                  "PA",
+                  "Bilancio idrico",
+                  "Elettroliti"
+                ]
+              }
             },
             {
               "id": "statine",
               "title": "Statine",
               "type": "drug",
-              "content": {"class":"Statine","effects":["Riduzione del colesterolo mediante inibizione della HMG-CoA reduttasi"],"indications":["Esempi: Atorvastatina, Simvastatina, Rosuvastatina"],"monitoring":[
-              "Transaminasi",
-              "CPK",
-              "Segni di miopatia"
-            ]}
+              "content": {
+                "class": "Statine",
+                "effects": [
+                  "Riduzione del colesterolo mediante inibizione della HMG-CoA reduttasi"
+                ],
+                "indications": [
+                  "Esempi: Atorvastatina, Simvastatina, Rosuvastatina"
+                ],
+                "monitoring": [
+                  "Transaminasi",
+                  "CPK",
+                  "Segni di miopatia"
+                ]
+              }
             },
             {
               "id": "trombolitici",
               "title": "Trombolitici",
               "type": "drug",
-              "content": {"class":"Trombolitici","effects":["Attivazione della fibrinolisi con lisi del trombo"],"indications":["Esempi: Alteplase, Tenecteplase"],"monitoring":[
-              "Segni di emorragia",
-              "Stato neurologico",
-              "PA"
-            ]}
+              "content": {
+                "class": "Trombolitici",
+                "effects": [
+                  "Attivazione della fibrinolisi con lisi del trombo"
+                ],
+                "indications": [
+                  "Esempi: Alteplase, Tenecteplase"
+                ],
+                "monitoring": [
+                  "Segni di emorragia",
+                  "Stato neurologico",
+                  "PA"
+                ]
+              }
             },
             {
               "id": "vasodilatatori",
               "title": "Vasodilatatori",
               "type": "drug",
-              "content": {"class":"Vasodilatatori","indications":[],"effects":["Rilassamento della muscolatura vascolare con riduzione delle resistenze periferiche."],"monitoring":[
-              "PA",
-              "FC",
-              "sintomi di ipotensione e risposta clinica."
-            ]}
+              "content": {
+                "class": "Vasodilatatori",
+                "indications": [],
+                "effects": [
+                  "Rilassamento della muscolatura vascolare con riduzione delle resistenze periferiche."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "sintomi di ipotensione e risposta clinica."
+                ]
+              }
+            },
+            {
+              "id": "metabolismo-osseo",
+              "title": "Metabolismo osseo",
+              "type": "drug",
+              "content": {
+                "class": "Metabolismo osseo",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antianemici",
+              "title": "Antianemici",
+              "type": "drug",
+              "content": {
+                "class": "Antianemici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "vitamine",
+              "title": "Vitamine",
+              "type": "drug",
+              "content": {
+                "class": "Vitamine",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "minerali-elettroliti",
+              "title": "Minerali ed elettroliti",
+              "type": "drug",
+              "content": {
+                "class": "Minerali ed elettroliti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "farmaci-metabolici",
+              "title": "Farmaci del metabolismo",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci del metabolismo",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "gastrointestinali-altri",
+              "title": "Altri farmaci gastrointestinali",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci gastrointestinali",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "emopoietici",
+              "title": "Farmaci emopoietici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci emopoietici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiosteoporotici",
+              "title": "Farmaci antiosteoporotici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci antiosteoporotici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "enzimi",
+              "title": "Enzimi e sostituti enzimatici",
+              "type": "drug",
+              "content": {
+                "class": "Enzimi e sostituti enzimatici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "immunomodulanti",
+              "title": "Immunomodulanti",
+              "type": "drug",
+              "content": {
+                "class": "Immunomodulanti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "oftalmologici",
+              "title": "Farmaci oftalmologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci oftalmologici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "otologici",
+              "title": "Farmaci otologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci otologici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "dermatologici",
+              "title": "Farmaci dermatologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci dermatologici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "urogenitali",
+              "title": "Farmaci dell'apparato urogenitale",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci dell'apparato urogenitale",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "ostetrici-ginecologici",
+              "title": "Farmaci ostetrici e ginecologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci ostetrici e ginecologici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "urologici",
+              "title": "Farmaci urologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci urologici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "neurologici",
+              "title": "Altri farmaci neurologici",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci neurologici",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "anestetici-locali",
+              "title": "Anestetici locali",
+              "type": "drug",
+              "content": {
+                "class": "Anestetici locali",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antisettici-disinfettanti",
+              "title": "Antisettici e disinfettanti",
+              "type": "drug",
+              "content": {
+                "class": "Antisettici e disinfettanti",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiparassitari",
+              "title": "Antiparassitari",
+              "type": "drug",
+              "content": {
+                "class": "Antiparassitari",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antidolorifici-non-fans",
+              "title": "Analgesici non FANS",
+              "type": "drug",
+              "content": {
+                "class": "Analgesici non FANS",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "antiinfiammatori-altri",
+              "title": "Altri antinfiammatori",
+              "type": "drug",
+              "content": {
+                "class": "Altri antinfiammatori",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
+            },
+            {
+              "id": "coagulazione-altri",
+              "title": "Altri farmaci della coagulazione",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci della coagulazione",
+                "indications": [],
+                "effects": [],
+                "monitoring": []
+              }
             }
           ]
         }
@@ -595,22 +1342,50 @@
     },
     {
       "title": "Interazioni",
-      "items": [{"id":"interazioni-farmaci","title":"Interazioni tra farmaci","type":"interaction-db"}]
+      "items": [
+        {
+          "id": "interazioni-farmaci",
+          "title": "Interazioni tra farmaci",
+          "type": "interaction-db"
+        }
+      ]
     },
     {
       "title": "Calcolatori",
-      "items": [{
-        "id":"calcolatori",
-        "title":"🧮 Calcolatori",
-        "type":"calculator-section",
-        "items":[
-          {"id":"dose","title":"Dose da somministrare","type":"calculator"},
-          {"id":"diluizioni","title":"Diluizioni","type":"calculator"},
-          {"id":"ml-h","title":"Velocità di infusione — mL/h","type":"calculator"},
-          {"id":"gocce-min","title":"Velocità — gocce/min","type":"calculator"},
-          {"id":"durata-infusione","title":"Durata dell'infusione","type":"calculator"}
-        ]
-      }]
+      "items": [
+        {
+          "id": "calcolatori",
+          "title": "🧮 Calcolatori",
+          "type": "calculator-section",
+          "items": [
+            {
+              "id": "dose",
+              "title": "Dose da somministrare",
+              "type": "calculator"
+            },
+            {
+              "id": "diluizioni",
+              "title": "Diluizioni",
+              "type": "calculator"
+            },
+            {
+              "id": "ml-h",
+              "title": "Velocità di infusione — mL/h",
+              "type": "calculator"
+            },
+            {
+              "id": "gocce-min",
+              "title": "Velocità — gocce/min",
+              "type": "calculator"
+            },
+            {
+              "id": "durata-infusione",
+              "title": "Durata dell'infusione",
+              "type": "calculator"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
