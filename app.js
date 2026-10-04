@@ -1744,6 +1744,75 @@ function setupContentOrderControls() {
         });
 }
 
+// ==========================================
+// FUNZIONE DI INTERAZIONE FARMACI (DA ZERO)
+// ==========================================
+
+// Array principale che conterrà l'elenco dei farmaci
+let listaFarmaciDati = [];
+
+// Lista di backup immediata nel caso in cui il file CSV non sia accessibile localmente
+const farmaciDiBackup = [
+    "Acetaminofene", "Acido Acetilsalicilico", "Amoxicillina", "Aspirina", "Atenololo", 
+    "Augmentin", "Azitromicina", "Clonazepam", "Codeina", "Diazepam", "Eparina", 
+    "Ibuprofene", "Insulina", "Ketoprofene", "Levofloxacina", "Metformina", 
+    "O someprazolo", "Paracetamolo", "Prednisone", "Rifampicina", "Tachipirina", "Warfarin"
+];
+
+/**
+ * Tenta di caricare il file CSV dalla repository.
+ * Se fallisce (es. aperto come file locale), carica la lista di backup.
+ */
+async function caricaDatabaseFarmaci() {
+    try {
+        const response = await fetch("/src/data/farmaci.csv");
+        if (!response.ok) throw new Error("CSV non raggiungibile");
+        
+        const testoCSV = await response.text();
+        const righe = testoCSV.split(/\r?\n/);
+        
+        // Estrae la prima colonna pulendola dagli spazi
+        listaFarmaciDati = righe.map(riga => {
+            const colonne = riga.split(/[,;]/);
+            return colonne[0]?.trim();
+        }).filter(nome => nome && nome.length > 0);
+
+        // Scarta l'intestazione se presente
+        if (listaFarmaciDati.length > 0 && 
+           (listaFarmaciDati[0].toLowerCase() === "nome" || listaFarmaciDati[0].toLowerCase() === "farmaco")) {
+            listaFarmaciDati.shift();
+        }
+        
+        console.log("Database farmaci caricato correttamente dal file CSV.");
+    } catch (e) {
+        // Se si verifica un errore o sei offline/locale, usa la lista pronta
+        listaFarmaciDati = farmaciDiBackup;
+        console.warn("Impossibile leggere il CSV (probabilmente sei in locale senza server). Caricata lista di backup.");
+    }
+}
+
+// Avvia immediatamente l'indicizzazione dei dati
+caricaDatabaseFarmaci();
+
+/**
+ * Restituisce i farmaci filtrati escludendo rigorosamente tutto ciò che non inizia con le stesse lettere.
+ * Puoi richiamare questa funzione passando il testo inserito dall'utente.
+ * 
+ * @param {string} testoInserito - Il testo digitato dall'utente
+ * @returns {Array} Array di stringhe con i soli farmaci suggeriti
+ */
+function updateDrugSearch(testoInserito) {
+    if (!testoInserito || testoInserito.trim() === "") {
+        return [];
+    }
+
+    const inputMinuscolo = testoInserito.toLowerCase();
+
+    // FILTRO RIGIDO: Mantiene SOLO i farmaci che INIZIANO con i caratteri digitati
+    return listaFarmaciDati.filter(farmaco => 
+        farmaco.toLowerCase().startsWith(inputMinuscolo)
+    );
+}
 
 function refreshOrderControls() {
 
