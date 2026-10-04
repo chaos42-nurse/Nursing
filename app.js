@@ -1406,7 +1406,7 @@ async function loadState() {
     // 1. Carica i dati dal CSV della repository
     async function caricaDatabase() {
         try {
-            const response = await fetch("/src/data/farmaci.csv");
+            const response = await fetch("./src/data/farmaci.csv");
             if (!response.ok) throw new Error();
             const testo = await response.text();
             const righe = testo.split(/\r?\n/);
@@ -1847,7 +1847,7 @@ const farmaciDiBackup = [
  */
 async function caricaDatabaseFarmaci() {
     try {
-        const response = await fetch("/src/data/farmaci.csv");
+        const response = await fetch("./src/data/farmaci.csv");
         if (!response.ok) throw new Error("CSV non raggiungibile");
         
         const testoCSV = await response.text();
