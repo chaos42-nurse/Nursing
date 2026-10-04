@@ -17,19 +17,10 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Scarica e organizza i file AIFA
+      - name: Elabora e formatta il database dei farmaci
         run: |
-          # Crea la cartella dei dati se non esiste
-          mkdir -p src/data
-          
-          # Scarica il file CSV ufficiale salvandolo temporaneamente
-          curl -L -o src/data/farmaci_grezzi.csv "https://aifa.gov.it"
-          
-          # Lancia lo script per convertire in JSON e inserire le classi corrette
+          # Avvia lo script per correggere le chiavi in italiano e smistare le classi
           node smista-farmaci.js
-          
-          # Elimina il file CSV grezzo per non appesantire il repository
-          rm src/data/farmaci_grezzi.csv
           
           # Crea il file per aggiornare la data nella PWA
           date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
@@ -41,3 +32,4 @@ jobs:
           git add src/data/
           git commit -m "Auto-aggiornamento mensile e smistamento classi farmaci JSON" || exit 0
           git push
+
