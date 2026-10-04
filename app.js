@@ -3061,12 +3061,18 @@ async function renderDrugInteractions() {
 
                 <div class="info-block">
                     <label for="drugA"><strong>Inserisci il Primo Farmaco (Farmaco A):</strong></label>
-                    <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Es: Aciclovir, Fentanyl...">
+                    <div class="drug-interaction-autocomplete">
+                        <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Inserisci le iniziali del farmaco..." autocomplete="off">
+                        <div id="drugASuggestions" class="patient-search-suggestions drug-interaction-suggestions" hidden></div>
+                    </div>
                 </div>
 
                 <div class="info-block" style="margin-top:15px;">
                     <label for="drugB"><strong>Inserisci il Secondo Farmaco (Farmaco B):</strong></label>
-                    <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Es: Diazepam, Midazolam...">
+                    <div class="drug-interaction-autocomplete">
+                        <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="Inserisci le iniziali del farmaco..." autocomplete="off">
+                        <div id="drugBSuggestions" class="patient-search-suggestions drug-interaction-suggestions" hidden></div>
+                    </div>
                 </div>
 
                 <div style="margin-top:20px; text-align:center;">
@@ -3078,9 +3084,90 @@ async function renderDrugInteractions() {
         </section>
     `;
 
+    const drugA = document.getElementById("drugA");
+    const drugB = document.getElementById("drugB");
+    const suggestionsA = document.getElementById("drugASuggestions");
+    const suggestionsB = document.getElementById("drugBSuggestions");
+
+    const normalizeDrugText = value =>
+        String(value ?? "")
+            .normalize("NFD")
+            .replace(/[\\u0300-\\u036f]/g, "")
+            .toLocaleLowerCase("it-IT")
+            .trim()
+            .replace(/\\s+/g, " ");
+
+    const drugNameMatches = (name, queryValue) => {
+        const query = normalizeDrugText(queryValue);
+        if (!query) return false;
+
+        const nameWords = normalizeDrugText(name).split(" ").filter(Boolean);
+        const queryWords = query.split(" ").filter(Boolean);
+
+        return queryWords.every(queryWord =>
+            nameWords.some(nameWord => nameWord.startsWith(queryWord))
+        );
+    };
+
+    const getDrugNames = () => [...new Set(
+        interazioni.flatMap(entry => [entry.farmacoA, entry.farmacoB])
+            .map(name => String(name || "").trim())
+            .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "it"));
+
+    const setupDrugAutocomplete = (input, suggestions) => {
+        if (!input || !suggestions) return;
+
+        const update = () => {
+            const query = input.value.trim();
+
+            if (!query) {
+                suggestions.hidden = true;
+                suggestions.innerHTML = "";
+                return;
+            }
+
+            const matches = getDrugNames()
+                .filter(name => drugNameMatches(name, query))
+                .slice(0, 12);
+
+            suggestions.innerHTML = matches.map(name => `
+                <button type="button" class="patient-search-suggestion drug-interaction-suggestion" data-drug-name="${escapeAttribute(name)}">
+                    <strong>${escapeHtml(name)}</strong>
+                </button>
+            `).join("");
+
+            suggestions.hidden = matches.length === 0;
+        };
+
+        input.addEventListener("input", update);
+        input.addEventListener("focus", update);
+
+        suggestions.addEventListener("click", event => {
+            const suggestion = event.target.closest("[data-drug-name]");
+            if (!suggestion) return;
+
+            const name = suggestion.dataset.drugName || "";
+            input.value = name;
+            suggestions.hidden = true;
+            suggestions.innerHTML = "";
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            input.focus();
+        });
+
+        input.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                suggestions.hidden = true;
+            }
+        });
+    };
+
+    setupDrugAutocomplete(drugA, suggestionsA);
+    setupDrugAutocomplete(drugB, suggestionsB);
+
     document.getElementById("btnCheckCompatibility")?.addEventListener("click", () => {
-        const dA = document.getElementById("drugA")?.value.trim().toLowerCase() || "";
-        const dB = document.getElementById("drugB")?.value.trim().toLowerCase() || "";
+        const dA = normalizeDrugText(drugA?.value);
+        const dB = normalizeDrugText(drugB?.value);
         const resDiv = document.getElementById("interactionResult");
 
         if (!resDiv) return;
@@ -3096,8 +3183,8 @@ async function renderDrugInteractions() {
         }
 
         const match = interazioni.find(entry => {
-            const fA = String(entry.farmacoA || "").trim().toLowerCase();
-            const fB = String(entry.farmacoB || "").trim().toLowerCase();
+            const fA = normalizeDrugText(entry.farmacoA);
+            const fB = normalizeDrugText(entry.farmacoB);
             return (fA === dA && fB === dB) || (fA === dB && fB === dA);
         });
 
