@@ -3099,24 +3099,16 @@ async function renderDrugInteractions() {
 
     const drugNameMatches = (name, queryValue) => {
         const query = normalizeDrugText(queryValue);
-        if (!query) return false;
+        const normalizedName = normalizeDrugText(name);
 
-        // Il completamento usa esclusivamente l'inizio delle parole:
-        // "fe" trova Fentanyl, ma NON Ceftriaxone.
-        const nameWords = normalizeDrugText(name).split(" ").filter(Boolean);
-        const queryWords = query.split(" ").filter(Boolean);
+        if (!query || !normalizedName) return false;
 
-        if (queryWords.length === 1) {
-            return nameWords.some(nameWord =>
-                nameWord.startsWith(queryWords[0])
-            );
-        }
-
-        return queryWords.every(queryWord =>
-            nameWords.some(nameWord =>
-                nameWord.startsWith(queryWord)
-            )
-        );
+        // La ricerca è esclusivamente per PREFISSO dell'intero nome:
+        // "f" → Fentanyl, Fluconazolo, ...
+        // "fe" → Fentanyl, ma NON Ceftriaxone e NON Acetofenazone.
+        // Non vengono mai considerate lettere presenti in altre posizioni
+        // o all'interno di parole successive.
+        return normalizedName.startsWith(query);
     };
 
     const getDrugNames = () => [...new Set(
