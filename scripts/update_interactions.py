@@ -5,11 +5,16 @@ import pandas as pd
 def process_interactions():
     # 1. Individua automaticamente lo ZIP inserito in data/
     zip_dir = 'data'
+    if not os.path.exists(zip_dir):
+        print(f"❌ La cartella {zip_dir} non esiste.")
+        return
+
     zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
     if not zip_files:
         print("❌ Nessun file ZIP trovato nella cartella data/")
         return
     
+    # PRENDI IL PRIMO FILE ZIP (Risolto bug di indicizzazione)
     zip_path = os.path.join(zip_dir, zip_files[0])
     print(f"📦 Estrazione del file ZIP: {zip_path}")
     
@@ -29,6 +34,7 @@ def process_interactions():
         print("❌ Nessun file CSV trovato all'interno dello ZIP")
         return
         
+    # PRENDI IL PRIMO FILE CSV ESTRATTO (Risolto bug di indicizzazione)
     csv_path = csv_files[0]
     print(f"📖 Lettura del dataset di origine: {csv_path}")
     df = pd.read_csv(csv_path)
@@ -37,16 +43,19 @@ def process_interactions():
     col_mapping = {}
     for col in df.columns:
         col_lower = col.lower()
-        if 'drug1' in col_lower or 'drug_a' in col_lower or 'id1' in col_lower:
+        if 'drug1' in col_lower or 'drug_a' in col_lower or 'id1' in col_lower or 'chemical1' in col_lower:
             col_mapping[col] = 'farmacoA'
-        elif 'drug2' in col_lower or 'drug_b' in col_lower or 'id2' in col_lower:
+        elif 'drug2' in col_lower or 'drug_b' in col_lower or 'id2' in col_lower or 'chemical2' in col_lower:
             col_mapping[col] = 'farmacoB'
         elif 'desc' in col_lower or 'note' in col_lower or 'effect' in col_lower or 'y' in col_lower:
             col_mapping[col] = 'nota'
 
     if len(col_mapping) < 2:
         print("⚠️ Colonne non standard rilevate. Associo per posizione fissa (0, 1, 2)")
-        df.columns = ['farmacoA', 'farmacoB', 'nota'] + list(df.columns[3:])
+        # Mantiene solo le prime 3 colonne se la mappatura testuale fallisce
+        nuove_colonne = ['farmacoA', 'farmacoB', 'nota']
+        df = df.iloc[:, :3]
+        df.columns = nuove_colonne
     else:
         df.rename(columns=col_mapping, inplace=True)
         
@@ -58,7 +67,8 @@ def process_interactions():
         "aspirin": "Acido acetilsalicilico", "acetaminophen": "Paracetamolo", 
         "paracetamol": "Paracetamolo", "diazepam": "Diazepam", "fentanyl": "Fentanyl", 
         "ceftriaxone": "Ceftriaxone", "amiodarone": "Amiodarone Cloridrato", 
-        "warfarin": "Warfarin", "ibuprofen": "Ibuprofene", "midazolam": "Midazolam"
+        "warfarin": "Warfarin", "ibuprofen": "Ibuprofene", "midazolam": "Midazolam",
+        "lorazepam": "Lorazepam", "furosemide": "Furosemide", "propofol": "Propofol"
     }
 
     df['farmacoA'] = df['farmacoA'].astype(str).str.lower().str.strip().map(traduzioni_farmaci).fillna(df['farmacoA'].astype(str).str.capitalize())
@@ -78,7 +88,7 @@ def process_interactions():
 
     df['nota'] = df['nota'].apply(formalizza_nota)
 
-    # Filtra e pulisce le colonne
+    # Filtra e pulisce le colonne finali espungendo i vuoti
     df_finale = df[['farmacoA', 'farmacoB', 'stato', 'nota']].dropna()
 
     # Rimuove i duplicati speculari (A+B e B+A vengono unificati per ottimizzare l'indice)
@@ -87,8 +97,13 @@ def process_interactions():
     df_finale.drop(columns=['coppia_key'], inplace=True)
 
     # 4. Sovrascrive il file finale che l'Action andrà a committare
+    os.makedirs('data', exist_ok=True)
     df_finale.to_csv('data/interazioni.csv', index=False)
     print(f"✅ Completato! Generato data/interazioni.csv con {len(df_finale)} record reali.")
+
+    # Pulizia della cartella temporanea
+    import shutil
+    shutil.rmtree(extract_dir, ignore_errors=True)
 
 if __name__ == '__main__':
     process_interactions()
