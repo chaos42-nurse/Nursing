@@ -33,6 +33,23 @@
               }
             },
             {
+              "id": "antiinfiammatori-altri",
+              "title": "Altri antinfiammatori",
+              "type": "drug",
+              "content": {
+                "class": "Altri antinfiammatori",
+                "indications": [],
+                "effects": [
+                  "Riduzione della risposta infiammatoria attraverso meccanismi diversi dai FANS."
+                ],
+                "monitoring": [
+                  "Segni e sintomi dell'infiammazione",
+                  "Temperatura quando pertinente",
+                  "Risposta clinica e tollerabilità"
+                ]
+              }
+            },
+            {
               "id": "antipertensivi",
               "title": "Altri antipertensivi",
               "type": "drug",
@@ -46,6 +63,74 @@
                   "PA",
                   "FC",
                   "sintomi di ipotensione e risposta clinica."
+                ]
+              }
+            },
+            {
+              "id": "coagulazione-altri",
+              "title": "Altri farmaci della coagulazione",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci della coagulazione",
+                "indications": [],
+                "effects": [
+                  "Modulazione della coagulazione o dell'emostasi attraverso meccanismi diversi dalle classi principali."
+                ],
+                "monitoring": [
+                  "Segni di sanguinamento o trombosi",
+                  "Emocromo",
+                  "Parametri della coagulazione quando indicati"
+                ]
+              }
+            },
+            {
+              "id": "gastrointestinali-altri",
+              "title": "Altri farmaci gastrointestinali",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci gastrointestinali",
+                "indications": [],
+                "effects": [
+                  "Modulazione di funzioni gastrointestinali non comprese nelle altre classi."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali",
+                  "Alvo",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "neurologici",
+              "title": "Altri farmaci neurologici",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci neurologici",
+                "indications": [],
+                "effects": [
+                  "Modulazione di specifici processi neurologici non compresi nelle altre classi."
+                ],
+                "monitoring": [
+                  "Stato neurologico",
+                  "Funzione motoria o sensitiva quando pertinente",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "antidolorifici-non-fans",
+              "title": "Analgesici non FANS",
+              "type": "drug",
+              "content": {
+                "class": "Analgesici non FANS",
+                "indications": [],
+                "effects": [
+                  "Riduzione della percezione del dolore attraverso meccanismi non riconducibili ai FANS."
+                ],
+                "monitoring": [
+                  "Intensità del dolore",
+                  "Stato di coscienza quando pertinente",
+                  "Risposta clinica e tollerabilità"
                 ]
               }
             },
@@ -64,6 +149,23 @@
                   "PA",
                   "FC",
                   "FR e SpO₂."
+                ]
+              }
+            },
+            {
+              "id": "anestetici-locali",
+              "title": "Anestetici locali",
+              "type": "drug",
+              "content": {
+                "class": "Anestetici locali",
+                "indications": [],
+                "effects": [
+                  "Blocco reversibile della conduzione nervosa con riduzione della sensibilità nella zona trattata."
+                ],
+                "monitoring": [
+                  "Sensibilità e funzione della zona trattata",
+                  "Parametri vitali quando pertinenti",
+                  "Segni di reazione locale o sistemica"
                 ]
               }
             },
@@ -145,6 +247,23 @@
                 ],
                 "monitoring": [
                   "Risposta clinica ed eventuali effetti endocrini o metabolici rilevanti."
+                ]
+              }
+            },
+            {
+              "id": "antianemici",
+              "title": "Antianemici",
+              "type": "drug",
+              "content": {
+                "class": "Antianemici",
+                "indications": [],
+                "effects": [
+                  "Correzione o prevenzione dell'anemia attraverso il supporto alla produzione dei globuli rossi o la disponibilità di nutrienti necessari."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Parametri marziali o vitaminici quando indicati",
+                  "Risposta clinica"
                 ]
               }
             },
@@ -374,6 +493,40 @@
                 "monitoring": [
                   "Intensità e frequenza della cefalea",
                   "nausea e risposta clinica."
+                ]
+              }
+            },
+            {
+              "id": "antiparassitari",
+              "title": "Antiparassitari",
+              "type": "drug",
+              "content": {
+                "class": "Antiparassitari",
+                "indications": [],
+                "effects": [
+                  "Eliminazione o inibizione di parassiti responsabili dell'infestazione."
+                ],
+                "monitoring": [
+                  "Segni e sintomi dell'infestazione",
+                  "Risposta clinica",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "antisettici-disinfettanti",
+              "title": "Antisettici e disinfettanti",
+              "type": "drug",
+              "content": {
+                "class": "Antisettici e disinfettanti",
+                "indications": [],
+                "effects": [
+                  "Riduzione o eliminazione di microrganismi su tessuti o superfici, secondo l'impiego."
+                ],
+                "monitoring": [
+                  "Condizioni dell'area trattata",
+                  "Segni di irritazione o reazione locale",
+                  "Risposta al trattamento"
                 ]
               }
             },
@@ -646,6 +799,23 @@
               }
             },
             {
+              "id": "enzimi",
+              "title": "Enzimi e sostituti enzimatici",
+              "type": "drug",
+              "content": {
+                "class": "Enzimi e sostituti enzimatici",
+                "indications": [],
+                "effects": [
+                  "Sostituzione o integrazione di attività enzimatiche carenti o modulazione di specifici processi enzimatici."
+                ],
+                "monitoring": [
+                  "Risposta clinica",
+                  "Parametri laboratoristici pertinenti",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
               "id": "anti-parkinson",
               "title": "Farmaci anti-Parkinson",
               "type": "drug",
@@ -660,6 +830,23 @@
                 "monitoring": [
                   "Pressione ortostatica",
                   "Controllo dei sintomi motori"
+                ]
+              }
+            },
+            {
+              "id": "antiosteoporotici",
+              "title": "Farmaci antiosteoporotici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci antiosteoporotici",
+                "indications": [],
+                "effects": [
+                  "Riduzione della perdita di massa ossea e/o aumento della resistenza scheletrica."
+                ],
+                "monitoring": [
+                  "Calcemia quando indicata",
+                  "Funzione renale",
+                  "Dolore o altri sintomi muscoloscheletrici"
                 ]
               }
             },
@@ -699,6 +886,125 @@
               }
             },
             {
+              "id": "farmaci-metabolici",
+              "title": "Farmaci del metabolismo",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci del metabolismo",
+                "indications": [],
+                "effects": [
+                  "Modulazione di specifiche vie metaboliche per correggere alterazioni del metabolismo."
+                ],
+                "monitoring": [
+                  "Parametri metabolici pertinenti",
+                  "Funzione d'organo quando indicata",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "urogenitali",
+              "title": "Farmaci dell'apparato urogenitale",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci dell'apparato urogenitale",
+                "indications": [],
+                "effects": [
+                  "Trattamento o modulazione di funzioni e condizioni dell'apparato urogenitale."
+                ],
+                "monitoring": [
+                  "Sintomi urinari o genitali",
+                  "Funzione d'organo pertinente",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "dermatologici",
+              "title": "Farmaci dermatologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci dermatologici",
+                "indications": [],
+                "effects": [
+                  "Trattamento o modulazione di condizioni della cute e degli annessi."
+                ],
+                "monitoring": [
+                  "Aspetto e sintomi delle lesioni cutanee",
+                  "Estensione dell'area interessata",
+                  "Reazioni locali"
+                ]
+              }
+            },
+            {
+              "id": "emopoietici",
+              "title": "Farmaci emopoietici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci emopoietici",
+                "indications": [],
+                "effects": [
+                  "Stimolazione o supporto della produzione delle cellule ematiche."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Risposta ematologica",
+                  "Parametri pertinenti alla specifica terapia"
+                ]
+              }
+            },
+            {
+              "id": "oftalmologici",
+              "title": "Farmaci oftalmologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci oftalmologici",
+                "indications": [],
+                "effects": [
+                  "Trattamento o modulazione di condizioni dell'occhio e degli annessi oculari."
+                ],
+                "monitoring": [
+                  "Sintomi oculari",
+                  "Acuità o funzione visiva quando pertinente",
+                  "Segni di irritazione o reazione locale"
+                ]
+              }
+            },
+            {
+              "id": "ostetrici-ginecologici",
+              "title": "Farmaci ostetrici e ginecologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci ostetrici e ginecologici",
+                "indications": [],
+                "effects": [
+                  "Modulazione di processi ormonali e fisiologici dell'apparato riproduttivo e della gravidanza, secondo la classe."
+                ],
+                "monitoring": [
+                  "Parametri clinici pertinenti",
+                  "Segni e sintomi riferiti",
+                  "Parametri laboratoristici quando indicati"
+                ]
+              }
+            },
+            {
+              "id": "otologici",
+              "title": "Farmaci otologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci otologici",
+                "indications": [],
+                "effects": [
+                  "Trattamento di condizioni dell'orecchio e del condotto uditivo."
+                ],
+                "monitoring": [
+                  "Dolore e secrezioni",
+                  "Udito quando pertinente",
+                  "Segni di irritazione o reazione locale"
+                ]
+              }
+            },
+            {
               "id": "broncocostrittori",
               "title": "Farmaci respiratori diversi dai broncodilatatori",
               "type": "drug",
@@ -716,6 +1022,23 @@
               }
             },
             {
+              "id": "urologici",
+              "title": "Farmaci urologici",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci urologici",
+                "indications": [],
+                "effects": [
+                  "Modulazione della funzione delle vie urinarie e/o della prostata, secondo la classe."
+                ],
+                "monitoring": [
+                  "Diuresi e sintomi urinari",
+                  "Funzione renale quando indicata",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
               "id": "gastroprotettori",
               "title": "Gastroprotettori",
               "type": "drug",
@@ -727,6 +1050,23 @@
                 ],
                 "monitoring": [
                   "Sintomi gastrointestinali e risposta clinica."
+                ]
+              }
+            },
+            {
+              "id": "immunomodulanti",
+              "title": "Immunomodulanti",
+              "type": "drug",
+              "content": {
+                "class": "Immunomodulanti",
+                "indications": [],
+                "effects": [
+                  "Modulazione della risposta immunitaria."
+                ],
+                "monitoring": [
+                  "Segni di infezione",
+                  "Emocromo quando indicato",
+                  "Risposta clinica e tollerabilità"
                 ]
               }
             },
@@ -834,6 +1174,40 @@
                 ],
                 "monitoring": [
                   "Alvo",
+                  "Bilancio idrico"
+                ]
+              }
+            },
+            {
+              "id": "metabolismo-osseo",
+              "title": "Metabolismo osseo",
+              "type": "drug",
+              "content": {
+                "class": "Metabolismo osseo",
+                "indications": [],
+                "effects": [
+                  "Regolazione del rimodellamento e della mineralizzazione ossea."
+                ],
+                "monitoring": [
+                  "Calcemia e altri parametri minerali quando indicati",
+                  "Funzione renale",
+                  "Dolore osseo e risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "minerali-elettroliti",
+              "title": "Minerali ed elettroliti",
+              "type": "drug",
+              "content": {
+                "class": "Minerali ed elettroliti",
+                "indications": [],
+                "effects": [
+                  "Correzione o mantenimento dell'equilibrio di minerali ed elettroliti."
+                ],
+                "monitoring": [
+                  "Elettroliti sierici",
+                  "Funzione renale",
                   "Bilancio idrico"
                 ]
               }
@@ -1084,40 +1458,6 @@
               }
             },
             {
-              "id": "metabolismo-osseo",
-              "title": "Metabolismo osseo",
-              "type": "drug",
-              "content": {
-                "class": "Metabolismo osseo",
-                "indications": [],
-                "effects": [
-                  "Regolazione del rimodellamento e della mineralizzazione ossea."
-                ],
-                "monitoring": [
-                  "Calcemia e altri parametri minerali quando indicati",
-                  "Funzione renale",
-                  "Dolore osseo e risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "antianemici",
-              "title": "Antianemici",
-              "type": "drug",
-              "content": {
-                "class": "Antianemici",
-                "indications": [],
-                "effects": [
-                  "Correzione o prevenzione dell'anemia attraverso il supporto alla produzione dei globuli rossi o la disponibilità di nutrienti necessari."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Parametri marziali o vitaminici quando indicati",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
               "id": "vitamine",
               "title": "Vitamine",
               "type": "drug",
@@ -1131,346 +1471,6 @@
                   "Parametri laboratoristici pertinenti quando indicati",
                   "Segni di carenza o eccesso",
                   "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "minerali-elettroliti",
-              "title": "Minerali ed elettroliti",
-              "type": "drug",
-              "content": {
-                "class": "Minerali ed elettroliti",
-                "indications": [],
-                "effects": [
-                  "Correzione o mantenimento dell'equilibrio di minerali ed elettroliti."
-                ],
-                "monitoring": [
-                  "Elettroliti sierici",
-                  "Funzione renale",
-                  "Bilancio idrico"
-                ]
-              }
-            },
-            {
-              "id": "farmaci-metabolici",
-              "title": "Farmaci del metabolismo",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci del metabolismo",
-                "indications": [],
-                "effects": [
-                  "Modulazione di specifiche vie metaboliche per correggere alterazioni del metabolismo."
-                ],
-                "monitoring": [
-                  "Parametri metabolici pertinenti",
-                  "Funzione d'organo quando indicata",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "gastrointestinali-altri",
-              "title": "Altri farmaci gastrointestinali",
-              "type": "drug",
-              "content": {
-                "class": "Altri farmaci gastrointestinali",
-                "indications": [],
-                "effects": [
-                  "Modulazione di funzioni gastrointestinali non comprese nelle altre classi."
-                ],
-                "monitoring": [
-                  "Sintomi gastrointestinali",
-                  "Alvo",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "emopoietici",
-              "title": "Farmaci emopoietici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci emopoietici",
-                "indications": [],
-                "effects": [
-                  "Stimolazione o supporto della produzione delle cellule ematiche."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Risposta ematologica",
-                  "Parametri pertinenti alla specifica terapia"
-                ]
-              }
-            },
-            {
-              "id": "antiosteoporotici",
-              "title": "Farmaci antiosteoporotici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci antiosteoporotici",
-                "indications": [],
-                "effects": [
-                  "Riduzione della perdita di massa ossea e/o aumento della resistenza scheletrica."
-                ],
-                "monitoring": [
-                  "Calcemia quando indicata",
-                  "Funzione renale",
-                  "Dolore o altri sintomi muscoloscheletrici"
-                ]
-              }
-            },
-            {
-              "id": "enzimi",
-              "title": "Enzimi e sostituti enzimatici",
-              "type": "drug",
-              "content": {
-                "class": "Enzimi e sostituti enzimatici",
-                "indications": [],
-                "effects": [
-                  "Sostituzione o integrazione di attività enzimatiche carenti o modulazione di specifici processi enzimatici."
-                ],
-                "monitoring": [
-                  "Risposta clinica",
-                  "Parametri laboratoristici pertinenti",
-                  "Tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "immunomodulanti",
-              "title": "Immunomodulanti",
-              "type": "drug",
-              "content": {
-                "class": "Immunomodulanti",
-                "indications": [],
-                "effects": [
-                  "Modulazione della risposta immunitaria."
-                ],
-                "monitoring": [
-                  "Segni di infezione",
-                  "Emocromo quando indicato",
-                  "Risposta clinica e tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "oftalmologici",
-              "title": "Farmaci oftalmologici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci oftalmologici",
-                "indications": [],
-                "effects": [
-                  "Trattamento o modulazione di condizioni dell'occhio e degli annessi oculari."
-                ],
-                "monitoring": [
-                  "Sintomi oculari",
-                  "Acuità o funzione visiva quando pertinente",
-                  "Segni di irritazione o reazione locale"
-                ]
-              }
-            },
-            {
-              "id": "otologici",
-              "title": "Farmaci otologici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci otologici",
-                "indications": [],
-                "effects": [
-                  "Trattamento di condizioni dell'orecchio e del condotto uditivo."
-                ],
-                "monitoring": [
-                  "Dolore e secrezioni",
-                  "Udito quando pertinente",
-                  "Segni di irritazione o reazione locale"
-                ]
-              }
-            },
-            {
-              "id": "dermatologici",
-              "title": "Farmaci dermatologici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci dermatologici",
-                "indications": [],
-                "effects": [
-                  "Trattamento o modulazione di condizioni della cute e degli annessi."
-                ],
-                "monitoring": [
-                  "Aspetto e sintomi delle lesioni cutanee",
-                  "Estensione dell'area interessata",
-                  "Reazioni locali"
-                ]
-              }
-            },
-            {
-              "id": "urogenitali",
-              "title": "Farmaci dell'apparato urogenitale",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci dell'apparato urogenitale",
-                "indications": [],
-                "effects": [
-                  "Trattamento o modulazione di funzioni e condizioni dell'apparato urogenitale."
-                ],
-                "monitoring": [
-                  "Sintomi urinari o genitali",
-                  "Funzione d'organo pertinente",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "ostetrici-ginecologici",
-              "title": "Farmaci ostetrici e ginecologici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci ostetrici e ginecologici",
-                "indications": [],
-                "effects": [
-                  "Modulazione di processi ormonali e fisiologici dell'apparato riproduttivo e della gravidanza, secondo la classe."
-                ],
-                "monitoring": [
-                  "Parametri clinici pertinenti",
-                  "Segni e sintomi riferiti",
-                  "Parametri laboratoristici quando indicati"
-                ]
-              }
-            },
-            {
-              "id": "urologici",
-              "title": "Farmaci urologici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci urologici",
-                "indications": [],
-                "effects": [
-                  "Modulazione della funzione delle vie urinarie e/o della prostata, secondo la classe."
-                ],
-                "monitoring": [
-                  "Diuresi e sintomi urinari",
-                  "Funzione renale quando indicata",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "neurologici",
-              "title": "Altri farmaci neurologici",
-              "type": "drug",
-              "content": {
-                "class": "Altri farmaci neurologici",
-                "indications": [],
-                "effects": [
-                  "Modulazione di specifici processi neurologici non compresi nelle altre classi."
-                ],
-                "monitoring": [
-                  "Stato neurologico",
-                  "Funzione motoria o sensitiva quando pertinente",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "anestetici-locali",
-              "title": "Anestetici locali",
-              "type": "drug",
-              "content": {
-                "class": "Anestetici locali",
-                "indications": [],
-                "effects": [
-                  "Blocco reversibile della conduzione nervosa con riduzione della sensibilità nella zona trattata."
-                ],
-                "monitoring": [
-                  "Sensibilità e funzione della zona trattata",
-                  "Parametri vitali quando pertinenti",
-                  "Segni di reazione locale o sistemica"
-                ]
-              }
-            },
-            {
-              "id": "antisettici-disinfettanti",
-              "title": "Antisettici e disinfettanti",
-              "type": "drug",
-              "content": {
-                "class": "Antisettici e disinfettanti",
-                "indications": [],
-                "effects": [
-                  "Riduzione o eliminazione di microrganismi su tessuti o superfici, secondo l'impiego."
-                ],
-                "monitoring": [
-                  "Condizioni dell'area trattata",
-                  "Segni di irritazione o reazione locale",
-                  "Risposta al trattamento"
-                ]
-              }
-            },
-            {
-              "id": "antiparassitari",
-              "title": "Antiparassitari",
-              "type": "drug",
-              "content": {
-                "class": "Antiparassitari",
-                "indications": [],
-                "effects": [
-                  "Eliminazione o inibizione di parassiti responsabili dell'infestazione."
-                ],
-                "monitoring": [
-                  "Segni e sintomi dell'infestazione",
-                  "Risposta clinica",
-                  "Tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "antidolorifici-non-fans",
-              "title": "Analgesici non FANS",
-              "type": "drug",
-              "content": {
-                "class": "Analgesici non FANS",
-                "indications": [],
-                "effects": [
-                  "Riduzione della percezione del dolore attraverso meccanismi non riconducibili ai FANS."
-                ],
-                "monitoring": [
-                  "Intensità del dolore",
-                  "Stato di coscienza quando pertinente",
-                  "Risposta clinica e tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "antiinfiammatori-altri",
-              "title": "Altri antinfiammatori",
-              "type": "drug",
-              "content": {
-                "class": "Altri antinfiammatori",
-                "indications": [],
-                "effects": [
-                  "Riduzione della risposta infiammatoria attraverso meccanismi diversi dai FANS."
-                ],
-                "monitoring": [
-                  "Segni e sintomi dell'infiammazione",
-                  "Temperatura quando pertinente",
-                  "Risposta clinica e tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "coagulazione-altri",
-              "title": "Altri farmaci della coagulazione",
-              "type": "drug",
-              "content": {
-                "class": "Altri farmaci della coagulazione",
-                "indications": [],
-                "effects": [
-                  "Modulazione della coagulazione o dell'emostasi attraverso meccanismi diversi dalle classi principali."
-                ],
-                "monitoring": [
-                  "Segni di sanguinamento o trombosi",
-                  "Emocromo",
-                  "Parametri della coagulazione quando indicati"
                 ]
               }
             }
