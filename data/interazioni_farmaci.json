@@ -1,0 +1,20 @@
+[
+  {
+    "farmacoA": "Aciclovir",
+    "farmacoB": "Diazepam",
+    "stato": "incompatibile",
+    "nota": "Rischio immediato di precipitazione chimica nella linea."
+  },
+  {
+    "farmacoA": "Amiodarone Cloridrato",
+    "farmacoB": "Ceftriaxone",
+    "stato": "incompatibile",
+    "nota": "Formazione di precipitato bianco lattiginoso."
+  },
+  {
+    "farmacoA": "Fentanyl",
+    "farmacoB": "Midazolam",
+    "stato": "compatibile",
+    "nota": "Compatibili in siringa estemporanea. Monitorare respiro."
+  }
+]
