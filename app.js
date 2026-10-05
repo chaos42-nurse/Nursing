@@ -3300,17 +3300,31 @@ function renderDrug(item, data) {
 (function() {
     let listaFarmaciDati = [];
 
-    // 1. Carica i dati dal file CSV (valido solo dopo aver estratto il file ZIP nella repo)
+    // 1. Carica i dati dal file CSV (Scompatta in automatico il file ZIP tramite JSZip)
     async function caricaDatabase() {
         try {
+            // Scarica l'archivio ZIP come ArrayBuffer (dati binari)
             const response = await fetch("./data/db_drug_interactions.csv.zip");
-            if (!response.ok) throw new Error();
+            if (!response.ok) throw new Error("Errore nel download del file ZIP");
             
-            const testo = await response.text();
+            const arrayBuffer = await response.arrayBuffer();
+
+            // Inizializza JSZip e carica l'archivio
+            const zip = await JSZip.loadAsync(arrayBuffer);
             
-            // Protezione: se rileva ancora un file ZIP bloccato, ferma l'esecuzione per evitare scritte strane
+            // Cerca il file CSV all'interno dello ZIP (deve chiamarsi esattamente così)
+            const fileInterno = zip.file("db_drug_interactions.csv");
+            if (!fileInterno) {
+                console.error("[Nursing Shot] Errore: 'db_drug_interactions.csv' non trovato dentro lo ZIP.");
+                return;
+            }
+
+            // Estrae il contenuto testuale del file CSV
+            const testo = await fileInterno.async("string");
+            
+            // Protezione ereditata: se rileva ancora la firma ZIP "PK" (improbabile qui), ferma l'esecuzione
             if (testo.startsWith("PK")) {
-                console.error("[Nursing Shot] Errore: Il file farmaci.csv è ancora un archivio ZIP compresso. Estrailo in formato testo.");
+                console.error("[Nursing Shot] Errore: Il file estratto risulta ancora compresso.");
                 return;
             }
 
@@ -3331,7 +3345,7 @@ function renderDrug(item, data) {
             
             console.log(`[Nursing Shot] Database sincronizzato: ${listaFarmaciDati.length} farmaci pronti.`);
         } catch (e) {
-            console.error("Impossibile caricare il file farmaci.csv:", e);
+            console.error("Impossibile caricare o decomprimere il file dei farmaci:", e);
         }
     }
     caricaDatabase();
