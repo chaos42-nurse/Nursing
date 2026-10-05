@@ -1749,7 +1749,7 @@ section h2 {
     border: 1px solid var(--border);
     border-radius: 10px;
     outline: none;
-    background: #0f141b;
+    background: var(--surface);
     color: var(--text);
     font: inherit;
 }
