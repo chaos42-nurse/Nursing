@@ -102,7 +102,7 @@ function setupPvInputFormatting(modal) {
     });
 
     temperatureInput?.addEventListener("input", () => {
-        let digits = temperatureInput.value.replace(/\D/g, "").slice(0, 4);
+        let digits = temperatureInput.value.replace(/\D/g, "").slice(0, 3);
         if (digits.length > 2) {
             digits = digits.slice(0, 2) + "," + digits.slice(2);
         }
@@ -480,10 +480,10 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>🩺 Nuova rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh">
+                        <input id="patientPa" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="P.A. mm/Mh">
                         <input id="patientFc" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="F.C. bpm">
                         <input id="patientSat" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Sat. %">
-                        <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
+                        <input id="patientTemperature" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="T.° °C">
                         <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addNewPatientPv" class="settings-action" type="button">💾 Registra PV</button>
@@ -573,10 +573,10 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>✏️ Modifica rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh">
+                        <input id="patientPa" class="personal-note-title-input" type="text" inputmode="numeric" value="${escapeAttribute(entry.pa || "")}" placeholder="P.A. mm/Mh">
                         <input id="patientFc" class="personal-note-title-input" type="text" inputmode="numeric" value="${escapeAttribute(entry.fc || "")}" placeholder="F.C. bpm">
                         <input id="patientSat" class="personal-note-title-input" type="text" inputmode="numeric" value="${escapeAttribute(entry.sat || "")}" placeholder="Sat. %">
-                        <input id="patientTemperature" class="personal-note-title-input" type="text" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
+                        <input id="patientTemperature" class="personal-note-title-input" type="text" inputmode="numeric" value="${escapeAttribute(entry.temperature || "")}" placeholder="T.° °C">
                         <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="numeric" value="${escapeAttribute(entry.glucose || "")}" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="savePatientPv" class="settings-action" type="button">💾 Salva rilevazione</button>
@@ -615,10 +615,10 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>🩺 Nuova rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" placeholder="P.A. mm/Mh">
+                        <input id="patientPa" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="P.A. mm/Mh">
                         <input id="patientFc" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="F.C. bpm">                        
                         <input id="patientSat" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Sat. %">
-                        <input id="patientTemperature" class="personal-note-title-input" type="text" placeholder="T.° °C">
+                        <input id="patientTemperature" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="T.° °C">
                         <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addPatientPv" class="settings-action" type="button">💾 Registra PV</button>
