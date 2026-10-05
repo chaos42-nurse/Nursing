@@ -1456,6 +1456,7 @@ async function loadState() {
             dataList.id = dataListId;
             document.body.appendChild(dataList);
             input.setAttribute("list", dataListId);
+            input.setAttribute("autocomplete", "off");
 
             // Ascolta la digitazione dell'utente
             input.addEventListener("input", () => {
