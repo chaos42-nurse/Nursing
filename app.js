@@ -7209,7 +7209,7 @@ function renderAllNoteLinksPage(termFilter = "") {
     // Shortcut presenti nelle note personali.
     for (const record of getAllPersonalNoteRecords()) {
         for (const term of extractPlaceorders(
-            String(record.note.title || "") + "\n" + String(record.note.text || "")
+            String(record.note.text || "")
         )) {
             addShortcutSource(term, {
                 type: "note",
