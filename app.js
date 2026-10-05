@@ -8492,9 +8492,107 @@ function renderSharedPersonalizationImport(payload) {
     `;
 }
 
-/* =========================================================
-   AVVIO
-========================================================= */
+// =========================================================================
+// SISTEMA AUTO-INSTALLANTE CON TRADUZIONE EN -> IT E RIMOZIONE DOPPIONI
+// =========================================================================
+
+(function() {
+    let listaFarmaciDati = [];
+
+    // 1. DIZIONARIO DI TRADUZIONE (Estendibile)
+    // Struttura: "nome_inglese_nel_csv": "Nome Italiano Da Cercare"
+    const dizionarioTraduzione = {
+        "acetaminophen": "Paracetamolo",
+        "aspirin": "Aspirina",
+        "ibuprofen": "Ibuprofene",
+        "amoxicillin": "Amoxicillina",
+        "warfarin": "Warfarin",
+        "heparin": "Eparina",
+        "diazepam": "Diazepam",
+        "omeprazole": "Omeprazolo",
+        "metformin": "Metformina",
+        "prednisone": "Prednisone",
+        "atorvastatin": "Atorvastatina",
+        "furosemide": "Furosemide"
+    };
+
+    // Creiamo un dizionario inverso (Italiano -> Inglese) per convertire l'input dell'utente
+    const dizionarioInverso = {};
+    for (const [en, it] of Object.entries(dizionarioTraduzione)) {
+        dizionarioInverso[it.toLowerCase()] = en.toLowerCase();
+    }
+
+    // Lista di emergenza se il CSV locale non è leggibile
+    const farmaciDiBackup = Object.values(dizionarioTraduzione);
+
+    // 2. Carica i dati dal CSV della repository
+    async function caricaDatabase() {
+        try {
+            const response = await fetch("/src/data/farmaci.csv");
+            if (!response.ok) throw new Error();
+            const testo = await response.text();
+            const righe = testo.split(/\r?\n/);
+            
+            const nomiGrezzi = righe.map(riga => {
+                const colonne = riga.split(/[,;]/);
+                const nomeInglese = colonne?.trim(); // Nome originale in Inglese dal CSV
+                
+                // TRADUZIONE: Se esiste la traduzione in Italiano restituisce quella, altrimenti lascia l'Inglese
+                if (nomeInglese && dizionarioTraduzione[nomeInglese.toLowerCase()]) {
+                    return dizionarioTraduzione[nomeInglese.toLowerCase()];
+                }
+                return nomeInglese;
+            }).filter(nome => nome && nome.length > 0);
+
+            // RIMOZIONE DOPPIONI
+            listaFarmaciDati = [...new Set(nomiGrezzi)];
+
+            if (listaFarmaciDati.length > 0 && ["nome", "farmaco"].includes(listaFarmaciDati.toLowerCase())) {
+                listaFarmaciDati.shift();
+            }
+        } catch (e) {
+            listaFarmaciDati = [...new Set(farmaciDiBackup)];
+        }
+    }
+    caricaDatabase();
+
+    // 3. Osserva la pagina: appena appare un input di ricerca, gli aggancia il datalist
+    const observer = new MutationObserver(() => {
+        const inputs = document.querySelectorAll("input[type='text'], input:not([type])");
+        
+        inputs.forEach(input => {
+            if (input.hasAttribute("list")) return;
+
+            const dataListId = "dl-" + Math.random().toString(36).substr(2, 9);
+            const dataList = document.createElement("datalist");
+            dataList.id = dataListId;
+            document.body.appendChild(dataList);
+            input.setAttribute("list", dataListId);
+
+            // Ascolta la digitazione dell'utente (Filtro per iniziali in Italiano)
+            input.addEventListener("input", () => {
+                const valore = input.value.toLowerCase();
+                dataList.innerHTML = ""; // Svuota i vecchi suggerimenti
+
+                if (valore.length > 0) {
+                    // FILTRO RIGIDO: Mantiene solo i nomi tradotti in Italiano che iniziano con quelle lettere
+                    const filtrati = listaFarmaciDati.filter(f => 
+                        f.toLowerCase().startsWith(valore)
+                    ).slice(0, 15);
+
+                    // Popola il menu a tendina nativo senza duplicati e in Italiano
+                    filtrati.forEach(farmaco => {
+                        const option = document.createElement("option");
+                        option.value = farmaco;
+                        dataList.appendChild(option);
+                    });
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
 
 /* =========================================================
    TEMA
