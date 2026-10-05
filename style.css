@@ -1814,6 +1814,20 @@ section h2 {
 
 
 
+/* Pulsanti modifica/elimina delle note: mantengono lo stile dell'app */
+.app-note-card .personal-note-actions button {
+    background: transparent;
+    color: var(--text);
+    border: 0;
+    box-shadow: none;
+}
+
+.app-note-card .personal-note-actions button:hover,
+.app-note-card .personal-note-actions button:focus-visible {
+    background: var(--surface-2, rgba(127, 127, 127, 0.10));
+    color: var(--text);
+}
+
 /* =========================================================
    NOTE GENERALI DELL'APP
 ========================================================= */
