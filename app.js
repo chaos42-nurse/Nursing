@@ -3340,7 +3340,7 @@ function renderDrug(item, data) {
                 return;
             }
 
-            const righe = testo.split(\(/\r\)?\n/);
+            const righe = testo.split(/\r?\n/);
             
             // Estrazione sicura della prima colonna del CSV
             const nomiGrezzi = righe.map(riga => {
