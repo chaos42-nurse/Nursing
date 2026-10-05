@@ -433,6 +433,12 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
 
     setupPatientOrderControls();
     refreshOrderControls();
+
+    const newPatientButton = document.getElementById("newPatientButton");
+    newPatientButton?.addEventListener("click", () => {
+        window.__newPatientPvDraft = [];
+        renderPatientsPage("", false, true);
+    });
 }
 function setupPatients() {
     document.addEventListener("click", event => {
@@ -466,12 +472,6 @@ function setupPatients() {
     });
 
     document.addEventListener("click", event => {
-        if (event.target.closest("#newPatientButton")) {
-            window.__newPatientPvDraft = [];
-            renderPatientsPage("", false, true);
-            return;
-        }
-
         if (event.target.closest("#openNewPatientPvRecorder")) {
             const modal = document.createElement("div");
             modal.className = "patient-pv-modal";
