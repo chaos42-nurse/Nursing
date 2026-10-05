@@ -3340,7 +3340,7 @@ function renderDrug(item, data) {
                 return;
             }
 
-            const righe = testo.split(/\r\)?\n/);
+            const righe = testo.split(/\r?\n/);
             
             // Corretto un potenziale bug di sintassi nella mappatura del file originale
             const nomiGrezzi = righe.map(riga => {
