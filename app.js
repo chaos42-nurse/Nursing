@@ -1201,7 +1201,7 @@ async function loadState() {
             backButton.style.display = "flex";
         }
 
-        stateTitle.textContent = "📝 Note dell'app";
+        stateTitle.textContent = "📝 Note";
         description.textContent = "Appunti e idee non legati alle singole sezioni.";
         renderAppNotesPage();
         return;
@@ -6799,11 +6799,11 @@ function renderAppNotesPage() {
     content.innerHTML = `
         <section class="detail-page app-notes-page">
             <div class="detail-header-row">
-                <h2>📝 Note dell'app</h2>
+                <h2>📝 Note</h2>
             </div>
 
             <p class="personal-notes-context">
-                Appunti liberi per idee, modifiche da fare e promemoria durante l'utilizzo di Nursing Shot.
+                Appunti liberi.
             </p>
 
             <div class="app-notes-list">
@@ -6822,7 +6822,7 @@ function renderAppNotesPage() {
                     `).join("")
                     : `
                         <div class="personal-note-empty">
-                            Nessuna nota dell'app. Puoi usare questa sezione per segnare idee e modifiche mentre utilizzi Nursing Shot.
+                            Nessuna nota.
                         </div>
                     `}
             </div>
@@ -7082,7 +7082,7 @@ function getLinkedNoteRecords(term, sourceStateId, sourceItemId, sourceNoteId) {
         }
 
         return extractPlaceorders(
-            String(record.note.title || "") + "\n" + String(record.note.text || "")
+            String(record.note.text || "")
         ).some(
             linkedTerm => normalizeLinkTerm(linkedTerm) === normalized
         );
