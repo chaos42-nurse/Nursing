@@ -2639,7 +2639,7 @@ async function loadInteractionsIndex() {
     if (Array.isArray(interactionsIndex)) return interactionsIndex;
 
     try {
-        const response = await fetch("./data/interazioni.csv", { cache: "no-store" });
+        const response = await fetch("./data/db_drug_interactions.csv.zip", { cache: "no-store" });
         if (!response.ok) {
             throw new Error(`File interazioni.csv non trovato — HTTP ${response.status}`);
         }
@@ -2693,7 +2693,7 @@ async function renderDrugInteractions() {
 
     try {
         // Scarica il CSV generato dall'Action di GitHub bypassando la cache del browser
-        const response = await fetch('./data/interazioni.csv', { cache: 'no-store' });
+        const response = await fetch('./data/db_drug_interactions.csv.zip', { cache: 'no-store' });
         if (response.ok) {
             const testoCsv = await response.text();
             const righe = testoCsv.split('\n').filter(Boolean);
