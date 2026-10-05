@@ -3266,6 +3266,116 @@ function renderDrug(item, data) {
 
 }
 
+// =========================================================================
+// MENU A TENDINA INTERATTIVO - ISOLATO SOLO SU INPUT DRUGA E DRUGB
+// =========================================================================
+
+(function() {
+    let listaFarmaciDati = [];
+
+    // 1. Carica i dati dal CSV della repository
+    async function caricaDatabase() {
+        try {
+            const response = await fetch("./data/db_drug_interactions.csv.zip");
+            if (!response.ok) throw new Error();
+            const testo = await response.text();
+            const righe = testo.split(/\r?\n/);
+            
+            const nomiGrezzi = righe.map(riga => {
+                const colonne = riga.split(/[,;]/);
+                return colonne[0]?.trim(); // Estrae il principio attivo dalla prima colonna
+            }).filter(nome => nome && nome.length > 0);
+
+            // RIMOZIONE DOPPIONI
+            listaFarmaciDati = [...new Set(nomiGrezzi)];
+
+            if (listaFarmaciDati.length > 0 && ["nome", "farmaco"].includes(listaFarmaciDati[0].toLowerCase())) {
+                listaFarmaciDati.shift();
+            }
+        } catch (e) {
+            console.error("Impossibile caricare il CSV delle interazioni:", e);
+        }
+    }
+    caricaDatabase();
+
+    // 2. Osserva la pagina controllando SOLO la presenza di #drugA e #drugB
+    const observer = new MutationObserver(() => {
+        // Seleziona selettivamente solo i due input della compatibilità farmaci visti nello screenshot
+        const inputsInterazione = document.querySelectorAll("#drugA, #drugB");
+        
+        inputsInterazione.forEach(inputRicerca => {
+            if (!inputRicerca || inputRicerca.hasAttribute("data-has-custom-dropdown")) return;
+
+            // Blocca l'input per evitare duplicazioni e rimuove i suggerimenti nativi
+            inputRicerca.setAttribute("data-has-custom-dropdown", "true");
+            inputRicerca.setAttribute("autocomplete", "off");
+
+            // Rimuove l'attributo list nativo visibile nello screenshot per non sovrapporre i menu
+            inputRicerca.removeAttribute("list");
+
+            // Crea il contenitore del menu a tendina (stile "classe farmaci")
+            const boxSuggerimenti = document.createElement("div");
+            boxSuggerimenti.className = "patient-search-suggestions-container";
+            boxSuggerimenti.style.cssText = "position: absolute; width: 100%; max-height: 250px; overflow-y: auto; z-index: 999; background: #fff; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 4px;";
+            
+            if (inputRicerca.parentElement) {
+                inputRicerca.parentElement.style.position = "relative";
+                inputRicerca.parentElement.appendChild(boxSuggerimenti);
+            }
+
+            // Ascolta la digitazione dell'utente SOLO su questo input
+            inputRicerca.addEventListener("input", () => {
+                const valore = inputRicerca.value.toLowerCase();
+                boxSuggerimenti.innerHTML = ""; 
+
+                if (valore.length === 0) {
+                    boxSuggerimenti.style.display = "none";
+                    return;
+                }
+
+                // FILTRO RIGIDO: Solo i principi attivi che INIZIANO con le lettere digitate
+                const filtrati = listaFarmaciDati.filter(farmaco => 
+                    farmaco.toLowerCase().startsWith(valore)
+                ).slice(0, 10); 
+
+                if (filtrati.length > 0) {
+                    boxSuggerimenti.style.display = "block";
+
+                    // Genera la lista di pulsanti con i tag richiesti
+                    filtrati.forEach(farmaco => {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "patient-search-suggestion";
+                        btn.innerHTML = `<strong>${farmaco}</strong>`;
+
+                        // Gestisce il click sul farmaco selezionato dal menu a tendina
+                        btn.addEventListener("click", () => {
+                            inputRicerca.value = farmaco; 
+                            boxSuggerimenti.style.display = "none"; 
+                            
+                            // Scatena l'evento di input originale per far elaborare la compatibilità alla tua app
+                            inputRicerca.dispatchEvent(new Event("input"));
+                        });
+
+                        boxSuggerimenti.appendChild(btn);
+                    });
+                } else {
+                    boxSuggerimenti.style.display = "none";
+                }
+            });
+
+            // Chiude la tendina se si clicca altrove nella pagina
+            document.addEventListener("click", (e) => {
+                if (e.target !== inputRicerca && !boxSuggerimenti.contains(e.target)) {
+                    boxSuggerimenti.style.display = "none";
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+
 
 /* =========================================================
    LABORATORIO
