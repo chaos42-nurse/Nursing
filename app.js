@@ -17,6 +17,9 @@ const editor =
 const patientRouteId =
     params.get("patient") || "";
 
+const appNotesRoute =
+    params.get("appnotes") || "";
+
 
 /* =========================================================
    ELEMENTI HTML
@@ -50,7 +53,8 @@ const PERSONALIZATION_VERSION = 2;
 const PERSONALIZATION_KEYS = {
     theme: "nursing-theme",
     categoryOrder: "nursing-category-order",
-    notes: "nursing-personal-notes"
+    notes: "nursing-personal-notes",
+    appNotes: "nursing-app-notes"
 };
 
 function normalizePatient(patient = {}) {
@@ -800,6 +804,10 @@ function resetAllPersonalization() {
     );
 
     localStorage.removeItem(
+        PERSONALIZATION_KEYS.appNotes
+    );
+
+    localStorage.removeItem(
         PERSONALIZATION_KEYS.theme
     );
 
@@ -1184,6 +1192,20 @@ async function loadState() {
 
         const linksMode =
         new URLSearchParams(window.location.search).get("links");
+
+    if (appNotesRoute === "1") {
+        document.body.classList.remove("home-page");
+        shortcuts.style.display = "none";
+
+        if (backButton) {
+            backButton.style.display = "flex";
+        }
+
+        stateTitle.textContent = "📝 Note dell'app";
+        description.textContent = "Appunti e idee non legati alle singole sezioni.";
+        renderAppNotesPage();
+        return;
+    }
 
     if (linksMode === "1") {
         document.body.classList.remove("home-page");
@@ -6623,6 +6645,7 @@ function setupSettings() {
     const resetButton = document.getElementById("resetOrderButton");
     const themeButton = document.getElementById("settingsThemeButton");
     const noteLinksButton = document.getElementById("noteLinksButton");
+    const appNotesButton = document.getElementById("appNotesButton");
     const shareButton = document.getElementById("sharePersonalizationButton");
     const patientsButton = document.getElementById("patientsButton");
     const resetAllButton = document.getElementById("resetPersonalizationButton");
@@ -6691,6 +6714,11 @@ function setupSettings() {
         window.location.href = "?links=1";
     });
 
+    appNotesButton?.addEventListener("click", () => {
+        panel.hidden = true;
+        window.location.href = "?appnotes=1";
+    });
+
     themeButton?.addEventListener("click", () => {
         const current =
             document.documentElement.dataset.theme || "dark";
@@ -6726,6 +6754,200 @@ function setupSettings() {
             loadState();
         } else {
             loadCategories();
+        }
+    });
+}
+
+
+/* =========================================================
+   NOTE GENERALI DELL'APP
+   Note libere non legate a una sezione o scheda specifica.
+========================================================= */
+
+function getAppNotes() {
+    try {
+        const raw = JSON.parse(
+            localStorage.getItem(PERSONALIZATION_KEYS.appNotes) || "[]"
+        );
+
+        if (!Array.isArray(raw)) return [];
+
+        return raw
+            .filter(note => note && typeof note === "object")
+            .map(note => ({
+                id: String(note.id || Date.now()),
+                title: String(note.title || "Nota"),
+                text: String(note.text || ""),
+                createdAt: String(note.createdAt || ""),
+                updatedAt: String(note.updatedAt || "")
+            }));
+    } catch (_) {
+        return [];
+    }
+}
+
+function saveAppNotes(notes) {
+    localStorage.setItem(
+        PERSONALIZATION_KEYS.appNotes,
+        JSON.stringify(notes)
+    );
+}
+
+function renderAppNotesPage() {
+    const notes = getAppNotes();
+
+    content.innerHTML = `
+        <section class="detail-page app-notes-page">
+            <div class="detail-header-row">
+                <h2>📝 Note dell'app</h2>
+            </div>
+
+            <p class="personal-notes-context">
+                Appunti liberi per idee, modifiche da fare e promemoria durante l'utilizzo di Nursing Shot.
+            </p>
+
+            <div class="app-notes-list">
+                ${notes.length
+                    ? notes.map(note => `
+                        <article class="app-note-card" data-app-note-id="${escapeAttribute(note.id)}">
+                            <div class="app-note-card-header">
+                                <h3>${escapeHtml(note.title || "Nota")}</h3>
+                                <div class="personal-note-actions">
+                                    <button class="app-note-edit" type="button" data-app-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
+                                    <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="app-note-text">${escapeNoteText(note.text)}</div>
+                        </article>
+                    `).join("")
+                    : `
+                        <div class="personal-note-empty">
+                            Nessuna nota dell'app. Puoi usare questa sezione per segnare idee e modifiche mentre utilizzi Nursing Shot.
+                        </div>
+                    `}
+            </div>
+
+            <div class="app-note-editor">
+                <h3>➕ Nuova nota</h3>
+                <input
+                    id="appNoteTitle"
+                    class="personal-note-title-input"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="Titolo della nota"
+                >
+                <textarea
+                    id="appNoteInput"
+                    class="personal-note-input"
+                    placeholder="Scrivi un'idea, una modifica da fare o un promemoria..."
+                    rows="7"
+                ></textarea>
+                <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
+                <p id="appNoteMessage" class="personal-note-message"></p>
+            </div>
+        </section>
+    `;
+}
+
+function setupAppNotes() {
+    document.addEventListener("click", event => {
+        const editButton = event.target.closest("[data-app-note-edit]");
+        if (editButton) {
+            const noteId = editButton.dataset.appNoteEdit || "";
+            const note = getAppNotes().find(current =>
+                String(current.id) === String(noteId)
+            );
+
+            if (!note) return;
+
+            const editor = document.querySelector(".app-note-editor");
+            const titleInput = document.getElementById("appNoteTitle");
+            const input = document.getElementById("appNoteInput");
+            const saveButton = document.getElementById("saveAppNote");
+
+            if (!editor || !titleInput || !input) return;
+
+            editor.dataset.editingId = String(note.id);
+            titleInput.value = note.title || "";
+            input.value = note.text || "";
+
+            if (saveButton) {
+                saveButton.textContent = "💾 Salva modifiche";
+            }
+
+            editor.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+            input.focus();
+            input.setSelectionRange(
+                input.value.length,
+                input.value.length
+            );
+            return;
+        }
+
+        const deleteButton = event.target.closest("[data-app-note-delete]");
+        if (deleteButton) {
+            const noteId = deleteButton.dataset.appNoteDelete || "";
+            const notes = getAppNotes().filter(note =>
+                String(note.id) !== String(noteId)
+            );
+
+            saveAppNotes(notes);
+            renderAppNotesPage();
+            return;
+        }
+
+        if (event.target.closest("#saveAppNote")) {
+            const titleInput = document.getElementById("appNoteTitle");
+            const input = document.getElementById("appNoteInput");
+            const editor = document.querySelector(".app-note-editor");
+
+            if (!input) return;
+
+            const textValue = input.value.trim();
+
+            if (!textValue) {
+                const message = document.getElementById("appNoteMessage");
+                if (message) {
+                    message.textContent = "✏️ Scrivi prima il testo della nota.";
+                }
+                return;
+            }
+
+            const notes = getAppNotes();
+            const editingId = editor?.dataset.editingId || "";
+            const now = new Date().toISOString();
+
+            if (editingId) {
+                const note = notes.find(current =>
+                    String(current.id) === String(editingId)
+                );
+
+                if (note) {
+                    note.title =
+                        (titleInput?.value || "").trim() || "Nota";
+                    note.text = textValue;
+                    note.updatedAt = now;
+                }
+
+                saveAppNotes(notes);
+                renderAppNotesPage();
+                return;
+            }
+
+            notes.unshift({
+                id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+                title: (titleInput?.value || "").trim() || "Nota",
+                text: textValue,
+                createdAt: now,
+                updatedAt: now
+            });
+
+            saveAppNotes(notes);
+            renderAppNotesPage();
         }
     });
 }
@@ -8786,6 +9008,7 @@ function setupTheme() {
 setupTheme();
 setupSettings();
 setupPersonalNotes();
+setupAppNotes();
 setupPatients();
 
 if (incomingPersonalization) {
