@@ -1473,6 +1473,346 @@
                   "Risposta clinica"
                 ]
               }
+            },
+            {
+              "id": "alfa-bloccanti",
+              "title": "Alfa-bloccanti",
+              "type": "drug",
+              "content": {
+                "class": "Alfa-bloccanti",
+                "effects": [
+                  "Blocco dei recettori adrenergici α con riduzione del tono vascolare e/o della resistenza delle vie urinarie, secondo la sottoclasse."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "Sintomi di ipotensione ortostatica",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "anticolinergici",
+              "title": "Anticolinergici",
+              "type": "drug",
+              "content": {
+                "class": "Anticolinergici",
+                "effects": [
+                  "Riduzione degli effetti dell'acetilcolina sui recettori colinergici, con modulazione delle secrezioni e/o della muscolatura liscia."
+                ],
+                "monitoring": [
+                  "FC",
+                  "Stato mentale quando pertinente",
+                  "Alvo e diuresi",
+                  "Secchezza delle mucose e risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "antimuscarinici",
+              "title": "Antimuscarinici",
+              "type": "drug",
+              "content": {
+                "class": "Antimuscarinici",
+                "effects": [
+                  "Blocco dei recettori muscarinici con riduzione dell'attività parasimpatica."
+                ],
+                "monitoring": [
+                  "FC",
+                  "Diuresi",
+                  "Alvo",
+                  "Stato mentale e tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "anticolinesterasici",
+              "title": "Anticolinesterasici",
+              "type": "drug",
+              "content": {
+                "class": "Anticolinesterasici",
+                "effects": [
+                  "Inibizione dell'acetilcolinesterasi con aumento della disponibilità di acetilcolina."
+                ],
+                "monitoring": [
+                  "FC",
+                  "Stato neurologico",
+                  "Funzione respiratoria quando pertinente",
+                  "Secrezioni e risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "antitubercolari",
+              "title": "Antitubercolari",
+              "type": "drug",
+              "content": {
+                "class": "Antitubercolari",
+                "effects": [
+                  "Inibizione o eliminazione dei micobatteri responsabili della tubercolosi."
+                ],
+                "monitoring": [
+                  "Temperatura e sintomi respiratori",
+                  "Funzione epatica",
+                  "Funzione renale quando pertinente",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "antiretrovirali",
+              "title": "Antiretrovirali",
+              "type": "drug",
+              "content": {
+                "class": "Antiretrovirali",
+                "effects": [
+                  "Inibizione di specifiche fasi della replicazione dei retrovirus."
+                ],
+                "monitoring": [
+                  "Carica virale e parametri immunologici secondo prescrizione",
+                  "Funzione epatica",
+                  "Funzione renale quando pertinente",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "antiprotozoari",
+              "title": "Antiprotozoari",
+              "type": "drug",
+              "content": {
+                "class": "Antiprotozoari",
+                "effects": [
+                  "Inibizione o eliminazione di protozoi responsabili di infezioni."
+                ],
+                "monitoring": [
+                  "Segni e sintomi dell'infezione",
+                  "Funzione epatica quando pertinente",
+                  "Risposta clinica",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "antireumatici",
+              "title": "Antireumatici modificanti la malattia",
+              "type": "drug",
+              "content": {
+                "class": "Antireumatici modificanti la malattia",
+                "effects": [
+                  "Modulazione dei processi immunitari e infiammatori coinvolti nelle malattie reumatiche."
+                ],
+                "monitoring": [
+                  "Segni e sintomi articolari",
+                  "Emocromo quando indicato",
+                  "Funzione epatica",
+                  "Segni di infezione"
+                ]
+              }
+            },
+            {
+              "id": "antigistaminici-h2",
+              "title": "Antistaminici H2",
+              "type": "drug",
+              "content": {
+                "class": "Antistaminici H2",
+                "effects": [
+                  "Riduzione della secrezione acida gastrica attraverso il blocco dei recettori H2 dell'istamina."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali",
+                  "Risposta clinica",
+                  "Funzione renale quando indicata",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "antianginosi-nitrati",
+              "title": "Nitrati antianginosi",
+              "type": "drug",
+              "content": {
+                "class": "Nitrati antianginosi",
+                "effects": [
+                  "Vasodilatazione con riduzione del precarico e della richiesta miocardica di ossigeno."
+                ],
+                "monitoring": [
+                  "Dolore toracico",
+                  "PA",
+                  "FC",
+                  "Sintomi di ipotensione"
+                ]
+              }
+            },
+            {
+              "id": "antifibrinolitici",
+              "title": "Antifibrinolitici",
+              "type": "drug",
+              "content": {
+                "class": "Antifibrinolitici",
+                "effects": [
+                  "Riduzione della fibrinolisi e della degradazione del coagulo."
+                ],
+                "monitoring": [
+                  "Entità del sanguinamento",
+                  "Emocromo quando indicato",
+                  "Funzione renale quando pertinente",
+                  "Segni di eventi trombotici"
+                ]
+              }
+            },
+            {
+              "id": "antitrombotici",
+              "title": "Antitrombotici",
+              "type": "drug",
+              "content": {
+                "class": "Antitrombotici",
+                "effects": [
+                  "Riduzione della formazione o della progressione dei trombi attraverso la modulazione della coagulazione o dell'aggregazione piastrinica."
+                ],
+                "monitoring": [
+                  "Segni di sanguinamento",
+                  "Segni di trombosi",
+                  "Emocromo",
+                  "Parametri della coagulazione quando indicati"
+                ]
+              }
+            },
+            {
+              "id": "immunoglobuline",
+              "title": "Immunoglobuline",
+              "type": "drug",
+              "content": {
+                "class": "Immunoglobuline",
+                "effects": [
+                  "Modulazione o sostituzione della risposta immunitaria mediante anticorpi."
+                ],
+                "monitoring": [
+                  "Reazioni durante e dopo la somministrazione secondo protocollo",
+                  "Segni di infezione",
+                  "Parametri clinici pertinenti",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "fattori-coagulazione",
+              "title": "Fattori della coagulazione",
+              "type": "drug",
+              "content": {
+                "class": "Fattori della coagulazione",
+                "effects": [
+                  "Sostituzione o integrazione di componenti della cascata coagulativa per favorire l'emostasi."
+                ],
+                "monitoring": [
+                  "Segni di sanguinamento",
+                  "Emocromo",
+                  "Parametri della coagulazione",
+                  "Segni di eventi trombotici"
+                ]
+              }
+            },
+            {
+              "id": "ormoni-ipofisari",
+              "title": "Ormoni ipofisari",
+              "type": "drug",
+              "content": {
+                "class": "Ormoni ipofisari",
+                "effects": [
+                  "Sostituzione o modulazione degli ormoni prodotti o regolati dall'ipofisi."
+                ],
+                "monitoring": [
+                  "Parametri endocrini pertinenti",
+                  "Segni e sintomi clinici",
+                  "Bilancio idrico quando pertinente",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "farmaci-tiroidei-antitiroidei",
+              "title": "Antitiroidei",
+              "type": "drug",
+              "content": {
+                "class": "Antitiroidei",
+                "effects": [
+                  "Riduzione della sintesi o della disponibilità degli ormoni tiroidei."
+                ],
+                "monitoring": [
+                  "Parametri tiroidei",
+                  "FC e sintomi cardiovascolari quando pertinenti",
+                  "Segni clinici di alterata funzione tiroidea",
+                  "Emocromo o funzione epatica quando indicati"
+                ]
+              }
+            },
+            {
+              "id": "antipertensivi-centrali",
+              "title": "Antipertensivi ad azione centrale",
+              "type": "drug",
+              "content": {
+                "class": "Antipertensivi ad azione centrale",
+                "effects": [
+                  "Riduzione del tono simpatico centrale con diminuzione della pressione arteriosa."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "Ipotensione ortostatica",
+                  "Stato di coscienza e risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "stimolanti-emopoiesi",
+              "title": "Stimolanti dell'emopoiesi",
+              "type": "drug",
+              "content": {
+                "class": "Stimolanti dell'emopoiesi",
+                "effects": [
+                  "Stimolazione della produzione di specifiche linee cellulari ematiche."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Risposta ematologica",
+                  "Parametri marziali quando pertinenti",
+                  "Segni di eventi trombotici quando rilevanti"
+                ]
+              }
+            },
+            {
+              "id": "chelanti",
+              "title": "Chelanti",
+              "type": "drug",
+              "content": {
+                "class": "Chelanti",
+                "effects": [
+                  "Legame a specifiche sostanze o ioni per facilitarne l'eliminazione o ridurne la disponibilità biologica."
+                ],
+                "monitoring": [
+                  "Parametri della sostanza target",
+                  "Funzione renale",
+                  "Elettroliti quando pertinenti",
+                  "Tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "enzimi-digestivi",
+              "title": "Enzimi digestivi",
+              "type": "drug",
+              "content": {
+                "class": "Enzimi digestivi",
+                "effects": [
+                  "Sostituzione o integrazione di enzimi necessari alla digestione."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali",
+                  "Alvo",
+                  "Stato nutrizionale quando pertinente",
+                  "Risposta clinica"
+                ]
+              }
             }
           ]
         }
