@@ -3293,15 +3293,27 @@ function renderDrug(item, data) {
 // MENU A TENDINA INTERATTIVO - ISOLATO SOLO SU INPUT DRUGA E DRUGB (TEMA SCURO)
 // =========================================================================
 
+// =========================================================================
+// MENU A TENDINA INTERATTIVO - SOLUZIONE DEFINITIVA PER CSV DECOMPRESSO
+// =========================================================================
+
 (function() {
     let listaFarmaciDati = [];
 
-    // 1. Carica i dati dal CSV della repository
+    // 1. Carica i dati dal file CSV (valido solo dopo aver estratto il file ZIP nella repo)
     async function caricaDatabase() {
         try {
             const response = await fetch("./data/db_drug_interactions.csv.zip");
             if (!response.ok) throw new Error();
+            
             const testo = await response.text();
+            
+            // Protezione: se rileva ancora un file ZIP bloccato, ferma l'esecuzione per evitare scritte strane
+            if (testo.startsWith("PK")) {
+                console.error("[Nursing Shot] Errore: Il file farmaci.csv è ancora un archivio ZIP compresso. Estrailo in formato testo.");
+                return;
+            }
+
             const righe = testo.split(/\r?\n/);
             
             const nomiGrezzi = righe.map(riga => {
@@ -3312,11 +3324,14 @@ function renderDrug(item, data) {
             // RIMOZIONE DOPPIONI
             listaFarmaciDati = [...new Set(nomiGrezzi)];
 
+            // Scarta l'eventuale riga di intestazione
             if (listaFarmaciDati.length > 0 && ["nome", "farmaco"].includes(listaFarmaciDati[0].toLowerCase())) {
                 listaFarmaciDati.shift();
             }
+            
+            console.log(`[Nursing Shot] Database sincronizzato: ${listaFarmaciDati.length} farmaci pronti.`);
         } catch (e) {
-            console.error("Impossibile caricare il CSV delle interazioni:", e);
+            console.error("Impossibile caricare il file farmaci.csv:", e);
         }
     }
     caricaDatabase();
@@ -3328,16 +3343,12 @@ function renderDrug(item, data) {
         inputsInterazione.forEach(inputRicerca => {
             if (!inputRicerca || inputRicerca.hasAttribute("data-has-custom-dropdown")) return;
 
-            // Blocca l'input per evitare duplicazioni e rimuove i suggerimenti nativi
             inputRicerca.setAttribute("data-has-custom-dropdown", "true");
             inputRicerca.setAttribute("autocomplete", "off");
             inputRicerca.removeAttribute("list");
 
-            // Crea il contenitore del menu a tendina (Stile coerente con l'applicazione)
             const boxSuggerimenti = document.createElement("div");
             boxSuggerimenti.className = "patient-search-suggestions-container";
-            
-            // Stile adattato al tema scuro dell'app
             boxSuggerimenti.style.cssText = "position: absolute; width: 100%; max-height: 250px; overflow-y: auto; z-index: 999; background: #1f2937; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid #374151;";
             
             if (inputRicerca.parentElement) {
@@ -3345,7 +3356,6 @@ function renderDrug(item, data) {
                 inputRicerca.parentElement.appendChild(boxSuggerimenti);
             }
 
-            // Ascolta la digitazione dell'utente SOLO su questo input
             inputRicerca.addEventListener("input", () => {
                 const valore = inputRicerca.value.toLowerCase();
                 boxSuggerimenti.innerHTML = ""; 
@@ -3363,27 +3373,20 @@ function renderDrug(item, data) {
                 if (filtrati.length > 0) {
                     boxSuggerimenti.style.display = "block";
 
-                    // Genera la lista di pulsanti ereditando lo stile dell'app
                     filtrati.forEach(farmaco => {
                         const btn = document.createElement("button");
                         btn.type = "button";
                         btn.className = "patient-search-suggestion";
-                        
-                        // Forza il colore del testo chiaro per contrastare lo sfondo scuro ed evitare l'effetto illeggibile
-                        btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 10px; background: transparent; border: none; color: #f3f4f6; cursor: pointer; border-bottom: 1px solid #374151;";
+                        btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 10px; background: transparent; border: none; color: #f3f4f6; cursor: pointer; border-bottom: 1px solid #374151; font-size: 15px; font-family: sans-serif;";
                         
                         btn.innerHTML = `<strong>${farmaco}</strong>`;
 
-                        // Gestisce il click sul farmaco selezionato dal menu a tendina
                         btn.addEventListener("click", () => {
                             inputRicerca.value = farmaco; 
                             boxSuggerimenti.style.display = "none"; 
-                            
-                            // Forza l'aggiornamento dell'applicazione
                             inputRicerca.dispatchEvent(new Event("input"));
                         });
 
-                        // Cambio colore al passaggio del mouse (hover effect)
                         btn.addEventListener("mouseenter", () => btn.style.background = "#374151");
                         btn.addEventListener("mouseleave", () => btn.style.background = "transparent");
 
@@ -3394,7 +3397,6 @@ function renderDrug(item, data) {
                 }
             });
 
-            // Chiude la tendina se si clicca altrove nella pagina
             document.addEventListener("click", (e) => {
                 if (e.target !== inputRicerca && !boxSuggerimenti.contains(e.target)) {
                     boxSuggerimenti.style.display = "none";
