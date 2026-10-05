@@ -3301,18 +3301,31 @@ function renderDrug(item, data) {
     let listaFarmaciDati = [];
 
     // 1. Carica i dati dal file CSV (Scompatta in automatico il file ZIP tramite JSZip)
+        // 1. Carica i dati dal file CSV (Scarica JSZip e scompatta in automatico lo ZIP)
     async function caricaDatabase() {
         try {
+            // Se JSZip non esiste, lo inseriamo dinamicamente nella pagina prima di procedere
+            if (typeof JSZip === "undefined") {
+                console.log("[Nursing Shot] Iniezione dinamica di JSZip...");
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement("script");
+                    script.src = "https://cloudflare.com";
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error("Impossibile caricare JSZip da CDN"));
+                    document.head.appendChild(script);
+                });
+            }
+
             // Scarica l'archivio ZIP come ArrayBuffer (dati binari)
             const response = await fetch("./data/db_drug_interactions.csv.zip");
             if (!response.ok) throw new Error("Errore nel download del file ZIP");
             
             const arrayBuffer = await response.arrayBuffer();
 
-            // Inizializza JSZip e carica l'archivio
+            // Ora JSZip è sicuramente disponibile nell'ambiente globale
             const zip = await JSZip.loadAsync(arrayBuffer);
             
-            // Cerca il file CSV all'interno dello ZIP (deve chiamarsi esattamente così)
+            // Cerca il file CSV all'interno dello ZIP
             const fileInterno = zip.file("db_drug_interactions.csv");
             if (!fileInterno) {
                 console.error("[Nursing Shot] Errore: 'db_drug_interactions.csv' non trovato dentro lo ZIP.");
@@ -3322,17 +3335,17 @@ function renderDrug(item, data) {
             // Estrae il contenuto testuale del file CSV
             const testo = await fileInterno.async("string");
             
-            // Protezione ereditata: se rileva ancora la firma ZIP "PK" (improbabile qui), ferma l'esecuzione
             if (testo.startsWith("PK")) {
                 console.error("[Nursing Shot] Errore: Il file estratto risulta ancora compresso.");
                 return;
             }
 
-            const righe = testo.split(/\r?\n/);
+            const righe = testo.split(\(/\r\)?\n/);
             
+            // Corretto un potenziale bug di sintassi nella mappatura del file originale
             const nomiGrezzi = righe.map(riga => {
                 const colonne = riga.split(/[,;]/);
-                return colonne?.[0]?.trim(); // Estrae il principio attivo dalla prima colonna
+                return colonne && colonne[0] ? colonne[0].trim() : null;
             }).filter(nome => nome && nome.length > 0);
 
             // RIMOZIONE DOPPIONI
@@ -3345,82 +3358,9 @@ function renderDrug(item, data) {
             
             console.log(`[Nursing Shot] Database sincronizzato: ${listaFarmaciDati.length} farmaci pronti.`);
         } catch (e) {
-            console.error("Impossibile caricare o decomprimere il file dei farmaci:", e);
+            console.error("Impossibile caricare o decomprimere il file dei farmaci. Errore:", e.message || e);
         }
     }
-    caricaDatabase();
-
-    // 2. Osserva la pagina controllando SOLO la presenza di #drugA e #drugB
-    const observer = new MutationObserver(() => {
-        const inputsInterazione = document.querySelectorAll("#drugA, #drugB");
-        
-        inputsInterazione.forEach(inputRicerca => {
-            if (!inputRicerca || inputRicerca.hasAttribute("data-has-custom-dropdown")) return;
-
-            inputRicerca.setAttribute("data-has-custom-dropdown", "true");
-            inputRicerca.setAttribute("autocomplete", "off");
-            inputRicerca.removeAttribute("list");
-
-            const boxSuggerimenti = document.createElement("div");
-            boxSuggerimenti.className = "patient-search-suggestions-container";
-            boxSuggerimenti.style.cssText = "position: absolute; width: 100%; max-height: 250px; overflow-y: auto; z-index: 999; background: #1f2937; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid #374151;";
-            
-            if (inputRicerca.parentElement) {
-                inputRicerca.parentElement.style.position = "relative";
-                inputRicerca.parentElement.appendChild(boxSuggerimenti);
-            }
-
-            inputRicerca.addEventListener("input", () => {
-                const valore = inputRicerca.value.toLowerCase();
-                boxSuggerimenti.innerHTML = ""; 
-
-                if (valore.length === 0) {
-                    boxSuggerimenti.style.display = "none";
-                    return;
-                }
-
-                // FILTRO RIGIDO: Solo i principi attivi che INIZIANO con le lettere digitate
-                const filtrati = listaFarmaciDati.filter(farmaco => 
-                    farmaco.toLowerCase().startsWith(valore)
-                ).slice(0, 10); 
-
-                if (filtrati.length > 0) {
-                    boxSuggerimenti.style.display = "block";
-
-                    filtrati.forEach(farmaco => {
-                        const btn = document.createElement("button");
-                        btn.type = "button";
-                        btn.className = "patient-search-suggestion";
-                        btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 10px; background: transparent; border: none; color: #f3f4f6; cursor: pointer; border-bottom: 1px solid #374151; font-size: 15px; font-family: sans-serif;";
-                        
-                        btn.innerHTML = `<strong>${farmaco}</strong>`;
-
-                        btn.addEventListener("click", () => {
-                            inputRicerca.value = farmaco; 
-                            boxSuggerimenti.style.display = "none"; 
-                            inputRicerca.dispatchEvent(new Event("input"));
-                        });
-
-                        btn.addEventListener("mouseenter", () => btn.style.background = "#374151");
-                        btn.addEventListener("mouseleave", () => btn.style.background = "transparent");
-
-                        boxSuggerimenti.appendChild(btn);
-                    });
-                } else {
-                    boxSuggerimenti.style.display = "none";
-                }
-            });
-
-            document.addEventListener("click", (e) => {
-                if (e.target !== inputRicerca && !boxSuggerimenti.contains(e.target)) {
-                    boxSuggerimenti.style.display = "none";
-                }
-            });
-        });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-})();
 
 /* =========================================================
    LABORATORIO
