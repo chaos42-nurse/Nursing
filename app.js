@@ -295,7 +295,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         <p class="personal-notes-context">✏️ Modalità modifica attiva</p>
 
                         <input id="patientName" class="personal-note-title-input" type="text"
-                            autocomplete="off"
+                            autocomplete="new-password"
                             placeholder="Nominativo"
                             value="${escapeAttribute(selectedPatient.name)}">
 
@@ -306,11 +306,11 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                                 placeholder="Età" readonly
                                 value="${escapeAttribute(calculatePatientAge(selectedPatient.birthDate))}">
                             <input id="patientRoom" class="personal-note-title-input" type="text"
-                                autocomplete="off"
+                                autocomplete="new-password"
                                 placeholder="Reparto"
                                 value="${escapeAttribute(selectedPatient.room)}">
                             <input id="patientBed" class="personal-note-title-input" type="text"
-                                autocomplete="off"
+                                autocomplete="new-password"
                                 placeholder="Stanza / letto"
                                 value="${escapeAttribute(selectedPatient.bed)}">
                         </div>
@@ -1447,6 +1447,18 @@ async function loadState() {
         const inputs = document.querySelectorAll("input[type='text'], input:not([type])");
         
         inputs.forEach(input => {
+            // Questi campi non devono avere suggerimenti/autocompletamento.
+            if ([
+                "patientName",
+                "patientRoom",
+                "patientBed",
+                "personalNoteTitle"
+            ].includes(input.id)) {
+                input.removeAttribute("list");
+                input.setAttribute("autocomplete", "new-password");
+                return;
+            }
+
             // Se l'input ha già la lista o non è quello giusto, salta
             if (input.hasAttribute("list")) return;
 
@@ -7585,7 +7597,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
 
             <div class="personal-note-editor">
                 <h3>➕ Nuova nota</h3>
-                <input id="personalNoteTitle" class="personal-note-title-input" type="text" autocomplete="off" placeholder="Titolo della nota">
+                <input id="personalNoteTitle" class="personal-note-title-input" type="text" autocomplete="new-password" placeholder="Titolo della nota">
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]" rows="7"></textarea>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>
