@@ -2341,20 +2341,23 @@ section h2 {
 }
 
 .patient-search-suggestions {
-    width: min(320px, 100%);
-    margin: 6px 0 10px;
+    width: min(620px, 100%);
+    margin: 8px 0 12px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     background: var(--surface);
 }
 
 .patient-search-suggestion {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(180px, 0.9fr) minmax(260px, 1.4fr);
     align-items: center;
-    gap: 10px;
+    gap: 18px;
     width: 100%;
-    padding: 10px 12px;
+    min-height: 52px;
+    box-sizing: border-box;
+    padding: 13px 16px;
     border: 0;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
@@ -2369,12 +2372,24 @@ section h2 {
 }
 
 .patient-search-suggestion strong {
-    min-width: 32px;
+    min-width: 0;
     color: var(--text);
+    line-height: 1.25;
 }
 
 .patient-search-suggestion span {
+    min-width: 0;
     color: var(--text);
+    line-height: 1.25;
+}
+
+@media (max-width: 600px) {
+    .patient-search-suggestion {
+        grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.2fr);
+        gap: 12px;
+        min-height: 54px;
+        padding: 13px 14px;
+    }
 }
 
 @media (max-width: 600px) {
