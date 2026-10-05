@@ -480,11 +480,11 @@ function setupPatients() {
                 <div class="patient-pv-modal-card">
                     <h3>🩺 Nuova rilevazione PV</h3>
                     <div class="patient-pv-input-form">
-                        <input id="patientPa" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="P.A. mm/Mh">
-                        <input id="patientFc" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="F.C. bpm">
-                        <input id="patientSat" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Sat. %">
-                        <input id="patientTemperature" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="T.° °C">
-                        <input id="patientGlucose" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Glicemia mg/dL">
+                        <input id="patientPa" autocomplete="off" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="P.A. mm/Mh">
+                        <input id="patientFc" autocomplete="off" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="F.C. bpm">
+                        <input id="patientSat" autocomplete="off" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Sat. %">
+                        <input id="patientTemperature" autocomplete="off" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="T.° °C">
+                        <input id="patientGlucose" autocomplete="off" class="personal-note-title-input" type="text" inputmode="numeric" placeholder="Glicemia mg/dL">
                     </div>
                     <button id="addNewPatientPv" class="settings-action" type="button">💾 Registra PV</button>
                     <button id="closePvRecorder" class="settings-action" type="button">Annulla</button>
@@ -1447,6 +1447,24 @@ async function loadState() {
         const inputs = document.querySelectorAll("input[type='text'], input:not([type])");
         
         inputs.forEach(input => {
+            // I campi paziente/PV e le note usano i propri controlli:
+            // non devono ricevere il datalist/autocompletamento nativo.
+            const excludedIds = [
+                "patientName",
+                "patientBirthDate",
+                "patientAge",
+                "patientRoom",
+                "patientBed",
+                "patientPa",
+                "patientFc",
+                "patientSat",
+                "patientTemperature",
+                "patientGlucose",
+                "personalNoteTitle"
+            ];
+
+            if (excludedIds.includes(input.id)) return;
+
             // Se l'input ha già la lista o non è quello giusto, salta
             if (input.hasAttribute("list")) return;
 
