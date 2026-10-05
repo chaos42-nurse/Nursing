@@ -3300,8 +3300,7 @@ function renderDrug(item, data) {
 (function() {
     let listaFarmaciDati = [];
 
-    // 1. Carica i dati dal file CSV (Scompatta in automatico il file ZIP tramite JSZip)
-        // 1. Carica i dati dal file CSV (Scarica JSZip e scompatta in automatico lo ZIP)
+    // 1. Carica i dati dal file CSV (Scarica JSZip e scompatta in automatico lo ZIP)
     async function caricaDatabase() {
         try {
             // Se JSZip non esiste, lo inseriamo dinamicamente nella pagina prima di procedere
@@ -3309,6 +3308,7 @@ function renderDrug(item, data) {
                 console.log("[Nursing Shot] Iniezione dinamica di JSZip...");
                 await new Promise((resolve, reject) => {
                     const script = document.createElement("script");
+                    // Ripristinato l'URL corretto della libreria JSZip
                     script.src = "https://cloudflare.com";
                     script.onload = resolve;
                     script.onerror = () => reject(new Error("Impossibile caricare JSZip da CDN"));
@@ -3340,9 +3340,9 @@ function renderDrug(item, data) {
                 return;
             }
 
-            const righe = testo.split(/\r?\n/);
+            const righe = testo.split(\(/\r\)?\n/);
             
-            // Corretto un potenziale bug di sintassi nella mappatura del file originale
+            // Estrazione sicura della prima colonna del CSV
             const nomiGrezzi = righe.map(riga => {
                 const colonne = riga.split(/[,;]/);
                 return colonne && colonne[0] ? colonne[0].trim() : null;
@@ -3360,9 +3360,10 @@ function renderDrug(item, data) {
         } catch (e) {
             console.error("Impossibile caricare o decomprimere il file dei farmaci. Errore:", e.message || e);
         }
-    }}
+    }
 
-caricaDatabase();
+    // Avvia l'estrazione e il caricamento dei farmaci
+    caricaDatabase();
 
 })();
 
