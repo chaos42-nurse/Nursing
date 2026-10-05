@@ -8573,6 +8573,19 @@ function renderSharedPersonalizationImport(payload) {
         const inputs = document.querySelectorAll("input[type='text'], input:not([type])");
         
         inputs.forEach(input => {
+            // Questi campi appartengono ai moduli paziente/note e non devono
+            // essere trasformati in campi di ricerca automatica.
+            if (
+                input.id === "patientName" ||
+                input.id === "patientBirthDate" ||
+                input.id === "patientAge" ||
+                input.id === "patientRoom" ||
+                input.id === "patientBed" ||
+                input.id === "personalNoteTitle"
+            ) {
+                return;
+            }
+
             if (input.hasAttribute("list")) return;
 
             const dataListId = "dl-" + Math.random().toString(36).substr(2, 9);
