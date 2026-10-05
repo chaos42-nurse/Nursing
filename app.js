@@ -1499,7 +1499,8 @@ async function loadState() {
             "patientSat",
             "patientTemperature",
             "patientGlucose",
-            "personalNoteTitle"
+            "personalNoteTitle",
+            "appNoteTitle"
         ]);
 
         inputs.forEach(input => {
@@ -7918,11 +7919,8 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                         <article class="personal-note-card" data-note-id="${escapeAttribute(note.id)}">
                             <div class="personal-note-card-header">
                                 <div>
-                                    <h3>${renderNoteText(
-                                    note.title || "Nota personale",
-                                    stateId,
-                                    itemId,
-                                    note.id
+                                    <h3>${escapeHtml(
+                                    note.title || "Nota personale"
                                 )}</h3>
                                 </div>
                                 <div class="personal-note-actions">
@@ -8938,7 +8936,8 @@ function renderSharedPersonalizationImport(payload) {
                 input.id === "patientAge" ||
                 input.id === "patientRoom" ||
                 input.id === "patientBed" ||
-                input.id === "personalNoteTitle"
+                input.id === "personalNoteTitle" ||
+                input.id === "appNoteTitle"
             ) {
                 return;
             }
