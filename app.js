@@ -9474,4 +9474,3 @@ if ("serviceWorker" in navigator) {
     });
 
 }
-}
