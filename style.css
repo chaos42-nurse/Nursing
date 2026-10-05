@@ -1813,6 +1813,81 @@ section h2 {
 
 
 
+
+/* =========================================================
+   NOTE GENERALI DELL'APP
+========================================================= */
+
+.app-notes-page {
+    gap: 12px;
+}
+
+.app-notes-list {
+    order: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.app-note-card,
+.app-note-editor {
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.app-note-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+}
+
+.app-note-card-header h3 {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.app-note-text {
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.app-note-editor {
+    order: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.app-note-editor h3 {
+    margin: 0 0 2px;
+}
+
+.app-note-editor .personal-note-input {
+    min-height: 150px;
+    margin: 0;
+    padding: 11px 12px;
+    resize: none;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    outline: none;
+    font: inherit;
+}
+
+.app-note-editor .personal-note-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(92, 200, 255, 0.10);
+}
+
+.app-note-editor .settings-action {
+    text-align: center;
+}
+
 /* =========================================================
    COLLEGAMENTI TRA NOTE
 ========================================================= */
