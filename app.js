@@ -1442,52 +1442,69 @@ async function loadState() {
     caricaDatabase();
 
     // 2. Osserva la pagina: appena appare un input di ricerca, gli aggancia il datalist
-    const observer = new MutationObserver(() => {
-        // Cerca qualsiasi input di tipo testo presente nella pagina
-        const inputs = document.querySelectorAll("input[type='text'], input:not([type])");
-        
+    const observer = new MutationObserver(mutations => {
+        // Controlla solo gli input realmente aggiunti al DOM.
+        // Evita di riscannerizzare tutta la pagina ad ogni modifica,
+        // riducendo lavoro sul main thread e reflow inutili.
+        const inputs = [];
+
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+                if (
+                    node.matches?.("input[type='text'], input:not([type])")
+                ) {
+                    inputs.push(node);
+                }
+
+                node.querySelectorAll?.(
+                    "input[type='text'], input:not([type])"
+                ).forEach(input => inputs.push(input));
+            });
+        });
+
+        if (!inputs.length) return;
+
+        const excludedIds = new Set([
+            "patientName",
+            "patientBirthDate",
+            "patientAge",
+            "patientRoom",
+            "patientBed",
+            "patientPa",
+            "patientFc",
+            "patientSat",
+            "patientTemperature",
+            "patientGlucose",
+            "personalNoteTitle"
+        ]);
+
         inputs.forEach(input => {
-            // I campi paziente/PV e le note usano i propri controlli:
-            // non devono ricevere il datalist/autocompletamento nativo.
-            const excludedIds = [
-                "patientName",
-                "patientBirthDate",
-                "patientAge",
-                "patientRoom",
-                "patientBed",
-                "patientPa",
-                "patientFc",
-                "patientSat",
-                "patientTemperature",
-                "patientGlucose",
-                "personalNoteTitle"
-            ];
-
-            if (excludedIds.includes(input.id)) return;
-
-            // Se l'input ha già la lista o non è quello giusto, salta
+            if (excludedIds.has(input.id)) return;
             if (input.hasAttribute("list")) return;
 
-            // Crea un datalist unico per questo input
-            const dataListId = "dl-" + Math.random().toString(36).substr(2, 9);
+            const dataListId =
+                "dl-" + Math.random().toString(36).substr(2, 9);
+
             const dataList = document.createElement("datalist");
             dataList.id = dataListId;
+
             document.body.appendChild(dataList);
             input.setAttribute("list", dataListId);
             input.setAttribute("autocomplete", "off");
 
-            // Ascolta la digitazione dell'utente
             input.addEventListener("input", () => {
                 const valore = input.value.toLowerCase();
-                dataList.innerHTML = ""; // Svuota i vecchi suggerimenti
+                dataList.innerHTML = "";
 
                 if (valore.length > 0) {
-                    // FILTRO RIGIDO: Solo farmaci che INIZIANO con le lettere digitate
-                    const filtrati = listaFarmaciDati.filter(f => 
-                        f.toLowerCase().startsWith(valore)
-                    ).slice(0, 15);
+                    const filtrati = listaFarmaciDati
+                        .filter(f =>
+                            f.toLowerCase().startsWith(valore)
+                        )
+                        .slice(0, 15);
 
-                    // Popola il menu a tendina nativo senza duplicati
                     filtrati.forEach(farmaco => {
                         const option = document.createElement("option");
                         option.value = farmaco;
@@ -1498,8 +1515,10 @@ async function loadState() {
         });
     });
 
-    // Avvia il controllo continuo sulla pagina HTML
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 })();
 
 
