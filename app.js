@@ -3289,6 +3289,10 @@ function renderDrug(item, data) {
 // MENU A TENDINA INTERATTIVO - ISOLATO SOLO SU INPUT DRUGA E DRUGB
 // =========================================================================
 
+// =========================================================================
+// MENU A TENDINA INTERATTIVO - ISOLATO SOLO SU INPUT DRUGA E DRUGB (TEMA SCURO)
+// =========================================================================
+
 (function() {
     let listaFarmaciDati = [];
 
@@ -3302,7 +3306,7 @@ function renderDrug(item, data) {
             
             const nomiGrezzi = righe.map(riga => {
                 const colonne = riga.split(/[,;]/);
-                return colonne[0]?.trim(); // Estrae il principio attivo dalla prima colonna
+                return colonne?.[0]?.trim(); // Estrae il principio attivo dalla prima colonna
             }).filter(nome => nome && nome.length > 0);
 
             // RIMOZIONE DOPPIONI
@@ -3319,7 +3323,6 @@ function renderDrug(item, data) {
 
     // 2. Osserva la pagina controllando SOLO la presenza di #drugA e #drugB
     const observer = new MutationObserver(() => {
-        // Seleziona selettivamente solo i due input della compatibilità farmaci visti nello screenshot
         const inputsInterazione = document.querySelectorAll("#drugA, #drugB");
         
         inputsInterazione.forEach(inputRicerca => {
@@ -3328,14 +3331,14 @@ function renderDrug(item, data) {
             // Blocca l'input per evitare duplicazioni e rimuove i suggerimenti nativi
             inputRicerca.setAttribute("data-has-custom-dropdown", "true");
             inputRicerca.setAttribute("autocomplete", "off");
-
-            // Rimuove l'attributo list nativo visibile nello screenshot per non sovrapporre i menu
             inputRicerca.removeAttribute("list");
 
-            // Crea il contenitore del menu a tendina (stile "classe farmaci")
+            // Crea il contenitore del menu a tendina (Stile coerente con l'applicazione)
             const boxSuggerimenti = document.createElement("div");
             boxSuggerimenti.className = "patient-search-suggestions-container";
-            boxSuggerimenti.style.cssText = "position: absolute; width: 100%; max-height: 250px; overflow-y: auto; z-index: 999; background: #fff; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 4px;";
+            
+            // Stile adattato al tema scuro dell'app
+            boxSuggerimenti.style.cssText = "position: absolute; width: 100%; max-height: 250px; overflow-y: auto; z-index: 999; background: #1f2937; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid #374151;";
             
             if (inputRicerca.parentElement) {
                 inputRicerca.parentElement.style.position = "relative";
@@ -3360,11 +3363,15 @@ function renderDrug(item, data) {
                 if (filtrati.length > 0) {
                     boxSuggerimenti.style.display = "block";
 
-                    // Genera la lista di pulsanti con i tag richiesti
+                    // Genera la lista di pulsanti ereditando lo stile dell'app
                     filtrati.forEach(farmaco => {
                         const btn = document.createElement("button");
                         btn.type = "button";
                         btn.className = "patient-search-suggestion";
+                        
+                        // Forza il colore del testo chiaro per contrastare lo sfondo scuro ed evitare l'effetto illeggibile
+                        btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 10px; background: transparent; border: none; color: #f3f4f6; cursor: pointer; border-bottom: 1px solid #374151;";
+                        
                         btn.innerHTML = `<strong>${farmaco}</strong>`;
 
                         // Gestisce il click sul farmaco selezionato dal menu a tendina
@@ -3372,9 +3379,13 @@ function renderDrug(item, data) {
                             inputRicerca.value = farmaco; 
                             boxSuggerimenti.style.display = "none"; 
                             
-                            // Scatena l'evento di input originale per far elaborare la compatibilità alla tua app
+                            // Forza l'aggiornamento dell'applicazione
                             inputRicerca.dispatchEvent(new Event("input"));
                         });
+
+                        // Cambio colore al passaggio del mouse (hover effect)
+                        btn.addEventListener("mouseenter", () => btn.style.background = "#374151");
+                        btn.addEventListener("mouseleave", () => btn.style.background = "transparent");
 
                         boxSuggerimenti.appendChild(btn);
                     });
@@ -3394,7 +3405,6 @@ function renderDrug(item, data) {
 
     observer.observe(document.body, { childList: true, subtree: true });
 })();
-
 
 /* =========================================================
    LABORATORIO
