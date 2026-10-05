@@ -3306,14 +3306,30 @@ function renderDrug(item, data) {
             // Se JSZip non esiste, lo inseriamo dinamicamente nella pagina prima di procedere
             if (typeof JSZip === "undefined") {
                 console.log("[Nursing Shot] Iniezione dinamica di JSZip...");
-                await new Promise((resolve, reject) => {
-                    const script = document.createElement("script");
-                    // Ripristinato l'URL corretto della libreria JSZip
-                    script.src = "https://cloudflare.com";
-                    script.onload = resolve;
-                    script.onerror = () => reject(new Error("Impossibile caricare JSZip da CDN"));
-                    document.head.appendChild(script);
-                });
+                const jszipUrls = [
+                    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
+                    "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+                ];
+                let caricato = false;
+                for (const url of jszipUrls) {
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement("script");
+                            script.src = url;
+                            script.onload = resolve;
+                            script.onerror = () => {
+                                script.remove();
+                                reject(new Error("Caricamento fallito: " + url));
+                            };
+                            document.head.appendChild(script);
+                        });
+                        caricato = true;
+                        break;
+                    } catch (err) {
+                        console.warn("[Nursing Shot]", err.message);
+                    }
+                }
+                if (!caricato) throw new Error("Impossibile caricare JSZip da CDN");
             }
 
             // Scarica l'archivio ZIP come ArrayBuffer (dati binari)
@@ -3352,10 +3368,10 @@ function renderDrug(item, data) {
             listaFarmaciDati = [...new Set(nomiGrezzi)];
 
             // Scarta l'eventuale riga di intestazione
-            if (listaFarmaciDati.length > 0 && ["nome", "farmaco"].includes(listaFarmaciDati[0].toLowerCase())) {
+            if (listaFarmaciDati.length > 0 && ["nome", "farmaco", "drug 1", "drug1"].includes(listaFarmaciDati[0].toLowerCase())) {
                 listaFarmaciDati.shift();
             }
-            
+
             console.log(`[Nursing Shot] Database sincronizzato: ${listaFarmaciDati.length} farmaci pronti.`);
         } catch (e) {
             console.error("Impossibile caricare o decomprimere il file dei farmaci. Errore:", e.message || e);
