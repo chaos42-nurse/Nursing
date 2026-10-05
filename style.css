@@ -1762,6 +1762,7 @@ section h2 {
 .personal-note-editor .personal-note-input {
     min-height: 150px;
     margin: 0;
+    padding: 11px 12px;
     resize: none;
     background: var(--surface);
     color: var(--text);
