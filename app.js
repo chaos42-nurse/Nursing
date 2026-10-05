@@ -8528,7 +8528,7 @@ function renderSharedPersonalizationImport(payload) {
     // 2. Carica i dati dal CSV della repository
     async function caricaDatabase() {
         try {
-            const response = await fetch("/src/data/farmaci.csv");
+            const response = await fetch("./src/data/farmaci.csv");
             if (!response.ok) throw new Error();
             const testo = await response.text();
             const righe = testo.split(/\r?\n/);
