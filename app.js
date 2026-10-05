@@ -3360,7 +3360,11 @@ function renderDrug(item, data) {
         } catch (e) {
             console.error("Impossibile caricare o decomprimere il file dei farmaci. Errore:", e.message || e);
         }
-    }
+    }}
+
+caricaDatabase();
+
+})();
 
 /* =========================================================
    LABORATORIO
