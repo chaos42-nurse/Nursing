@@ -1813,6 +1813,278 @@
                   "Risposta clinica"
                 ]
               }
+            },
+            {
+              "id": "apparato-gastrointestinale-digestione",
+              "title": "Apparato gastrointestinale e digestione",
+              "type": "drug",
+              "content": {
+                "class": "Apparato gastrointestinale e digestione",
+                "effects": [
+                  "Funzioni terapeutiche rivolte a secrezione gastrica, motilità, digestione, assorbimento e protezione dell'apparato gastrointestinale."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali",
+                  "Alvo",
+                  "Idratazione e bilancio idrico quando pertinenti",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "sistema-ematologico",
+              "title": "Sistema ematologico",
+              "type": "drug",
+              "content": {
+                "class": "Sistema ematologico",
+                "effects": [
+                  "Interventi farmacologici rivolti a eritropoiesi, emostasi, coagulazione e principali alterazioni delle cellule e dei componenti del sangue."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Parametri della coagulazione quando indicati",
+                  "Segni di sanguinamento o trombosi",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "sistema-linfatico-immunitario",
+              "title": "Sistema linfatico e immunitario",
+              "type": "drug",
+              "content": {
+                "class": "Sistema linfatico e immunitario",
+                "effects": [
+                  "Modulazione o sostituzione della risposta immunitaria e trattamento delle condizioni che coinvolgono il sistema linfatico e immunitario."
+                ],
+                "monitoring": [
+                  "Segni di infezione",
+                  "Emocromo quando indicato",
+                  "Parametri immunologici pertinenti",
+                  "Risposta clinica e tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "sistema-cardiovascolare",
+              "title": "Sistema cardiovascolare",
+              "type": "drug",
+              "content": {
+                "class": "Sistema cardiovascolare",
+                "effects": [
+                  "Interventi farmacologici rivolti a pressione arteriosa, ritmo cardiaco, perfusione, contrattilità e circolazione."
+                ],
+                "monitoring": [
+                  "PA",
+                  "FC",
+                  "Ritmo/ECG quando indicato",
+                  "Segni e sintomi cardiovascolari"
+                ]
+              }
+            },
+            {
+              "id": "sistema-respiratorio",
+              "title": "Sistema respiratorio",
+              "type": "drug",
+              "content": {
+                "class": "Sistema respiratorio",
+                "effects": [
+                  "Modulazione del tono bronchiale, dell'infiammazione delle vie aeree, delle secrezioni e di altri processi respiratori."
+                ],
+                "monitoring": [
+                  "FR",
+                  "SpO₂",
+                  "Rumori respiratori e sintomi",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "sistema-nervoso",
+              "title": "Sistema nervoso",
+              "type": "drug",
+              "content": {
+                "class": "Sistema nervoso",
+                "effects": [
+                  "Modulazione dell'attività del sistema nervoso centrale o periferico per il controllo di funzioni neurologiche e sintomi."
+                ],
+                "monitoring": [
+                  "Stato neurologico",
+                  "Stato di coscienza quando pertinente",
+                  "Funzione motoria e sensitiva quando pertinente",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "sistema-endocrino-metabolico",
+              "title": "Sistema endocrino e metabolismo",
+              "type": "drug",
+              "content": {
+                "class": "Sistema endocrino e metabolismo",
+                "effects": [
+                  "Regolazione ormonale e dei principali processi metabolici, inclusi glucosio, lipidi, elettroliti e metabolismo energetico."
+                ],
+                "monitoring": [
+                  "Parametri metabolici pertinenti",
+                  "Glicemia quando indicata",
+                  "Elettroliti",
+                  "Parametri endocrini pertinenti"
+                ]
+              }
+            },
+            {
+              "id": "apparato-muscoloscheletrico",
+              "title": "Apparato muscoloscheletrico",
+              "type": "drug",
+              "content": {
+                "class": "Apparato muscoloscheletrico",
+                "effects": [
+                  "Interventi rivolti a dolore, infiammazione, metabolismo osseo e funzione muscolare e articolare."
+                ],
+                "monitoring": [
+                  "Dolore",
+                  "Mobilità e funzione articolare",
+                  "Segni di infiammazione",
+                  "Parametri pertinenti al trattamento"
+                ]
+              }
+            },
+            {
+              "id": "apparato-genitourinario",
+              "title": "Apparato genito-urinario",
+              "type": "drug",
+              "content": {
+                "class": "Apparato genito-urinario",
+                "effects": [
+                  "Interventi rivolti a funzione renale, vie urinarie e apparato riproduttivo."
+                ],
+                "monitoring": [
+                  "Diuresi",
+                  "Funzione renale",
+                  "Sintomi urinari o genitali",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "dermatologia",
+              "title": "Dermatologia",
+              "type": "drug",
+              "content": {
+                "class": "Dermatologia",
+                "effects": [
+                  "Trattamento farmacologico delle condizioni della cute e degli annessi cutanei."
+                ],
+                "monitoring": [
+                  "Condizioni della cute",
+                  "Segni di irritazione o reazione locale",
+                  "Estensione e caratteristiche della lesione",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "oftalmologia",
+              "title": "Oftalmologia",
+              "type": "drug",
+              "content": {
+                "class": "Oftalmologia",
+                "effects": [
+                  "Interventi farmacologici rivolti a patologie e disturbi dell'occhio e della funzione visiva."
+                ],
+                "monitoring": [
+                  "Acuità e funzione visiva quando pertinenti",
+                  "Dolore oculare",
+                  "Segni di irritazione o infiammazione",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "otorinolaringoiatria",
+              "title": "Otorinolaringoiatria",
+              "type": "drug",
+              "content": {
+                "class": "Otorinolaringoiatria",
+                "effects": [
+                  "Interventi farmacologici rivolti a patologie dell'orecchio, naso, seni paranasali, faringe e laringe."
+                ],
+                "monitoring": [
+                  "Sintomi locali",
+                  "Udito quando pertinente",
+                  "Secrezioni e segni di infezione",
+                  "Risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "oncologia",
+              "title": "Oncologia",
+              "type": "drug",
+              "content": {
+                "class": "Oncologia",
+                "effects": [
+                  "Trattamenti farmacologici diretti alle cellule tumorali o alla modulazione dei processi biologici coinvolti nelle neoplasie."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Funzione epatica e renale quando pertinenti",
+                  "Segni di tossicità",
+                  "Risposta clinica e tollerabilità"
+                ]
+              }
+            },
+            {
+              "id": "anestesia-terapia-dolore",
+              "title": "Anestesia e terapia del dolore",
+              "type": "drug",
+              "content": {
+                "class": "Anestesia e terapia del dolore",
+                "effects": [
+                  "Riduzione della sensibilità, della coscienza o della percezione del dolore mediante specifiche strategie farmacologiche."
+                ],
+                "monitoring": [
+                  "Stato di coscienza",
+                  "PA e FC",
+                  "FR e SpO₂ quando pertinenti",
+                  "Intensità del dolore e risposta clinica"
+                ]
+              }
+            },
+            {
+              "id": "urgenza-rianimazione",
+              "title": "Terapia d'urgenza e rianimazione",
+              "type": "drug",
+              "content": {
+                "class": "Terapia d'urgenza e rianimazione",
+                "effects": [
+                  "Farmaci utilizzati per il trattamento rapido di alterazioni acute delle funzioni vitali e delle emergenze cliniche."
+                ],
+                "monitoring": [
+                  "Parametri vitali",
+                  "Stato di coscienza",
+                  "ECG quando indicato",
+                  "Risposta clinica immediata"
+                ]
+              }
+            },
+            {
+              "id": "nutrizione-soluzioni-infusione",
+              "title": "Nutrizione e soluzioni per infusione",
+              "type": "drug",
+              "content": {
+                "class": "Nutrizione e soluzioni per infusione",
+                "effects": [
+                  "Supporto nutrizionale e reintegro di liquidi, elettroliti o altri componenti necessari al mantenimento dell'omeostasi."
+                ],
+                "monitoring": [
+                  "Bilancio idrico",
+                  "Elettroliti",
+                  "Glicemia quando pertinente",
+                  "Stato nutrizionale e parametri vitali"
+                ]
+              }
             }
           ]
         }
