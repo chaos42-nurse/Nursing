@@ -1816,16 +1816,29 @@ section h2 {
 
 /* Pulsanti modifica/elimina delle note: mantengono lo stile dell'app */
 .app-note-card .personal-note-actions button {
-    background: transparent;
-    color: var(--text);
-    border: 0;
-    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border) !important;
+    border-radius: 9px;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
 }
 
 .app-note-card .personal-note-actions button:hover,
 .app-note-card .personal-note-actions button:focus-visible {
-    background: var(--surface-2, rgba(127, 127, 127, 0.10));
-    color: var(--text);
+    background: var(--surface-hover) !important;
+    color: var(--text) !important;
+    border-color: var(--accent) !important;
 }
 
 /* =========================================================
