@@ -1,6 +1,6 @@
 {
   "id": "laboratorio",
-  "title": "Esami e laboratorio",
+  "title": "Referti e valutazioni",
   "icon": "🧪",
   "description": "Archivio infermieristico dedicato agli esami, ai prelievi e all'elettrocardiogramma.",
   "sections": [
@@ -14,13 +14,37 @@
             {
               "type": "table",
               "title": "Esami ematici",
-              "headers": ["Esame", "Valori standard", "Significato"],
+              "headers": [
+                "Esame",
+                "Valori standard",
+                "Significato"
+              ],
               "rows": [
-                ["Emocromo", "", ""],
-                ["Elettroliti", "", ""],
-                ["Funzionalità renale", "", ""],
-                ["Funzionalità epatica", "", ""],
-                ["Coagulazione", "", ""]
+                [
+                  "Emocromo",
+                  "",
+                  ""
+                ],
+                [
+                  "Elettroliti",
+                  "",
+                  ""
+                ],
+                [
+                  "Funzionalità renale",
+                  "",
+                  ""
+                ],
+                [
+                  "Funzionalità epatica",
+                  "",
+                  ""
+                ],
+                [
+                  "Coagulazione",
+                  "",
+                  ""
+                ]
               ]
             }
           ]
@@ -39,7 +63,11 @@
             {
               "type": "list",
               "title": "Argomenti",
-              "items": ["Onde P, QRS e T", "Ritmo sinusale", "Alterazioni del ritmo"]
+              "items": [
+                "Onde P, QRS e T",
+                "Ritmo sinusale",
+                "Alterazioni del ritmo"
+              ]
             }
           ]
         }
@@ -47,7 +75,27 @@
     },
     {
       "title": "Prelievo",
-      "items": ["Tipologie di provette", "Ordine di prelievo", "Identificazione del paziente", "Conservazione dei campioni"]
+      "items": [
+        "Tipologie di provette",
+        "Ordine di prelievo",
+        "Identificazione del paziente",
+        "Conservazione dei campioni"
+      ]
+    },
+    {
+      "title": "LDP",
+      "items": [
+        {
+          "id": "valutazione",
+          "title": "Valutazione",
+          "blocks": []
+        },
+        {
+          "id": "medicazione-consigliata",
+          "title": "Medicazione consigliata",
+          "blocks": []
+        }
+      ]
     }
   ]
 }
