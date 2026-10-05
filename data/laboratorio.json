@@ -5,13 +5,18 @@
   "description": "Archivio infermieristico dedicato agli esami, ai prelievi e all'elettrocardiogramma.",
   "sections": [
     {
-      "title": "Esami principali",
+      "title": "Esami ematici",
       "items": [
         "Emocromo",
         "Elettroliti",
         "Funzionalità renale",
         "Funzionalità epatica",
-        "Coagulazione",
+        "Coagulazione"
+      ]
+    },
+    {
+      "title": "Altri esami",
+      "items": [
         "Glicemia",
         "EGA",
         {
