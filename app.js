@@ -9474,3 +9474,4 @@ if ("serviceWorker" in navigator) {
     });
 
 }
+}
