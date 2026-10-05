@@ -1762,6 +1762,16 @@ section h2 {
 .personal-note-editor .personal-note-input {
     min-height: 150px;
     margin: 0;
+    resize: none;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    outline: none;
+    font: inherit;
+}
+
+.personal-note-editor .personal-note-input::placeholder {
+    color: var(--text-secondary);
 }
 
 .personal-note-editor .settings-action {
