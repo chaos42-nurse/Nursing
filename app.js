@@ -6810,9 +6810,9 @@ function renderAppNotesPage() {
             <div class="app-notes-list">
                 ${notes.length
                     ? notes.map(note => `
-                        <article class="app-note-card" data-app-note-id="${escapeAttribute(note.id)}">
+                        <article id="app-note-${escapeAttribute(note.id)}" class="app-note-card" data-app-note-id="${escapeAttribute(note.id)}">
                             <div class="app-note-card-header">
-                                <h3>${escapeHtml(note.title || "Nota")}</h3>
+                                <h3>${renderNoteText(note.title || "Nota")}</h3>
                                 <div class="personal-note-actions">
                                     <button class="app-note-edit" type="button" data-app-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
@@ -7195,6 +7195,10 @@ function renderAllNoteLinksPage(termFilter = "") {
                 return existing.patient.id === source.patient.id;
             }
 
+            if (source.type === "appnote") {
+                return String(existing.note.id) === String(source.note.id);
+            }
+
             return (
                 existing.stateId === source.stateId &&
                 existing.itemId === source.itemId &&
@@ -7215,6 +7219,20 @@ function renderAllNoteLinksPage(termFilter = "") {
             addShortcutSource(term, {
                 type: "note",
                 ...record
+            });
+        }
+    }
+
+    // Shortcut presenti nel testo delle Note generali.
+    // Il titolo NON viene indicizzato: i [[placeholder]] del titolo
+    // vengono soltanto renderizzati come collegamenti.
+    for (const note of getAppNotes()) {
+        for (const term of extractPlaceorders(
+            String(note.text || "")
+        )) {
+            addShortcutSource(term, {
+                type: "appnote",
+                note
             });
         }
     }
@@ -7272,6 +7290,14 @@ function renderAllNoteLinksPage(termFilter = "") {
                                            href="${makePatientUrl(record.patient.id)}">
                                             <span>👤 Pazienti</span>
                                             <strong>${escapeHtml(record.patient.name || "Paziente senza nome")}</strong>
+                                        </a>
+                                    `
+                                    : record.type === "appnote"
+                                    ? `
+                                        <a class="personal-note-index-link"
+                                           href="?appnotes=1#app-note-${encodeURIComponent(record.note.id)}">
+                                            <span>📝 Note</span>
+                                            <strong>${escapeHtml(record.note.title || "Nota")}</strong>
                                         </a>
                                     `
                                     : `
