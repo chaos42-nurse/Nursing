@@ -5,18 +5,26 @@
   "description": "Archivio infermieristico dedicato agli esami, ai prelievi e all'elettrocardiogramma.",
   "sections": [
     {
-      "title": "Esami ematici",
+      "title": "Esami principali",
       "items": [
-        "Emocromo",
-        "Elettroliti",
-        "Funzionalità renale",
-        "Funzionalità epatica",
-        "Coagulazione"
-      ]
-    },
-    {
-      "title": "Altri esami",
-      "items": [
+        {
+          "id": "esami-ematici",
+          "title": "Esami ematici",
+          "blocks": [
+            {
+              "type": "table",
+              "title": "Esami ematici",
+              "headers": ["Esame", "Valori standard", "Significato"],
+              "rows": [
+                ["Emocromo", "", ""],
+                ["Elettroliti", "", ""],
+                ["Funzionalità renale", "", ""],
+                ["Funzionalità epatica", "", ""],
+                ["Coagulazione", "", ""]
+              ]
+            }
+          ]
+        },
         "Glicemia",
         "EGA",
         {
@@ -31,11 +39,7 @@
             {
               "type": "list",
               "title": "Argomenti",
-              "items": [
-                "Onde P, QRS e T",
-                "Ritmo sinusale",
-                "Alterazioni del ritmo"
-              ]
+              "items": ["Onde P, QRS e T", "Ritmo sinusale", "Alterazioni del ritmo"]
             }
           ]
         }
@@ -43,12 +47,7 @@
     },
     {
       "title": "Prelievo",
-      "items": [
-        "Tipologie di provette",
-        "Ordine di prelievo",
-        "Identificazione del paziente",
-        "Conservazione dei campioni"
-      ]
+      "items": ["Tipologie di provette", "Ordine di prelievo", "Identificazione del paziente", "Conservazione dei campioni"]
     }
   ]
 }
