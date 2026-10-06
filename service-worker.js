@@ -1,10 +1,11 @@
-const CACHE_NAME = "nursing-v83";
+const CACHE_NAME = "nursing-v86";
 
 const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
-    "./app.js?v=83",
+    "./app.js?v=86",
+    "./js/interazioni.js?v=86",
     "./manifest.json",
     "./icon-192.png",
     "./icon-512.png",
@@ -15,7 +16,8 @@ const CORE_FILES = [
     "./data/emergenze.json",
     "./data/version.json",
     "./src/data/aifa-principi-attivi.json",
-    "./data/interazioni.csv"
+    "./data/db_drug_interactions.csv.zip",
+    "./data/alias-farmaci.json"
 ];
 
 self.addEventListener("install", event => {
