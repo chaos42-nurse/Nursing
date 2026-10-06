@@ -7101,7 +7101,7 @@ function makeNoteUrl(stateId, itemId, noteId) {
     return "?" + params.toString();
 }
 
-function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
+function renderInlineNoteText(text) {
     const source = String(text || "");
     const pattern = /<placeorder>([\s\S]*?)<\/placeorder>|\[\[([\s\S]*?)\]\]/gi;
     let html = "";
@@ -7127,6 +7127,129 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
     }
 
     html += escapeNoteText(source.slice(lastIndex));
+    return html;
+}
+
+function parseNoteTableRow(line) {
+    const source = String(line || "");
+    const cells = [];
+    let index = 0;
+
+    while (index < source.length && /\s/.test(source[index])) index++;
+
+    while (index < source.length) {
+        if (source[index] !== "[") return null;
+
+        // Una cella deve avere una chiusura "]". Le parentesi doppie
+        // vengono lasciate al contenuto della cella: [ [[placeholder]] ].
+        let end = index + 1;
+        let depth = 0;
+        let closingIndex = -1;
+
+        for (; end < source.length; end++) {
+            if (source[end] === "[" && source[end + 1] === "[") {
+                depth++;
+                end++;
+                continue;
+            }
+
+            if (source[end] === "]" && source[end + 1] === "]" && depth > 0) {
+                depth--;
+                end++;
+                continue;
+            }
+
+            if (source[end] === "]" && depth === 0) {
+                closingIndex = end;
+                break;
+            }
+        }
+
+        if (closingIndex === -1) return null;
+
+        const rawCell = source.slice(index + 1, closingIndex);
+        cells.push(rawCell.trim());
+
+        index = closingIndex + 1;
+
+        let spaces = 0;
+        while (index < source.length && /\s/.test(source[index])) {
+            spaces++;
+            index++;
+        }
+
+        if (index >= source.length) break;
+        if (spaces === 0 || source[index] !== "[") return null;
+    }
+
+    return cells.length >= 2 ? cells : null;
+}
+
+function renderNoteTable(rows) {
+    if (!Array.isArray(rows) || rows.length < 2) return "";
+
+    const columnCount = rows[0].length;
+
+    if (columnCount < 2 || rows.some(row => row.length !== columnCount)) {
+        return "";
+    }
+
+    return '<div class="personal-note-table-wrapper"><table class="personal-note-table">' +
+        '<thead><tr>' +
+        rows[0].map(cell => '<th>' + renderInlineNoteText(cell) + '</th>').join("") +
+        '</tr></thead>' +
+        '<tbody>' +
+        rows.slice(1).map(row =>
+            '<tr>' +
+            row.map(cell => '<td>' + renderInlineNoteText(cell) + '</td>').join("") +
+            '</tr>'
+        ).join("") +
+        '</tbody></table></div>';
+}
+
+function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
+    const source = String(text || "");
+    const lines = source.split(/\r?\n/);
+    let html = "";
+    let index = 0;
+
+    while (index < lines.length) {
+        const firstRow = parseNoteTableRow(lines[index]);
+
+        if (firstRow) {
+            const tableRows = [firstRow];
+            let nextIndex = index + 1;
+
+            while (nextIndex < lines.length) {
+                const row = parseNoteTableRow(lines[nextIndex]);
+
+                if (!row || row.length !== firstRow.length) break;
+
+                tableRows.push(row);
+                nextIndex++;
+            }
+
+            if (tableRows.length >= 2) {
+                html += renderNoteTable(tableRows);
+
+                if (nextIndex < lines.length) {
+                    html += "<br>";
+                }
+
+                index = nextIndex;
+                continue;
+            }
+        }
+
+        html += renderInlineNoteText(lines[index]);
+
+        if (index < lines.length - 1) {
+            html += "<br>";
+        }
+
+        index++;
+    }
+
     return html;
 }
 
