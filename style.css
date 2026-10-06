@@ -2620,3 +2620,43 @@ section h2 {
 .drug-catalog-info a:hover {
     text-decoration: underline;
 }
+
+/* =========================================================
+   TABELLE NELLE NOTE
+========================================================= */
+
+.personal-note-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+.personal-note-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 420px;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.personal-note-table th,
+.personal-note-table td {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.45;
+}
+
+.personal-note-table th {
+    background: var(--surface-hover);
+    font-weight: 700;
+}
+
+.personal-note-table td {
+    background: var(--surface);
+}
+
+.personal-note-table .personal-note-linked-term {
+    display: inline;
+}
