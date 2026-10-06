@@ -41,6 +41,19 @@
 <div id="pageHeader">
 <div class="page-title-row"><h2 id="state"></h2></div>
 <p id="description"></p>
+<style>
+#description {
+display: none;
+}
+body.patient-description-visible #description {
+display: block;
+}
+</style>
+<script>
+if (new URLSearchParams(window.location.search).get("patients") === "1") {
+    document.body.classList.add("patient-description-visible");
+}
+</script>
 </div>
 <div id="content"></div>
 </main>
