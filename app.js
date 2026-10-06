@@ -8483,9 +8483,6 @@ function showPersonalizationShareDialog() {
                 >
                 <span>
                     <strong>${escapeHtml(note.title || "Nota personale")}</strong>
-                    <small>${escapeHtml(
-                        String(note.text || "").slice(0, 100)
-                    )}${String(note.text || "").length > 100 ? "…" : ""}</small>
                 </span>
             </label>
         `).join("")
