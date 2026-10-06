@@ -6720,11 +6720,26 @@ function setupSettings() {
         window.location.href = "?appnotes=1";
     });
 
+    function updateThemeButtonIcon() {
+        const theme =
+            document.documentElement.dataset.theme || "dark";
+
+        if (themeButton) {
+            themeButton.textContent =
+                theme === "light"
+                    ? "☀️ Tema"
+                    : "🌙 Tema";
+        }
+    }
+
+    updateThemeButtonIcon();
+
     themeButton?.addEventListener("click", () => {
         const current =
             document.documentElement.dataset.theme || "dark";
 
         applyTheme(current === "dark" ? "light" : "dark");
+        updateThemeButtonIcon();
         setMessage("Tema aggiornato.");
     });
 
