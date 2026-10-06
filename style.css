@@ -2068,29 +2068,48 @@ section h2 {
 }
 
 .share-note-option {
+    position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
     padding: 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
     cursor: pointer;
+    background: var(--surface);
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
 }
 
 .share-note-option input {
-    margin-top: 3px;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.share-note-option:has(input:checked) {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+}
+
+.share-note-option:focus-within {
+    border-color: var(--accent);
 }
 
 .share-note-option span {
     display: flex;
     flex-direction: column;
-    gap: 2px;
     min-width: 0;
 }
 
-.share-note-option small {
-    color: var(--text-secondary);
-    overflow-wrap: anywhere;
+.share-note-option strong {
+    display: block;
+    width: 100%;
 }
 
 
