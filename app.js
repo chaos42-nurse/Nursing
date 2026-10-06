@@ -6818,7 +6818,7 @@ function renderAppNotesPage() {
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
                             </div>
-                            <div class="app-note-text">${escapeNoteText(note.text)}</div>
+                            <div class="app-note-text">${renderNoteText(note.text)}</div>
                         </article>
                     `).join("")
                     : `
@@ -7083,6 +7083,7 @@ function getLinkedNoteRecords(term, sourceStateId, sourceItemId, sourceNoteId) {
         }
 
         return extractPlaceorders(
+            String(record.note.title || "") + "\n" +
             String(record.note.text || "")
         ).some(
             linkedTerm => normalizeLinkTerm(linkedTerm) === normalized
@@ -7211,9 +7212,10 @@ function renderAllNoteLinksPage(termFilter = "") {
         }
     }
 
-    // Shortcut presenti nelle note personali.
+    // Shortcut presenti nelle note personali, sia nel titolo sia nel testo.
     for (const record of getAllPersonalNoteRecords()) {
         for (const term of extractPlaceorders(
+            String(record.note.title || "") + "\n" +
             String(record.note.text || "")
         )) {
             addShortcutSource(term, {
@@ -7223,11 +7225,10 @@ function renderAllNoteLinksPage(termFilter = "") {
         }
     }
 
-    // Shortcut presenti nel testo delle Note generali.
-    // Il titolo NON viene indicizzato: i [[placeholder]] del titolo
-    // vengono soltanto renderizzati come collegamenti.
+    // Shortcut presenti nelle Note generali, sia nel titolo sia nel testo.
     for (const note of getAppNotes()) {
         for (const term of extractPlaceorders(
+            String(note.title || "") + "\n" +
             String(note.text || "")
         )) {
             addShortcutSource(term, {
