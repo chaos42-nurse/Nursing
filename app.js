@@ -2609,205 +2609,236 @@ async function renderDrugSearch() {
     });
 }
 /* =========================================================================
-   INCOLLA DA QUI IL NUOVO CODICE PER LE INTERAZIONI
+   INTERAZIONI TRA FARMACI
+   I dati vengono letti direttamente dallo ZIP originale
+   (data/db_drug_interactions.csv.zip) e tradotti in italiano da
+   js/interazioni.js (window.NursingInterazioni).
 ========================================================================= */
-let interactionsIndex = null;
 
-function parseInteractionCsv(csvText) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let quoted = false;
+const DDI_STILE_ESITO = {
+    rischio: { classe: "ddi-rischio", icona: "⚠️" },
+    attenzione: { classe: "ddi-attenzione", icona: "⚠️" },
+    nota: { classe: "ddi-nota", icona: "ℹ️" },
+    nessuna: { classe: "ddi-nessuna", icona: "ℹ️" }
+};
 
-    for (let i = 0; i < csvText.length; i++) {
-        const ch = csvText[i];
-        const next = csvText[i + 1];
+const DDI_BADGE = {
+    rischio: "Effetto avverso",
+    attenzione: "Attenzione",
+    nota: "Nota"
+};
 
-        if (ch === '"' && quoted && next === '"') {
-            field += '"';
-            i++;
-            continue;
-        }
+function ddiRenderEsito(NI, idx, idA, idB, esito) {
+    const stile = DDI_STILE_ESITO[esito.esito];
+    const coppia = `${escapeHtml(NI.nomeCompleto(idx, idA))} + ${escapeHtml(NI.nomeCompleto(idx, idB))}`;
 
-        if (ch === '"') {
-            quoted = !quoted;
-            continue;
-        }
-
-        if (ch === "," && !quoted) {
-            row.push(field.trim());
-            field = "";
-            continue;
-        }
-
-        if ((ch === "\n" || ch === "\r") && !quoted) {
-            if (ch === "\r" && next === "\n") i++;
-            row.push(field.trim());
-            field = "";
-            if (row.some(value => value !== "")) rows.push(row);
-            row = [];
-            continue;
-        }
-
-        field += ch;
+    if (esito.esito === "nessuna") {
+        return `
+            <div class="info-block ddi-esito ${stile.classe}">
+                <h4>${stile.icona} ${escapeHtml(NI.ETICHETTE.nessuna)}</h4>
+                <p class="ddi-coppia">${coppia}</p>
+                <p>
+                    Non è una garanzia di sicurezza: l'assenza di una voce non esclude rischi
+                    e il database non riguarda la compatibilità fisico-chimica in infusione
+                    o in siringa. Verifica sempre RCP, protocollo di reparto o farmacista.
+                </p>
+            </div>`;
     }
 
-    row.push(field.trim());
-    if (row.some(value => value !== "")) rows.push(row);
+    const voci = esito.voci.map(voce => `
+        <li class="ddi-voce ddi-voce-${voce.categoria}">
+            <span class="ddi-badge">${escapeHtml(DDI_BADGE[voce.categoria])}</span>
+            <p>${escapeHtml(voce.testoIt)}</p>
+            ${voce.tradotto ? "" : `<p class="ddi-nota-testo">Frase non ancora tradotta: testo originale in inglese.</p>`}
+            <details>
+                <summary>Testo originale (inglese)</summary>
+                <p lang="en">${escapeHtml(voce.testoEn)}</p>
+            </details>
+        </li>`).join("");
 
-    return rows;
+    return `
+        <div class="info-block ddi-esito ${stile.classe}">
+            <h4>${stile.icona} ${escapeHtml(NI.ETICHETTE[esito.esito])}</h4>
+            <p class="ddi-coppia">${coppia}</p>
+            <ul class="ddi-voci">${voci}</ul>
+        </div>`;
 }
 
-async function loadInteractionsIndex() {
-    if (Array.isArray(interactionsIndex)) return interactionsIndex;
+function ddiRenderProblema(NI, idx, input, risolto) {
+    const digitato = escapeHtml(input.value.trim());
 
-    try {
-        const response = await fetch("./data/db_drug_interactions.csv.zip", { cache: "no-store" });
-        if (!response.ok) {
-            throw new Error(`File interazioni.csv non trovato — HTTP ${response.status}`);
-        }
-
-        const csvText = await response.text();
-        const rows = parseInteractionCsv(csvText);
-
-        if (rows.length <= 1) {
-            interactionsIndex = [];
-            return interactionsIndex;
-        }
-
-        const header = rows[0].map(value => value.toLowerCase());
-        const getColumn = (names) => {
-            for (const name of names) {
-                const index = header.indexOf(name);
-                if (index !== -1) return index;
-            }
-            return -1;
-        };
-
-        const aIndex = getColumn(["farmacoa", "farmaco a"]);
-        const bIndex = getColumn(["farmacob", "farmaco b"]);
-        const statoIndex = getColumn(["stato", "compatibilita", "compatibilità"]);
-        const notaIndex = getColumn(["nota", "note", "descrizione"]);
-
-        if (aIndex === -1 || bIndex === -1) {
-            throw new Error("Il CSV deve contenere almeno le colonne farmacoA e farmacoB.");
-        }
-
-        interactionsIndex = rows.slice(1)
-            .map(row => ({
-                farmacoA: row[aIndex] || "",
-                farmacoB: row[bIndex] || "",
-                stato: statoIndex >= 0 ? (row[statoIndex] || "") : "",
-                nota: notaIndex >= 0 ? (row[notaIndex] || "") : ""
-            }))
-            .filter(row => row.farmacoA && row.farmacoB);
-
-        return interactionsIndex;
-    } catch (error) {
-        console.error("Errore nel caricamento delle interazioni:", error);
-        interactionsIndex = [];
-        return interactionsIndex;
+    if (risolto.tipo === "nessuno") {
+        return `
+            <div class="info-block ddi-esito ddi-nessuna">
+                <h4>«${digitato}» non è presente nel database</h4>
+                <p>
+                    Controlla il nome. L'archivio contiene ${idx.nNomi.toLocaleString("it-IT")} principi attivi,
+                    soprattutto molecole di sintesi: farmaci biologici come eparine e insuline non sono inclusi.
+                    Questo non significa che non ci siano interazioni.
+                </p>
+            </div>`;
     }
+
+    const scelte = risolto.candidati.map(c => `
+        <button type="button" class="settings-action ddi-scelta" data-target="${escapeHtml(input.id)}" data-valore="${escapeHtml(c.label)}">
+            <strong>${escapeHtml(c.label)}</strong>${c.altro ? ` <small>${escapeHtml(c.altro)}</small>` : ""}
+        </button>`).join("");
+
+    return `
+        <div class="info-block ddi-esito ddi-nessuna">
+            <h4>Quale farmaco intendi con «${digitato}»?</h4>
+            <div class="ddi-scelte">${scelte}</div>
+        </div>`;
 }
 
-async function renderDrugInteractions() {
-    let interazioni = [];
-    let totalRecord = 0;
+async function renderDrugInteractions(selectedItem, data) {
+    const NI = window.NursingInterazioni;
+    const titolo = (selectedItem && selectedItem.title) || "Interazioni tra farmaci";
 
-    try {
-        // Scarica il CSV generato dall'Action di GitHub bypassando la cache del browser
-        const response = await fetch('./data/db_drug_interactions.csv.zip', { cache: 'no-store' });
-        if (response.ok) {
-            const testoCsv = await response.text();
-            const righe = testoCsv.split('\n').filter(Boolean);
-            
-            // Converte le righe del CSV in oggetti stabili per la PWA
-            interazioni = righe.slice(1).map(riga => {
-                const colonne = riga.split(',');
-                return {
-                    farmacoA: colonne[0] ? colonne[0].replace(/"/g, '').trim() : "",
-                    farmacoB: colonne[1] ? colonne[1].replace(/"/g, '').trim() : "",
-                    stato: colonne[2] ? colonne[2].replace(/"/g, '').trim() : "incompatibile",
-                    nota: colonne[3] ? colonne[3].replace(/"/g, '').trim() : "Rischio di interazione."
-                };
-            }).filter(i => i.farmacoA && i.farmacoB);
-            
-            totalRecord = interazioni.length;
-        }
-    } catch(e) {
-        console.error("Errore lettura database CSV delle interazioni:", e);
-    }
-
-    const haDati = totalRecord > 0;
-    const messaggioInfo = haDati 
-        ? `<div class="info-block" style="background:#d4edda; color:#155724; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #28a745;">
-            <strong>✓ Database Interazioni Attivo</strong> | Coppie molecolari pronte offline: ${totalRecord}
-           </div>`
-        : `<div class="info-block" style="background:#fff3cd; color:#856404; padding:10px; margin-bottom:15px; border-radius:4px; border-left:4px solid #ffc107;">
-            <strong>⚠️ Archivio vuoto</strong>. Esegui il workflow su GitHub per scompattare lo ZIP.
-           </div>`;
-
-    // Costruisci il form di inserimento testuale
     content.innerHTML = `
-        <section class="detail-page">
-            <div class="detail-header">
-                <h2>Verifica Compatibilità Farmaci (TDC Database)</h2>
-            </div>
+        <section class="detail-page ddi-page">
+            ${detailHeader(escapeHtml(titolo), data || window.__currentData)}
+
             <div class="detail-content">
-                ${messaggioInfo}
-                
-                <div class="info-block">
-                    <label for="drugA">Inserisci Primo Farmaco:</label>
-                    <input id="drugA" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px;" placeholder="Es: Ceftriaxone, Fentanyl...">
-                </div>
-                <div class="info-block" style="margin-top: 15px;">
-                    <label for="drugB">Inserisci Secondo Farmaco:</label>
-                    <input id="drugB" type="text" class="personal-note-title-input" style="width:100%; padding:10px; margin-top:5px;" placeholder="Es: Amiodarone, Midazolam...">
-                </div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <button id="btnCheckCompatibility" class="content-button" style="width:100%; padding:12px;">Verifica Compatibilità</button>
-                </div>
-                <div id="interactionResult" style="margin-top: 25px;"></div>
+                <article id="ddiStato" class="info-block info-block-note" role="status">
+                    <strong>Archivio interazioni</strong>
+                    <p>Caricamento in corso…</p>
+                </article>
+
+                <article class="info-block ddi-form">
+                    <label for="drugA">Primo farmaco</label>
+                    <input id="drugA" class="personal-note-title-input" type="text" list="ddiListaA"
+                           autocomplete="off" autocapitalize="none" spellcheck="false"
+                           placeholder="Es: paracetamolo, ceftriaxone…">
+                    <datalist id="ddiListaA"></datalist>
+
+                    <label for="drugB">Secondo farmaco</label>
+                    <input id="drugB" class="personal-note-title-input" type="text" list="ddiListaB"
+                           autocomplete="off" autocapitalize="none" spellcheck="false"
+                           placeholder="Es: amiodarone, midazolam…">
+                    <datalist id="ddiListaB"></datalist>
+
+                    <button id="btnCheckCompatibility" class="settings-action ddi-submit" type="button" disabled>
+                        🔄 Verifica interazioni
+                    </button>
+                </article>
+
+                <div id="interactionResult" aria-live="polite"></div>
+
+                <article class="info-block info-block-warning">
+                    <span class="info-block-icon">ℹ️</span>
+                    <div>
+                        <strong>Come leggere il risultato</strong>
+                        <p>
+                            Fonte: DrugBank tramite Therapeutics Data Commons, in inglese; le frasi sono
+                            tradotte con un modello fisso e il testo originale è sempre consultabile.
+                            Il database indica che un'interazione esiste, non la sua gravità: i colori
+                            sono una classificazione indicativa. Non riguarda la compatibilità
+                            fisico-chimica in infusione o in siringa. Verifica sempre RCP, protocolli
+                            di reparto o farmacista.
+                        </p>
+                    </div>
+                </article>
             </div>
         </section>
     `;
 
-    // Logica di ricerca flessibile (Risolve il problema del prefisso rigido)
-    document.getElementById("btnCheckCompatibility")?.addEventListener("click", () => {
-        const dA = document.getElementById("drugA").value.trim().toLowerCase();
-        const dB = document.getElementById("drugB").value.trim().toLowerCase();
-        const resDiv = document.getElementById("interactionResult");
+    const elStato = document.getElementById("ddiStato");
+    const elRisultato = document.getElementById("interactionResult");
+    const inA = document.getElementById("drugA");
+    const inB = document.getElementById("drugB");
+    const listaA = document.getElementById("ddiListaA");
+    const listaB = document.getElementById("ddiListaB");
+    const bottone = document.getElementById("btnCheckCompatibility");
 
-        if (!resDiv) return;
-        if (!dA || !dB) {
-            resDiv.innerHTML = `<div class="personal-note-empty">Inserisci entrambi i principi attivi.</div>`;
-            return;
-        }
+    if (!NI) {
+        elStato.innerHTML = `<strong>Archivio non disponibile</strong><p>Modulo interazioni non caricato (js/interazioni.js).</p>`;
+        return;
+    }
 
-        // RICERCA FLESSIBILE: Usa 'includes' invece di 'startsWith' così "fe" troverà anche "Ceftriaxone"
-        const match = interazioni.find(i => {
-            const fA = i.farmacoA.toLowerCase();
-            const fB = i.farmacoB.toLowerCase();
-            return (fA.includes(dA) && fB.includes(dB)) || (fA.includes(dB) && fB.includes(dA));
+    let idx = null;
+    const paginaAttiva = () => document.body.contains(elRisultato);
+
+    const aggiornaSuggerimenti = (input, lista) => {
+        if (!idx) return;
+        lista.innerHTML = "";
+        NI.cerca(idx, input.value, 10).forEach(s => {
+            const option = document.createElement("option");
+            option.value = s.label;
+            lista.appendChild(option);
         });
+    };
+    inA.addEventListener("input", () => aggiornaSuggerimenti(inA, listaA));
+    inB.addEventListener("input", () => aggiornaSuggerimenti(inB, listaB));
 
-        if (!match) {
-            resDiv.innerHTML = `
-                <div class="info-block" style="border-left: 4px solid #6c757d; background: #f8f9fa; padding: 15px;">
-                    <h4 style="color: #6c757d; margin:0;">⚠️ Nessuna interazione nota nel database</h4>
-                    <p style="margin-top: 5px; margin-bottom:0;">Nessuna incompatibilità registrata per questa coppia. Procedere con cautela secondo protocollo.</p>
-                </div>`;
+    function verifica() {
+        if (!idx) return;
+
+        const rA = NI.risolvi(idx, inA.value);
+        const rB = NI.risolvi(idx, inB.value);
+
+        if (rA.tipo === "vuoto" || rB.tipo === "vuoto") {
+            elRisultato.innerHTML = `<div class="personal-note-empty">Inserisci entrambi i farmaci.</div>`;
             return;
         }
 
-        const colore = match.stato === "incompatibile" ? "#dc3545" : "#28a745";
-        resDiv.innerHTML = `
-            <div class="info-block" style="border-left: 4px solid ${colore}; background: #f8f9fa; padding: 15px;">
-                <h4 style="color: ${colore}; margin:0; font-weight:bold;">${match.stato.toUpperCase()}</h4>
-                <p style="margin-top: 8px; font-weight: bold; margin-bottom:0;">${match.farmacoA} + ${match.farmacoB}</p>
-                <p style="margin-top: 5px; color:#222; line-height:1.4;">${match.nota}</p>
+        const problemi = [];
+        if (rA.tipo !== "esatto") problemi.push(ddiRenderProblema(NI, idx, inA, rA));
+        if (rB.tipo !== "esatto") problemi.push(ddiRenderProblema(NI, idx, inB, rB));
+
+        if (problemi.length) {
+            elRisultato.innerHTML = problemi.join("");
+            elRisultato.querySelectorAll(".ddi-scelta").forEach(pulsante => {
+                pulsante.addEventListener("click", () => {
+                    document.getElementById(pulsante.dataset.target).value = pulsante.dataset.valore;
+                    verifica();
+                });
+            });
+            return;
+        }
+
+        if (rA.id === rB.id) {
+            elRisultato.innerHTML = `<div class="personal-note-empty">Hai inserito lo stesso farmaco due volte.</div>`;
+            return;
+        }
+
+        elRisultato.innerHTML = ddiRenderEsito(NI, idx, rA.id, rB.id, NI.verificaCoppia(idx, rA.id, rB.id));
+    }
+
+    bottone.addEventListener("click", verifica);
+    [inA, inB].forEach(input => input.addEventListener("keydown", evento => {
+        if (evento.key === "Enter") verifica();
+    }));
+
+    try {
+        idx = await NI.carica({
+            onStato: messaggio => {
+                if (!paginaAttiva()) return;
+                elStato.innerHTML = `<strong>Archivio interazioni</strong><p>${escapeHtml(messaggio)}</p>`;
+            }
+        });
+    } catch (errore) {
+        console.error("Errore nel caricamento delle interazioni:", errore);
+        if (!paginaAttiva()) return;
+        elStato.className = "info-block info-block-warning";
+        elStato.innerHTML = `
+            <div>
+                <strong>Archivio non disponibile</strong>
+                <p>${escapeHtml(errore && errore.message ? errore.message : String(errore))}</p>
+                <button id="ddiRiprova" class="settings-action" type="button">↻ Riprova</button>
             </div>`;
-    });
+        document.getElementById("ddiRiprova")?.addEventListener("click", () => renderDrugInteractions(selectedItem, data));
+        return;
+    }
+
+    if (!paginaAttiva()) return;
+
+    elStato.innerHTML = `
+        <strong>✓ Archivio caricato</strong>
+        <p>${idx.righe.toLocaleString("it-IT")} interazioni tra ${idx.nNomi.toLocaleString("it-IT")} principi attivi, disponibili anche offline.</p>`;
+    bottone.disabled = false;
+    aggiornaSuggerimenti(inA, listaA);
+    aggiornaSuggerimenti(inB, listaB);
 }
 
 
@@ -2930,7 +2961,7 @@ function loadItem(data) {
      * DATABASE LOCALE — INTERAZIONI
      */
     if (selectedItem.type === "interaction-db") {
-        renderDrugInteractions();
+        renderDrugInteractions(selectedItem, data);
         return;
     }
 
@@ -3307,104 +3338,6 @@ function renderDrug(item, data) {
     `;
 
 }
-
-// =========================================================================
-// MENU A TENDINA INTERATTIVO - ISOLATO SOLO SU INPUT DRUGA E DRUGB
-// =========================================================================
-
-// =========================================================================
-// MENU A TENDINA INTERATTIVO - ISOLATO SOLO SU INPUT DRUGA E DRUGB (TEMA SCURO)
-// =========================================================================
-
-// =========================================================================
-// MENU A TENDINA INTERATTIVO - SOLUZIONE DEFINITIVA PER CSV DECOMPRESSO
-// =========================================================================
-
-(function() {
-    let listaFarmaciDati = [];
-
-    // 1. Carica i dati dal file CSV (Scarica JSZip e scompatta in automatico lo ZIP)
-    async function caricaDatabase() {
-        try {
-            // Se JSZip non esiste, lo inseriamo dinamicamente nella pagina prima di procedere
-            if (typeof JSZip === "undefined") {
-                console.log("[Nursing Shot] Iniezione dinamica di JSZip...");
-                const jszipUrls = [
-                    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
-                    "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
-                ];
-                let caricato = false;
-                for (const url of jszipUrls) {
-                    try {
-                        await new Promise((resolve, reject) => {
-                            const script = document.createElement("script");
-                            script.src = url;
-                            script.onload = resolve;
-                            script.onerror = () => {
-                                script.remove();
-                                reject(new Error("Caricamento fallito: " + url));
-                            };
-                            document.head.appendChild(script);
-                        });
-                        caricato = true;
-                        break;
-                    } catch (err) {
-                        console.warn("[Nursing Shot]", err.message);
-                    }
-                }
-                if (!caricato) throw new Error("Impossibile caricare JSZip da CDN");
-            }
-
-            // Scarica l'archivio ZIP come ArrayBuffer (dati binari)
-            const response = await fetch("./data/db_drug_interactions.csv.zip");
-            if (!response.ok) throw new Error("Errore nel download del file ZIP");
-            
-            const arrayBuffer = await response.arrayBuffer();
-
-            // Ora JSZip è sicuramente disponibile nell'ambiente globale
-            const zip = await JSZip.loadAsync(arrayBuffer);
-            
-            // Cerca il file CSV all'interno dello ZIP
-            const fileInterno = zip.file("db_drug_interactions.csv");
-            if (!fileInterno) {
-                console.error("[Nursing Shot] Errore: 'db_drug_interactions.csv' non trovato dentro lo ZIP.");
-                return;
-            }
-
-            // Estrae il contenuto testuale del file CSV
-            const testo = await fileInterno.async("string");
-            
-            if (testo.startsWith("PK")) {
-                console.error("[Nursing Shot] Errore: Il file estratto risulta ancora compresso.");
-                return;
-            }
-
-            const righe = testo.split(/\r?\n/);
-            
-            // Estrazione sicura della prima colonna del CSV
-            const nomiGrezzi = righe.map(riga => {
-                const colonne = riga.split(/[,;]/);
-                return colonne && colonne[0] ? colonne[0].trim() : null;
-            }).filter(nome => nome && nome.length > 0);
-
-            // RIMOZIONE DOPPIONI
-            listaFarmaciDati = [...new Set(nomiGrezzi)];
-
-            // Scarta l'eventuale riga di intestazione
-            if (listaFarmaciDati.length > 0 && ["nome", "farmaco", "drug 1", "drug1"].includes(listaFarmaciDati[0].toLowerCase())) {
-                listaFarmaciDati.shift();
-            }
-
-            console.log(`[Nursing Shot] Database sincronizzato: ${listaFarmaciDati.length} farmaci pronti.`);
-        } catch (e) {
-            console.error("Impossibile caricare o decomprimere il file dei farmaci. Errore:", e.message || e);
-        }
-    }
-
-    // Avvia l'estrazione e il caricamento dei farmaci
-    caricaDatabase();
-
-})();
 
 /* =========================================================
    LABORATORIO

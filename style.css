@@ -2679,3 +2679,169 @@ section h2 {
 .personal-note-table .personal-note-linked-term {
     display: inline;
 }
+
+
+/* =========================================================
+   INTERAZIONI TRA FARMACI
+========================================================= */
+
+.ddi-page .detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ddi-page #interactionResult:empty {
+    display: none;
+}
+
+.ddi-page #interactionResult {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ddi-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ddi-form label {
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+.ddi-form label:first-child {
+    margin-top: 0;
+}
+
+.ddi-submit {
+    margin-top: 12px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.ddi-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.ddi-esito h4 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+}
+
+.ddi-esito p {
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.ddi-esito .ddi-coppia {
+    margin-bottom: 10px;
+    color: var(--text);
+    font-weight: 700;
+}
+
+.ddi-rischio {
+    border-color: rgba(255, 100, 100, 0.5);
+    background: rgba(255, 100, 100, 0.08);
+}
+
+.ddi-rischio h4 {
+    color: var(--danger);
+}
+
+.ddi-attenzione {
+    border-color: rgba(255, 190, 70, 0.5);
+    background: rgba(255, 190, 70, 0.08);
+}
+
+.ddi-attenzione h4 {
+    color: #d99a1d;
+}
+
+.ddi-nota {
+    border-color: rgba(92, 200, 255, 0.45);
+    background: var(--accent-soft);
+}
+
+.ddi-nota h4 {
+    color: var(--accent);
+}
+
+.ddi-voci {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ddi-voce {
+    padding: 10px 12px;
+    border-left: 4px solid var(--border-hover);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.ddi-voce-rischio {
+    border-left-color: var(--danger);
+}
+
+.ddi-voce-attenzione {
+    border-left-color: #e0a526;
+}
+
+.ddi-voce-nota {
+    border-left-color: var(--accent);
+}
+
+.ddi-badge {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-hover);
+    color: var(--text);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.ddi-voce p {
+    margin: 0;
+    color: var(--text);
+}
+
+.ddi-voce .ddi-nota-testo {
+    margin-top: 6px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.ddi-voce details {
+    margin-top: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.ddi-voce details summary {
+    cursor: pointer;
+}
+
+.ddi-voce details p {
+    margin-top: 6px;
+    color: var(--text-secondary);
+}
+
+.ddi-scelte {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ddi-scelta small {
+    margin-left: 6px;
+    color: var(--text-secondary);
+}
