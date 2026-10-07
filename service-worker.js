@@ -1,4 +1,6 @@
-const CACHE_NAME = "nursing-v88";
+const CACHE_NAME = "nursing-v89";
+
+const PATIENT_PHOTO_CACHE = "nursing-patient-photos-v1";
 
 const CORE_FILES = [
     "./",
@@ -30,7 +32,9 @@ self.addEventListener("activate", event => {
     event.waitUntil(
         caches.keys()
             .then(cacheNames => Promise.all(
-                cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+                cacheNames
+                .filter(name => name !== CACHE_NAME && name !== PATIENT_PHOTO_CACHE)
+                .map(name => caches.delete(name))
             ))
             .then(() => self.clients.claim())
     );
