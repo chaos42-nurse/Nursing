@@ -2891,3 +2891,22 @@ section h2 {
 .ddi-suggest .ddi-suggest-vuoto:hover {
     background: none;
 }
+
+/* Elenco curato: informazione da verificare */
+.ddi-curata {
+    border-style: dashed;
+}
+
+.ddi-curata .ddi-curata-nota {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.ddi-voce .ddi-monitoraggio {
+    font-size: 0.95em;
+}
+
+.ddi-esito a {
+    color: var(--accent);
+    text-decoration: underline;
+}

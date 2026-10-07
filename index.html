@@ -57,12 +57,12 @@ if (new URLSearchParams(window.location.search).get("patients") === "1") {
 </div>
 <div id="content"></div>
 </main>
-<script src="./js/interazioni.js?v=87"></script>
-<script src="./app.js?v=87"></script>
+<script src="./js/interazioni.js?v=88"></script>
+<script src="./app.js?v=88"></script>
 <script>
 if ("serviceWorker" in navigator) {
 window.addEventListener("load", () => {
-navigator.serviceWorker.register("./service-worker.js?v=87")
+navigator.serviceWorker.register("./service-worker.js?v=88")
 .then(() => console.log("Service worker registrato correttamente."))
 .catch(error => console.error("Errore registrazione service worker:", error));
 });
