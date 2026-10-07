@@ -32,7 +32,7 @@
         rischio: "Possibili effetti avversi",
         attenzione: "Attenzione: possibile variazione di effetto o concentrazioni",
         nota: "Interazione segnalata (riduce un effetto avverso)",
-        nessuna: "Nessuna interazione registrata nel database"
+        nessuna: "Nessuna interazione nel database consultato (non significa che sia sicuro)"
     };
 
     const ORDINE_CATEGORIE = { rischio: 0, attenzione: 1, nota: 2 };
@@ -838,6 +838,61 @@
         return { esito, voci };
     }
 
+    /* Elenco curato a mano (data/interazioni-curate.json): interazioni frequenti
+       in reparto, anche tra gruppi di farmaci (es. FANS, nitrati). Vengono sempre
+       presentate come "da verificare". I nomi non presenti nello ZIP sono ignorati. */
+    function aggiungiCurate(idx, dati) {
+        idx.curate = [];
+        if (!dati || !Array.isArray(dati.voci)) return idx;
+        const gruppi = dati.gruppi || {};
+
+        const lato = nome => {
+            const ids = new Set();
+            const nomi = typeof nome === "string" && nome.charAt(0) === "@" ? (gruppi[nome.slice(1)] || []) : [nome];
+            for (const n of nomi) {
+                const id = idx.idPerNome.get(n);
+                if (id !== undefined) ids.add(id);
+            }
+            return ids;
+        };
+
+        for (const v of dati.voci) {
+            const A = lato(v.a);
+            const B = lato(v.b);
+            if (!A.size || !B.size) continue;
+            idx.curate.push({
+                id: v.id,
+                A, B,
+                categoria: v.categoria === "rischio" ? R : W,
+                tipo: v.tipo === "compatibilita" ? "compatibilita" : "interazione",
+                testo: v.testo,
+                monitoraggio: v.monitoraggio || ""
+            });
+        }
+        return idx;
+    }
+
+    /* Voci dell'elenco curato valide per la coppia (in entrambi i versi). */
+    function verificaCurate(idx, idA, idB) {
+        if (!idx.curate || idA === idB) return [];
+        const out = [];
+        for (const v of idx.curate) {
+            let x = null, y = null;
+            if (v.A.has(idA) && v.B.has(idB)) { x = idA; y = idB; }
+            else if (v.A.has(idB) && v.B.has(idA)) { x = idB; y = idA; }
+            if (x === null) continue;
+            out.push({
+                id: v.id,
+                categoria: v.categoria,
+                tipo: v.tipo,
+                testo: riempi(v.testo, nomeVisto(idx, x), nomeVisto(idx, y)),
+                monitoraggio: v.monitoraggio
+            });
+        }
+        out.sort((p, q) => ORDINE_CATEGORIE[p.categoria] - ORDINE_CATEGORIE[q.categoria]);
+        return out;
+    }
+
     /* =====================================================================
        CARICAMENTO NEL BROWSER (una sola volta per sessione)
     ===================================================================== */
@@ -850,6 +905,7 @@
         const o = Object.assign({
             zip: "./data/db_drug_interactions.csv.zip",
             alias: "./data/alias-farmaci.json",
+            curate: "./data/interazioni-curate.json",
             onStato: null
         }, opzioni);
         const stato = msg => { if (o.onStato) o.onStato(msg); };
@@ -877,7 +933,16 @@
             } catch (errore) {
                 console.warn("[Interazioni] Dizionario dei nomi italiani non disponibile:", errore);
             }
-            return aggiungiAlias(idx, datiAlias);
+            aggiungiAlias(idx, datiAlias);
+
+            let datiCurate = null;
+            try {
+                const rc = await fetch(o.curate);
+                if (rc.ok) datiCurate = await rc.json();
+            } catch (errore) {
+                console.warn("[Interazioni] Elenco curato non disponibile:", errore);
+            }
+            return aggiungiCurate(idx, datiCurate);
         })();
 
         promessaIndice.catch(() => { promessaIndice = null; });
@@ -891,6 +956,8 @@
         estraiCsvDaZip,
         costruisciIndice,
         aggiungiAlias,
+        aggiungiCurate,
+        verificaCurate,
         cerca,
         risolvi,
         verificaCoppia,

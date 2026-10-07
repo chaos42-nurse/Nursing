@@ -18,6 +18,7 @@ const prova = (nome, fn) => {
     );
 };
 
+const curateDati = JSON.parse(readFileSync(path.join(radice, "data/interazioni-curate.json"), "utf-8"));
 const zip = readFileSync(path.join(radice, "data/db_drug_interactions.csv.zip"));
 const alias = JSON.parse(readFileSync(path.join(radice, "data/alias-farmaci.json"), "utf-8"));
 
@@ -48,6 +49,7 @@ console.log("  ZIP letto in " + Math.round(performance.now() - t0) + " ms (" + t
 t0 = performance.now();
 const idx = await NI.costruisciIndice(testo);
 NI.aggiungiAlias(idx, alias);
+NI.aggiungiCurate(idx, curateDati);
 console.log("  indice pronto in " + Math.round(performance.now() - t0) + " ms");
 
 const dati = csvIndipendente(testo).slice(1).filter(r => r.length >= 3 && r[0]);
@@ -191,6 +193,38 @@ await prova("autocompletamento: forme italiane e nomi parziali vengono suggeriti
     primo("tachi", "Acetaminophen");
     assert.equal(NI.cerca(idx, "para", 3)[0].id, id("Acetaminophen"), "i farmaci piu' comuni vengono per primi");
     assert.equal(NI.cerca(idx, "a", 5).length, 0, "meno di 2 lettere: nessun suggerimento");
+});
+
+await prova("elenco curato: nomi esistenti nello ZIP, voci complete e senza id doppi", () => {
+    const nomi = [];
+    for (const g of Object.values(curateDati.gruppi)) nomi.push(...g);
+    for (const v of curateDati.voci) {
+        for (const l of [v.a, v.b]) {
+            if (l.startsWith("@")) assert.ok(curateDati.gruppi[l.slice(1)], "gruppo inesistente: " + l);
+            else nomi.push(l);
+        }
+        assert.ok(["rischio", "attenzione"].includes(v.categoria), "categoria non valida: " + v.id);
+        assert.ok(v.testo && v.testo.length > 20 && v.monitoraggio, "voce incompleta: " + v.id);
+    }
+    for (const n of nomi) assert.ok(idx.idPerNome.has(n), "non presente nello ZIP: " + n);
+    assert.equal(new Set(curateDati.voci.map(v => v.id)).size, curateDati.voci.length, "id duplicati");
+    assert.equal(idx.curate.length, curateDati.voci.length, "voci scartate dal caricamento");
+});
+
+await prova("elenco curato: coppie note vengono trovate in entrambi i versi", () => {
+    const cur = (a, b) => NI.verificaCurate(idx, id(a), id(b));
+    const r = cur("Ciprofloxacin", "Theophylline");
+    assert.equal(r.length, 1);
+    assert.equal(r[0].categoria, "rischio");
+    assert.equal(cur("Theophylline", "Ciprofloxacin")[0].testo, r[0].testo);
+    console.log("      Ciprofloxacina + Teofillina →", r[0].testo);
+    assert.equal(cur("Ceftriaxone", "Calcium gluconate")[0].tipo, "compatibilita");
+    assert.ok(cur("Haloperidol", "Ondansetron").some(v => v.id === "qt"), "gruppo QT");
+    assert.ok(cur("Levofloxacin", "Amiodarone").some(v => v.id === "qt"));
+    assert.ok(cur("Sildenafil", "Isosorbide mononitrate").length === 1);
+    assert.ok(cur("Morphine", "Lorazepam").some(v => v.id === "oppioidi-benzodiazepine"));
+    assert.equal(cur("Amiodarone", "Amiodarone").length, 0, "stesso farmaco: nessuna voce");
+    assert.equal(cur("Furosemide", "Acetaminophen").length, 0, "coppia non in elenco");
 });
 
 await prova("farmaci non inclusi nel dataset (eparina, insulina) risultano 'nessuno', non 'nessuna interazione'", () => {

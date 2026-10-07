@@ -1,0 +1,257 @@
+{
+  "_nota": "Elenco compilato a mano di interazioni di uso frequente in reparto, mostrato SOPRA il risultato del database. Non e' verificato voce per voce su una fonte: nell'app e' sempre presentato come 'informazione comunque da verificare'. Ogni nome deve esistere nello ZIP (verificato da scripts/test_interazioni.mjs). {A} e {B} diventano i nomi dei farmaci: {A} appartiene al lato 'a', {B} al lato 'b'. Un lato '@nome' e' un gruppo definito in 'gruppi'; se 'a' e 'b' sono lo stesso gruppo vale per ogni coppia di farmaci diversi del gruppo.",
+  "gruppi": {
+    "fans": ["Ibuprofen", "Ketorolac", "Naproxen", "Diclofenac", "Ketoprofen", "Piroxicam", "Nimesulide"],
+    "ace_sartani": ["Enalapril", "Ramipril", "Lisinopril", "Captopril", "Losartan", "Valsartan", "Irbesartan", "Candesartan cilexetil"],
+    "betabloccanti": ["Metoprolol", "Bisoprolol", "Atenolol", "Propranolol", "Carvedilol", "Nebivolol", "Labetalol", "Sotalol"],
+    "ca_antagonisti_fc": ["Verapamil", "Diltiazem"],
+    "nitrati": ["Nitroglycerin", "Isosorbide dinitrate", "Isosorbide mononitrate"],
+    "oppioidi": ["Morphine", "Fentanyl", "Oxycodone", "Tramadol", "Codeine", "Methadone", "Buprenorphine"],
+    "benzodiazepine": ["Diazepam", "Lorazepam", "Midazolam", "Alprazolam", "Clonazepam", "Bromazepam"],
+    "qt": ["Amiodarone", "Sotalol", "Haloperidol", "Citalopram", "Escitalopram", "Ondansetron", "Domperidone", "Methadone", "Azithromycin", "Clarithromycin", "Erythromycin", "Levofloxacin", "Ciprofloxacin", "Moxifloxacin", "Fluconazole"],
+    "macrolidi_cyp": ["Clarithromycin", "Erythromycin"],
+    "inibitori_cyp3a4": ["Clarithromycin", "Erythromycin", "Fluconazole", "Itraconazole", "Voriconazole", "Diltiazem", "Verapamil"],
+    "aminoglicosidi": ["Gentamicin", "Amikacin", "Tobramycin"],
+    "serotoninergici": ["Sertraline", "Fluoxetine", "Paroxetine", "Citalopram", "Escitalopram", "Venlafaxine", "Tramadol"],
+    "antipsicotici": ["Haloperidol", "Olanzapine", "Risperidone", "Quetiapine", "Clozapine"],
+    "immunosoppressori": ["Tacrolimus", "Cyclosporine"],
+    "diuretici_ansa": ["Furosemide", "Torasemide"],
+    "calcio_ev": ["Calcium gluconate", "Calcium chloride"]
+  },
+  "voci": [
+    {
+      "id": "sildenafil-nitrati",
+      "a": "Sildenafil", "b": "@nitrati", "categoria": "rischio",
+      "testo": "{A} associato a {B} può causare un calo grave della pressione arteriosa. L'associazione è in genere controindicata.",
+      "monitoraggio": "Non somministrare insieme. Chiedere al medico prima di qualunque nitrato (anche sublinguale) in chi ha assunto sildenafil di recente."
+    },
+    {
+      "id": "qt",
+      "a": "@qt", "b": "@qt", "categoria": "rischio",
+      "testo": "{A} e {B} possono entrambi prolungare l'intervallo QT: associati aumentano il rischio di aritmie gravi (torsione di punta).",
+      "monitoraggio": "ECG con valutazione del QTc, potassio e magnesio nella norma, attenzione a sincope, palpitazioni, bradicardia."
+    },
+    {
+      "id": "oppioidi-benzodiazepine",
+      "a": "@oppioidi", "b": "@benzodiazepine", "categoria": "rischio",
+      "testo": "{A} con {B}: effetto sedativo additivo con rischio di depressione respiratoria, ipotensione, coma.",
+      "monitoraggio": "Frequenza respiratoria, saturazione, livello di coscienza (sedazione) ravvicinati; dosi più basse possibili secondo prescrizione."
+    },
+    {
+      "id": "theofillina-inibitori",
+      "a": "Theophylline", "b": "Ciprofloxacin", "categoria": "rischio",
+      "testo": "{B} può ridurre l'eliminazione di {A} e farne aumentare le concentrazioni: rischio di nausea, tachiaritmie, convulsioni.",
+      "monitoraggio": "Concentrazione plasmatica di teofillina, frequenza cardiaca, segni di tossicità; il medico può ridurre la dose."
+    },
+    {
+      "id": "theofillina-macrolidi",
+      "a": "Theophylline", "b": "@macrolidi_cyp", "categoria": "attenzione",
+      "testo": "{B} può far aumentare le concentrazioni di {A}, con rischio di tossicità.",
+      "monitoraggio": "Concentrazione plasmatica di teofillina, frequenza cardiaca, tremori, nausea."
+    },
+    {
+      "id": "aminoglicosidi-diuretici-ansa",
+      "a": "@aminoglicosidi", "b": "@diuretici_ansa", "categoria": "rischio",
+      "testo": "{A} con {B}: maggior rischio di danno all'udito e al rene.",
+      "monitoraggio": "Funzione renale, diuresi, livelli ematici dell'aminoglicoside, acufeni o calo dell'udito."
+    },
+    {
+      "id": "aminoglicosidi-vancomicina",
+      "a": "@aminoglicosidi", "b": "Vancomycin", "categoria": "rischio",
+      "testo": "{A} con {B}: maggior rischio di tossicità renale (e dell'orecchio).",
+      "monitoraggio": "Creatinina, diuresi, livelli ematici dei due farmaci secondo protocollo."
+    },
+    {
+      "id": "aminoglicosidi-colistina",
+      "a": "@aminoglicosidi", "b": "Colistin", "categoria": "rischio",
+      "testo": "{A} con {B}: maggior rischio di tossicità renale e neurologica.",
+      "monitoraggio": "Creatinina, diuresi, segni neurologici (formicolii, debolezza, difficoltà respiratoria)."
+    },
+    {
+      "id": "ceftriaxone-calcio",
+      "a": "Ceftriaxone", "b": "@calcio_ev", "categoria": "rischio", "tipo": "compatibilita",
+      "testo": "Ceftriaxone e soluzioni di calcio per via endovenosa possono formare precipitati. Non miscelare e non somministrare nella stessa linea; nei neonati l'associazione è da evitare.",
+      "monitoraggio": "Lavare la linea tra un farmaco e l'altro o usare vie separate, secondo protocollo e indicazioni del farmacista."
+    },
+    {
+      "id": "warfarin-fans",
+      "a": "Warfarin", "b": "@fans", "categoria": "rischio",
+      "testo": "{B} con {A}: aumento del rischio di sanguinamento (anche gastrointestinale).",
+      "monitoraggio": "Segni di sanguinamento (feci nere, ematuria, ecchimosi), INR secondo indicazione medica."
+    },
+    {
+      "id": "warfarin-antibiotici",
+      "a": "Warfarin", "b": "Metronidazole", "categoria": "rischio",
+      "testo": "{B} può aumentare l'effetto di {A} e innalzare l'INR.",
+      "monitoraggio": "INR ravvicinato, segni di sanguinamento."
+    },
+    {
+      "id": "warfarin-cotrimossazolo-trimetoprim",
+      "a": "Warfarin", "b": "Trimethoprim", "categoria": "rischio",
+      "testo": "{B} può aumentare l'effetto di {A} e innalzare l'INR.",
+      "monitoraggio": "INR ravvicinato, segni di sanguinamento."
+    },
+    {
+      "id": "warfarin-sulfametoxazolo",
+      "a": "Warfarin", "b": "Sulfamethoxazole", "categoria": "rischio",
+      "testo": "{B} (presente nel cotrimossazolo) può aumentare l'effetto di {A} e innalzare l'INR.",
+      "monitoraggio": "INR ravvicinato, segni di sanguinamento."
+    },
+    {
+      "id": "warfarin-amiodarone",
+      "a": "Warfarin", "b": "Amiodarone", "categoria": "attenzione",
+      "testo": "{B} può aumentare l'effetto di {A}; l'effetto può comparire dopo giorni o settimane.",
+      "monitoraggio": "INR frequente nelle settimane successive all'inizio, segni di sanguinamento."
+    },
+    {
+      "id": "warfarin-rifampicina",
+      "a": "Warfarin", "b": "Rifampicin", "categoria": "attenzione",
+      "testo": "{B} può ridurre l'effetto di {A}, con rischio di INR troppo basso.",
+      "monitoraggio": "INR ravvicinato all'inizio e alla sospensione di rifampicina."
+    },
+    {
+      "id": "iperkaliemia-ace-spironolattone",
+      "a": "@ace_sartani", "b": "Spironolactone", "categoria": "rischio",
+      "testo": "{A} con {B}: rischio di aumento del potassio nel sangue (iperkaliemia), soprattutto con insufficienza renale.",
+      "monitoraggio": "Potassio e creatinina, ECG se potassio alto, debolezza o bradicardia."
+    },
+    {
+      "id": "iperkaliemia-ace-potassio",
+      "a": "@ace_sartani", "b": "Potassium chloride", "categoria": "rischio",
+      "testo": "{A} con {B}: rischio di iperkaliemia.",
+      "monitoraggio": "Potassio e creatinina prima e durante la terapia; non somministrare potassio in bolo."
+    },
+    {
+      "id": "iperkaliemia-spironolattone-potassio",
+      "a": "Spironolactone", "b": "Potassium chloride", "categoria": "rischio",
+      "testo": "{A} con {B}: rischio di iperkaliemia.",
+      "monitoraggio": "Potassio e creatinina ravvicinati."
+    },
+    {
+      "id": "ace-fans",
+      "a": "@ace_sartani", "b": "@fans", "categoria": "attenzione",
+      "testo": "{B} può ridurre l'effetto antipertensivo di {A} e, soprattutto con un diuretico, aumentare il rischio di danno renale.",
+      "monitoraggio": "Pressione arteriosa, diuresi, creatinina e potassio."
+    },
+    {
+      "id": "litio-fans",
+      "a": "Lithium cation", "b": "@fans", "categoria": "rischio",
+      "testo": "{B} può far aumentare i livelli di {A} con rischio di tossicità (tremori, confusione, vomito, diarrea).",
+      "monitoraggio": "Litiemia, funzione renale, sintomi di tossicità."
+    },
+    {
+      "id": "litio-ace",
+      "a": "Lithium cation", "b": "@ace_sartani", "categoria": "rischio",
+      "testo": "{B} può far aumentare i livelli di {A} con rischio di tossicità.",
+      "monitoraggio": "Litiemia, funzione renale, sintomi di tossicità."
+    },
+    {
+      "id": "litio-tiazidici",
+      "a": "Lithium cation", "b": "Hydrochlorothiazide", "categoria": "rischio",
+      "testo": "{B} può far aumentare i livelli di {A} con rischio di tossicità.",
+      "monitoraggio": "Litiemia, sodiemia, funzione renale, sintomi di tossicità."
+    },
+    {
+      "id": "digossina-amiodarone",
+      "a": "Digoxin", "b": "Amiodarone", "categoria": "attenzione",
+      "testo": "{B} può aumentare le concentrazioni di {A}, con rischio di tossicità (nausea, disturbi visivi, aritmie).",
+      "monitoraggio": "Digossinemia, frequenza e ritmo cardiaco, potassio; spesso si riduce la dose di digossina."
+    },
+    {
+      "id": "digossina-ca-antagonisti",
+      "a": "Digoxin", "b": "Verapamil", "categoria": "attenzione",
+      "testo": "{B} può aumentare le concentrazioni di {A} e rallentare ulteriormente la conduzione cardiaca.",
+      "monitoraggio": "Digossinemia, frequenza cardiaca, ECG (blocchi AV)."
+    },
+    {
+      "id": "digossina-macrolidi",
+      "a": "Digoxin", "b": "@macrolidi_cyp", "categoria": "attenzione",
+      "testo": "{B} può aumentare le concentrazioni di {A}, con rischio di tossicità.",
+      "monitoraggio": "Digossinemia, frequenza e ritmo cardiaco, nausea e disturbi visivi."
+    },
+    {
+      "id": "digossina-diuretici-ansa",
+      "a": "Digoxin", "b": "@diuretici_ansa", "categoria": "attenzione",
+      "testo": "{B} può causare calo di potassio e magnesio, che aumenta la tossicità di {A}.",
+      "monitoraggio": "Potassio e magnesio, ECG, digossinemia."
+    },
+    {
+      "id": "betabloccanti-ca-antagonisti",
+      "a": "@betabloccanti", "b": "@ca_antagonisti_fc", "categoria": "rischio",
+      "testo": "{A} con {B}: rischio di bradicardia marcata, blocco atrio-ventricolare, ipotensione e scompenso.",
+      "monitoraggio": "Frequenza cardiaca, pressione, ECG; attenzione soprattutto per via endovenosa."
+    },
+    {
+      "id": "clonidina-betabloccanti",
+      "a": "Clonidine", "b": "@betabloccanti", "categoria": "attenzione",
+      "testo": "{A} con {B}: rischio di bradicardia; alla sospensione di {A} può comparire un rialzo pressorio improvviso.",
+      "monitoraggio": "Frequenza cardiaca e pressione; non sospendere bruscamente senza indicazione medica."
+    },
+    {
+      "id": "simvastatina-cyp3a4",
+      "a": "Simvastatin", "b": "@inibitori_cyp3a4", "categoria": "rischio",
+      "testo": "{B} può far aumentare molto l'esposizione a {A}: rischio di danno muscolare (miopatia, rabdomiolisi). Con alcuni di questi farmaci l'associazione è controindicata o richiede una dose massima ridotta.",
+      "monitoraggio": "Dolore o debolezza muscolare, urine scure, CPK; chiedere conferma al medico o al farmacista."
+    },
+    {
+      "id": "simvastatina-amiodarone",
+      "a": "Simvastatin", "b": "Amiodarone", "categoria": "attenzione",
+      "testo": "{B} può aumentare l'esposizione a {A} con rischio di miopatia; è prevista una dose massima ridotta di {A}.",
+      "monitoraggio": "Dolore o debolezza muscolare, CPK."
+    },
+    {
+      "id": "midazolam-cyp3a4",
+      "a": "Midazolam", "b": "@inibitori_cyp3a4", "categoria": "attenzione",
+      "testo": "{B} può aumentare le concentrazioni di {A}: sedazione più intensa e prolungata, con rischio di depressione respiratoria.",
+      "monitoraggio": "Livello di coscienza, frequenza respiratoria e saturazione per un tempo più lungo del solito."
+    },
+    {
+      "id": "immunosoppressori-cyp3a4",
+      "a": "@immunosoppressori", "b": "@inibitori_cyp3a4", "categoria": "attenzione",
+      "testo": "{B} può far aumentare i livelli di {A}, con rischio di tossicità (reni, sistema nervoso).",
+      "monitoraggio": "Livelli ematici del farmaco, creatinina, pressione, tremori; aggiustamento della dose a cura del medico."
+    },
+    {
+      "id": "metotrexato-fans",
+      "a": "Methotrexate", "b": "@fans", "categoria": "rischio",
+      "testo": "{B} può ridurre l'eliminazione di {A} e aumentarne la tossicità (midollo osseo, reni, mucose).",
+      "monitoraggio": "Emocromo, creatinina, comparsa di afte o febbre; verificare con il medico."
+    },
+    {
+      "id": "metotrexato-trimetoprim",
+      "a": "Methotrexate", "b": "Trimethoprim", "categoria": "rischio",
+      "testo": "{B} con {A}: rischio di grave tossicità sul midollo osseo.",
+      "monitoraggio": "Emocromo, febbre, sanguinamenti; associazione in genere da evitare."
+    },
+    {
+      "id": "metotrexato-sulfametoxazolo",
+      "a": "Methotrexate", "b": "Sulfamethoxazole", "categoria": "rischio",
+      "testo": "{B} (presente nel cotrimossazolo) con {A}: rischio di grave tossicità sul midollo osseo.",
+      "monitoraggio": "Emocromo, febbre, sanguinamenti; associazione in genere da evitare."
+    },
+    {
+      "id": "allopurinolo-azatioprina",
+      "a": "Allopurinol", "b": "Azathioprine", "categoria": "rischio",
+      "testo": "{A} aumenta l'esposizione ad {B}: rischio di grave soppressione del midollo osseo se la dose non viene ridotta.",
+      "monitoraggio": "Emocromo, febbre, infezioni, lividi; la dose di azatioprina va ridotta dal medico."
+    },
+    {
+      "id": "linezolid-serotoninergici",
+      "a": "Linezolid", "b": "@serotoninergici", "categoria": "rischio",
+      "testo": "{A} con {B}: rischio di sindrome serotoninergica (agitazione, febbre, tremori, sudorazione, tachicardia).",
+      "monitoraggio": "Stato mentale, temperatura, tremori, clono; segnalare subito al medico."
+    },
+    {
+      "id": "serotoninergici",
+      "a": "@serotoninergici", "b": "@serotoninergici", "categoria": "attenzione",
+      "testo": "{A} con {B}: più farmaci serotoninergici insieme aumentano il rischio di sindrome serotoninergica (e, con il tramadolo, di convulsioni).",
+      "monitoraggio": "Agitazione, tremori, sudorazione, febbre, diarrea, tachicardia."
+    },
+    {
+      "id": "metoclopramide-antipsicotici",
+      "a": "Metoclopramide", "b": "@antipsicotici", "categoria": "attenzione",
+      "testo": "{A} con {B}: maggior rischio di sintomi extrapiramidali (rigidità, tremori, movimenti involontari, irrequietezza).",
+      "monitoraggio": "Rigidità, tremori, movimenti anomali del volto o del collo; segnalare al medico."
+    }
+  ]
+}

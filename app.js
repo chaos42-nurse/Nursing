@@ -2628,7 +2628,31 @@ const DDI_BADGE = {
     nota: "Nota"
 };
 
-function ddiRenderEsito(NI, idx, idA, idB, esito) {
+const DDI_AIFA_URL = "https://medicinali.aifa.gov.it/";
+
+function ddiRenderCurate(curate) {
+    if (!curate.length) return "";
+
+    const voci = curate.map(v => `
+        <li class="ddi-voce ddi-voce-${v.categoria}">
+            <span class="ddi-badge">${escapeHtml(v.tipo === "compatibilita" ? "Compatibilità in infusione" : DDI_BADGE[v.categoria])}</span>
+            <p>${escapeHtml(v.testo)}</p>
+            ${v.monitoraggio ? `<p class="ddi-monitoraggio"><strong>Cosa controllare:</strong> ${escapeHtml(v.monitoraggio)}</p>` : ""}
+        </li>`).join("");
+
+    const grave = curate.some(v => v.categoria === "rischio");
+    return `
+        <div class="info-block ddi-esito ddi-curata ${grave ? "ddi-rischio" : "ddi-attenzione"}">
+            <h4>⚠️ Informazione comunque da verificare</h4>
+            <p class="ddi-curata-nota">
+                Segnalazione dell'elenco integrato a mano nell'app, non proveniente dal database
+                e non verificata voce per voce. Controlla RCP, protocollo di reparto o farmacista.
+            </p>
+            <ul class="ddi-voci">${voci}</ul>
+        </div>`;
+}
+
+function ddiRenderEsito(NI, idx, idA, idB, esito, haCurate) {
     const stile = DDI_STILE_ESITO[esito.esito];
     const coppia = `${escapeHtml(NI.nomeCompleto(idx, idA))} + ${escapeHtml(NI.nomeCompleto(idx, idB))}`;
 
@@ -2638,9 +2662,12 @@ function ddiRenderEsito(NI, idx, idA, idB, esito) {
                 <h4>${stile.icona} ${escapeHtml(NI.ETICHETTE.nessuna)}</h4>
                 <p class="ddi-coppia">${coppia}</p>
                 <p>
-                    Non è una garanzia di sicurezza: l'assenza di una voce non esclude rischi
-                    e il database non riguarda la compatibilità fisico-chimica in infusione
-                    o in siringa. Verifica sempre RCP, protocollo di reparto o farmacista.
+                    ${haCurate ? "Il database di base non riporta nulla per questa coppia, ma sopra c'è una segnalazione da verificare. " : ""}
+                    <strong>L'assenza di una voce non vuol dire che l'associazione sia sicura.</strong>
+                    Il database è incompleto e non riguarda la compatibilità fisico-chimica in
+                    infusione o in siringa. Controlla sempre il RCP di entrambi i farmaci
+                    (<a href="${DDI_AIFA_URL}" target="_blank" rel="noopener noreferrer">banca dati farmaci AIFA</a>),
+                    il protocollo di reparto o il farmacista.
                 </p>
             </div>`;
     }
@@ -2735,7 +2762,8 @@ async function renderDrugInteractions(selectedItem, data) {
                             Fonte: DrugBank tramite Therapeutics Data Commons, in inglese; le frasi sono
                             tradotte con un modello fisso e il testo originale è sempre consultabile.
                             Il database indica che un'interazione esiste, non la sua gravità: i colori
-                            sono una classificazione indicativa. Non riguarda la compatibilità
+                            sono una classificazione indicativa. Le segnalazioni «da verificare» arrivano
+                            da un elenco integrato a mano e vanno sempre controllate. Non riguarda la compatibilità
                             fisico-chimica in infusione o in siringa. Verifica sempre RCP, protocolli
                             di reparto o farmacista.
                         </p>
@@ -2874,7 +2902,10 @@ async function renderDrugInteractions(selectedItem, data) {
             return;
         }
 
-        elRisultato.innerHTML = ddiRenderEsito(NI, idx, rA.id, rB.id, NI.verificaCoppia(idx, rA.id, rB.id));
+        const curate = NI.verificaCurate(idx, rA.id, rB.id);
+        elRisultato.innerHTML =
+            ddiRenderCurate(curate) +
+            ddiRenderEsito(NI, idx, rA.id, rB.id, NI.verificaCoppia(idx, rA.id, rB.id), curate.length > 0);
     }
 
     bottone.addEventListener("click", verifica);
