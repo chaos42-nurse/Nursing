@@ -428,9 +428,11 @@ function openPatientPhotoCapture(patientId) {
             const recordedAt = new Date().toISOString();
             const request = patientPhotoRequest(patientId, photoId);
 
-            const response = new Response(file, {
+            const storedFile = await compressPatientPhoto(file);
+
+            const response = new Response(storedFile, {
                 headers: {
-                    "Content-Type": file.type || "image/jpeg",
+                    "Content-Type": storedFile.type || "image/jpeg",
                     "X-Photo-Id": photoId,
                     "X-Photo-Date": recordedAt,
                     "X-Patient-Id": String(patientId)
@@ -448,6 +450,49 @@ function openPatientPhotoCapture(patientId) {
             input.value = "";
         }
     });
+}
+
+async function compressPatientPhoto(file) {
+    if (!file || !file.type.startsWith("image/")) return file;
+
+    try {
+        const bitmap = await createImageBitmap(file);
+        const maxSize = 1600;
+        const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+        const width = Math.max(1, Math.round(bitmap.width * scale));
+        const height = Math.max(1, Math.round(bitmap.height * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d", { alpha: false });
+        context.drawImage(bitmap, 0, 0, width, height);
+        bitmap.close();
+
+        const blob = await new Promise(resolve =>
+            canvas.toBlob(resolve, "image/jpeg", 0.75)
+        );
+
+        return blob || file;
+    } catch (error) {
+        console.warn("Compressione fotografia non disponibile:", error);
+        return file;
+    }
+}
+
+async function deletePatientPhotos(patientId) {
+    if (!("caches" in window) || !patientId) return;
+
+    const cache = await caches.open(PATIENT_PHOTO_CACHE);
+    const requests = await cache.keys();
+    const prefix = `/patient-photos/${encodeURIComponent(String(patientId))}/`;
+
+    await Promise.all(
+        requests
+            .filter(request => new URL(request.url).pathname.includes(prefix))
+            .map(request => cache.delete(request))
+    );
 }
 
 async function deletePatientPhoto(patientId, photoId) {
@@ -677,7 +722,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
     });
 }
 function setupPatients() {
-    document.addEventListener("click", event => {
+    document.addEventListener("click", async event => {
         const diabeticButton = event.target.closest("[data-diabetic-choice]");
         if (diabeticButton) {
             const value = diabeticButton.dataset.diabeticChoice === "yes";
@@ -1035,6 +1080,8 @@ function setupPatients() {
             )) {
                 return;
             }
+
+            await deletePatientPhotos(id);
 
             savePatients(
                 getPatients().filter(current => current.id !== id)
