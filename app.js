@@ -48,6 +48,7 @@ const backButton =
 let orderEditMode = false;
 
 const PATIENTS_KEY = "nursing-patients";
+const PATIENT_PHOTO_CACHE = "nursing-patient-photos-v1";
 const PERSONALIZATION_VERSION = 2;
 
 const PERSONALIZATION_KEYS = {
@@ -243,6 +244,227 @@ function getPatientInitials(name = "") {
         .toUpperCase() || "";
 }
 
+
+function patientPhotoRequest(patientId, photoId) {
+    const safePatientId = encodeURIComponent(String(patientId || ""));
+    return new Request(
+        new URL(
+            \`./patient-photos/\${safePatientId}/\${encodeURIComponent(photoId)}.jpg\`,
+            window.location.href
+        ).toString()
+    );
+}
+
+function formatPatientPhotoDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Data non disponibile";
+    return date.toLocaleString("it-IT", {
+        dateStyle: "short",
+        timeStyle: "short"
+    });
+}
+
+async function getPatientPhotos(patientId) {
+    if (!("caches" in window) || !patientId) return [];
+
+    const cache = await caches.open(PATIENT_PHOTO_CACHE);
+    const requests = await cache.keys();
+    const prefix = \`/patient-photos/\${encodeURIComponent(String(patientId))}/\`;
+
+    const photos = [];
+
+    for (const request of requests) {
+        const url = new URL(request.url);
+        if (!url.pathname.includes(prefix)) continue;
+
+        const response = await cache.match(request);
+        if (!response) continue;
+
+        const photoId = response.headers.get("X-Photo-Id") || decodeURIComponent(
+            url.pathname.split("/").pop().replace(/\.jpg$/i, "")
+        );
+
+        photos.push({
+            id: photoId,
+            recordedAt: response.headers.get("X-Photo-Date") || "",
+            request
+        });
+    }
+
+    photos.sort((a, b) =>
+        String(b.recordedAt).localeCompare(String(a.recordedAt))
+    );
+
+    return photos;
+}
+
+async function renderPatientPhotosPage(patientId) {
+    const patient = getPatients().find(current => current.id === patientId);
+    if (!patient) {
+        renderPatientsPage();
+        return;
+    }
+
+    stateTitle.textContent = "📷 Evoluzione medicazione";
+    description.textContent = "Documentazione fotografica del paziente.";
+    content.innerHTML = \`
+        <section class="detail-page patients-page patient-photos-page">
+            <div class="patient-photo-header">
+                <h3>👤 \${renderNoteText(patient.name || "Paziente senza nome")}</h3>
+                <button id="takePatientPhoto" class="settings-action" type="button"
+                    data-patient-id="\${escapeAttribute(patientId)}">
+                    📷 Scatta foto
+                </button>
+            </div>
+
+            <div class="patient-photo-privacy-warning">
+                <strong>⚠️ Privacy e consenso</strong>
+                <p>
+                    Prima di fotografare, chiedi il consenso del paziente.
+                    Non inquadrare volti, documenti, braccialetti identificativi
+                    o altri elementi che possano rivelare informazioni non necessarie.
+                </p>
+            </div>
+
+            <div id="patientPhotoGallery" class="patient-photo-gallery">
+                <p class="personal-note-empty">Caricamento immagini…</p>
+            </div>
+        </section>
+    \`;
+
+    const gallery = document.getElementById("patientPhotoGallery");
+    const photos = await getPatientPhotos(patientId);
+
+    if (!photos.length) {
+        gallery.innerHTML = '<div class="personal-note-empty">Nessuna fotografia acquisita.</div>';
+        return;
+    }
+
+    gallery.innerHTML = "";
+
+    for (const photo of photos) {
+        const response = await caches.match(photo.request);
+        if (!response) continue;
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        const card = document.createElement("article");
+        card.className = "patient-photo-card";
+        card.innerHTML = \`
+            <img class="patient-photo-image" alt="Fotografia acquisita il \${escapeAttribute(formatPatientPhotoDate(photo.recordedAt))}">
+            <div class="patient-photo-meta">
+                <strong>\${escapeHtml(formatPatientPhotoDate(photo.recordedAt))}</strong>
+                <button type="button" class="patient-photo-delete settings-action settings-danger"
+                    data-photo-id="\${escapeAttribute(photo.id)}"
+                    data-patient-id="\${escapeAttribute(patientId)}">
+                    🗑️ Elimina
+                </button>
+            </div>
+        \`;
+
+        card.querySelector("img").src = objectUrl;
+        card.querySelector("img").addEventListener("load", () => URL.revokeObjectURL(objectUrl), { once: true });
+        gallery.appendChild(card);
+    }
+}
+
+function openPatientPhotoCapture(patientId) {
+    const modal = document.createElement("div");
+    modal.className = "patient-photo-modal";
+    modal.innerHTML = \`
+        <div class="patient-photo-modal-card">
+            <h3>📷 Nuova fotografia</h3>
+
+            <div class="patient-photo-privacy-warning">
+                <strong>⚠️ Prima di procedere</strong>
+                <p>
+                    Chiedi il consenso del paziente prima di effettuare la foto.
+                    Non inquadrare volti, documenti, braccialetti identificativi
+                    o altri elementi non necessari alla documentazione della medicazione.
+                </p>
+            </div>
+
+            <label class="patient-photo-consent">
+                <input id="patientPhotoConsent" type="checkbox">
+                <span>Ho acquisito il consenso del paziente e verificherò che nell'immagine non compaiano dati non necessari.</span>
+            </label>
+
+            <input id="patientPhotoInput" type="file" accept="image/*" capture="environment" hidden>
+
+            <button id="startPatientPhoto" class="settings-action" type="button" disabled>
+                📷 Apri fotocamera
+            </button>
+            <button id="closePatientPhoto" class="settings-action" type="button">
+                Annulla
+            </button>
+
+            <p id="patientPhotoMessage" class="personal-note-message"></p>
+        </div>
+    \`;
+
+    document.body.appendChild(modal);
+
+    const consent = modal.querySelector("#patientPhotoConsent");
+    const start = modal.querySelector("#startPatientPhoto");
+    const input = modal.querySelector("#patientPhotoInput");
+    const message = modal.querySelector("#patientPhotoMessage");
+
+    consent.addEventListener("change", () => {
+        start.disabled = !consent.checked;
+    });
+
+    start.addEventListener("click", () => {
+        input.click();
+    });
+
+    modal.querySelector("#closePatientPhoto").addEventListener("click", () => {
+        modal.remove();
+    });
+
+    input.addEventListener("change", async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        try {
+            start.disabled = true;
+            message.textContent = "Salvataggio nella cache…";
+
+            const cache = await caches.open(PATIENT_PHOTO_CACHE);
+            const photoId = \`\${Date.now()}-\${Math.random().toString(36).slice(2, 8)}\`;
+            const recordedAt = new Date().toISOString();
+            const request = patientPhotoRequest(patientId, photoId);
+
+            const response = new Response(file, {
+                headers: {
+                    "Content-Type": file.type || "image/jpeg",
+                    "X-Photo-Id": photoId,
+                    "X-Photo-Date": recordedAt,
+                    "X-Patient-Id": String(patientId)
+                }
+            });
+
+            await cache.put(request, response);
+            modal.remove();
+            await renderPatientPhotosPage(patientId);
+        } catch (error) {
+            console.error("Errore salvataggio fotografia:", error);
+            message.textContent = "Impossibile salvare la fotografia nella cache.";
+            start.disabled = false;
+        } finally {
+            input.value = "";
+        }
+    });
+}
+
+async function deletePatientPhoto(patientId, photoId) {
+    if (!window.confirm("Eliminare questa fotografia?")) return;
+
+    const cache = await caches.open(PATIENT_PHOTO_CACHE);
+    await cache.delete(patientPhotoRequest(patientId, photoId));
+    await renderPatientPhotosPage(patientId);
+}
+
 function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
     const patients = applyPatientOrder(getPatients());
     const selectedPatient =
@@ -365,6 +587,23 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory, selectedPatient.id)}</div>
                             <button id="openPvRecorder" class="settings-action" type="button"
                                 data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
+                        </div>
+
+                        <div class="patient-evolution-section">
+                            <div class="patient-evolution-row">
+                                <div>
+                                    <strong>📷 Evoluzione medicazione</strong>
+                                    <small>Fotografie conservate esclusivamente nella cache della PWA.</small>
+                                </div>
+                                <button id="openPatientPhotos" class="settings-action" type="button"
+                                    data-patient-id="${escapeAttribute(selectedPatient.id)}">
+                                    📷 Apri
+                                </button>
+                            </div>
+                            <div class="patient-photo-privacy-warning compact">
+                                <strong>⚠️ Privacy</strong>
+                                <span>Chiedi il consenso prima della foto e non inquadrare dati o elementi identificativi non necessari.</span>
+                            </div>
                         </div>
 
                         <button id="editCurrentPatient" class="settings-action" type="button">
@@ -546,6 +785,38 @@ function setupPatients() {
             url.searchParams.set("patients", "1");
             url.searchParams.set("patient", patientId);
             window.location.href = url.toString();
+            return;
+        }
+
+        if (event.target.closest("#openPatientPhotos")) {
+            const patientId = event.target.closest("#openPatientPhotos")?.dataset.patientId || "";
+            if (!patientId) return;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("patients", "1");
+            url.searchParams.set("patient", patientId);
+            url.searchParams.set("patientPhotos", "1");
+            window.location.href = url.toString();
+            return;
+        }
+
+        if (event.target.closest("#takePatientPhoto")) {
+            const patientId = event.target.closest("#takePatientPhoto")?.dataset.patientId || "";
+            if (patientId) openPatientPhotoCapture(patientId);
+            return;
+        }
+
+        if (event.target.closest("#closePatientPhoto")) {
+            event.target.closest(".patient-photo-modal")?.remove();
+            return;
+        }
+
+        if (event.target.closest(".patient-photo-delete")) {
+            const button = event.target.closest(".patient-photo-delete");
+            deletePatientPhoto(
+                button.dataset.patientId || "",
+                button.dataset.photoId || ""
+            );
             return;
         }
 
@@ -829,6 +1100,14 @@ function resetAllPersonalization() {
 if (backButton) {
 
     backButton.addEventListener("click", () => {
+
+        if (patientPhotosRoute === "1") {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("patientPhotos");
+            window.history.pushState({}, "", url);
+            renderPatientsPage(patientRouteId, false);
+            return;
+        }
 
         if (patientsRoute === "1") {
             const currentPatient =
@@ -6655,6 +6934,10 @@ const patientsRoute =
     new URLSearchParams(window.location.search)
         .get("patients");
 
+const patientPhotosRoute =
+    new URLSearchParams(window.location.search)
+        .get("patientPhotos");
+
 if (patientsRoute === "1") {
     document.body.classList.remove("home-page");
 }
@@ -9270,6 +9553,13 @@ if (incomingPersonalization) {
         window.location.reload();
 
     });
+
+} else if (patientPhotosRoute === "1") {
+
+    stateTitle.textContent = "📷 Evoluzione medicazione";
+    description.textContent = "Documentazione fotografica del paziente.";
+    shortcuts.style.display = "none";
+    renderPatientPhotosPage(patientRouteId);
 
 } else if (patientsRoute === "1") {
 
