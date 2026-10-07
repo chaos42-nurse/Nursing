@@ -388,14 +388,9 @@ function openPatientPhotoCapture(patientId) {
                 </p>
             </div>
 
-            <label class="patient-photo-consent">
-                <input id="patientPhotoConsent" type="checkbox">
-                <span>Ho acquisito il consenso del paziente e verificherò che nell'immagine non compaiano dati non necessari.</span>
-            </label>
-
             <input id="patientPhotoInput" type="file" accept="image/*" capture="environment" hidden>
 
-            <button id="startPatientPhoto" class="settings-action" type="button" disabled>
+            <button id="startPatientPhoto" class="settings-action" type="button">
                 📷 Apri fotocamera
             </button>
             <button id="closePatientPhoto" class="settings-action" type="button">
@@ -408,14 +403,9 @@ function openPatientPhotoCapture(patientId) {
 
     document.body.appendChild(modal);
 
-    const consent = modal.querySelector("#patientPhotoConsent");
     const start = modal.querySelector("#startPatientPhoto");
     const input = modal.querySelector("#patientPhotoInput");
     const message = modal.querySelector("#patientPhotoMessage");
-
-    consent.addEventListener("change", () => {
-        start.disabled = !consent.checked;
-    });
 
     start.addEventListener("click", () => {
         input.click();
