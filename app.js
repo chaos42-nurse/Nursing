@@ -1011,7 +1011,7 @@ function setupPatients() {
         window.location.href = url.toString();
     });
 
-    document.addEventListener("click", event => {
+    document.addEventListener("click", async event => {
         if (event.target.closest("#openNewPatientPvRecorder")) {
             const modal = document.createElement("div");
             modal.className = "patient-pv-modal";
