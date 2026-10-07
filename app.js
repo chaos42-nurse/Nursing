@@ -428,7 +428,11 @@ function openPatientPhotoCapture(patientId) {
             const recordedAt = new Date().toISOString();
             const request = patientPhotoRequest(patientId, photoId);
 
-            const storedFile = await compressPatientPhoto(file);
+            // Prima recuperiamo spazio comprimendo anche le fotografie
+            // già presenti nella cache.
+            await optimizeStoredPatientPhotos();
+
+            const storedFile = await compressPatientPhoto(file, 1024, 0.55);
 
             const response = new Response(storedFile, {
                 headers: {
@@ -442,9 +446,9 @@ function openPatientPhotoCapture(patientId) {
             try {
                 await cache.put(request, response);
             } catch (storageError) {
-                console.warn("Cache piena, riprovo con una versione più piccola:", storageError);
+                console.warn("Cache piena, provo una compressione più aggressiva:", storageError);
 
-                const tinyFile = await compressPatientPhoto(await compressPatientPhoto(file));
+                const tinyFile = await compressPatientPhoto(file, 512, 0.30);
                 const tinyResponse = new Response(tinyFile, {
                     headers: {
                         "Content-Type": tinyFile.type || "image/jpeg",
@@ -470,13 +474,13 @@ function openPatientPhotoCapture(patientId) {
     });
 }
 
-async function compressPatientPhoto(file) {
-    if (!file || !file.type.startsWith("image/")) return file;
+async function compressPatientPhoto(file, maxSize = 1024, quality = 0.55) {
+    if (!file || !file.type?.startsWith("image/")) return file;
 
     try {
         const bitmap = await createImageBitmap(file);
-        const maxSize = 1024;
-        const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+        const largestSide = Math.max(bitmap.width, bitmap.height);
+        const scale = Math.min(1, maxSize / largestSide);
         const width = Math.max(1, Math.round(bitmap.width * scale));
         const height = Math.max(1, Math.round(bitmap.height * scale));
 
@@ -489,7 +493,7 @@ async function compressPatientPhoto(file) {
         bitmap.close();
 
         const blob = await new Promise(resolve =>
-            canvas.toBlob(resolve, "image/jpeg", 0.55)
+            canvas.toBlob(resolve, "image/jpeg", quality)
         );
 
         canvas.width = 1;
@@ -499,6 +503,47 @@ async function compressPatientPhoto(file) {
     } catch (error) {
         console.warn("Compressione fotografia non disponibile:", error);
         return file;
+    }
+}
+
+async function optimizeStoredPatientPhotos() {
+    if (!("caches" in window)) return;
+
+    const cache = await caches.open(PATIENT_PHOTO_CACHE);
+    const requests = await cache.keys();
+
+    for (const request of requests) {
+        const response = await cache.match(request);
+        if (!response) continue;
+
+        const contentType = response.headers.get("Content-Type") || "";
+        if (!contentType.startsWith("image/")) continue;
+
+        try {
+            const originalBlob = await response.blob();
+            const optimizedBlob = await compressPatientPhoto(originalBlob, 768, 0.42);
+
+            // Se la foto è già piccola, non la riscriviamo inutilmente.
+            if (optimizedBlob.size >= originalBlob.size * 0.95) continue;
+
+            const headers = new Headers(response.headers);
+            headers.set("Content-Type", optimizedBlob.type || "image/jpeg");
+
+            // Eliminiamo prima l'originale: così la quota viene realmente liberata
+            // prima di inserire la versione compressa.
+            await cache.delete(request);
+
+            try {
+                await cache.put(
+                    request,
+                    new Response(optimizedBlob, { headers })
+                );
+            } catch (writeError) {
+                console.warn("Impossibile ricreare la foto compressa:", writeError);
+            }
+        } catch (error) {
+            console.warn("Impossibile ottimizzare una fotografia esistente:", error);
+        }
     }
 }
 
