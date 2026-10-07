@@ -248,50 +248,213 @@ function getPatientInitials(name = "") {
 }
 
 
-function patientPhotoRequest(patientId, photoId) {
-    const safePatientId = encodeURIComponent(String(patientId || ""));
-    return new Request(
-        new URL(
-            "./patient-photos/${safePatientId}/${encodeURIComponent(photoId)}.jpg",
-            window.location.href
-        ).toString()
-    );
+const PATIENT_PHOTO_DB = "nursing-patient-photo-storage";
+const PATIENT_PHOTO_DB_VERSION = 1;
+const PATIENT_PHOTO_HANDLE_STORE = "handles";
+const PATIENT_PHOTO_ROOT_KEY = "photo-root";
+
+function patientPhotoFileName(recordedAt, photoId) {
+    const date = new Date(recordedAt);
+    const stamp = Number.isNaN(date.getTime())
+        ? String(Date.now())
+        : date.toISOString().replace(/[:.]/g, "-");
+
+    return `${stamp}_${encodeURIComponent(String(photoId || ""))}.jpg`;
 }
 
-function formatPatientPhotoDate(value) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "Data non disponibile";
-    return date.toLocaleString("it-IT", {
-        dateStyle: "short",
-        timeStyle: "short"
+function patientPhotoPatientFolderName(patientId) {
+    return `paziente-${String(patientId || "").replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+}
+
+function openPatientPhotoDb() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(
+            PATIENT_PHOTO_DB,
+            PATIENT_PHOTO_DB_VERSION
+        );
+
+        request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(PATIENT_PHOTO_HANDLE_STORE)) {
+                db.createObjectStore(PATIENT_PHOTO_HANDLE_STORE);
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
     });
 }
 
-async function getPatientPhotos(patientId) {
-    if (!("caches" in window) || !patientId) return [];
+async function savePatientPhotoRootHandle(handle) {
+    const db = await openPatientPhotoDb();
 
-    const cache = await caches.open(PATIENT_PHOTO_CACHE);
-    const requests = await cache.keys();
-    const prefix = `/patient-photos/${encodeURIComponent(String(patientId))}/`;
+    await new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+            PATIENT_PHOTO_HANDLE_STORE,
+            "readwrite"
+        );
+
+        transaction.objectStore(PATIENT_PHOTO_HANDLE_STORE).put(
+            handle,
+            PATIENT_PHOTO_ROOT_KEY
+        );
+
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+    });
+
+    db.close();
+}
+
+async function getPatientPhotoRootHandle() {
+    const db = await openPatientPhotoDb();
+
+    const handle = await new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+            PATIENT_PHOTO_HANDLE_STORE,
+            "readonly"
+        );
+
+        const request = transaction
+            .objectStore(PATIENT_PHOTO_HANDLE_STORE)
+            .get(PATIENT_PHOTO_ROOT_KEY);
+
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+    });
+
+    db.close();
+    return handle;
+}
+
+async function clearPatientPhotoRootHandle() {
+    const db = await openPatientPhotoDb();
+
+    await new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+            PATIENT_PHOTO_HANDLE_STORE,
+            "readwrite"
+        );
+
+        transaction.objectStore(PATIENT_PHOTO_HANDLE_STORE)
+            .delete(PATIENT_PHOTO_ROOT_KEY);
+
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+    });
+
+    db.close();
+}
+
+function supportsPatientPhotoFileSystem() {
+    return (
+        "showDirectoryPicker" in window &&
+        "indexedDB" in window
+    );
+}
+
+async function hasPatientPhotoPermission(handle, mode = "readwrite") {
+    if (!handle) return false;
+
+    try {
+        if ((await handle.queryPermission({ mode })) === "granted") {
+            return true;
+        }
+
+        return (
+            await handle.requestPermission({ mode })
+        ) === "granted";
+    } catch (error) {
+        console.warn("Impossibile verificare il permesso della cartella foto:", error);
+        return false;
+    }
+}
+
+async function choosePatientPhotoFolder() {
+    if (!supportsPatientPhotoFileSystem()) {
+        throw new Error(
+            "Il browser non supporta il salvataggio diretto dei file."
+        );
+    }
+
+    const handle = await window.showDirectoryPicker({
+        id: "nursing-shot-patient-photos",
+        mode: "readwrite",
+        startIn: "pictures"
+    });
+
+    if (!await hasPatientPhotoPermission(handle, "readwrite")) {
+        throw new Error(
+            "Permesso di scrittura nella cartella non concesso."
+        );
+    }
+
+    await savePatientPhotoRootHandle(handle);
+    return handle;
+}
+
+async function getPatientPhotoRootHandleForUse({ chooseIfMissing = false } = {}) {
+    if (!supportsPatientPhotoFileSystem()) {
+        throw new Error(
+            "Il browser non supporta il salvataggio diretto dei file."
+        );
+    }
+
+    let handle = await getPatientPhotoRootHandle();
+
+    if (!handle && chooseIfMissing) {
+        handle = await choosePatientPhotoFolder();
+    }
+
+    if (!handle) return null;
+
+    if (!await hasPatientPhotoPermission(handle, "readwrite")) {
+        if (chooseIfMissing) {
+            handle = await choosePatientPhotoFolder();
+        } else {
+            return null;
+        }
+    }
+
+    return handle;
+}
+
+async function getPatientPhotoDirectory(patientId, { create = false } = {}) {
+    const root = await getPatientPhotoRootHandleForUse({ chooseIfMissing: create });
+    if (!root) return null;
+
+    return root.getDirectoryHandle(
+        patientPhotoPatientFolderName(patientId),
+        { create }
+    );
+}
+
+async function getPatientPhotos(patientId) {
+    const patientDirectory = await getPatientPhotoDirectory(patientId);
+
+    if (!patientDirectory) return [];
 
     const photos = [];
 
-    for (const request of requests) {
-        const url = new URL(request.url);
-        if (!url.pathname.includes(prefix)) continue;
+    try {
+        for await (const entry of patientDirectory.values()) {
+            if (entry.kind !== "file" || !entry.name.toLowerCase().endsWith(".jpg")) {
+                continue;
+            }
 
-        const response = await cache.match(request);
-        if (!response) continue;
+            const file = await entry.getFile();
 
-        const photoId = response.headers.get("X-Photo-Id") || decodeURIComponent(
-            url.pathname.split("/").pop().replace(/\.jpg$/i, "")
-        );
-
-        photos.push({
-            id: photoId,
-            recordedAt: response.headers.get("X-Photo-Date") || "",
-            request
-        });
+            photos.push({
+                id: entry.name,
+                name: entry.name,
+                recordedAt: file.lastModified
+                    ? new Date(file.lastModified).toISOString()
+                    : "",
+                handle: entry
+            });
+        }
+    } catch (error) {
+        console.warn("Impossibile leggere la cartella del paziente:", error);
     }
 
     photos.sort((a, b) =>
@@ -303,6 +466,7 @@ async function getPatientPhotos(patientId) {
 
 async function renderPatientPhotosPage(patientId) {
     const patient = getPatients().find(current => current.id === patientId);
+
     if (!patient) {
         renderPatientsPage();
         return;
@@ -310,14 +474,20 @@ async function renderPatientPhotosPage(patientId) {
 
     stateTitle.textContent = "📷 Evoluzione medicazione";
     description.textContent = "Documentazione fotografica del paziente.";
+
     content.innerHTML = `
         <section class="detail-page patients-page patient-photos-page">
             <div class="patient-photo-header">
                 <h3>👤 ${renderNoteText(patient.name || "Paziente senza nome")}</h3>
-                <button id="takePatientPhoto" class="settings-action" type="button"
-                    data-patient-id="${escapeAttribute(patientId)}">
-                    📷 Scatta foto
-                </button>
+                <div class="patient-photo-header-actions">
+                    <button id="changePatientPhotoFolder" class="settings-action" type="button">
+                        📁 Cartella
+                    </button>
+                    <button id="takePatientPhoto" class="settings-action" type="button"
+                        data-patient-id="${escapeAttribute(patientId)}">
+                        📷 Scatta foto
+                    </button>
+                </div>
             </div>
 
             <div class="patient-photo-privacy-warning">
@@ -335,31 +505,68 @@ async function renderPatientPhotosPage(patientId) {
         </section>
     `;
 
+    document
+        .getElementById("changePatientPhotoFolder")
+        ?.addEventListener("click", async () => {
+            try {
+                await choosePatientPhotoFolder();
+                await renderPatientPhotosPage(patientId);
+            } catch (error) {
+                if (error?.name !== "AbortError") {
+                    console.error(error);
+                    window.alert(
+                        "Non è stato possibile impostare la cartella per le fotografie."
+                    );
+                }
+            }
+        });
+
     const gallery = document.getElementById("patientPhotoGallery");
-    const photos = await getPatientPhotos(patientId);
+
+    let photos = [];
+
+    try {
+        photos = await getPatientPhotos(patientId);
+    } catch (error) {
+        gallery.innerHTML = `
+            <div class="personal-note-empty">
+                Imposta una cartella per salvare le fotografie.
+            </div>
+        `;
+        return;
+    }
 
     if (!photos.length) {
-        gallery.innerHTML = '<div class="personal-note-empty">Nessuna fotografia acquisita.</div>';
+        const root = await getPatientPhotoRootHandle();
+
+        gallery.innerHTML = root
+            ? '<div class="personal-note-empty">Nessuna fotografia acquisita.</div>'
+            : `
+                <div class="personal-note-empty">
+                    Prima di scattare una fotografia verrà chiesto di scegliere
+                    la cartella in cui conservarla.
+                </div>
+            `;
+
         return;
     }
 
     gallery.innerHTML = "";
 
     for (const photo of photos) {
-        const response = await caches.match(photo.request);
-        if (!response) continue;
-
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
+        const file = await photo.handle.getFile();
+        const objectUrl = URL.createObjectURL(file);
 
         const card = document.createElement("article");
         card.className = "patient-photo-card";
+
         card.innerHTML = `
-            <img class="patient-photo-image" alt="Fotografia acquisita il ${escapeAttribute(formatPatientPhotoDate(photo.recordedAt))}">
+            <img class="patient-photo-image"
+                alt="Fotografia acquisita il ${escapeAttribute(formatPatientPhotoDate(photo.recordedAt))}">
             <div class="patient-photo-meta">
                 <strong>${escapeHtml(formatPatientPhotoDate(photo.recordedAt))}</strong>
                 <button type="button" class="patient-photo-delete settings-action settings-danger"
-                    data-photo-id="${escapeAttribute(photo.id)}"
+                    data-photo-id="${escapeAttribute(photo.name)}"
                     data-patient-id="${escapeAttribute(patientId)}">
                     🗑️ Elimina
                 </button>
@@ -367,7 +574,12 @@ async function renderPatientPhotosPage(patientId) {
         `;
 
         card.querySelector("img").src = objectUrl;
-        card.querySelector("img").addEventListener("load", () => URL.revokeObjectURL(objectUrl), { once: true });
+        card.querySelector("img").addEventListener(
+            "load",
+            () => URL.revokeObjectURL(objectUrl),
+            { once: true }
+        );
+
         gallery.appendChild(card);
     }
 }
@@ -375,6 +587,7 @@ async function renderPatientPhotosPage(patientId) {
 function openPatientPhotoCapture(patientId) {
     const modal = document.createElement("div");
     modal.className = "patient-photo-modal";
+
     modal.innerHTML = `
         <div class="patient-photo-modal-card">
             <h3>📷 Nuova fotografia</h3>
@@ -388,11 +601,13 @@ function openPatientPhotoCapture(patientId) {
                 </p>
             </div>
 
-            <input id="patientPhotoInput" type="file" accept="image/*" capture="environment" hidden>
+            <input id="patientPhotoInput" type="file"
+                accept="image/*" capture="environment" hidden>
 
             <button id="startPatientPhoto" class="settings-action" type="button">
                 📷 Apri fotocamera
             </button>
+
             <button id="closePatientPhoto" class="settings-action" type="button">
                 Annulla
             </button>
@@ -417,56 +632,60 @@ function openPatientPhotoCapture(patientId) {
 
     input.addEventListener("change", async () => {
         const file = input.files?.[0];
+
         if (!file) return;
 
         try {
             start.disabled = true;
-            message.textContent = "Salvataggio nella cache…";
+            message.textContent = "Salvataggio della fotografia…";
 
-            const cache = await caches.open(PATIENT_PHOTO_CACHE);
-            const photoId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-            const recordedAt = new Date().toISOString();
-            const request = patientPhotoRequest(patientId, photoId);
-
-            // Prima recuperiamo spazio comprimendo anche le fotografie
-            // già presenti nella cache.
-            await optimizeStoredPatientPhotos();
-
-            const storedFile = await compressPatientPhoto(file, 1024, 0.55);
-
-            const response = new Response(storedFile, {
-                headers: {
-                    "Content-Type": storedFile.type || "image/jpeg",
-                    "X-Photo-Id": photoId,
-                    "X-Photo-Date": recordedAt,
-                    "X-Patient-Id": String(patientId)
-                }
+            const root = await getPatientPhotoRootHandleForUse({
+                chooseIfMissing: true
             });
 
-            try {
-                await cache.put(request, response);
-            } catch (storageError) {
-                console.warn("Cache piena, provo una compressione più aggressiva:", storageError);
-
-                const tinyFile = await compressPatientPhoto(file, 512, 0.30);
-                const tinyResponse = new Response(tinyFile, {
-                    headers: {
-                        "Content-Type": tinyFile.type || "image/jpeg",
-                        "X-Photo-Id": photoId,
-                        "X-Photo-Date": recordedAt,
-                        "X-Patient-Id": String(patientId)
-                    }
-                });
-
-                await cache.put(request, tinyResponse);
+            if (!root) {
+                throw new Error("Cartella foto non disponibile.");
             }
+
+            const patientDirectory = await root.getDirectoryHandle(
+                patientPhotoPatientFolderName(patientId),
+                { create: true }
+            );
+
+            const photoId =
+                `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+            const recordedAt = new Date().toISOString();
+            const fileName = patientPhotoFileName(recordedAt, photoId);
+
+            const storedFile =
+                await compressPatientPhoto(file, 1600, 0.72);
+
+            const photoHandle =
+                await patientDirectory.getFileHandle(
+                    fileName,
+                    { create: true }
+                );
+
+            const writable =
+                await photoHandle.createWritable();
+
+            await writable.write(storedFile);
+            await writable.close();
 
             modal.remove();
             await renderPatientPhotosPage(patientId);
+
         } catch (error) {
             console.error("Errore salvataggio fotografia:", error);
-            message.textContent =
-                "Spazio di archiviazione insufficiente. Elimina alcune fotografie o libera spazio sul dispositivo.";
+
+            if (error?.name === "AbortError") {
+                message.textContent = "Salvataggio annullato.";
+            } else {
+                message.textContent =
+                    "Impossibile salvare la fotografia nella cartella selezionata.";
+            }
+
             start.disabled = false;
         } finally {
             input.value = "";
@@ -474,7 +693,7 @@ function openPatientPhotoCapture(patientId) {
     });
 }
 
-async function compressPatientPhoto(file, maxSize = 1024, quality = 0.55) {
+async function compressPatientPhoto(file, maxSize = 1600, quality = 0.72) {
     if (!file || !file.type?.startsWith("image/")) return file;
 
     try {
@@ -506,66 +725,40 @@ async function compressPatientPhoto(file, maxSize = 1024, quality = 0.55) {
     }
 }
 
-async function optimizeStoredPatientPhotos() {
-    if (!("caches" in window)) return;
+async function deletePatientPhotos(patientId) {
+    if (!supportsPatientPhotoFileSystem() || !patientId) return;
 
-    const cache = await caches.open(PATIENT_PHOTO_CACHE);
-    const requests = await cache.keys();
+    const root = await getPatientPhotoRootHandleForUse();
 
-    for (const request of requests) {
-        const response = await cache.match(request);
-        if (!response) continue;
+    if (!root) return;
 
-        const contentType = response.headers.get("Content-Type") || "";
-        if (!contentType.startsWith("image/")) continue;
-
-        try {
-            const originalBlob = await response.blob();
-            const optimizedBlob = await compressPatientPhoto(originalBlob, 768, 0.42);
-
-            // Se la foto è già piccola, non la riscriviamo inutilmente.
-            if (optimizedBlob.size >= originalBlob.size * 0.95) continue;
-
-            const headers = new Headers(response.headers);
-            headers.set("Content-Type", optimizedBlob.type || "image/jpeg");
-
-            // Eliminiamo prima l'originale: così la quota viene realmente liberata
-            // prima di inserire la versione compressa.
-            await cache.delete(request);
-
-            try {
-                await cache.put(
-                    request,
-                    new Response(optimizedBlob, { headers })
-                );
-            } catch (writeError) {
-                console.warn("Impossibile ricreare la foto compressa:", writeError);
-            }
-        } catch (error) {
-            console.warn("Impossibile ottimizzare una fotografia esistente:", error);
+    try {
+        await root.removeEntry(
+            patientPhotoPatientFolderName(patientId),
+            { recursive: true }
+        );
+    } catch (error) {
+        // La cartella potrebbe non esistere: in quel caso non c'è nulla da eliminare.
+        if (error?.name !== "NotFoundError") {
+            console.warn("Impossibile eliminare la cartella fotografica del paziente:", error);
         }
     }
-}
-
-async function deletePatientPhotos(patientId) {
-    if (!("caches" in window) || !patientId) return;
-
-    const cache = await caches.open(PATIENT_PHOTO_CACHE);
-    const requests = await cache.keys();
-    const prefix = `/patient-photos/${encodeURIComponent(String(patientId))}/`;
-
-    await Promise.all(
-        requests
-            .filter(request => new URL(request.url).pathname.includes(prefix))
-            .map(request => cache.delete(request))
-    );
 }
 
 async function deletePatientPhoto(patientId, photoId) {
     if (!window.confirm("Eliminare questa fotografia?")) return;
 
-    const cache = await caches.open(PATIENT_PHOTO_CACHE);
-    await cache.delete(patientPhotoRequest(patientId, photoId));
+    const patientDirectory =
+        await getPatientPhotoDirectory(patientId);
+
+    if (!patientDirectory) return;
+
+    try {
+        await patientDirectory.removeEntry(photoId);
+    } catch (error) {
+        console.warn("Impossibile eliminare la fotografia:", error);
+    }
+
     await renderPatientPhotosPage(patientId);
 }
 
