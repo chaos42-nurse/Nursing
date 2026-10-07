@@ -1505,7 +1505,7 @@ async function loadState() {
 
         inputs.forEach(input => {
             if (excludedIds.has(input.id)) return;
-            if (input.hasAttribute("list")) return;
+            if (input.hasAttribute("list") || input.getAttribute("role") === "combobox") return;
 
             const dataListId =
                 "dl-" + Math.random().toString(36).substr(2, 9);
@@ -2707,16 +2707,18 @@ async function renderDrugInteractions(selectedItem, data) {
 
                 <article class="info-block ddi-form">
                     <label for="drugA">Primo farmaco</label>
-                    <input id="drugA" class="personal-note-title-input" type="text" list="ddiListaA"
-                           autocomplete="off" autocapitalize="none" spellcheck="false"
+                    <input id="drugA" class="personal-note-title-input" type="text"
+                           role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ddiListaA"
+                           autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
                            placeholder="Es: paracetamolo, ceftriaxone…">
-                    <datalist id="ddiListaA"></datalist>
+                    <ul id="ddiListaA" class="ddi-suggest" role="listbox" hidden></ul>
 
                     <label for="drugB">Secondo farmaco</label>
-                    <input id="drugB" class="personal-note-title-input" type="text" list="ddiListaB"
-                           autocomplete="off" autocapitalize="none" spellcheck="false"
+                    <input id="drugB" class="personal-note-title-input" type="text"
+                           role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ddiListaB"
+                           autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
                            placeholder="Es: amiodarone, midazolam…">
-                    <datalist id="ddiListaB"></datalist>
+                    <ul id="ddiListaB" class="ddi-suggest" role="listbox" hidden></ul>
 
                     <button id="btnCheckCompatibility" class="settings-action ddi-submit" type="button" disabled>
                         🔄 Verifica interazioni
@@ -2759,17 +2761,87 @@ async function renderDrugInteractions(selectedItem, data) {
     let idx = null;
     const paginaAttiva = () => document.body.contains(elRisultato);
 
-    const aggiornaSuggerimenti = (input, lista) => {
-        if (!idx) return;
-        lista.innerHTML = "";
-        NI.cerca(idx, input.value, 10).forEach(s => {
-            const option = document.createElement("option");
-            option.value = s.label;
-            lista.appendChild(option);
+    /* Autocompletamento: elenco dei suggerimenti sotto il campo (non il datalist
+       del browser, che su telefono è inaffidabile e filtra per conto suo). */
+    function collegaAutocompletamento(input, lista, altroInput) {
+        let voci = [];
+        let attiva = -1;
+
+        const chiudi = () => {
+            lista.hidden = true;
+            lista.innerHTML = "";
+            input.setAttribute("aria-expanded", "false");
+            voci = [];
+            attiva = -1;
+        };
+
+        const evidenzia = nuova => {
+            const nodi = lista.querySelectorAll("li[data-i]");
+            if (!nodi.length) return;
+            attiva = (nuova + nodi.length) % nodi.length;
+            nodi.forEach((n, i) => {
+                n.classList.toggle("is-active", i === attiva);
+                n.setAttribute("aria-selected", i === attiva ? "true" : "false");
+            });
+            nodi[attiva].scrollIntoView({ block: "nearest" });
+        };
+
+        const scegli = i => {
+            const voce = voci[i];
+            if (!voce) return;
+            input.value = voce.label;
+            chiudi();
+            if (altroInput && !altroInput.value.trim()) altroInput.focus();
+            else verifica();
+        };
+
+        const mostra = () => {
+            if (!idx) return;
+            const testo = input.value.trim();
+            if (testo.length < 2) { chiudi(); return; }
+
+            voci = NI.cerca(idx, testo, 8);
+            attiva = -1;
+
+            if (!voci.length) {
+                lista.innerHTML = `<li class="ddi-suggest-vuoto">Nessun suggerimento: il farmaco potrebbe non essere nel database.</li>`;
+            } else {
+                lista.innerHTML = voci.map((v, i) => `
+                    <li role="option" data-i="${i}" aria-selected="false">
+                        <strong>${escapeHtml(v.label)}</strong>${v.altro ? `<small>${escapeHtml(v.altro)}</small>` : ""}
+                    </li>`).join("");
+            }
+            lista.hidden = false;
+            input.setAttribute("aria-expanded", "true");
+        };
+
+        // pointerdown + preventDefault: il campo non perde il focus prima della scelta
+        lista.addEventListener("pointerdown", evento => {
+            const riga = evento.target.closest("li[data-i]");
+            if (!riga) return;
+            evento.preventDefault();
+            scegli(Number(riga.dataset.i));
         });
-    };
-    inA.addEventListener("input", () => aggiornaSuggerimenti(inA, listaA));
-    inB.addEventListener("input", () => aggiornaSuggerimenti(inB, listaB));
+
+        input.addEventListener("input", mostra);
+        input.addEventListener("focus", mostra);
+        input.addEventListener("blur", () => setTimeout(chiudi, 120));
+        input.addEventListener("keydown", evento => {
+            if (evento.key === "ArrowDown" && voci.length) { evento.preventDefault(); evidenzia(attiva + 1); }
+            else if (evento.key === "ArrowUp" && voci.length) { evento.preventDefault(); evidenzia(attiva - 1); }
+            else if (evento.key === "Escape") chiudi();
+            else if (evento.key === "Enter") {
+                evento.preventDefault();
+                if (attiva >= 0 && voci[attiva]) scegli(attiva);
+                else { chiudi(); verifica(); }
+            }
+        });
+
+        return { chiudi, mostra };
+    }
+
+    collegaAutocompletamento(inA, listaA, inB);
+    collegaAutocompletamento(inB, listaB, inA);
 
     function verifica() {
         if (!idx) return;
@@ -2806,9 +2878,6 @@ async function renderDrugInteractions(selectedItem, data) {
     }
 
     bottone.addEventListener("click", verifica);
-    [inA, inB].forEach(input => input.addEventListener("keydown", evento => {
-        if (evento.key === "Enter") verifica();
-    }));
 
     try {
         idx = await NI.carica({
@@ -2837,8 +2906,6 @@ async function renderDrugInteractions(selectedItem, data) {
         <strong>✓ Archivio caricato</strong>
         <p>${idx.righe.toLocaleString("it-IT")} interazioni tra ${idx.nNomi.toLocaleString("it-IT")} principi attivi, disponibili anche offline.</p>`;
     bottone.disabled = false;
-    aggiornaSuggerimenti(inA, listaA);
-    aggiornaSuggerimenti(inB, listaB);
 }
 
 
@@ -9040,7 +9107,7 @@ function renderSharedPersonalizationImport(payload) {
                 return;
             }
 
-            if (input.hasAttribute("list")) return;
+            if (input.hasAttribute("list") || input.getAttribute("role") === "combobox") return;
 
             const dataListId = "dl-" + Math.random().toString(36).substr(2, 9);
             const dataList = document.createElement("datalist");

@@ -2845,3 +2845,49 @@ section h2 {
     margin-left: 6px;
     color: var(--text-secondary);
 }
+
+
+/* Autocompletamento farmaci (Interazioni tra farmaci) */
+.ddi-suggest {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface-elevated);
+}
+
+.ddi-suggest[hidden] {
+    display: none;
+}
+
+.ddi-suggest li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ddi-suggest li:hover,
+.ddi-suggest li.is-active {
+    background: var(--accent-soft);
+}
+
+.ddi-suggest small {
+    color: var(--text-secondary);
+}
+
+.ddi-suggest .ddi-suggest-vuoto {
+    cursor: default;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.ddi-suggest .ddi-suggest-vuoto:hover {
+    background: none;
+}
