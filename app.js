@@ -439,12 +439,30 @@ function openPatientPhotoCapture(patientId) {
                 }
             });
 
-            await cache.put(request, response);
+            try {
+                await cache.put(request, response);
+            } catch (storageError) {
+                console.warn("Cache piena, riprovo con una versione più piccola:", storageError);
+
+                const tinyFile = await compressPatientPhoto(await compressPatientPhoto(file));
+                const tinyResponse = new Response(tinyFile, {
+                    headers: {
+                        "Content-Type": tinyFile.type || "image/jpeg",
+                        "X-Photo-Id": photoId,
+                        "X-Photo-Date": recordedAt,
+                        "X-Patient-Id": String(patientId)
+                    }
+                });
+
+                await cache.put(request, tinyResponse);
+            }
+
             modal.remove();
             await renderPatientPhotosPage(patientId);
         } catch (error) {
             console.error("Errore salvataggio fotografia:", error);
-            message.textContent = "Impossibile salvare la fotografia nella cache.";
+            message.textContent =
+                "Spazio di archiviazione insufficiente. Elimina alcune fotografie o libera spazio sul dispositivo.";
             start.disabled = false;
         } finally {
             input.value = "";
@@ -457,7 +475,7 @@ async function compressPatientPhoto(file) {
 
     try {
         const bitmap = await createImageBitmap(file);
-        const maxSize = 1600;
+        const maxSize = 1024;
         const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
         const width = Math.max(1, Math.round(bitmap.width * scale));
         const height = Math.max(1, Math.round(bitmap.height * scale));
@@ -471,8 +489,11 @@ async function compressPatientPhoto(file) {
         bitmap.close();
 
         const blob = await new Promise(resolve =>
-            canvas.toBlob(resolve, "image/jpeg", 0.75)
+            canvas.toBlob(resolve, "image/jpeg", 0.55)
         );
+
+        canvas.width = 1;
+        canvas.height = 1;
 
         return blob || file;
     } catch (error) {
