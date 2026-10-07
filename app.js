@@ -6937,10 +6937,6 @@ const patientsRoute =
     new URLSearchParams(window.location.search)
         .get("patients");
 
-const patientPhotosRoute =
-    new URLSearchParams(window.location.search)
-        .get("patientPhotos");
-
 if (patientsRoute === "1") {
     document.body.classList.remove("home-page");
 }
