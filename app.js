@@ -51,7 +51,6 @@ const backButton =
 let orderEditMode = false;
 
 const PATIENTS_KEY = "nursing-patients";
-const PATIENT_PHOTO_CACHE = "nursing-patient-photos-v1";
 const PERSONALIZATION_VERSION = 2;
 
 const PERSONALIZATION_KEYS = {
@@ -248,223 +247,7 @@ function getPatientInitials(name = "") {
 }
 
 
-const PATIENT_PHOTO_DB = "nursing-patient-photo-storage";
-const PATIENT_PHOTO_DB_VERSION = 1;
-const PATIENT_PHOTO_HANDLE_STORE = "handles";
-const PATIENT_PHOTO_ROOT_KEY = "photo-root";
-
-function patientPhotoFileName(recordedAt, photoId) {
-    const date = new Date(recordedAt);
-    const stamp = Number.isNaN(date.getTime())
-        ? String(Date.now())
-        : date.toISOString().replace(/[:.]/g, "-");
-
-    return `${stamp}_${encodeURIComponent(String(photoId || ""))}.jpg`;
-}
-
-function patientPhotoPatientFolderName(patientId) {
-    return `paziente-${String(patientId || "").replace(/[^a-zA-Z0-9_-]/g, "_")}`;
-}
-
-function openPatientPhotoDb() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(
-            PATIENT_PHOTO_DB,
-            PATIENT_PHOTO_DB_VERSION
-        );
-
-        request.onupgradeneeded = () => {
-            const db = request.result;
-            if (!db.objectStoreNames.contains(PATIENT_PHOTO_HANDLE_STORE)) {
-                db.createObjectStore(PATIENT_PHOTO_HANDLE_STORE);
-            }
-        };
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function savePatientPhotoRootHandle(handle) {
-    const db = await openPatientPhotoDb();
-
-    await new Promise((resolve, reject) => {
-        const transaction = db.transaction(
-            PATIENT_PHOTO_HANDLE_STORE,
-            "readwrite"
-        );
-
-        transaction.objectStore(PATIENT_PHOTO_HANDLE_STORE).put(
-            handle,
-            PATIENT_PHOTO_ROOT_KEY
-        );
-
-        transaction.oncomplete = resolve;
-        transaction.onerror = () => reject(transaction.error);
-    });
-
-    db.close();
-}
-
-async function getPatientPhotoRootHandle() {
-    const db = await openPatientPhotoDb();
-
-    const handle = await new Promise((resolve, reject) => {
-        const transaction = db.transaction(
-            PATIENT_PHOTO_HANDLE_STORE,
-            "readonly"
-        );
-
-        const request = transaction
-            .objectStore(PATIENT_PHOTO_HANDLE_STORE)
-            .get(PATIENT_PHOTO_ROOT_KEY);
-
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
-    });
-
-    db.close();
-    return handle;
-}
-
-async function clearPatientPhotoRootHandle() {
-    const db = await openPatientPhotoDb();
-
-    await new Promise((resolve, reject) => {
-        const transaction = db.transaction(
-            PATIENT_PHOTO_HANDLE_STORE,
-            "readwrite"
-        );
-
-        transaction.objectStore(PATIENT_PHOTO_HANDLE_STORE)
-            .delete(PATIENT_PHOTO_ROOT_KEY);
-
-        transaction.oncomplete = resolve;
-        transaction.onerror = () => reject(transaction.error);
-    });
-
-    db.close();
-}
-
-function supportsPatientPhotoFileSystem() {
-    return (
-        "showDirectoryPicker" in window &&
-        "indexedDB" in window
-    );
-}
-
-async function hasPatientPhotoPermission(handle, mode = "readwrite") {
-    if (!handle) return false;
-
-    try {
-        if ((await handle.queryPermission({ mode })) === "granted") {
-            return true;
-        }
-
-        return (
-            await handle.requestPermission({ mode })
-        ) === "granted";
-    } catch (error) {
-        console.warn("Impossibile verificare il permesso della cartella foto:", error);
-        return false;
-    }
-}
-
-async function choosePatientPhotoFolder() {
-    if (!supportsPatientPhotoFileSystem()) {
-        throw new Error(
-            "Il browser non supporta il salvataggio diretto dei file."
-        );
-    }
-
-    const handle = await window.showDirectoryPicker({
-        id: "nursing-shot-patient-photos",
-        mode: "readwrite",
-        startIn: "pictures"
-    });
-
-    if (!await hasPatientPhotoPermission(handle, "readwrite")) {
-        throw new Error(
-            "Permesso di scrittura nella cartella non concesso."
-        );
-    }
-
-    await savePatientPhotoRootHandle(handle);
-    return handle;
-}
-
-async function getPatientPhotoRootHandleForUse({ chooseIfMissing = false } = {}) {
-    if (!supportsPatientPhotoFileSystem()) {
-        throw new Error(
-            "Il browser non supporta il salvataggio diretto dei file."
-        );
-    }
-
-    let handle = await getPatientPhotoRootHandle();
-
-    if (!handle && chooseIfMissing) {
-        handle = await choosePatientPhotoFolder();
-    }
-
-    if (!handle) return null;
-
-    if (!await hasPatientPhotoPermission(handle, "readwrite")) {
-        if (chooseIfMissing) {
-            handle = await choosePatientPhotoFolder();
-        } else {
-            return null;
-        }
-    }
-
-    return handle;
-}
-
-async function getPatientPhotoDirectory(patientId, { create = false } = {}) {
-    const root = await getPatientPhotoRootHandleForUse({ chooseIfMissing: create });
-    if (!root) return null;
-
-    return root.getDirectoryHandle(
-        patientPhotoPatientFolderName(patientId),
-        { create }
-    );
-}
-
-async function getPatientPhotos(patientId) {
-    const patientDirectory = await getPatientPhotoDirectory(patientId);
-
-    if (!patientDirectory) return [];
-
-    const photos = [];
-
-    try {
-        for await (const entry of patientDirectory.values()) {
-            if (entry.kind !== "file" || !entry.name.toLowerCase().endsWith(".jpg")) {
-                continue;
-            }
-
-            const file = await entry.getFile();
-
-            photos.push({
-                id: entry.name,
-                name: entry.name,
-                recordedAt: file.lastModified
-                    ? new Date(file.lastModified).toISOString()
-                    : "",
-                handle: entry
-            });
-        }
-    } catch (error) {
-        console.warn("Impossibile leggere la cartella del paziente:", error);
-    }
-
-    photos.sort((a, b) =>
-        String(b.recordedAt).localeCompare(String(a.recordedAt))
-    );
-
-    return photos;
-}
-
-async function renderPatientPhotosPage(patientId) {
+function renderPatientPhotosPage(patientId) {
     const patient = getPatients().find(current => current.id === patientId);
 
     if (!patient) {
@@ -479,287 +262,13 @@ async function renderPatientPhotosPage(patientId) {
         <section class="detail-page patients-page patient-photos-page">
             <div class="patient-photo-header">
                 <h3>👤 ${renderNoteText(patient.name || "Paziente senza nome")}</h3>
-                <div class="patient-photo-header-actions">
-                    <button id="changePatientPhotoFolder" class="settings-action" type="button">
-                        📁 Cartella
-                    </button>
-                    <button id="takePatientPhoto" class="settings-action" type="button"
-                        data-patient-id="${escapeAttribute(patientId)}">
-                        📷 Scatta foto
-                    </button>
-                </div>
             </div>
 
-            <div class="patient-photo-privacy-warning">
-                <strong>⚠️ Privacy e consenso</strong>
-                <p>
-                    Prima di fotografare, chiedi il consenso del paziente.
-                    Non inquadrare volti, documenti, braccialetti identificativi
-                    o altri elementi che possano rivelare informazioni non necessarie.
-                </p>
-            </div>
-
-            <div id="patientPhotoGallery" class="patient-photo-gallery">
-                <p class="personal-note-empty">Caricamento immagini…</p>
+            <div class="patient-photo-placeholder">
+                Elemento ancora in fase di modifica.
             </div>
         </section>
     `;
-
-    document
-        .getElementById("changePatientPhotoFolder")
-        ?.addEventListener("click", async () => {
-            try {
-                await choosePatientPhotoFolder();
-                await renderPatientPhotosPage(patientId);
-            } catch (error) {
-                if (error?.name !== "AbortError") {
-                    console.error(error);
-                    window.alert(
-                        "Non è stato possibile impostare la cartella per le fotografie."
-                    );
-                }
-            }
-        });
-
-    const gallery = document.getElementById("patientPhotoGallery");
-
-    let photos = [];
-
-    try {
-        photos = await getPatientPhotos(patientId);
-    } catch (error) {
-        gallery.innerHTML = `
-            <div class="personal-note-empty">
-                Imposta una cartella per salvare le fotografie.
-            </div>
-        `;
-        return;
-    }
-
-    if (!photos.length) {
-        const root = await getPatientPhotoRootHandle();
-
-        gallery.innerHTML = root
-            ? '<div class="personal-note-empty">Nessuna fotografia acquisita.</div>'
-            : `
-                <div class="personal-note-empty">
-                    Prima di scattare una fotografia verrà chiesto di scegliere
-                    la cartella in cui conservarla.
-                </div>
-            `;
-
-        return;
-    }
-
-    gallery.innerHTML = "";
-
-    for (const photo of photos) {
-        const file = await photo.handle.getFile();
-        const objectUrl = URL.createObjectURL(file);
-
-        const card = document.createElement("article");
-        card.className = "patient-photo-card";
-
-        card.innerHTML = `
-            <img class="patient-photo-image"
-                alt="Fotografia acquisita il ${escapeAttribute(formatPatientPhotoDate(photo.recordedAt))}">
-            <div class="patient-photo-meta">
-                <strong>${escapeHtml(formatPatientPhotoDate(photo.recordedAt))}</strong>
-                <button type="button" class="patient-photo-delete settings-action settings-danger"
-                    data-photo-id="${escapeAttribute(photo.name)}"
-                    data-patient-id="${escapeAttribute(patientId)}">
-                    🗑️ Elimina
-                </button>
-            </div>
-        `;
-
-        card.querySelector("img").src = objectUrl;
-        card.querySelector("img").addEventListener(
-            "load",
-            () => URL.revokeObjectURL(objectUrl),
-            { once: true }
-        );
-
-        gallery.appendChild(card);
-    }
-}
-
-function openPatientPhotoCapture(patientId) {
-    const modal = document.createElement("div");
-    modal.className = "patient-photo-modal";
-
-    modal.innerHTML = `
-        <div class="patient-photo-modal-card">
-            <h3>📷 Nuova fotografia</h3>
-
-            <div class="patient-photo-privacy-warning">
-                <strong>⚠️ Prima di procedere</strong>
-                <p>
-                    Chiedi il consenso del paziente prima di effettuare la foto.
-                    Non inquadrare volti, documenti, braccialetti identificativi
-                    o altri elementi non necessari alla documentazione della medicazione.
-                </p>
-            </div>
-
-            <input id="patientPhotoInput" type="file"
-                accept="image/*" capture="environment" hidden>
-
-            <button id="startPatientPhoto" class="settings-action" type="button">
-                📷 Apri fotocamera
-            </button>
-
-            <button id="closePatientPhoto" class="settings-action" type="button">
-                Annulla
-            </button>
-
-            <p id="patientPhotoMessage" class="personal-note-message"></p>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const start = modal.querySelector("#startPatientPhoto");
-    const input = modal.querySelector("#patientPhotoInput");
-    const message = modal.querySelector("#patientPhotoMessage");
-
-    start.addEventListener("click", () => {
-        input.click();
-    });
-
-    modal.querySelector("#closePatientPhoto").addEventListener("click", () => {
-        modal.remove();
-    });
-
-    input.addEventListener("change", async () => {
-        const file = input.files?.[0];
-
-        if (!file) return;
-
-        try {
-            start.disabled = true;
-            message.textContent = "Salvataggio della fotografia…";
-
-            const root = await getPatientPhotoRootHandleForUse({
-                chooseIfMissing: true
-            });
-
-            if (!root) {
-                throw new Error("Cartella foto non disponibile.");
-            }
-
-            const patientDirectory = await root.getDirectoryHandle(
-                patientPhotoPatientFolderName(patientId),
-                { create: true }
-            );
-
-            const photoId =
-                `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-            const recordedAt = new Date().toISOString();
-            const fileName = patientPhotoFileName(recordedAt, photoId);
-
-            const storedFile =
-                await compressPatientPhoto(file, 1600, 0.72);
-
-            const photoHandle =
-                await patientDirectory.getFileHandle(
-                    fileName,
-                    { create: true }
-                );
-
-            const writable =
-                await photoHandle.createWritable();
-
-            await writable.write(storedFile);
-            await writable.close();
-
-            modal.remove();
-            await renderPatientPhotosPage(patientId);
-
-        } catch (error) {
-            console.error("Errore salvataggio fotografia:", error);
-
-            if (error?.name === "AbortError") {
-                message.textContent = "Salvataggio annullato.";
-            } else {
-                message.textContent =
-                    "Impossibile salvare la fotografia nella cartella selezionata.";
-            }
-
-            start.disabled = false;
-        } finally {
-            input.value = "";
-        }
-    });
-}
-
-async function compressPatientPhoto(file, maxSize = 1600, quality = 0.72) {
-    if (!file || !file.type?.startsWith("image/")) return file;
-
-    try {
-        const bitmap = await createImageBitmap(file);
-        const largestSide = Math.max(bitmap.width, bitmap.height);
-        const scale = Math.min(1, maxSize / largestSide);
-        const width = Math.max(1, Math.round(bitmap.width * scale));
-        const height = Math.max(1, Math.round(bitmap.height * scale));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const context = canvas.getContext("2d", { alpha: false });
-        context.drawImage(bitmap, 0, 0, width, height);
-        bitmap.close();
-
-        const blob = await new Promise(resolve =>
-            canvas.toBlob(resolve, "image/jpeg", quality)
-        );
-
-        canvas.width = 1;
-        canvas.height = 1;
-
-        return blob || file;
-    } catch (error) {
-        console.warn("Compressione fotografia non disponibile:", error);
-        return file;
-    }
-}
-
-async function deletePatientPhotos(patientId) {
-    if (!supportsPatientPhotoFileSystem() || !patientId) return;
-
-    const root = await getPatientPhotoRootHandleForUse();
-
-    if (!root) return;
-
-    try {
-        await root.removeEntry(
-            patientPhotoPatientFolderName(patientId),
-            { recursive: true }
-        );
-    } catch (error) {
-        // La cartella potrebbe non esistere: in quel caso non c'è nulla da eliminare.
-        if (error?.name !== "NotFoundError") {
-            console.warn("Impossibile eliminare la cartella fotografica del paziente:", error);
-        }
-    }
-}
-
-async function deletePatientPhoto(patientId, photoId) {
-    if (!window.confirm("Eliminare questa fotografia?")) return;
-
-    const patientDirectory =
-        await getPatientPhotoDirectory(patientId);
-
-    if (!patientDirectory) return;
-
-    try {
-        await patientDirectory.removeEntry(photoId);
-    } catch (error) {
-        console.warn("Impossibile eliminare la fotografia:", error);
-    }
-
-    await renderPatientPhotosPage(patientId);
 }
 
 function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
@@ -890,7 +399,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                             <div class="patient-evolution-row">
                                 <div>
                                     <strong>📷 Evoluzione medicazione</strong>
-                                    <small>Fotografie conservate esclusivamente nella cache della PWA.</small>
+                                    <small>Elemento ancora in fase di modifica.</small>
                                 </div>
                                 <button id="openPatientPhotos" class="settings-action" type="button"
                                     data-patient-id="${escapeAttribute(selectedPatient.id)}">
@@ -981,7 +490,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
     });
 }
 function setupPatients() {
-    document.addEventListener("click", async event => {
+    document.addEventListener("click", event => {
         const diabeticButton = event.target.closest("[data-diabetic-choice]");
         if (diabeticButton) {
             const value = diabeticButton.dataset.diabeticChoice === "yes";
@@ -1094,26 +603,6 @@ function setupPatients() {
             url.searchParams.set("patient", patientId);
             url.searchParams.set("patientPhotos", "1");
             window.location.href = url.toString();
-            return;
-        }
-
-        if (event.target.closest("#takePatientPhoto")) {
-            const patientId = event.target.closest("#takePatientPhoto")?.dataset.patientId || "";
-            if (patientId) openPatientPhotoCapture(patientId);
-            return;
-        }
-
-        if (event.target.closest("#closePatientPhoto")) {
-            event.target.closest(".patient-photo-modal")?.remove();
-            return;
-        }
-
-        if (event.target.closest(".patient-photo-delete")) {
-            const button = event.target.closest(".patient-photo-delete");
-            deletePatientPhoto(
-                button.dataset.patientId || "",
-                button.dataset.photoId || ""
-            );
             return;
         }
 
@@ -1339,8 +828,6 @@ function setupPatients() {
             )) {
                 return;
             }
-
-            await deletePatientPhotos(id);
 
             savePatients(
                 getPatients().filter(current => current.id !== id)
