@@ -1,109 +1,91 @@
+# -*- coding: utf-8 -*-
+"""
+Genera i file del database interazioni a partire dallo ZIP in data/.
+
+Input : data/db_drug_interactions.csv.zip   (DrugBank/TDCommons, in inglese)
+Output: data/interazioni.csv                (nomi ed effetti in italiano)
+        data/traduzioni-interazioni.json    (dizionario usato dall'app per
+                                             tradurre al volo anche lo ZIP)
+
+Tutta la traduzione e la classificazione "pericolosa"/"possibile" sono in
+scripts/traduzioni_interazioni.py.
+"""
+
+import csv
+import json
 import os
+import sys
 import zipfile
-import pandas as pd
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import traduzioni_interazioni as tr  # noqa: E402
+
+ZIP_DIR = "data"
+OUT_CSV = os.path.join("data", "interazioni.csv")
+OUT_JSON = os.path.join("data", "traduzioni-interazioni.json")
+
+
+def leggi_righe_zip(percorso_zip):
+    with zipfile.ZipFile(percorso_zip) as z:
+        nomi_csv = [n for n in z.namelist() if n.lower().endswith(".csv")]
+        if not nomi_csv:
+            raise SystemExit("❌ Nessun file CSV trovato all'interno dello ZIP")
+        with z.open(nomi_csv[0]) as raw:
+            import io
+            lettore = csv.reader(io.TextIOWrapper(raw, encoding="utf-8", newline=""))
+            intestazione = next(lettore, None)
+            print(f"📖 Lettura di {nomi_csv[0]} — colonne: {intestazione}")
+            for riga in lettore:
+                if len(riga) >= 3 and riga[0].strip() and riga[1].strip():
+                    yield riga[0].strip(), riga[1].strip(), riga[2].strip()
+
 
 def process_interactions():
-    # 1. Individua automaticamente lo ZIP inserito in data/
-    zip_dir = 'data'
-    if not os.path.exists(zip_dir):
-        print(f"❌ La cartella {zip_dir} non esiste.")
-        return
+    if not os.path.isdir(ZIP_DIR):
+        raise SystemExit(f"❌ La cartella {ZIP_DIR} non esiste.")
 
-    zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
+    zip_files = sorted(f for f in os.listdir(ZIP_DIR) if f.endswith(".zip"))
     if not zip_files:
-        print("❌ Nessun file ZIP trovato nella cartella data/")
-        return
-    
-    # PRENDI IL PRIMO FILE ZIP (Risolto bug di indicizzazione)
-    zip_path = os.path.join(zip_dir, zip_files[0])
-    print(f"📦 Estrazione del file ZIP: {zip_path}")
-    
-    extract_dir = 'temp_extracted'
-    os.makedirs(extract_dir, exist_ok=True)
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_dir)
-        
-    # Trova il file CSV estratto all'interno dello ZIP
-    csv_files = []
-    for root, dirs, files in os.walk(extract_dir):
-        for file in files:
-            if file.endswith('.csv'):
-                csv_files.append(os.path.join(root, file))
-                
-    if not csv_files:
-        print("❌ Nessun file CSV trovato all'interno dello ZIP")
-        return
-        
-    # PRENDI IL PRIMO FILE CSV ESTRATTO (Risolto bug di indicizzazione)
-    csv_path = csv_files[0]
-    print(f"📖 Lettura del dataset di origine: {csv_path}")
-    df = pd.read_csv(csv_path)
+        raise SystemExit("❌ Nessun file ZIP trovato nella cartella data/")
 
-    # 2. Mappatura intelligente delle colonne (TDCommons / TDC usano nomi scientifici differenti)
-    col_mapping = {}
-    for col in df.columns:
-        col_lower = col.lower()
-        if 'drug1' in col_lower or 'drug_a' in col_lower or 'id1' in col_lower or 'chemical1' in col_lower:
-            col_mapping[col] = 'farmacoA'
-        elif 'drug2' in col_lower or 'drug_b' in col_lower or 'id2' in col_lower or 'chemical2' in col_lower:
-            col_mapping[col] = 'farmacoB'
-        elif 'desc' in col_lower or 'note' in col_lower or 'effect' in col_lower or 'y' in col_lower:
-            col_mapping[col] = 'nota'
+    percorso = os.path.join(ZIP_DIR, zip_files[0])
+    print(f"📦 Estrazione del file ZIP: {percorso}")
 
-    if len(col_mapping) < 2:
-        print("⚠️ Colonne non standard rilevate. Associo per posizione fissa (0, 1, 2)")
-        # Mantiene solo le prime 3 colonne se la mappatura testuale fallisce
-        nuove_colonne = ['farmacoA', 'farmacoB', 'nota']
-        df = df.iloc[:, :3]
-        df.columns = nuove_colonne
-    else:
-        df.rename(columns=col_mapping, inplace=True)
-        
-    df['stato'] = 'incompatibile' # Richiesto dall'interfaccia grafica della PWA
+    nomi_en = set()
+    viste = set()
+    scritte = non_tradotte = 0
 
-    # 3. Traduzione Automatica dei Principi Attivi e delle Note
-    print("🔄 Traduzione clinica automatica in corso...")
-    traduzioni_farmaci = {
-        "aspirin": "Acido acetilsalicilico", "acetaminophen": "Paracetamolo", 
-        "paracetamol": "Paracetamolo", "diazepam": "Diazepam", "fentanyl": "Fentanyl", 
-        "ceftriaxone": "Ceftriaxone", "amiodarone": "Amiodarone Cloridrato", 
-        "warfarin": "Warfarin", "ibuprofen": "Ibuprofene", "midazolam": "Midazolam",
-        "lorazepam": "Lorazepam", "furosemide": "Furosemide", "propofol": "Propofol"
-    }
+    with open(OUT_CSV, "w", encoding="utf-8", newline="") as out:
+        scrittore = csv.writer(out, lineterminator="\n")
+        scrittore.writerow(["farmacoA", "farmacoB", "stato", "nota"])
 
-    df['farmacoA'] = df['farmacoA'].astype(str).str.lower().str.strip().map(traduzioni_farmaci).fillna(df['farmacoA'].astype(str).str.capitalize())
-    df['farmacoB'] = df['farmacoB'].astype(str).str.lower().str.strip().map(traduzioni_farmaci).fillna(df['farmacoB'].astype(str).str.capitalize())
+        for a_en, b_en, testo_en in leggi_righe_zip(percorso):
+            nomi_en.add(a_en)
+            nomi_en.add(b_en)
 
-    # Traduzione massiva delle stringhe inglesi tipiche dei database medici (DrugBank/TDC)
-    def formalizza_nota(testo):
-        if not isinstance(testo, str): return "Rischio di interazione clinica."
-        t = testo.strip()
-        t = t.replace("The risk or severity of adverse effects can be increased when", "Il rischio o la gravità degli effetti avversi può aumentare quando il")
-        t = t.replace("is combined with", "viene combinato con")
-        t = t.replace("The metabolism of", "Il metabolismo di")
-        t = t.replace("can be decreased when combined with", "può essere ridotto se combinato con")
-        t = t.replace("The serum concentration of", "La concentrazione sierica di")
-        t = t.replace("can be increased when combined with", "può aumentare se combinato con")
-        return t
+            tradotto = tr.effetto_it(testo_en, a_en, b_en)
+            if tradotto is None:
+                # Frase non prevista: si conserva l'originale, da rivedere
+                non_tradotte += 1
+                nota, stato = testo_en, tr.M
+            else:
+                nota, stato = tradotto
 
-    df['nota'] = df['nota'].apply(formalizza_nota)
+            a_it, b_it = tr.nome_it(a_en), tr.nome_it(b_en)
+            chiave = (a_it, b_it, nota)
+            if chiave in viste:
+                continue
+            viste.add(chiave)
+            scrittore.writerow([a_it, b_it, stato, nota])
+            scritte += 1
 
-    # Filtra e pulisce le colonne finali espungendo i vuoti
-    df_finale = df[['farmacoA', 'farmacoB', 'stato', 'nota']].dropna()
+    with open(OUT_JSON, "w", encoding="utf-8") as f:
+        json.dump(tr.esporta_json(nomi_en), f, ensure_ascii=False, separators=(",", ":"))
 
-    # Rimuove i duplicati speculari (A+B e B+A vengono unificati per ottimizzare l'indice)
-    df_finale['coppia_key'] = df_finale.apply(lambda r: "-".join(sorted([str(r['farmacoA']), str(r['farmacoB'])])), axis=1)
-    df_finale.drop_duplicates(subset=['coppia_key'], inplace=True)
-    df_finale.drop(columns=['coppia_key'], inplace=True)
+    print(f"✅ Completato! {OUT_CSV}: {scritte} record "
+          f"({non_tradotte} con frase non prevista).")
+    print(f"✅ {OUT_JSON}: {len(nomi_en)} nomi, {len(tr.EFFETTI)} modelli di frase.")
 
-    # 4. Sovrascrive il file finale che l'Action andrà a committare
-    os.makedirs('data', exist_ok=True)
-    df_finale.to_csv('data/interazioni.csv', index=False)
-    print(f"✅ Completato! Generato data/interazioni.csv con {len(df_finale)} record reali.")
 
-    # Pulizia della cartella temporanea
-    import shutil
-    shutil.rmtree(extract_dir, ignore_errors=True)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     process_interactions()
