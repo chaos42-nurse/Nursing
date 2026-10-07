@@ -164,11 +164,33 @@ await prova("i nomi approssimati non vengono accettati in automatico ma proposti
     const r1 = NI.risolvi(idx, "ceftriax");
     assert.equal(r1.tipo, "candidati");
     assert.equal(r1.candidati[0].id, id("Ceftriaxone"));
-    const r2 = NI.risolvi(idx, "doxazosina");   // nessun alias: dedotta dal nome inglese "Doxazosin"
+    const r2 = NI.risolvi(idx, "doxepina");   // nessun alias: dedotta dal nome inglese "Doxepin"
     assert.equal(r2.tipo, "candidati");
-    assert.ok(r2.candidati.some(c => c.id === id("Doxazosin")));
+    assert.ok(r2.candidati.some(c => c.id === id("Doxepin")));
     assert.equal(NI.risolvi(idx, "zzzzqq").tipo, "nessuno");
     assert.equal(NI.risolvi(idx, "").tipo, "vuoto");
+});
+
+await prova("autocompletamento: forme italiane e nomi parziali vengono suggeriti", () => {
+    const primo = (q, nome) => {
+        const r = NI.cerca(idx, q, 10);
+        assert.ok(r.some(x => x.id === id(nome)), q + " non suggerisce " + nome + ": " + r.map(x => x.label).join(", "));
+    };
+    primo("aripiprazolo", "Aripiprazole");
+    primo("lamotrigina", "Lamotrigine");
+    primo("duloxetina", "Duloxetine");
+    primo("fenitoina", "Phenytoin");
+    primo("ossicodone", "Oxycodone");
+    primo("acido acetilsalicilico", "Acetylsalicylic acid");
+    primo("valproato", "Valproic acid");
+    primo("risedronato", "Risedronic acid");
+    primo("magnesio solfato", "Magnesium sulfate");
+    primo("calcio gluconato", "Calcium gluconate");
+    primo("sevoflurano", "Sevoflurane");
+    primo("amoxi", "Amoxicillin");
+    primo("tachi", "Acetaminophen");
+    assert.equal(NI.cerca(idx, "para", 3)[0].id, id("Acetaminophen"), "i farmaci piu' comuni vengono per primi");
+    assert.equal(NI.cerca(idx, "a", 5).length, 0, "meno di 2 lettere: nessun suggerimento");
 });
 
 await prova("farmaci non inclusi nel dataset (eparina, insulina) risultano 'nessuno', non 'nessuna interazione'", () => {

@@ -537,6 +537,28 @@
             .trim();
     }
 
+    /* "Scheletro" di una parola: riduce le differenze ortografiche tra il nome
+       italiano e quello inglese (aripiprazolo/aripiprazole, lamotrigina/lamotrigine,
+       sodio/sodium, fenitoina/phenytoin): ph->f, th->t, y->i, k->c, x->s,
+       lettere doppie, vocali finali. Serve solo per PROPORRE suggerimenti. */
+    function scheletro(parola) {
+        return parola
+            .replace(/ium$/, "i")
+            .replace(/ph/g, "f")
+            .replace(/th/g, "t")
+            .replace(/ch/g, "c")
+            .replace(/ck/g, "c")
+            .replace(/y/g, "i")
+            .replace(/k/g, "c")
+            .replace(/x/g, "s")
+            .replace(/(.)\1+/g, "$1")
+            .replace(/[aeiou]+$/, "");
+    }
+
+    function tokenScheletro(norm) {
+        return norm.split(" ").filter(Boolean).map(scheletro).filter(Boolean);
+    }
+
     /* Costruisce l'indice dal testo del CSV (colonne: Drug 1, Drug 2, descrizione).
        Per ogni riga memorizza solo (farmaco A, farmaco B, modello della frase):
        le frasi si ricostruiscono al momento della consultazione. */
@@ -663,7 +685,7 @@
         const aggiungi = (nome, id, tipo) => {
             const norm = normalizza(nome);
             if (!norm) return;
-            idx.termini.push({ norm, label: nome, id, tipo });
+            idx.termini.push({ norm, label: nome, id, tipo, sk: tokenScheletro(norm) });
             const lista = idx.esatti.get(norm);
             if (!lista) idx.esatti.set(norm, [id]);
             else if (!lista.includes(id)) lista.push(id);
@@ -702,11 +724,10 @@
 
     function suggerimento(idx, id, termine) {
         const tipo = termine ? termine.tipo : "en";
-        return {
-            id,
-            label: termine ? termine.label : idx.nomi[id],
-            altro: tipo === "it" ? idx.nomi[id] : (idx.nomeIt[id] || "")
-        };
+        const label = termine ? termine.label : idx.nomi[id];
+        let altro = tipo === "it" ? idx.nomi[id] : (idx.nomeIt[id] || "");
+        if (normalizza(altro) === normalizza(label)) altro = "";
+        return { id, label, altro };
     }
 
     /* Suggerimenti ordinati per pertinenza (per l'autocompletamento e per
@@ -715,6 +736,7 @@
         const q = normalizza(testo);
         if (q.length < 2) return [];
 
+        const qSk = tokenScheletro(q);
         const trovati = new Map();
         for (const t of idx.termini) {
             const nt = t.norm;
@@ -726,6 +748,12 @@
                 nt.length >= 5 && q.length > nt.length && q.startsWith(nt) &&
                 (q.length - nt.length <= 3 || q[nt.length] === " ")
             ) tier = 3;
+            if (tier < 0 && qSk.length) {
+                // ogni parola digitata deve essere l'inizio di una parola del nome
+                // (in qualunque ordine): "acido acetilsalicilico" ~ "Acetylsalicylic acid"
+                const ok = qSk.every(w => t.sk.some(x => x.startsWith(w)));
+                if (ok) tier = 4;
+            }
             if (tier < 0) continue;
 
             const prec = trovati.get(t.id);
@@ -737,6 +765,7 @@
         return [...trovati.values()]
             .sort((x, y) =>
                 x.tier - y.tier ||
+                (x.t.tipo === "it" ? 0 : 1) - (y.t.tipo === "it" ? 0 : 1) ||
                 x.t.norm.length - y.t.norm.length ||
                 x.t.label.localeCompare(y.t.label))
             .slice(0, limite || 8)
@@ -868,6 +897,7 @@
         nomeVisto,
         nomeCompleto,
         normalizza,
+        scheletro,
         inflateRawJs
     };
 });
