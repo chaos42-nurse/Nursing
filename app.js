@@ -17,6 +17,9 @@ const editor =
 const patientRouteId =
     params.get("patient") || "";
 
+const patientPhotosRoute =
+    params.get("patientPhotos") || "";
+
 const appNotesRoute =
     params.get("appnotes") || "";
 
