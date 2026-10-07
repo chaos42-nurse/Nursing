@@ -249,7 +249,7 @@ function patientPhotoRequest(patientId, photoId) {
     const safePatientId = encodeURIComponent(String(patientId || ""));
     return new Request(
         new URL(
-            \`./patient-photos/\${safePatientId}/\${encodeURIComponent(photoId)}.jpg\`,
+            `./patient-photos/${safePatientId}/${encodeURIComponent(photoId)}.jpg`,
             window.location.href
         ).toString()
     );
@@ -269,7 +269,7 @@ async function getPatientPhotos(patientId) {
 
     const cache = await caches.open(PATIENT_PHOTO_CACHE);
     const requests = await cache.keys();
-    const prefix = \`/patient-photos/\${encodeURIComponent(String(patientId))}/\`;
+    const prefix = `/patient-photos/${encodeURIComponent(String(patientId))}/`;
 
     const photos = [];
 
@@ -307,12 +307,12 @@ async function renderPatientPhotosPage(patientId) {
 
     stateTitle.textContent = "📷 Evoluzione medicazione";
     description.textContent = "Documentazione fotografica del paziente.";
-    content.innerHTML = \`
+    content.innerHTML = `
         <section class="detail-page patients-page patient-photos-page">
             <div class="patient-photo-header">
-                <h3>👤 \${renderNoteText(patient.name || "Paziente senza nome")}</h3>
+                <h3>👤 ${renderNoteText(patient.name || "Paziente senza nome")}</h3>
                 <button id="takePatientPhoto" class="settings-action" type="button"
-                    data-patient-id="\${escapeAttribute(patientId)}">
+                    data-patient-id="${escapeAttribute(patientId)}">
                     📷 Scatta foto
                 </button>
             </div>
@@ -330,7 +330,7 @@ async function renderPatientPhotosPage(patientId) {
                 <p class="personal-note-empty">Caricamento immagini…</p>
             </div>
         </section>
-    \`;
+    `;
 
     const gallery = document.getElementById("patientPhotoGallery");
     const photos = await getPatientPhotos(patientId);
@@ -351,17 +351,17 @@ async function renderPatientPhotosPage(patientId) {
 
         const card = document.createElement("article");
         card.className = "patient-photo-card";
-        card.innerHTML = \`
-            <img class="patient-photo-image" alt="Fotografia acquisita il \${escapeAttribute(formatPatientPhotoDate(photo.recordedAt))}">
+        card.innerHTML = `
+            <img class="patient-photo-image" alt="Fotografia acquisita il ${escapeAttribute(formatPatientPhotoDate(photo.recordedAt))}">
             <div class="patient-photo-meta">
-                <strong>\${escapeHtml(formatPatientPhotoDate(photo.recordedAt))}</strong>
+                <strong>${escapeHtml(formatPatientPhotoDate(photo.recordedAt))}</strong>
                 <button type="button" class="patient-photo-delete settings-action settings-danger"
-                    data-photo-id="\${escapeAttribute(photo.id)}"
-                    data-patient-id="\${escapeAttribute(patientId)}">
+                    data-photo-id="${escapeAttribute(photo.id)}"
+                    data-patient-id="${escapeAttribute(patientId)}">
                     🗑️ Elimina
                 </button>
             </div>
-        \`;
+        `;
 
         card.querySelector("img").src = objectUrl;
         card.querySelector("img").addEventListener("load", () => URL.revokeObjectURL(objectUrl), { once: true });
@@ -372,7 +372,7 @@ async function renderPatientPhotosPage(patientId) {
 function openPatientPhotoCapture(patientId) {
     const modal = document.createElement("div");
     modal.className = "patient-photo-modal";
-    modal.innerHTML = \`
+    modal.innerHTML = `
         <div class="patient-photo-modal-card">
             <h3>📷 Nuova fotografia</h3>
 
@@ -401,7 +401,7 @@ function openPatientPhotoCapture(patientId) {
 
             <p id="patientPhotoMessage" class="personal-note-message"></p>
         </div>
-    \`;
+    `;
 
     document.body.appendChild(modal);
 
@@ -431,7 +431,7 @@ function openPatientPhotoCapture(patientId) {
             message.textContent = "Salvataggio nella cache…";
 
             const cache = await caches.open(PATIENT_PHOTO_CACHE);
-            const photoId = \`\${Date.now()}-\${Math.random().toString(36).slice(2, 8)}\`;
+            const photoId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
             const recordedAt = new Date().toISOString();
             const request = patientPhotoRequest(patientId, photoId);
 
