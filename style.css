@@ -2910,3 +2910,176 @@ section h2 {
     color: var(--accent);
     text-decoration: underline;
 }
+
+
+/* =========================================================
+   PAZIENTI — EVOLUZIONE MEDICAZIONE / FOTO
+========================================================= */
+
+.patient-evolution-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+}
+
+.patient-evolution-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.patient-evolution-row > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.patient-evolution-row small {
+    color: var(--text-secondary);
+}
+
+.patient-photo-privacy-warning {
+    padding: 12px;
+    border: 1px solid rgba(255, 190, 70, 0.38);
+    border-radius: var(--radius-small);
+    background: rgba(255, 190, 70, 0.08);
+}
+
+.patient-photo-privacy-warning strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.patient-photo-privacy-warning p,
+.patient-photo-privacy-warning span {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: .86rem;
+    line-height: 1.45;
+}
+
+.patient-photo-privacy-warning.compact {
+    display: flex;
+    gap: 7px;
+    align-items: flex-start;
+}
+
+.patient-photo-privacy-warning.compact strong {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.patient-photo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.patient-photo-header h3 {
+    margin: 0;
+}
+
+.patient-photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.patient-photo-card {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+}
+
+.patient-photo-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--background);
+}
+
+.patient-photo-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px;
+}
+
+.patient-photo-meta strong {
+    font-size: .84rem;
+}
+
+.patient-photo-delete {
+    width: auto;
+    margin: 0;
+    padding: 7px 9px;
+}
+
+.patient-photo-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, .62);
+}
+
+.patient-photo-modal-card {
+    width: min(520px, 100%);
+    max-height: calc(100vh - 36px);
+    overflow-y: auto;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 14px 45px rgba(0,0,0,.4);
+}
+
+.patient-photo-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 14px 0;
+    color: var(--text);
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.patient-photo-consent input {
+    flex: 0 0 auto;
+    width: 18px !important;
+    height: 18px;
+    margin: 2px 0 0;
+}
+
+.patient-photo-modal .settings-action:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .patient-photo-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .patient-photo-gallery {
+        grid-template-columns: 1fr;
+    }
+}
