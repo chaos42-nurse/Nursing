@@ -252,7 +252,7 @@ function patientPhotoRequest(patientId, photoId) {
     const safePatientId = encodeURIComponent(String(patientId || ""));
     return new Request(
         new URL(
-            `./patient-photos/${safePatientId}/${encodeURIComponent(photoId)}.jpg`,
+            "./patient-photos/${safePatientId}/${encodeURIComponent(photoId)}.jpg",
             window.location.href
         ).toString()
     );
