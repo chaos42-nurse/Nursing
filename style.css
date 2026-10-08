@@ -3075,6 +3075,38 @@ section h2 {
     pointer-events: none;
 }
 
+.patient-photo-viewer-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, rgba(0,0,0,.8));
+}
+
+.patient-photo-viewer-note input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 10px;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    font-size: 16px;
+}
+
+.patient-photo-viewer-note button {
+    padding: 0 14px;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,.9);
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+}
+
 .patient-photo-viewer-caption {
     flex: 1;
     min-width: 0;

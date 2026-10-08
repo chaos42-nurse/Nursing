@@ -573,9 +573,38 @@ function setupPatientPhotosPage(patient) {
                 <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
                 <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
             </div>
+            ${item ? `
+            <form class="patient-photo-viewer-note" autocomplete="off">
+                <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
+                       value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
+                <button type="submit">Salva nota</button>
+            </form>` : ""}
         `;
 
         document.body.appendChild(viewer);
+
+        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
+        const caption = viewer.querySelector(".patient-photo-viewer-caption");
+
+        noteForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            const input = noteForm.querySelector("input");
+            input.blur();
+
+            try {
+                const saved = await photos.updateNote(item.id, input.value);
+                item.note = saved;
+                input.value = saved;
+                caption.textContent = date + (saved ? " · " + saved : "");
+                showMessage(saved ? "Nota salvata." : "Nota rimossa.");
+            } catch (error) {
+                console.error("Errore salvataggio nota:", error);
+                showMessage("Impossibile salvare la nota.");
+            }
+        });
+
+        // I gesti sulla foto non devono togliere il focus né chiudere con la tastiera aperta.
+        noteForm?.addEventListener("pointerdown", event => event.stopPropagation());
 
         const stage = viewer.querySelector(".patient-photo-viewer-stage");
         const img = viewer.querySelector("img");
@@ -629,6 +658,10 @@ function setupPatientPhotosPage(patient) {
         };
 
         const onKey = event => {
+            if (event.target instanceof HTMLInputElement) {
+                if (event.key === "Escape") event.target.blur();
+                return;
+            }
             if (event.key === "Escape") close();
             if (event.key === "+" || event.key === "=") zoomAt(scale * 1.5, center().x, center().y);
             if (event.key === "-") zoomAt(scale / 1.5, center().x, center().y);
@@ -3535,11 +3568,9 @@ async function renderDrugInteractions(selectedItem, data) {
     if (!paginaAttiva()) return;
 
     const fonti = idx.fonti || {};
-    const nomiFonti = [fonti.zip ? "ZIP" : "", fonti.csv ? "CSV" : ""].filter(Boolean).join(" + ");
     elStato.innerHTML = `
         <strong>✓ Archivio caricato</strong>
-        <p>${idx.righe.toLocaleString("it-IT")} interazioni tra ${idx.nNomi.toLocaleString("it-IT")} principi attivi, disponibili anche offline.
-        Sorgenti lette: ${escapeHtml(nomiFonti || "nessuna")}.</p>
+        <p>${idx.righe.toLocaleString("it-IT")} interazioni tra ${idx.nNomi.toLocaleString("it-IT")} principi attivi, disponibili anche offline.</p>
         ${fonti.problemi && fonti.problemi.length ? `<p><small>Una sorgente non è stata letta (${escapeHtml(fonti.problemi.join(" · "))}): i risultati usano l'altra.</small></p>` : ""}`;
     bottone.disabled = false;
 }
