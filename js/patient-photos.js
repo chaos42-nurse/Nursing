@@ -91,7 +91,7 @@
                 resolve(result && "result" in result ? result.result : result);
             };
 
-            tx.onerror = () => reject(tx.error);
+            tx.onerror = () => reject(tx.error || new PhotoError("db", "Operazione non riuscita."));
             tx.onabort = () => reject(tx.error || new PhotoError("db", "Operazione annullata."));
         }));
     }
@@ -213,24 +213,27 @@
         throw new PhotoError("encode", "Impossibile comprimere l'immagine.");
     }
 
-    async function compressImage(file) {
-        if (!file || !String(file.type || "").startsWith("image/")) {
+    async function compressImage(file, options = {}) {
+        // Alcuni telefoni Android restituiscono file senza tipo MIME: si prova
+        // comunque a decodificarli invece di rifiutarli.
+        const type = String((file && file.type) || "");
+        if (!file || (type && !type.startsWith("image/"))) {
             throw new PhotoError("type", "Il file scelto non è un'immagine.");
         }
 
         const source = await decodeImage(file);
 
         try {
-            let canvas = drawScaled(source, MAX_SIDE);
+            let canvas = drawScaled(source, options.maxSide || MAX_SIDE);
             let best = null;
 
-            for (const quality of QUALITY_STEPS) {
+            for (const quality of (options.quality ? [options.quality] : QUALITY_STEPS)) {
                 best = await encode(canvas, quality);
                 if (best.size <= TARGET_BYTES) break;
             }
 
             // Foto ancora pesante (scena molto dettagliata): riduce la risoluzione.
-            if (best.size > TARGET_BYTES * 1.6) {
+            if (!options.maxSide && best.size > TARGET_BYTES * 1.6) {
                 canvas = drawScaled(source, FALLBACK_MAX_SIDE);
                 best = await encode(canvas, QUALITY_STEPS[QUALITY_STEPS.length - 1]);
             }
@@ -256,39 +259,49 @@
     async function addPhoto(patientId, file, note = "") {
         if (!patientId) throw new PhotoError("patient", "Paziente non valido.");
 
-        const info = await getStorageInfo();
-
         const compressed = await compressImage(file);
 
-        if (info.free < compressed.blob.size + 1024 * 1024) {
-            throw new PhotoError(
-                "quota",
-                "Spazio sul dispositivo insufficiente. Elimina qualche foto vecchia e riprova."
-            );
-        }
-
-        const record = {
+        const buildRecord = data => ({
             id: createId(),
             patientId: String(patientId),
             createdAt: new Date().toISOString(),
             note: String(note || "").trim().slice(0, 120),
-            width: compressed.width,
-            height: compressed.height,
-            size: compressed.blob.size,
-            blob: compressed.blob
-        };
+            width: data.width,
+            height: data.height,
+            size: data.blob.size,
+            blob: data.blob
+        });
+
+        // Nessun controllo preventivo: navigator.storage.estimate() è una stima
+        // e su Android con poca memoria libera dà quote bassissime anche quando
+        // una foto da ~250 KB si salverebbe senza problemi. Si prova a scrivere
+        // e si reagisce solo a un rifiuto reale del browser.
+        let record = buildRecord(compressed);
 
         try {
             await runTransaction("readwrite", store => store.put(record));
         } catch (error) {
-            if (isQuotaError(error)) {
+            if (!isQuotaError(error)) throw error;
+
+            // Ritenta una volta con una versione molto più piccola (~60-80 KB).
+            try {
+                const small = await compressImage(file, { maxSide: 800, quality: 0.45 });
+                record = buildRecord(small);
+                await runTransaction("readwrite", store => store.put(record));
+            } catch (retryError) {
+                if (!isQuotaError(retryError)) throw retryError;
+
+                const info = await getStorageInfo();
+                const free = Number.isFinite(info.free) ? info.free : null;
+
                 throw new PhotoError(
                     "quota",
-                    "Spazio sul dispositivo esaurito. Elimina qualche foto vecchia e riprova."
+                    "Memoria del telefono insufficiente" +
+                    (free !== null ? " (liberi circa " + formatBytes(free) + ")" : "") +
+                    ". Libera spazio sul telefono (app, foto, download) oppure elimina " +
+                    "le foto salvate qui, poi riprova."
                 );
             }
-
-            throw error;
         }
 
         // Dopo il primo salvataggio riuscito chiede la persistenza dei dati.
