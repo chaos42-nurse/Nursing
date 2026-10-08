@@ -262,13 +262,246 @@ function renderPatientPhotosPage(patientId) {
         <section class="detail-page patients-page patient-photos-page">
             <div class="patient-photo-header">
                 <h3>👤 ${renderNoteText(patient.name || "Paziente senza nome")}</h3>
+                <button id="patientPhotoAdd" class="settings-action" type="button">📷 Nuova foto</button>
             </div>
 
-            <div class="patient-photo-placeholder">
-                Elemento ancora in fase di modifica.
+            <div class="patient-photo-privacy-warning">
+                <strong>⚠️ Privacy</strong>
+                <p>
+                    Le foto restano solo su questo dispositivo, ridotte e senza
+                    dati di posizione. Chiedi il consenso e non inquadrare volto,
+                    nome o altri elementi identificativi non necessari.
+                </p>
             </div>
+
+            <p id="patientPhotoStorage" class="settings-message"></p>
+            <p id="patientPhotoMessage" class="settings-message" role="status"></p>
+
+            <div id="patientPhotoGallery" class="patient-photo-gallery"></div>
         </section>
     `;
+
+    setupPatientPhotosPage(patient);
+}
+
+function setupPatientPhotosPage(patient) {
+    const photos = window.PatientPhotos;
+    const gallery = content.querySelector("#patientPhotoGallery");
+    const storageLine = content.querySelector("#patientPhotoStorage");
+    const messageLine = content.querySelector("#patientPhotoMessage");
+    const addButton = content.querySelector("#patientPhotoAdd");
+
+    let objectUrls = [];
+
+    const showMessage = text => {
+        messageLine.textContent = text || "";
+    };
+
+    const releaseUrls = () => {
+        objectUrls.forEach(url => URL.revokeObjectURL(url));
+        objectUrls = [];
+    };
+
+    if (!photos) {
+        addButton.disabled = true;
+        showMessage("Modulo foto non disponibile. Ricarica l'app.");
+        return;
+    }
+
+    const refreshStorage = async () => {
+        const info = await photos.getStorageInfo();
+
+        if (!info.supported || !info.quota) {
+            storageLine.textContent = "";
+            return info;
+        }
+
+        const percent = Math.min(100, Math.round(info.usage / info.quota * 100));
+
+        storageLine.textContent =
+            "Spazio dell'app: " + photos.formatBytes(info.usage) +
+            " usati su circa " + photos.formatBytes(info.quota) +
+            " (" + percent + "%)" +
+            (info.persisted ? " · dati protetti" : "");
+
+        if (info.free < photos.LOW_SPACE_BYTES) {
+            storageLine.textContent +=
+                " — spazio quasi esaurito: elimina le foto che non servono più.";
+        }
+
+        return info;
+    };
+
+    const renderGallery = async () => {
+        releaseUrls();
+
+        let items = [];
+
+        try {
+            items = await photos.listPhotos(patient.id);
+        } catch (error) {
+            console.error("Errore lettura foto:", error);
+            showMessage("Impossibile leggere le foto salvate.");
+        }
+
+        if (!items.length) {
+            gallery.innerHTML =
+                '<p class="settings-message">Nessuna foto salvata per questo paziente.</p>';
+            return;
+        }
+
+        gallery.innerHTML = items.map(item => {
+            const url = URL.createObjectURL(item.blob);
+            objectUrls.push(url);
+
+            const date = new Date(item.createdAt).toLocaleString("it-IT", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+            });
+
+            return `
+                <figure class="patient-photo-card" style="margin:0">
+                    <img class="patient-photo-image" src="${url}" alt="Foto del ${escapeAttribute(date)}"
+                         loading="lazy" data-photo-view="${escapeAttribute(item.id)}">
+                    <figcaption class="patient-photo-meta">
+                        <span>
+                            <strong>${escapeHtml(date)}</strong>
+                            ${item.note ? `<br><small>${escapeHtml(item.note)}</small>` : ""}
+                            <br><small>${escapeHtml(photos.formatBytes(item.size))}</small>
+                        </span>
+                        <button class="settings-action settings-danger patient-photo-delete"
+                                type="button" data-photo-delete="${escapeAttribute(item.id)}"
+                                aria-label="Elimina foto">🗑️</button>
+                    </figcaption>
+                </figure>
+            `;
+        }).join("");
+    };
+
+    const openAddModal = () => {
+        document.getElementById("patientPhotoModal")?.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "patientPhotoModal";
+        modal.className = "patient-photo-modal";
+
+        modal.innerHTML = `
+            <div class="patient-photo-modal-card">
+                <h3>📷 Nuova foto</h3>
+
+                <label class="patient-photo-consent">
+                    <input id="patientPhotoConsent" type="checkbox">
+                    <span>Il paziente ha dato il consenso alla foto e l'inquadratura non
+                    contiene dati identificativi non necessari.</span>
+                </label>
+
+                <input id="patientPhotoNote" type="text" maxlength="120"
+                       placeholder="Nota breve (facoltativa)" style="width:100%;margin-bottom:12px">
+
+                <button id="patientPhotoCamera" class="settings-action" type="button" disabled>📷 Scatta</button>
+                <button id="patientPhotoPick" class="settings-action" type="button" disabled>🖼️ Scegli dalla galleria</button>
+                <button id="patientPhotoCancel" class="settings-action" type="button">Annulla</button>
+
+                <input id="patientPhotoFileCamera" type="file" accept="image/*" capture="environment" hidden>
+                <input id="patientPhotoFilePick" type="file" accept="image/*" hidden>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const consent = modal.querySelector("#patientPhotoConsent");
+        const cameraButton = modal.querySelector("#patientPhotoCamera");
+        const pickButton = modal.querySelector("#patientPhotoPick");
+        const noteInput = modal.querySelector("#patientPhotoNote");
+        const cameraInput = modal.querySelector("#patientPhotoFileCamera");
+        const pickInput = modal.querySelector("#patientPhotoFilePick");
+
+        const close = () => modal.remove();
+
+        consent.addEventListener("change", () => {
+            cameraButton.disabled = !consent.checked;
+            pickButton.disabled = !consent.checked;
+        });
+
+        cameraButton.addEventListener("click", () => cameraInput.click());
+        pickButton.addEventListener("click", () => pickInput.click());
+        modal.querySelector("#patientPhotoCancel").addEventListener("click", close);
+
+        modal.addEventListener("click", event => {
+            if (event.target === modal) close();
+        });
+
+        const handleFile = async event => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const note = noteInput.value;
+            close();
+            addButton.disabled = true;
+            showMessage("Salvataggio della foto in corso…");
+
+            try {
+                const { record, originalBytes } = await photos.addPhoto(patient.id, file, note);
+
+                showMessage(
+                    "Foto salvata: " + photos.formatBytes(originalBytes) +
+                    " → " + photos.formatBytes(record.size) + "."
+                );
+            } catch (error) {
+                console.error("Errore salvataggio foto:", error);
+                showMessage(
+                    error?.code
+                        ? error.message
+                        : "Impossibile salvare la foto. Controlla lo spazio sul dispositivo."
+                );
+            } finally {
+                addButton.disabled = false;
+                await renderGallery();
+                await refreshStorage();
+            }
+        };
+
+        cameraInput.addEventListener("change", handleFile);
+        pickInput.addEventListener("change", handleFile);
+    };
+
+    addButton.addEventListener("click", openAddModal);
+
+    gallery.addEventListener("click", async event => {
+        const deleteButton = event.target.closest("[data-photo-delete]");
+
+        if (deleteButton) {
+            if (!window.confirm("Eliminare questa foto dal dispositivo?")) return;
+
+            try {
+                await photos.deletePhoto(deleteButton.dataset.photoDelete);
+                showMessage("Foto eliminata.");
+            } catch (error) {
+                console.error("Errore eliminazione foto:", error);
+                showMessage("Impossibile eliminare la foto.");
+            }
+
+            await renderGallery();
+            await refreshStorage();
+            return;
+        }
+
+        const image = event.target.closest("[data-photo-view]");
+
+        if (image) {
+            const viewer = document.createElement("div");
+            viewer.className = "patient-photo-modal";
+            viewer.innerHTML =
+                '<div class="patient-photo-modal-card"><img src="' +
+                escapeAttribute(image.src) +
+                '" alt="" style="width:100%;border-radius:10px"></div>';
+            viewer.addEventListener("click", () => viewer.remove());
+            document.body.appendChild(viewer);
+        }
+    });
+
+    renderGallery();
+    refreshStorage();
 }
 
 function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
@@ -399,7 +632,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                             <div class="patient-evolution-row">
                                 <div>
                                     <strong>📷 Evoluzione medicazione</strong>
-                                    <small>Elemento ancora in fase di modifica.</small>
+                                    <small>Foto della medicazione salvate sul dispositivo.</small>
                                 </div>
                                 <button id="openPatientPhotos" class="settings-action" type="button"
                                     data-patient-id="${escapeAttribute(selectedPatient.id)}">
@@ -833,6 +1066,9 @@ function setupPatients() {
                 getPatients().filter(current => current.id !== id)
             );
 
+            // Libera lo spazio delle foto del paziente eliminato.
+            window.PatientPhotos?.removeAllForPatient(id);
+
             renderPatientsPage();
             return;
         }
@@ -871,6 +1107,8 @@ function resetAllPersonalization() {
     localStorage.removeItem(
         PATIENTS_KEY
     );
+
+    window.PatientPhotos?.clearAll();
 
     applyTheme("dark");
     orderEditMode = false;
