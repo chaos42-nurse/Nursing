@@ -378,6 +378,94 @@ function setupPatientPhotosPage(patient) {
         }).join("");
     };
 
+    const saveFile = async (file, note) => {
+        addButton.disabled = true;
+        showMessage("Salvataggio della foto in corso…");
+
+        try {
+            const { record, originalBytes } = await photos.addPhoto(patient.id, file, note);
+
+            showMessage(
+                "Foto salvata: " + photos.formatBytes(originalBytes) +
+                " → " + photos.formatBytes(record.size) + "."
+            );
+        } catch (error) {
+            console.error("Errore salvataggio foto:", error);
+            showMessage(
+                error?.code
+                    ? error.message
+                    : "Impossibile salvare la foto. Controlla lo spazio sul dispositivo."
+            );
+        } finally {
+            addButton.disabled = false;
+            await renderGallery();
+            await refreshStorage();
+        }
+    };
+
+    let liveCameraFailed = false;
+
+    // Fotocamera dentro l'app: non apre l'app fotocamera di sistema, quindi
+    // Android non chiude la pagina per mancanza di memoria durante lo scatto.
+    const openLiveCamera = async note => {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
+            audio: false
+        });
+
+        const overlay = document.createElement("div");
+        overlay.className = "patient-photo-camera";
+        overlay.innerHTML = `
+            <video class="patient-photo-camera-video" playsinline muted autoplay></video>
+            <div class="patient-photo-camera-bar">
+                <button type="button" class="settings-action" data-cam="cancel">Annulla</button>
+                <button type="button" class="patient-photo-shutter" data-cam="shoot"
+                        aria-label="Scatta"></button>
+                <span></span>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const video = overlay.querySelector("video");
+        video.srcObject = stream;
+        video.play().catch(() => {});
+
+        const stop = () => {
+            stream.getTracks().forEach(track => track.stop());
+            overlay.remove();
+        };
+
+        overlay.addEventListener("click", event => {
+            const action = event.target.closest("[data-cam]")?.dataset.cam;
+            if (!action) return;
+
+            if (action === "cancel") {
+                stop();
+                return;
+            }
+
+            if (!video.videoWidth) return;
+
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+            stop();
+
+            canvas.toBlob(blob => {
+                if (!blob) {
+                    showMessage("Impossibile acquisire la foto.");
+                    return;
+                }
+                saveFile(new File([blob], "foto.jpg", { type: "image/jpeg" }), note);
+            }, "image/jpeg", 0.9);
+        });
+    };
+
     const openAddModal = () => {
         document.getElementById("patientPhotoModal")?.remove();
 
@@ -389,17 +477,11 @@ function setupPatientPhotosPage(patient) {
             <div class="patient-photo-modal-card">
                 <h3>📷 Nuova foto</h3>
 
-                <label class="patient-photo-consent">
-                    <input id="patientPhotoConsent" type="checkbox">
-                    <span>Il paziente ha dato il consenso alla foto e l'inquadratura non
-                    contiene dati identificativi non necessari.</span>
-                </label>
-
                 <input id="patientPhotoNote" type="text" maxlength="120"
                        placeholder="Nota breve (facoltativa)" style="width:100%;margin-bottom:12px">
 
-                <button id="patientPhotoCamera" class="settings-action" type="button" disabled>📷 Scatta</button>
-                <button id="patientPhotoPick" class="settings-action" type="button" disabled>🖼️ Scegli dalla galleria</button>
+                <button id="patientPhotoCamera" class="settings-action" type="button">📷 Scatta</button>
+                <button id="patientPhotoPick" class="settings-action" type="button">🖼️ Scegli dalla galleria</button>
                 <button id="patientPhotoCancel" class="settings-action" type="button">Annulla</button>
 
                 <input id="patientPhotoFileCamera" type="file" accept="image/*" capture="environment" hidden>
@@ -409,7 +491,6 @@ function setupPatientPhotosPage(patient) {
 
         document.body.appendChild(modal);
 
-        const consent = modal.querySelector("#patientPhotoConsent");
         const cameraButton = modal.querySelector("#patientPhotoCamera");
         const pickButton = modal.querySelector("#patientPhotoPick");
         const noteInput = modal.querySelector("#patientPhotoNote");
@@ -418,12 +499,29 @@ function setupPatientPhotosPage(patient) {
 
         const close = () => modal.remove();
 
-        consent.addEventListener("change", () => {
-            cameraButton.disabled = !consent.checked;
-            pickButton.disabled = !consent.checked;
+        cameraButton.addEventListener("click", async () => {
+            const note = noteInput.value;
+
+            if (navigator.mediaDevices?.getUserMedia && !liveCameraFailed) {
+                close();
+
+                try {
+                    await openLiveCamera(note);
+                } catch (error) {
+                    console.warn("Fotocamera integrata non disponibile:", error);
+                    liveCameraFailed = true;
+                    showMessage(
+                        "Fotocamera integrata non disponibile (permesso negato?). " +
+                        "Tocca di nuovo Nuova foto → Scatta per usare la fotocamera del telefono."
+                    );
+                }
+
+                return;
+            }
+
+            cameraInput.click();
         });
 
-        cameraButton.addEventListener("click", () => cameraInput.click());
         pickButton.addEventListener("click", () => pickInput.click());
         modal.querySelector("#patientPhotoCancel").addEventListener("click", close);
 
@@ -431,34 +529,13 @@ function setupPatientPhotosPage(patient) {
             if (event.target === modal) close();
         });
 
-        const handleFile = async event => {
+        const handleFile = event => {
             const file = event.target.files?.[0];
             if (!file) return;
 
             const note = noteInput.value;
             close();
-            addButton.disabled = true;
-            showMessage("Salvataggio della foto in corso…");
-
-            try {
-                const { record, originalBytes } = await photos.addPhoto(patient.id, file, note);
-
-                showMessage(
-                    "Foto salvata: " + photos.formatBytes(originalBytes) +
-                    " → " + photos.formatBytes(record.size) + "."
-                );
-            } catch (error) {
-                console.error("Errore salvataggio foto:", error);
-                showMessage(
-                    error?.code
-                        ? error.message
-                        : "Impossibile salvare la foto. Controlla lo spazio sul dispositivo."
-                );
-            } finally {
-                addButton.disabled = false;
-                await renderGallery();
-                await refreshStorage();
-            }
+            saveFile(file, note);
         };
 
         cameraInput.addEventListener("change", handleFile);

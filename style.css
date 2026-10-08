@@ -3038,21 +3038,49 @@ section h2 {
     box-shadow: 0 14px 45px rgba(0,0,0,.4);
 }
 
-.patient-photo-consent {
+.patient-photo-camera {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin: 14px 0;
-    color: var(--text);
-    line-height: 1.4;
+    flex-direction: column;
+    background: #000;
+}
+
+.patient-photo-camera-video {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.patient-photo-camera-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+    background: rgba(0, 0, 0, .85);
+}
+
+.patient-photo-camera-bar > * {
+    flex: 1;
+}
+
+.patient-photo-shutter {
+    flex: 0 0 auto;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    background: #fff;
+    box-shadow: inset 0 0 0 4px #000;
     cursor: pointer;
 }
 
-.patient-photo-consent input {
+.patient-photo-camera-bar .settings-action {
     flex: 0 0 auto;
-    width: 18px !important;
-    height: 18px;
-    margin: 2px 0 0;
+    width: auto;
 }
 
 .patient-photo-modal .settings-action:disabled {
