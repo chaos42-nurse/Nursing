@@ -3098,3 +3098,11 @@ section h2 {
         grid-template-columns: 1fr;
     }
 }
+
+/* Il simbolo 🔗 nella schermata Note è un collegamento, ma non deve avere sottolineatura. */
+.detail-header-row a[aria-label="Collegamenti tra note"],
+.detail-header-row a[title="Collegamenti tra note"] {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
