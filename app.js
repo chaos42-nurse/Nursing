@@ -295,6 +295,7 @@ function setupPatientPhotosPage(patient) {
     const addButton = content.querySelector("#patientPhotoAdd");
 
     let objectUrls = [];
+    let itemsById = new Map();
 
     const showMessage = text => {
         messageLine.textContent = text || "";
@@ -337,6 +338,7 @@ function setupPatientPhotosPage(patient) {
 
     const renderGallery = async () => {
         releaseUrls();
+        itemsById = new Map();
 
         let items = [];
 
@@ -356,24 +358,22 @@ function setupPatientPhotosPage(patient) {
         gallery.innerHTML = items.map(item => {
             const url = URL.createObjectURL(item.blob);
             objectUrls.push(url);
+            itemsById.set(item.id, item);
 
-            const date = new Date(item.createdAt).toLocaleString("it-IT", {
-                day: "2-digit", month: "2-digit", year: "numeric",
-                hour: "2-digit", minute: "2-digit"
+            const shortDate = new Date(item.createdAt).toLocaleDateString("it-IT", {
+                day: "2-digit", month: "2-digit"
             });
 
             return `
                 <figure class="patient-photo-card" style="margin:0">
-                    <img class="patient-photo-image" src="${url}" alt="Foto del ${escapeAttribute(date)}"
-                         loading="lazy" data-photo-view="${escapeAttribute(item.id)}">
+                    <img class="patient-photo-image" src="${url}"
+                         alt="Foto del ${escapeAttribute(shortDate)}"
+                         loading="lazy" decoding="async"
+                         data-photo-view="${escapeAttribute(item.id)}">
                     <figcaption class="patient-photo-meta">
-                        <span>
-                            <strong>${escapeHtml(date)}</strong>
-                            ${item.note ? `<br><small>${escapeHtml(item.note)}</small>` : ""}
-                            <br><small>${escapeHtml(photos.formatBytes(item.size))}</small>
-                        </span>
-                        <button class="settings-action settings-danger patient-photo-delete"
-                                type="button" data-photo-delete="${escapeAttribute(item.id)}"
+                        <span class="patient-photo-date">${escapeHtml(shortDate)}</span>
+                        <button class="patient-photo-delete" type="button"
+                                data-photo-delete="${escapeAttribute(item.id)}"
                                 aria-label="Elimina foto">🗑️</button>
                     </figcaption>
                 </figure>
@@ -545,6 +545,188 @@ function setupPatientPhotosPage(patient) {
         pickInput.addEventListener("change", handleFile);
     };
 
+    // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
+    // tocco, pulsanti +/− e trascinamento per spostare la foto ingrandita.
+    const openPhotoViewer = (src, item) => {
+        document.getElementById("patientPhotoViewer")?.remove();
+
+        const viewer = document.createElement("div");
+        viewer.id = "patientPhotoViewer";
+        viewer.className = "patient-photo-viewer";
+
+        const date = item
+            ? new Date(item.createdAt).toLocaleString("it-IT", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+            })
+            : "";
+
+        viewer.innerHTML = `
+            <div class="patient-photo-viewer-stage">
+                <img class="patient-photo-viewer-img" src="${escapeAttribute(src)}" alt="" draggable="false">
+            </div>
+            <div class="patient-photo-viewer-top">
+                <span class="patient-photo-viewer-caption">
+                    ${escapeHtml(date)}${item?.note ? " · " + escapeHtml(item.note) : ""}
+                </span>
+                <button type="button" data-viewer="out" aria-label="Riduci">−</button>
+                <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
+                <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
+            </div>
+        `;
+
+        document.body.appendChild(viewer);
+
+        const stage = viewer.querySelector(".patient-photo-viewer-stage");
+        const img = viewer.querySelector("img");
+
+        const MIN = 1;
+        const MAX = 8;
+        let scale = 1, x = 0, y = 0;
+
+        const pointers = new Map();
+        let pinchStart = null;
+        let dragStart = null;
+        let moved = false;
+        let lastTap = 0;
+
+        const clampPan = () => {
+            const rect = stage.getBoundingClientRect();
+            const maxX = Math.max(0, (img.offsetWidth * scale - rect.width) / 2);
+            const maxY = Math.max(0, (img.offsetHeight * scale - rect.height) / 2);
+            x = Math.min(maxX, Math.max(-maxX, x));
+            y = Math.min(maxY, Math.max(-maxY, y));
+        };
+
+        const apply = () => {
+            if (scale <= MIN) { x = 0; y = 0; }
+            clampPan();
+            img.style.transform = "translate(" + x + "px," + y + "px) scale(" + scale + ")";
+        };
+
+        // Zoom mantenendo fermo il punto (cx, cy), in coordinate dello schermo.
+        const zoomAt = (newScale, cx, cy) => {
+            newScale = Math.min(MAX, Math.max(MIN, newScale));
+            const rect = stage.getBoundingClientRect();
+            const px = cx - (rect.left + rect.width / 2);
+            const py = cy - (rect.top + rect.height / 2);
+            const ratio = newScale / scale;
+
+            x = px - (px - x) * ratio;
+            y = py - (py - y) * ratio;
+            scale = newScale;
+            apply();
+        };
+
+        const center = () => {
+            const rect = stage.getBoundingClientRect();
+            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+        };
+
+        const close = () => {
+            document.removeEventListener("keydown", onKey);
+            viewer.remove();
+        };
+
+        const onKey = event => {
+            if (event.key === "Escape") close();
+            if (event.key === "+" || event.key === "=") zoomAt(scale * 1.5, center().x, center().y);
+            if (event.key === "-") zoomAt(scale / 1.5, center().x, center().y);
+        };
+
+        document.addEventListener("keydown", onKey);
+
+        viewer.querySelector(".patient-photo-viewer-top").addEventListener("click", event => {
+            const action = event.target.closest("[data-viewer]")?.dataset.viewer;
+            if (action === "close") close();
+            if (action === "in") zoomAt(scale * 1.5, center().x, center().y);
+            if (action === "out") zoomAt(scale / 1.5, center().x, center().y);
+        });
+
+        stage.addEventListener("wheel", event => {
+            event.preventDefault();
+            zoomAt(scale * (event.deltaY < 0 ? 1.2 : 1 / 1.2), event.clientX, event.clientY);
+        }, { passive: false });
+
+        const distance = () => {
+            const [a, b] = [...pointers.values()];
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        };
+
+        stage.addEventListener("pointerdown", event => {
+            stage.setPointerCapture(event.pointerId);
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            moved = false;
+
+            if (pointers.size === 2) {
+                pinchStart = { dist: distance(), scale };
+                dragStart = null;
+            } else if (pointers.size === 1) {
+                dragStart = { px: event.clientX, py: event.clientY, x, y };
+            }
+        });
+
+        stage.addEventListener("pointermove", event => {
+            if (!pointers.has(event.pointerId)) return;
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+            if (pointers.size === 2 && pinchStart) {
+                const [a, b] = [...pointers.values()];
+                zoomAt(
+                    pinchStart.scale * distance() / pinchStart.dist,
+                    (a.x + b.x) / 2,
+                    (a.y + b.y) / 2
+                );
+                moved = true;
+            } else if (pointers.size === 1 && dragStart && scale > MIN) {
+                const dx = event.clientX - dragStart.px;
+                const dy = event.clientY - dragStart.py;
+                if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+                x = dragStart.x + dx;
+                y = dragStart.y + dy;
+                apply();
+            } else if (dragStart && Math.hypot(event.clientX - dragStart.px, event.clientY - dragStart.py) > 6) {
+                moved = true;
+            }
+        });
+
+        const release = event => {
+            const wasSingle = pointers.size === 1;
+            pointers.delete(event.pointerId);
+            pinchStart = null;
+
+            if (pointers.size === 1) {
+                const [rest] = [...pointers.values()];
+                dragStart = { px: rest.x, py: rest.y, x, y };
+                return;
+            }
+
+            dragStart = null;
+
+            if (!wasSingle || moved || event.type === "pointercancel") return;
+
+            // Doppio tocco: alterna tra adattata e ingrandita.
+            const now = Date.now();
+
+            if (now - lastTap < 320) {
+                lastTap = 0;
+                if (scale > MIN) zoomAt(MIN, event.clientX, event.clientY);
+                else zoomAt(3, event.clientX, event.clientY);
+                return;
+            }
+
+            lastTap = now;
+
+            // Tocco singolo sullo sfondo (fuori dalla foto) con foto adattata: chiude.
+            if (scale === MIN && event.target === stage) {
+                setTimeout(() => { if (lastTap === now) close(); }, 330);
+            }
+        };
+
+        stage.addEventListener("pointerup", release);
+        stage.addEventListener("pointercancel", release);
+    };
+
     addButton.addEventListener("click", openAddModal);
 
     gallery.addEventListener("click", async event => {
@@ -569,14 +751,7 @@ function setupPatientPhotosPage(patient) {
         const image = event.target.closest("[data-photo-view]");
 
         if (image) {
-            const viewer = document.createElement("div");
-            viewer.className = "patient-photo-modal";
-            viewer.innerHTML =
-                '<div class="patient-photo-modal-card"><img src="' +
-                escapeAttribute(image.src) +
-                '" alt="" style="width:100%;border-radius:10px"></div>';
-            viewer.addEventListener("click", () => viewer.remove());
-            document.body.appendChild(viewer);
+            openPhotoViewer(image.src, itemsById.get(image.dataset.photoView));
         }
     });
 
