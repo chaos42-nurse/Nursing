@@ -7106,7 +7106,6 @@ function setupSettings() {
     const orderButton = document.getElementById("orderModeButton");
     const resetButton = document.getElementById("resetOrderButton");
     const themeButton = document.getElementById("settingsThemeButton");
-    const noteLinksButton = document.getElementById("noteLinksButton");
     const appNotesButton = document.getElementById("appNotesButton");
     const contactButton = document.getElementById("contactButton");
     const shareButton = document.getElementById("sharePersonalizationButton");
@@ -7181,11 +7180,6 @@ function setupSettings() {
         } else {
             loadCategories();
         }
-    });
-
-    noteLinksButton?.addEventListener("click", () => {
-        panel.hidden = true;
-        window.location.href = "?links=1";
     });
 
     appNotesButton?.addEventListener("click", () => {
