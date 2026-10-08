@@ -29,9 +29,9 @@
     const N = "nota";
 
     const ETICHETTE = {
-        rischio: "Possibili effetti avversi",
-        attenzione: "Attenzione: possibile variazione di effetto o concentrazioni",
-        nota: "Interazione segnalata (riduce un effetto avverso)",
+        rischio: "Interazione PERICOLOSA: evitare l'associazione o monitorare con attenzione",
+        attenzione: "Interazione POSSIBILE: monitorare effetto e concentrazioni",
+        nota: "Interazione possibile (riduce un effetto avverso)",
         nessuna: "Nessuna interazione nel database consultato (non significa che sia sicuro)"
     };
 
@@ -44,7 +44,7 @@
     --------------------------------------------------------------------- */
     const MODELLI = [
         ["The risk or severity of adverse effects can be increased when {A} is combined with {B}.",
-         "Il rischio o la gravità degli effetti avversi può aumentare quando {A} e {B} vengono associati.", R],
+         "Il rischio o la gravità degli effetti avversi può aumentare quando {A} e {B} vengono associati.", W],
         ["The metabolism of {B} can be decreased when combined with {A}.",
          "Il metabolismo di {B} può risultare ridotto in associazione con {A}.", W],
         ["The serum concentration of {B} can be increased when it is combined with {A}.",
@@ -52,7 +52,7 @@
         ["The serum concentration of {B} can be decreased when it is combined with {A}.",
          "La concentrazione sierica di {B} può diminuire in associazione con {A}.", W],
         ["{A} may increase the hypotensive activities of {B}.",
-         "{A} può potenziare l'effetto ipotensivo di {B}.", R],
+         "{A} può potenziare l'effetto ipotensivo di {B}.", W],
         ["The therapeutic efficacy of {B} can be decreased when used in combination with {A}.",
          "L'efficacia terapeutica di {B} può risultare ridotta in caso di uso in associazione con {A}.", W],
         ["{A} may increase the QTc-prolonging activities of {B}.",
@@ -76,7 +76,7 @@
         ["{A} may decrease the cardiotoxic activities of {B}.",
          "{A} può ridurre l'effetto cardiotossico di {B}.", N],
         ["{A} may increase the sedative activities of {B}.",
-         "{A} può potenziare l'effetto sedativo di {B}.", R],
+         "{A} può potenziare l'effetto sedativo di {B}.", W],
         ["{A} may increase the neuroexcitatory activities of {B}.",
          "{A} può potenziare l'effetto neuroeccitatorio di {B}.", R],
         ["{A} can cause a decrease in the absorption of {B} resulting in a reduced serum concentration and potentially a decrease in efficacy.",
@@ -86,13 +86,13 @@
         ["{A} may increase the atrioventricular blocking (AV block) activities of {B}.",
          "{A} può potenziare l'effetto di blocco atrioventricolare (blocco AV) di {B}.", R],
         ["{A} may increase the hypertensive activities of {B}.",
-         "{A} può potenziare l'effetto ipertensivo di {B}.", R],
+         "{A} può potenziare l'effetto ipertensivo di {B}.", W],
         ["{A} may increase the nephrotoxic activities of {B}.",
          "{A} può potenziare l'effetto nefrotossico di {B}.", R],
         ["{A} may increase the antihypertensive activities of {B}.",
-         "{A} può potenziare l'effetto antipertensivo di {B}.", R],
+         "{A} può potenziare l'effetto antipertensivo di {B}.", W],
         ["{A} may increase the orthostatic hypotensive activities of {B}.",
-         "{A} può potenziare l'effetto ipotensivo ortostatico di {B}.", R],
+         "{A} può potenziare l'effetto ipotensivo ortostatico di {B}.", W],
         ["{A} may decrease the sedative activities of {B}.",
          "{A} può ridurre l'effetto sedativo di {B}.", W],
         ["The serum concentration of the active metabolites of {B} can be increased when {B} is used in combination with {A}.",
@@ -104,11 +104,11 @@
         ["The risk or severity of QTc prolongation can be increased when {A} is combined with {B}.",
          "Il rischio o la gravità del prolungamento dell'intervallo QTc può aumentare quando {A} e {B} vengono associati.", R],
         ["{A} may increase the fluid retaining activities of {B}.",
-         "{A} può potenziare l'effetto di ritenzione idrica di {B}.", R],
+         "{A} può potenziare l'effetto di ritenzione idrica di {B}.", W],
         ["{A} may increase the neuromuscular blocking activities of {B}.",
          "{A} può potenziare l'effetto di blocco neuromuscolare di {B}.", R],
         ["{A} may increase the tachycardic activities of {B}.",
-         "{A} può potenziare l'effetto tachicardizzante di {B}.", R],
+         "{A} può potenziare l'effetto tachicardizzante di {B}.", W],
         ["{A} may decrease the bronchodilatory activities of {B}.",
          "{A} può ridurre l'effetto broncodilatatore di {B}.", W],
         ["{A} may increase the arrhythmogenic activities of {B}.",
@@ -118,9 +118,9 @@
         ["{A} may decrease the diuretic activities of {B}.",
          "{A} può ridurre l'effetto diuretico di {B}.", W],
         ["{A} may increase the anticholinergic activities of {B}.",
-         "{A} può potenziare l'effetto anticolinergico di {B}.", R],
+         "{A} può potenziare l'effetto anticolinergico di {B}.", W],
         ["{A} may increase the immunosuppressive activities of {B}.",
-         "{A} può potenziare l'effetto immunosoppressivo di {B}.", R],
+         "{A} può potenziare l'effetto immunosoppressivo di {B}.", W],
         ["The serum concentration of the active metabolites of {B} can be reduced when {B} is used in combination with {A} resulting in a loss in efficacy.",
          "La concentrazione sierica dei metaboliti attivi di {B} può ridursi se {B} è usato in associazione con {A}, con possibile perdita di efficacia.", W],
         ["{A} may decrease the vasoconstricting activities of {B}.",
@@ -138,15 +138,15 @@
         ["{A} may increase the cardiotoxic activities of {B}.",
          "{A} può potenziare l'effetto cardiotossico di {B}.", R],
         ["{A} may increase the hypocalcemic activities of {B}.",
-         "{A} può potenziare l'effetto ipocalcemizzante di {B}.", R],
+         "{A} può potenziare l'effetto ipocalcemizzante di {B}.", W],
         ["{A} may increase the constipating activities of {B}.",
-         "{A} può potenziare l'effetto costipante di {B}.", R],
+         "{A} può potenziare l'effetto costipante di {B}.", W],
         ["The risk or severity of bleeding can be increased when {A} is combined with {B}.",
          "Il rischio o la gravità di sanguinamento può aumentare quando {A} e {B} vengono associati.", R],
         ["{A} may increase the hyponatremic activities of {B}.",
          "{A} può potenziare l'effetto iponatremizzante di {B}.", R],
         ["{A} may increase the vasoconstricting activities of {B}.",
-         "{A} può potenziare l'effetto vasocostrittore di {B}.", R],
+         "{A} può potenziare l'effetto vasocostrittore di {B}.", W],
         ["{A} may increase the thrombogenic activities of {B}.",
          "{A} può potenziare l'effetto trombogenico di {B}.", R],
         ["{A} may increase the antipsychotic activities of {B}.",
@@ -154,9 +154,9 @@
         ["{A} may increase the adverse neuromuscular activities of {B}.",
          "{A} può potenziare gli effetti neuromuscolari avversi di {B}.", R],
         ["{A} may increase the hypercalcemic activities of {B}.",
-         "{A} può potenziare l'effetto ipercalcemizzante di {B}.", R],
+         "{A} può potenziare l'effetto ipercalcemizzante di {B}.", W],
         ["{A} can cause an increase in the absorption of {B} resulting in an increased serum concentration and potentially a worsening of adverse effects.",
-         "{A} può aumentare l'assorbimento di {B}, con aumento della concentrazione sierica e possibile peggioramento degli effetti avversi.", R],
+         "{A} può aumentare l'assorbimento di {B}, con aumento della concentrazione sierica e possibile peggioramento degli effetti avversi.", W],
         ["{A} may decrease the neuromuscular blocking activities of {B}.",
          "{A} può ridurre l'effetto di blocco neuromuscolare di {B}.", W],
         ["{A} may increase the neurotoxic activities of {B}.",
@@ -164,7 +164,7 @@
         ["{A} may increase the myopathic rhabdomyolysis activities of {B}.",
          "{A} può potenziare l'effetto miopatico (rabdomiolisi) di {B}.", R],
         ["{A} may increase the vasopressor activities of {B}.",
-         "{A} può potenziare l'effetto vasopressore di {B}.", R],
+         "{A} può potenziare l'effetto vasopressore di {B}.", W],
         ["{A} may increase the hepatotoxic activities of {B}.",
          "{A} può potenziare l'effetto epatotossico di {B}.", R],
         ["{A} may increase the stimulatory activities of {B}.",
@@ -172,17 +172,17 @@
         ["The absorption of {B} can be decreased when combined with {A}.",
          "L'assorbimento di {B} può risultare ridotto in associazione con {A}.", W],
         ["{A} may increase the ulcerogenic activities of {B}.",
-         "{A} può potenziare l'effetto ulcerogeno di {B}.", R],
+         "{A} può potenziare l'effetto ulcerogeno di {B}.", W],
         ["{A} may increase the myelosuppressive activities of {B}.",
          "{A} può potenziare l'effetto mielosoppressivo di {B}.", R],
         ["{A} may decrease effectiveness of {B} as a diagnostic agent.",
          "{A} può ridurre l'efficacia di {B} come agente diagnostico.", W],
         ["{A} may increase the vasodilatory activities of {B}.",
-         "{A} può potenziare l'effetto vasodilatatore di {B}.", R],
+         "{A} può potenziare l'effetto vasodilatatore di {B}.", W],
         ["{A} may increase the excretion rate of {B} which could result in a lower serum level and potentially a reduction in efficacy.",
          "{A} può aumentare la velocità di eliminazione di {B}, con possibile riduzione dei livelli sierici e dell'efficacia.", W],
         ["{A} may increase the hyperglycemic activities of {B}.",
-         "{A} può potenziare l'effetto iperglicemizzante di {B}.", R],
+         "{A} può potenziare l'effetto iperglicemizzante di {B}.", W],
         ["The risk of a hypersensitivity reaction to {B} is increased when it is combined with {A}.",
          "Il rischio di reazione di ipersensibilità a {B} aumenta in associazione con {A}.", R],
         ["{A} may increase the central nervous system depressant (CNS depressant) and hypertensive activities of {B}.",
@@ -190,19 +190,19 @@
         ["The risk or severity of heart failure can be increased when {B} is combined with {A}.",
          "Il rischio o la gravità dello scompenso cardiaco può aumentare quando {B} e {A} vengono associati.", R],
         ["{A} may increase the bronchoconstrictory activities of {B}.",
-         "{A} può potenziare l'effetto broncocostrittore di {B}.", R],
+         "{A} può potenziare l'effetto broncocostrittore di {B}.", W],
         ["{A} may increase the ototoxic activities of {B}.",
          "{A} può potenziare l'effetto ototossico di {B}.", R],
         ["The risk or severity of hypertension can be increased when {B} is combined with {A}.",
-         "Il rischio o la gravità dell'ipertensione può aumentare quando {B} e {A} vengono associati.", R],
+         "Il rischio o la gravità dell'ipertensione può aumentare quando {B} e {A} vengono associati.", W],
         ["{A} may increase the hypotensive and central nervous system depressant (CNS depressant) activities of {B}.",
          "{A} può potenziare l'effetto ipotensivo e depressivo sul sistema nervoso centrale (SNC) di {B}.", R],
         ["{A} may increase the central neurotoxic activities of {B}.",
          "{A} può potenziare l'effetto neurotossico centrale di {B}.", R],
         ["{A} may increase the photosensitizing activities of {B}.",
-         "{A} può potenziare l'effetto fotosensibilizzante di {B}.", R],
+         "{A} può potenziare l'effetto fotosensibilizzante di {B}.", W],
         ["{A} may increase the dermatologic adverse activities of {B}.",
-         "{A} può potenziare gli effetti avversi dermatologici di {B}.", R],
+         "{A} può potenziare gli effetti avversi dermatologici di {B}.", W],
         ["The protein binding of {B} can be decreased when combined with {A}.",
          "Il legame di {B} alle proteine plasmatiche può risultare ridotto in associazione con {A}.", W],
         ["The bioavailability of {B} can be increased when combined with {A}.",
@@ -214,7 +214,7 @@
         ["The risk or severity of hyperkalemia can be increased when {A} is combined with {B}.",
          "Il rischio o la gravità dell'iperkaliemia può aumentare quando {A} e {B} vengono associati.", R],
         ["The risk or severity of hypotension can be increased when {A} is combined with {B}.",
-         "Il rischio o la gravità dell'ipotensione può aumentare quando {A} e {B} vengono associati.", R]
+         "Il rischio o la gravità dell'ipotensione può aumentare quando {A} e {B} vengono associati.", W]
     ];
 
     const TRADUZIONI = new Map(MODELLI.map(([en, it, cat]) => [en, { it, cat }]));
@@ -559,15 +559,98 @@
         return norm.split(" ").filter(Boolean).map(scheletro).filter(Boolean);
     }
 
+    /* Importa le righe di data/interazioni.csv (farmacoA, farmacoB, stato, nota),
+       gia' in italiano, riportandole ai nomi inglesi e ai modelli dello ZIP tramite
+       il dizionario data/traduzioni-interazioni.json. Le righe gia' presenti nello
+       ZIP vengono scartate; quelle non riconducibili restano cosi' come sono. */
+    async function aggiungiCsvItaliano(testo, traduzioni, c) {
+        const nomiEn = (traduzioni && traduzioni.nomi) || {};
+        const effetti = (traduzioni && traduzioni.effetti) || [];
+
+        const idPerMinuscolo = new Map();
+        c.nomi.forEach((nome, id) => idPerMinuscolo.set(nome.toLowerCase(), id));
+
+        const idPerNomeIt = new Map();
+        for (const [en, it] of Object.entries(nomiEn)) {
+            const id = idPerMinuscolo.get(en);
+            if (id !== undefined) idPerNomeIt.set(normalizza(it), id);
+        }
+
+        const modelloEnPerIt = new Map(effetti.map(e => [e.it, e.en]));
+        const idDaNome = nome => {
+            const id = idPerNomeIt.get(normalizza(nome));
+            if (id !== undefined) return id;
+            const id2 = idPerMinuscolo.get(nome.toLowerCase());
+            return id2 !== undefined ? id2 : c.idNome(nome);
+        };
+
+        const intestazione = leggiRecord(testo, 0);
+        const colonne = intestazione.campi.map(x => normalizza(x));
+        if (!(colonne[0] === "farmacoa" && colonne.length >= 4)) {
+            throw new Error("Il CSV italiano deve avere le colonne farmacoA, farmacoB, stato, nota.");
+        }
+
+        const len = testo.length;
+        let pos = intestazione.next;
+        let aggiunte = 0;
+        let letti = 0;
+
+        while (pos < len) {
+            const rec = leggiRecord(testo, pos);
+            pos = rec.next;
+            if (rec.campi.length < 4) continue;
+
+            const a = rec.campi[0].trim();
+            const b = rec.campi[1].trim();
+            const stato = normalizza(rec.campi[2]);
+            const nota = rec.campi.slice(3).join(",").trim();
+            if (!a || !b || !nota) continue;
+
+            const mIt = ricavaModello(nota, a, b);
+            const mEn = modelloEnPerIt.get(mIt);
+            const chiaveModello = mEn || mIt;
+
+            let im = c.idModello.get(chiaveModello);
+            if (im === undefined) {
+                im = c.modelli.length;
+                const tr = mEn ? TRADUZIONI.get(mEn) : null;
+                c.modelli.push(tr
+                    ? { en: mEn, it: tr.it, cat: tr.cat, tradotto: true }
+                    : { en: mIt, it: mIt, cat: stato === "pericolosa" ? R : W, tradotto: true });
+                c.idModello.set(chiaveModello, im);
+            }
+
+            const ia = idDaNome(a);
+            const ib = idDaNome(b);
+            const chiave = (ia * 8192 + ib) * 256 + im;
+
+            if (!c.visti.has(chiave)) {
+                c.visti.add(chiave);
+                c.coppiaA.push(ia);
+                c.coppiaB.push(ib);
+                c.coppiaModello.push(im);
+                aggiunte++;
+            }
+
+            if (++letti % 20000 === 0) {
+                if (c.onProgress) c.onProgress(pos / len);
+                await pausa();
+            }
+        }
+
+        return aggiunte;
+    }
+
     /* Costruisce l'indice dal testo del CSV (colonne: Drug 1, Drug 2, descrizione).
        Per ogni riga memorizza solo (farmaco A, farmaco B, modello della frase):
        le frasi si ricostruiscono al momento della consultazione. */
     async function costruisciIndice(testo, opzioni) {
         const onProgress = opzioni && opzioni.onProgress;
-        const len = testo.length;
+        // lo ZIP puo' mancare: in quel caso l'indice nasce solo dal CSV italiano
+        const len = testo ? testo.length : 0;
 
-        const intestazione = leggiRecord(testo, 0);
-        if (intestazione.campi.length < 3) {
+        const intestazione = testo ? leggiRecord(testo, 0) : { campi: [], next: 0 };
+        if (testo && intestazione.campi.length < 3) {
             throw new Error("Il CSV delle interazioni deve avere almeno 3 colonne (farmaco 1, farmaco 2, descrizione).");
         }
 
@@ -590,8 +673,9 @@
         const coppiaModello = [];
 
         let pos = intestazione.next;
-        let proxVirgolette = testo.indexOf('"', pos);
+        let proxVirgolette = testo ? testo.indexOf('"', pos) : -1;
         let righe = 0;
+        const visti = new Set();   // (A, B, modello) gia' presenti: evita doppioni tra ZIP e CSV
 
         while (pos < len) {
             let fine = testo.indexOf("\n", pos);
@@ -634,8 +718,11 @@
                 idModello.set(m, im);
             }
 
-            coppiaA.push(idNome(a));
-            coppiaB.push(idNome(b));
+            const ia = idNome(a);
+            const ib = idNome(b);
+            visti.add((ia * 8192 + ib) * 256 + im);
+            coppiaA.push(ia);
+            coppiaB.push(ib);
             coppiaModello.push(im);
 
             if (++righe % 20000 === 0) {
@@ -643,6 +730,13 @@
                 await pausa();
             }
         }
+
+        // --- seconda sorgente: data/interazioni.csv (italiano) ---------------
+        const righeCsv = opzioni && opzioni.csvIt
+            ? await aggiungiCsvItaliano(opzioni.csvIt, opzioni.traduzioni, {
+                nomi, idNome, idModello, modelli, coppiaA, coppiaB, coppiaModello, visti, onProgress
+            })
+            : 0;
 
         const n = coppiaA.length;
         const nNomi = nomi.length;
@@ -669,6 +763,7 @@
             rigaModello,
             modelli,
             nonTradotti: modelli.filter(x => !x.tradotto).length,
+            righeCsv,
             nomeIt: [],
             termini: [],
             esatti: new Map()
@@ -692,12 +787,14 @@
         };
 
         idx.nomi.forEach((nome, id) => aggiungi(nome, id, "en"));
+        idx.comune = new Uint8Array(idx.nNomi);
 
         const alias = datiAlias && datiAlias.alias;
         if (alias) {
             for (const [en, lista] of Object.entries(alias)) {
                 const id = idx.idPerNome.get(en);
                 if (id === undefined || !Array.isArray(lista)) continue;
+                if (lista.length > 1) idx.comune[id] = 1;   // voce curata: farmaco di uso corrente
                 lista.forEach((nome, i) => {
                     if (i === 0) idx.nomeIt[id] = nome;
                     aggiungi(nome, id, "it");
@@ -766,6 +863,7 @@
             .sort((x, y) =>
                 x.tier - y.tier ||
                 (x.t.tipo === "it" ? 0 : 1) - (y.t.tipo === "it" ? 0 : 1) ||
+                (idx.comune[y.t.id] || 0) - (idx.comune[x.t.id] || 0) ||
                 x.t.norm.length - y.t.norm.length ||
                 x.t.label.localeCompare(y.t.label))
             .slice(0, limite || 8)
@@ -904,6 +1002,8 @@
 
         const o = Object.assign({
             zip: "./data/db_drug_interactions.csv.zip",
+            csv: "./data/interazioni.csv",
+            traduzioni: "./data/traduzioni-interazioni.json",
             alias: "./data/alias-farmaci.json",
             curate: "./data/interazioni-curate.json",
             onStato: null
@@ -912,19 +1012,48 @@
 
         promessaIndice = (async () => {
             stato("Scaricamento dell'archivio…");
-            const risposta = await fetch(o.zip);
-            if (!risposta.ok) {
-                throw new Error("Archivio interazioni non raggiungibile (HTTP " + risposta.status + ").");
-            }
-            const buffer = await risposta.arrayBuffer();
+            const leggi = (url, come) => fetch(url).then(r => {
+                if (!r.ok) throw new Error("HTTP " + r.status + " (" + url + ")");
+                return come === "buffer" ? r.arrayBuffer() : come === "json" ? r.json() : r.text();
+            });
+            const [rZip, rCsv, rTrad] = await Promise.allSettled([
+                leggi(o.zip, "buffer"),
+                leggi(o.csv, "text"),
+                leggi(o.traduzioni, "json")
+            ]);
 
-            stato("Lettura dello ZIP…");
-            const testo = await estraiCsvDaZip(buffer);
+            const problemi = [];
+            let testoZip = null;
+            if (rZip.status === "fulfilled") {
+                stato("Lettura dello ZIP…");
+                try {
+                    testoZip = await estraiCsvDaZip(rZip.value);
+                } catch (errore) {
+                    problemi.push("ZIP: " + (errore && errore.message ? errore.message : errore));
+                }
+            } else {
+                problemi.push("ZIP: " + (rZip.reason && rZip.reason.message ? rZip.reason.message : rZip.reason));
+            }
+
+            const testoCsv = rCsv.status === "fulfilled" ? rCsv.value : null;
+            if (!testoCsv) {
+                problemi.push("CSV: " + (rCsv.reason && rCsv.reason.message ? rCsv.reason.message : rCsv.reason));
+            }
+            const traduzioni = rTrad.status === "fulfilled" ? rTrad.value : null;
+            if (!traduzioni) console.warn("[Interazioni] Dizionario di traduzione non disponibile:", rTrad.reason);
+
+            if (!testoZip && !testoCsv) {
+                throw new Error("Archivio interazioni non raggiungibile. " + problemi.join(" · "));
+            }
+            problemi.forEach(p => console.warn("[Interazioni] Sorgente non letta —", p));
 
             stato("Preparazione dell'indice…");
-            const idx = await costruisciIndice(testo, {
+            const idx = await costruisciIndice(testoZip, {
+                csvIt: testoCsv,
+                traduzioni,
                 onProgress: f => stato("Preparazione dell'indice… " + Math.round(f * 100) + "%")
             });
+            idx.fonti = { zip: !!testoZip, csv: !!testoCsv, problemi };
 
             let datiAlias = null;
             try {

@@ -166,7 +166,7 @@ await prova("i nomi approssimati non vengono accettati in automatico ma proposti
     const r1 = NI.risolvi(idx, "ceftriax");
     assert.equal(r1.tipo, "candidati");
     assert.equal(r1.candidati[0].id, id("Ceftriaxone"));
-    const r2 = NI.risolvi(idx, "doxepina");   // nessun alias: dedotta dal nome inglese "Doxepin"
+    const r2 = NI.risolvi(idx, "doxepi");   // nome parziale: va proposto, non accettato
     assert.equal(r2.tipo, "candidati");
     assert.ok(r2.candidati.some(c => c.id === id("Doxepin")));
     assert.equal(NI.risolvi(idx, "zzzzqq").tipo, "nessuno");
@@ -240,6 +240,40 @@ await prova("esempi clinici: warfarin + acido acetilsalicilico, amiodarone + mid
     console.log("      Amiodarone + Midazolam →", r2.esito, r2.voci.map(v => v.testoIt).join(" || "));
     const r3 = NI.verificaCoppia(idx, id("Furosemide"), id("Ceftriaxone"));
     console.log("      Furosemide + Ceftriaxone →", r3.esito, r3.voci.map(v => v.testoIt).join(" || "));
+});
+
+await prova("ZIP + CSV italiano insieme: nessun doppione; ciascuno funziona anche da solo", async () => {
+    const csvIt = readFileSync(path.join(radice, "data/interazioni.csv"), "utf-8");
+    const trad = JSON.parse(readFileSync(path.join(radice, "data/traduzioni-interazioni.json"), "utf-8"));
+
+    // entrambi: il CSV italiano e' derivato dallo ZIP, quindi non aggiunge righe nuove
+    const insieme = await NI.costruisciIndice(testo, { csvIt, traduzioni: trad });
+    assert.equal(insieme.righe, idx.righe);
+    assert.equal(insieme.righeCsv, 0);
+
+    // solo CSV (ZIP assente): stesse interazioni, nomi italiani
+    const soloCsv = await NI.costruisciIndice(null, { csvIt, traduzioni: trad });
+    assert.equal(soloCsv.righe, 191541);
+    NI.aggiungiAlias(soloCsv, null);
+    const a = NI.risolvi(soloCsv, "Fentanil"), b = NI.risolvi(soloCsv, "Midazolam");
+    assert.equal(a.tipo, "esatto");
+    assert.equal(b.tipo, "esatto");
+    const r = NI.verificaCoppia(soloCsv, a.id, b.id);
+    assert.ok(r.voci.length >= 1, "Fentanil + Midazolam deve avere almeno una voce");
+    assert.ok(/Fentanil|Midazolam/.test(r.voci[0].testoIt) && !/\bmay\b|\bthe\b/i.test(r.voci[0].testoIt));
+
+    // solo ZIP: invariato
+    assert.equal(idx.righeCsv || 0, 0);
+});
+
+await prova("le righe del CSV non presenti nello ZIP vengono aggiunte, non perse", async () => {
+    const trad = JSON.parse(readFileSync(path.join(radice, "data/traduzioni-interazioni.json"), "utf-8"));
+    const csvExtra = "farmacoA,farmacoB,stato,nota\n" +
+        "Fentanil,Warfarin,pericolosa,Frase libera inserita a mano dal reparto.\n" +
+        "Farmacoinventato,Warfarin,possibile,Nota di prova su un farmaco fuori dallo ZIP.\n";
+    const i2 = await NI.costruisciIndice(testo, { csvIt: csvExtra, traduzioni: trad });
+    assert.equal(i2.righe, idx.righe + 2);
+    assert.equal(i2.righeCsv, 2);
 });
 
 console.log("\n" + ok + " controlli superati" + (process.exitCode ? " — CI SONO ERRORI" : ""));

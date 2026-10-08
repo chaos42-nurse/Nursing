@@ -2688,9 +2688,9 @@ const DDI_STILE_ESITO = {
 };
 
 const DDI_BADGE = {
-    rischio: "Effetto avverso",
-    attenzione: "Attenzione",
-    nota: "Nota"
+    rischio: "Pericolosa",
+    attenzione: "Possibile",
+    nota: "Possibile"
 };
 
 const DDI_AIFA_URL = "https://medicinali.aifa.gov.it/";
@@ -2803,14 +2803,14 @@ async function renderDrugInteractions(selectedItem, data) {
                            role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ddiListaA"
                            autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
                            placeholder="Es: paracetamolo, ceftriaxone…">
-                    <ul id="ddiListaA" class="ddi-suggest" role="listbox" hidden></ul>
+                    <ul id="ddiListaA" class="ddi-suggest patient-search-suggestions" role="listbox" hidden></ul>
 
                     <label for="drugB">Secondo farmaco</label>
                     <input id="drugB" class="personal-note-title-input" type="text"
                            role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ddiListaB"
                            autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
                            placeholder="Es: amiodarone, midazolam…">
-                    <ul id="ddiListaB" class="ddi-suggest" role="listbox" hidden></ul>
+                    <ul id="ddiListaB" class="ddi-suggest patient-search-suggestions" role="listbox" hidden></ul>
 
                     <button id="btnCheckCompatibility" class="settings-action ddi-submit" type="button" disabled>
                         🔄 Verifica interazioni
@@ -2824,10 +2824,11 @@ async function renderDrugInteractions(selectedItem, data) {
                     <div>
                         <strong>Come leggere il risultato</strong>
                         <p>
-                            Fonte: DrugBank tramite Therapeutics Data Commons, in inglese; le frasi sono
-                            tradotte con un modello fisso e il testo originale è sempre consultabile.
-                            Il database indica che un'interazione esiste, non la sua gravità: i colori
-                            sono una classificazione indicativa. Le segnalazioni «da verificare» arrivano
+                            Fonte: DrugBank tramite Therapeutics Data Commons (file ZIP e CSV del repository);
+                            nomi e frasi sono tradotti in italiano e il testo originale è sempre consultabile.
+                            Il database indica che un'interazione esiste, non la sua gravità: «Pericolosa» e
+                            «Possibile» sono una classificazione indicativa dedotta dal tipo di effetto
+                            (per esempio QT lungo, depressione respiratoria, sanguinamento), non una valutazione clinica. Le segnalazioni «da verificare» arrivano
                             da un elenco integrato a mano e vanno sempre controllate. Non riguarda la compatibilità
                             fisico-chimica in infusione o in siringa. Verifica sempre RCP, protocolli
                             di reparto o farmacista.
@@ -2853,6 +2854,33 @@ async function renderDrugInteractions(selectedItem, data) {
 
     let idx = null;
     const paginaAttiva = () => document.body.contains(elRisultato);
+
+    /* Classe farmacologica di ogni principio attivo: stessa fonte della ricerca
+       "Classi farmacologiche", cosi' i suggerimenti hanno lo stesso aspetto
+       (nome in grassetto, classe sotto o accanto). */
+    let classiPerNome = null;
+    Promise.all([
+        loadDrugActiveIngredientIndex().catch(() => []),
+        loadAifaActiveIngredientIndex().catch(() => [])
+    ]).then(([indiceDidattico, indiceAifa]) => {
+        const mappa = new Map();
+        for (const voce of [...indiceDidattico, ...indiceAifa]) {
+            const nome = voce && voce.principioAttivo;
+            const classe = voce && voce.classeNome;
+            if (!nome || !classe || /catalogo aifa/i.test(classe)) continue;
+            const chiave = normalizeDrugSearchText(nome);
+            if (!mappa.has(chiave)) mappa.set(chiave, classe);
+        }
+        classiPerNome = mappa;
+    });
+
+    const classeDi = voce => {
+        if (!classiPerNome) return "";
+        const nomeIt = idx && idx.nomeIt ? idx.nomeIt[voce.id] : "";
+        return classiPerNome.get(normalizeDrugSearchText(voce.label))
+            || classiPerNome.get(normalizeDrugSearchText(nomeIt))
+            || "";
+    };
 
     /* Autocompletamento: elenco dei suggerimenti sotto il campo (non il datalist
        del browser, che su telefono è inaffidabile e filtra per conto suo). */
@@ -2900,8 +2928,9 @@ async function renderDrugInteractions(selectedItem, data) {
                 lista.innerHTML = `<li class="ddi-suggest-vuoto">Nessun suggerimento: il farmaco potrebbe non essere nel database.</li>`;
             } else {
                 lista.innerHTML = voci.map((v, i) => `
-                    <li role="option" data-i="${i}" aria-selected="false">
-                        <strong>${escapeHtml(v.label)}</strong>${v.altro ? `<small>${escapeHtml(v.altro)}</small>` : ""}
+                    <li class="patient-search-suggestion" role="option" data-i="${i}" aria-selected="false">
+                        <strong>${escapeHtml(v.label)}</strong>
+                        <span>${escapeHtml(classeDi(v) || v.altro || "Principio attivo")}</span>
                     </li>`).join("");
             }
             lista.hidden = false;
@@ -2998,9 +3027,13 @@ async function renderDrugInteractions(selectedItem, data) {
 
     if (!paginaAttiva()) return;
 
+    const fonti = idx.fonti || {};
+    const nomiFonti = [fonti.zip ? "ZIP" : "", fonti.csv ? "CSV" : ""].filter(Boolean).join(" + ");
     elStato.innerHTML = `
         <strong>✓ Archivio caricato</strong>
-        <p>${idx.righe.toLocaleString("it-IT")} interazioni tra ${idx.nNomi.toLocaleString("it-IT")} principi attivi, disponibili anche offline.</p>`;
+        <p>${idx.righe.toLocaleString("it-IT")} interazioni tra ${idx.nNomi.toLocaleString("it-IT")} principi attivi, disponibili anche offline.
+        Sorgenti lette: ${escapeHtml(nomiFonti || "nessuna")}.</p>
+        ${fonti.problemi && fonti.problemi.length ? `<p><small>Una sorgente non è stata letta (${escapeHtml(fonti.problemi.join(" · "))}): i risultati usano l'altra.</small></p>` : ""}`;
     bottone.disabled = false;
 }
 
