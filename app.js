@@ -23,6 +23,9 @@ const patientPhotosRoute =
 const appNotesRoute =
     params.get("appnotes") || "";
 
+const contactRoute =
+    params.get("contact") || "";
+
 
 /* =========================================================
    ELEMENTI HTML
@@ -1601,6 +1604,20 @@ async function loadState() {
         stateTitle.textContent = "🔗 Collegamenti";
         description.textContent = "Collegamenti tra tutte le note personali.";
         renderAllNoteLinksPage(termFilter);
+        return;
+    }
+
+    if (contactRoute === "1") {
+        document.body.classList.remove("home-page");
+        shortcuts.style.display = "none";
+
+        if (backButton) {
+            backButton.style.display = "flex";
+        }
+
+        stateTitle.textContent = "📩 Contattami";
+        description.textContent = "Per domande, segnalazioni o suggerimenti.";
+        renderContactPage();
         return;
     }
 
@@ -7091,6 +7108,7 @@ function setupSettings() {
     const themeButton = document.getElementById("settingsThemeButton");
     const noteLinksButton = document.getElementById("noteLinksButton");
     const appNotesButton = document.getElementById("appNotesButton");
+    const contactButton = document.getElementById("contactButton");
     const shareButton = document.getElementById("sharePersonalizationButton");
     const patientsButton = document.getElementById("patientsButton");
     const resetAllButton = document.getElementById("resetPersonalizationButton");
@@ -7102,7 +7120,16 @@ function setupSettings() {
         if (message) message.textContent = text;
     };
 
+    const updateOrderControls = () => {
+        if (resetButton) {
+            resetButton.hidden = !orderEditMode;
+        }
+    };
+
+    updateOrderControls();
+
     openButton.addEventListener("click", () => {
+        updateOrderControls();
         panel.hidden = false;
     });
 
@@ -7122,6 +7149,8 @@ function setupSettings() {
             orderEditMode
                 ? "✅ Fine modifica ordine"
                 : "↕️ Modifica ordine";
+
+        updateOrderControls();
 
         setMessage(
             orderEditMode
@@ -7162,6 +7191,11 @@ function setupSettings() {
     appNotesButton?.addEventListener("click", () => {
         panel.hidden = true;
         window.location.href = "?appnotes=1";
+    });
+
+    contactButton?.addEventListener("click", () => {
+        panel.hidden = true;
+        window.location.href = "?contact=1";
     });
 
     function updateThemeButtonIcon() {
@@ -7253,6 +7287,27 @@ function saveAppNotes(notes) {
     );
 }
 
+function renderContactPage() {
+    content.innerHTML = `
+        <section class="detail-page contact-page">
+            <div class="detail-header-row">
+                <h2>📩 Contattami</h2>
+            </div>
+
+            <p class="personal-notes-context">
+                Per domande, segnalazioni o suggerimenti puoi contattarmi tramite email.
+            </p>
+
+            <div class="contact-links">
+                <a
+                    class="settings-action"
+                    href="mailto:svngrl99a11a494a@gmail.com"
+                >✉️ Email</a>
+            </div>
+        </section>
+    `;
+}
+
 function renderAppNotesPage() {
     const notes = getAppNotes();
 
@@ -7260,6 +7315,12 @@ function renderAppNotesPage() {
         <section class="detail-page app-notes-page">
             <div class="detail-header-row">
                 <h2>📝 Note</h2>
+                <a
+                    class="home-button"
+                    href="?links=1"
+                    title="Collegamenti tra note"
+                    aria-label="Collegamenti tra note"
+                >🔗</a>
             </div>
 
             <p class="personal-notes-context">
