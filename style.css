@@ -1443,6 +1443,11 @@ section h2 {
     flex-direction: column;
 }
 
+/* Abbassa leggermente l'intestazione della schermata Contattami per evitare la sovrapposizione con il pulsante superiore. */
+.contact-page > .detail-header-row {
+    margin-top: 14px;
+}
+
 .personal-notes-button {
     order: 3;
     display: flex;
