@@ -1446,6 +1446,11 @@ section h2 {
 /* Abbassa leggermente l'intestazione della schermata Contattami per evitare la sovrapposizione con il pulsante superiore. */
 .contact-page > .detail-header-row {
     margin-top: 14px;
+    margin-bottom: 18px;
+}
+
+.contact-page .contact-links .settings-action {
+    text-decoration: none !important;
 }
 
 .personal-notes-button {
