@@ -2986,10 +2986,174 @@ section h2 {
 }
 
 .patient-photo-gallery {
+    margin-top: 16px;
+}
+
+.patient-photo-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
-    margin-top: 16px;
+}
+
+.patient-photo-day {
+    margin: 14px 0 6px;
+    font-size: .95rem;
+}
+
+.patient-photo-day small {
+    font-weight: 400;
+    opacity: .7;
+}
+
+.patient-photo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.patient-photo-actions .settings-action {
+    flex: 1 1 auto;
+    width: auto;
+}
+
+.patient-photo-card {
+    position: relative;
+}
+
+.patient-photo-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #2f81f7;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 22px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.patient-photo-gallery.comparing .patient-photo-delete {
+    visibility: hidden;
+}
+
+.patient-photo-card.selected {
+    outline: 3px solid #2f81f7;
+    outline-offset: -3px;
+}
+
+.patient-photo-card.selected .patient-photo-badge {
+    display: block;
+}
+
+.patient-photo-comparebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.patient-photo-comparebar[hidden] {
+    display: none;
+}
+
+.patient-photo-comparebar span {
+    flex: 1;
+    font-size: .9rem;
+}
+
+.patient-photo-comparebar button {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.patient-photo-comparebar button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.patient-photo-compare {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    color: #fff;
+}
+
+.patient-photo-compare-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    font-size: .9rem;
+}
+
+.patient-photo-compare-top button {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.patient-photo-compare-panes {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.patient-photo-compare-pane {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #111;
+}
+
+.patient-photo-compare-cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 6px 10px;
+    background: rgba(0,0,0,.6);
+    font-size: .8rem;
+    pointer-events: none;
+}
+
+.patient-photo-compare-cap strong {
+    margin-right: 6px;
+    color: #58a6ff;
+}
+
+@media (orientation: landscape) and (min-width: 600px) {
+    .patient-photo-compare-panes {
+        flex-direction: row;
+    }
 }
 
 .patient-photo-card {
@@ -3208,7 +3372,7 @@ section h2 {
         flex-direction: column;
     }
 
-    .patient-photo-gallery {
+    .patient-photo-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }

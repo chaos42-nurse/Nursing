@@ -265,7 +265,10 @@ function renderPatientPhotosPage(patientId) {
         <section class="detail-page patients-page patient-photos-page">
             <div class="patient-photo-header">
                 <h3>👤 ${renderNoteText(patient.name || "Paziente senza nome")}</h3>
-                <button id="patientPhotoAdd" class="settings-action" type="button">📷 Nuova foto</button>
+                <div class="patient-photo-actions">
+                    <button id="patientPhotoAdd" class="settings-action" type="button">📷 Nuova foto</button>
+                    <button id="patientPhotoCompare" class="settings-action" type="button">↔️ Confronta</button>
+                </div>
             </div>
 
             <div class="patient-photo-privacy-warning">
@@ -281,6 +284,12 @@ function renderPatientPhotosPage(patientId) {
             <p id="patientPhotoMessage" class="settings-message" role="status"></p>
 
             <div id="patientPhotoGallery" class="patient-photo-gallery"></div>
+
+            <div id="patientPhotoCompareBar" class="patient-photo-comparebar" hidden>
+                <span id="patientPhotoCompareText"></span>
+                <button id="patientPhotoCompareGo" type="button" disabled>Confronta</button>
+                <button id="patientPhotoCompareCancel" type="button">Annulla</button>
+            </div>
         </section>
     `;
 
@@ -296,6 +305,8 @@ function setupPatientPhotosPage(patient) {
 
     let objectUrls = [];
     let itemsById = new Map();
+    let compareMode = false;
+    let selected = [];
 
     const showMessage = text => {
         messageLine.textContent = text || "";
@@ -355,30 +366,72 @@ function setupPatientPhotosPage(patient) {
             return;
         }
 
-        gallery.innerHTML = items.map(item => {
-            const url = URL.createObjectURL(item.blob);
-            objectUrls.push(url);
-            itemsById.set(item.id, item);
+        const dayKey = iso => {
+            const d = new Date(iso);
+            return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+                "-" + String(d.getDate()).padStart(2, "0");
+        };
 
-            const shortDate = new Date(item.createdAt).toLocaleDateString("it-IT", {
-                day: "2-digit", month: "2-digit"
+        const dayLabel = iso => {
+            const key = dayKey(iso);
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            if (key === dayKey(today.toISOString())) return "Oggi";
+            if (key === dayKey(yesterday.toISOString())) return "Ieri";
+
+            return new Date(iso).toLocaleDateString("it-IT", {
+                weekday: "short", day: "2-digit", month: "2-digit", year: "numeric"
             });
+        };
 
-            return `
-                <figure class="patient-photo-card" style="margin:0">
-                    <img class="patient-photo-image" src="${url}"
-                         alt="Foto del ${escapeAttribute(shortDate)}"
-                         loading="lazy" decoding="async"
-                         data-photo-view="${escapeAttribute(item.id)}">
-                    <figcaption class="patient-photo-meta">
-                        <span class="patient-photo-date">${escapeHtml(shortDate)}</span>
-                        <button class="patient-photo-delete" type="button"
-                                data-photo-delete="${escapeAttribute(item.id)}"
-                                aria-label="Elimina foto">🗑️</button>
-                    </figcaption>
-                </figure>
-            `;
-        }).join("");
+        const groups = new Map();
+
+        items.forEach(item => {
+            const key = dayKey(item.createdAt);
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(item);
+        });
+
+        gallery.innerHTML = [...groups.values()].map(group => `
+            <section class="patient-photo-day-group">
+                <h4 class="patient-photo-day">
+                    ${escapeHtml(dayLabel(group[0].createdAt))}
+                    <small>· ${group.length} foto</small>
+                </h4>
+                <div class="patient-photo-grid">
+                    ${group.map(item => {
+                        const url = URL.createObjectURL(item.blob);
+                        objectUrls.push(url);
+                        itemsById.set(item.id, item);
+
+                        const time = new Date(item.createdAt).toLocaleTimeString("it-IT", {
+                            hour: "2-digit", minute: "2-digit"
+                        });
+
+                        return `
+                            <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
+                                <img class="patient-photo-image" src="${url}"
+                                     alt="Foto delle ${escapeAttribute(time)}"
+                                     loading="lazy" decoding="async"
+                                     data-photo-view="${escapeAttribute(item.id)}">
+                                <span class="patient-photo-badge" aria-hidden="true"></span>
+                                <figcaption class="patient-photo-meta">
+                                    <span class="patient-photo-date">${escapeHtml(time)}</span>
+                                    <button class="patient-photo-delete" type="button"
+                                            data-photo-delete="${escapeAttribute(item.id)}"
+                                            aria-label="Elimina foto">🗑️</button>
+                                </figcaption>
+                            </figure>
+                        `;
+                    }).join("")}
+                </div>
+            </section>
+        `).join("");
+
+        selected = selected.filter(id => itemsById.has(id));
+        updateSelectionUi();
     };
 
     const saveFile = async (file, note) => {
@@ -469,6 +522,125 @@ function setupPatientPhotosPage(patient) {
         });
     };
 
+    const compareBar = content.querySelector("#patientPhotoCompareBar");
+    const compareText = content.querySelector("#patientPhotoCompareText");
+    const compareGo = content.querySelector("#patientPhotoCompareGo");
+    const compareButton = content.querySelector("#patientPhotoCompare");
+
+    function updateSelectionUi() {
+        gallery.classList.toggle("comparing", compareMode);
+
+        gallery.querySelectorAll("[data-card]").forEach(card => {
+            const index = selected.indexOf(card.dataset.card);
+            card.classList.toggle("selected", index !== -1);
+            card.querySelector(".patient-photo-badge").textContent = index !== -1 ? String(index + 1) : "";
+        });
+
+        compareBar.hidden = !compareMode;
+        compareGo.disabled = selected.length !== 2;
+        compareText.textContent = selected.length === 2
+            ? "2 foto scelte"
+            : "Scegli 2 foto (" + selected.length + "/2)";
+    }
+
+    const setCompareMode = on => {
+        compareMode = on;
+        selected = [];
+        updateSelectionUi();
+    };
+
+    const toggleSelection = id => {
+        const index = selected.indexOf(id);
+
+        if (index !== -1) {
+            selected.splice(index, 1);
+        } else if (selected.length < 2) {
+            selected.push(id);
+        } else {
+            // Già 2 scelte: la più vecchia selezione viene sostituita.
+            selected.shift();
+            selected.push(id);
+        }
+
+        updateSelectionUi();
+    };
+
+    // Distanza leggibile tra due foto: "3 giorni", "5 ore", "40 min".
+    const formatGap = (from, to) => {
+        const minutes = Math.round((new Date(to) - new Date(from)) / 60000);
+
+        if (minutes < 60) return minutes + " min";
+        if (minutes < 60 * 48) return Math.round(minutes / 60) + " ore";
+
+        return Math.round(minutes / (60 * 24)) + " giorni";
+    };
+
+    const openCompare = (idA, idB) => {
+        const [before, after] = [itemsById.get(idA), itemsById.get(idB)]
+            .filter(Boolean)
+            .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+
+        if (!before || !after) return;
+
+        document.getElementById("patientPhotoCompareView")?.remove();
+
+        const fmt = item => new Date(item.createdAt).toLocaleString("it-IT", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+        });
+
+        const pane = (label, item) => `
+            <div class="patient-photo-compare-pane">
+                <div class="patient-photo-viewer-stage">
+                    <img class="patient-photo-viewer-img"
+                         src="${escapeAttribute(URL.createObjectURL(item.blob))}" alt="" draggable="false">
+                </div>
+                <div class="patient-photo-compare-cap">
+                    <strong>${label}</strong> ${escapeHtml(fmt(item))}${item.note ? " · " + escapeHtml(item.note) : ""}
+                </div>
+            </div>`;
+
+        const view = document.createElement("div");
+        view.id = "patientPhotoCompareView";
+        view.className = "patient-photo-compare";
+        view.innerHTML = `
+            <div class="patient-photo-compare-top">
+                <span>Confronto · distanza ${escapeHtml(formatGap(before.createdAt, after.createdAt))}</span>
+                <button type="button" data-cmp="close" aria-label="Chiudi">✕</button>
+            </div>
+            <div class="patient-photo-compare-panes">
+                ${pane("Prima", before)}
+                ${pane("Dopo", after)}
+            </div>
+        `;
+
+        document.body.appendChild(view);
+
+        const urls = [...view.querySelectorAll("img")].map(img => img.src);
+
+        view.querySelectorAll(".patient-photo-compare-pane").forEach(el => {
+            attachZoom(el.querySelector(".patient-photo-viewer-stage"), el.querySelector("img"));
+        });
+
+        const close = () => {
+            document.removeEventListener("keydown", onKey);
+            urls.forEach(url => URL.revokeObjectURL(url));
+            view.remove();
+            setCompareMode(false);
+        };
+
+        const onKey = event => { if (event.key === "Escape") close(); };
+
+        document.addEventListener("keydown", onKey);
+        view.querySelector("[data-cmp=close]").addEventListener("click", close);
+    };
+
+    compareButton.addEventListener("click", () => setCompareMode(!compareMode));
+    content.querySelector("#patientPhotoCompareCancel").addEventListener("click", () => setCompareMode(false));
+    compareGo.addEventListener("click", () => {
+        if (selected.length === 2) openCompare(selected[0], selected[1]);
+    });
+
     const openAddModal = () => {
         document.getElementById("patientPhotoModal")?.remove();
 
@@ -545,70 +717,8 @@ function setupPatientPhotosPage(patient) {
         pickInput.addEventListener("change", handleFile);
     };
 
-    // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
-    // tocco, pulsanti +/− e trascinamento per spostare la foto ingrandita.
-    const openPhotoViewer = (src, item) => {
-        document.getElementById("patientPhotoViewer")?.remove();
-
-        const viewer = document.createElement("div");
-        viewer.id = "patientPhotoViewer";
-        viewer.className = "patient-photo-viewer";
-
-        const date = item
-            ? new Date(item.createdAt).toLocaleString("it-IT", {
-                day: "2-digit", month: "2-digit", year: "numeric",
-                hour: "2-digit", minute: "2-digit"
-            })
-            : "";
-
-        viewer.innerHTML = `
-            <div class="patient-photo-viewer-stage">
-                <img class="patient-photo-viewer-img" src="${escapeAttribute(src)}" alt="" draggable="false">
-            </div>
-            <div class="patient-photo-viewer-top">
-                <span class="patient-photo-viewer-caption">
-                    ${escapeHtml(date)}${item?.note ? " · " + escapeHtml(item.note) : ""}
-                </span>
-                <button type="button" data-viewer="out" aria-label="Riduci">−</button>
-                <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
-                <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
-            </div>
-            ${item ? `
-            <form class="patient-photo-viewer-note" autocomplete="off">
-                <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
-                       value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
-                <button type="submit">Salva nota</button>
-            </form>` : ""}
-        `;
-
-        document.body.appendChild(viewer);
-
-        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
-        const caption = viewer.querySelector(".patient-photo-viewer-caption");
-
-        noteForm?.addEventListener("submit", async event => {
-            event.preventDefault();
-            const input = noteForm.querySelector("input");
-            input.blur();
-
-            try {
-                const saved = await photos.updateNote(item.id, input.value);
-                item.note = saved;
-                input.value = saved;
-                caption.textContent = date + (saved ? " · " + saved : "");
-                showMessage(saved ? "Nota salvata." : "Nota rimossa.");
-            } catch (error) {
-                console.error("Errore salvataggio nota:", error);
-                showMessage("Impossibile salvare la nota.");
-            }
-        });
-
-        // I gesti sulla foto non devono togliere il focus né chiudere con la tastiera aperta.
-        noteForm?.addEventListener("pointerdown", event => event.stopPropagation());
-
-        const stage = viewer.querySelector(".patient-photo-viewer-stage");
-        const img = viewer.querySelector("img");
-
+    // Zoom e spostamento con i gesti: pizzico, rotella, doppio tocco, trascinamento.
+    const attachZoom = (stage, img, onBackgroundTap) => {
         const MIN = 1;
         const MAX = 8;
         let scale = 1, x = 0, y = 0;
@@ -651,30 +761,6 @@ function setupPatientPhotosPage(patient) {
             const rect = stage.getBoundingClientRect();
             return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
         };
-
-        const close = () => {
-            document.removeEventListener("keydown", onKey);
-            viewer.remove();
-        };
-
-        const onKey = event => {
-            if (event.target instanceof HTMLInputElement) {
-                if (event.key === "Escape") event.target.blur();
-                return;
-            }
-            if (event.key === "Escape") close();
-            if (event.key === "+" || event.key === "=") zoomAt(scale * 1.5, center().x, center().y);
-            if (event.key === "-") zoomAt(scale / 1.5, center().x, center().y);
-        };
-
-        document.addEventListener("keydown", onKey);
-
-        viewer.querySelector(".patient-photo-viewer-top").addEventListener("click", event => {
-            const action = event.target.closest("[data-viewer]")?.dataset.viewer;
-            if (action === "close") close();
-            if (action === "in") zoomAt(scale * 1.5, center().x, center().y);
-            if (action === "out") zoomAt(scale / 1.5, center().x, center().y);
-        });
 
         stage.addEventListener("wheel", event => {
             event.preventDefault();
@@ -752,12 +838,108 @@ function setupPatientPhotosPage(patient) {
 
             // Tocco singolo sullo sfondo (fuori dalla foto) con foto adattata: chiude.
             if (scale === MIN && event.target === stage) {
-                setTimeout(() => { if (lastTap === now) close(); }, 330);
+                setTimeout(() => { if (lastTap === now) onBackgroundTap?.(); }, 330);
             }
         };
 
         stage.addEventListener("pointerup", release);
         stage.addEventListener("pointercancel", release);
+
+        return {
+            zoomBy: factor => zoomAt(scale * factor, center().x, center().y),
+            reset: () => { scale = 1; x = 0; y = 0; apply(); }
+        };
+    };
+
+    // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
+    // tocco, pulsanti +/− e trascinamento per spostare la foto ingrandita.
+    const openPhotoViewer = (src, item) => {
+        document.getElementById("patientPhotoViewer")?.remove();
+
+        const viewer = document.createElement("div");
+        viewer.id = "patientPhotoViewer";
+        viewer.className = "patient-photo-viewer";
+
+        const date = item
+            ? new Date(item.createdAt).toLocaleString("it-IT", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+            })
+            : "";
+
+        viewer.innerHTML = `
+            <div class="patient-photo-viewer-stage">
+                <img class="patient-photo-viewer-img" src="${escapeAttribute(src)}" alt="" draggable="false">
+            </div>
+            <div class="patient-photo-viewer-top">
+                <span class="patient-photo-viewer-caption">
+                    ${escapeHtml(date)}${item?.note ? " · " + escapeHtml(item.note) : ""}
+                </span>
+                <button type="button" data-viewer="out" aria-label="Riduci">−</button>
+                <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
+                <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
+            </div>
+            ${item ? `
+            <form class="patient-photo-viewer-note" autocomplete="off">
+                <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
+                       value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
+                <button type="submit">Salva nota</button>
+            </form>` : ""}
+        `;
+
+        document.body.appendChild(viewer);
+
+        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
+        const caption = viewer.querySelector(".patient-photo-viewer-caption");
+
+        noteForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            const input = noteForm.querySelector("input");
+            input.blur();
+
+            try {
+                const saved = await photos.updateNote(item.id, input.value);
+                item.note = saved;
+                input.value = saved;
+                caption.textContent = date + (saved ? " · " + saved : "");
+                showMessage(saved ? "Nota salvata." : "Nota rimossa.");
+            } catch (error) {
+                console.error("Errore salvataggio nota:", error);
+                showMessage("Impossibile salvare la nota.");
+            }
+        });
+
+        // I gesti sulla foto non devono togliere il focus né chiudere con la tastiera aperta.
+        noteForm?.addEventListener("pointerdown", event => event.stopPropagation());
+
+        const stage = viewer.querySelector(".patient-photo-viewer-stage");
+        const img = viewer.querySelector("img");
+
+        const zoom = attachZoom(stage, img, () => close());
+
+        const close = () => {
+            document.removeEventListener("keydown", onKey);
+            viewer.remove();
+        };
+
+        const onKey = event => {
+            if (event.target instanceof HTMLInputElement) {
+                if (event.key === "Escape") event.target.blur();
+                return;
+            }
+            if (event.key === "Escape") close();
+            if (event.key === "+" || event.key === "=") zoom.zoomBy(1.5);
+            if (event.key === "-") zoom.zoomBy(1 / 1.5);
+        };
+
+        document.addEventListener("keydown", onKey);
+
+        viewer.querySelector(".patient-photo-viewer-top").addEventListener("click", event => {
+            const action = event.target.closest("[data-viewer]")?.dataset.viewer;
+            if (action === "close") close();
+            if (action === "in") zoom.zoomBy(1.5);
+            if (action === "out") zoom.zoomBy(1 / 1.5);
+        });
     };
 
     addButton.addEventListener("click", openAddModal);
@@ -782,6 +964,11 @@ function setupPatientPhotosPage(patient) {
         }
 
         const image = event.target.closest("[data-photo-view]");
+
+        if (image && compareMode) {
+            toggleSelection(image.dataset.photoView);
+            return;
+        }
 
         if (image) {
             openPhotoViewer(image.src, itemsById.get(image.dataset.photoView));
