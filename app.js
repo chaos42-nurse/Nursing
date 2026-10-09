@@ -366,69 +366,40 @@ function setupPatientPhotosPage(patient) {
             return;
         }
 
-        const dayKey = iso => {
-            const d = new Date(iso);
-            return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
-                "-" + String(d.getDate()).padStart(2, "0");
-        };
+        // Un'unica griglia per tutte le foto, indipendentemente dal giorno.
+        // La data e l'ora restano visibili sotto ogni immagine.
+        items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        const dayLabel = iso => {
-            const key = dayKey(iso);
-            const today = new Date();
-            const yesterday = new Date();
-            yesterday.setDate(today.getDate() - 1);
+        gallery.innerHTML = `
+            <div class="patient-photo-grid">
+                ${items.map(item => {
+                    const url = URL.createObjectURL(item.blob);
+                    objectUrls.push(url);
+                    itemsById.set(item.id, item);
 
-            if (key === dayKey(today.toISOString())) return "Oggi";
-            if (key === dayKey(yesterday.toISOString())) return "Ieri";
+                    const dateTime = new Date(item.createdAt).toLocaleString("it-IT", {
+                        day: "2-digit", month: "2-digit", year: "numeric",
+                        hour: "2-digit", minute: "2-digit"
+                    });
 
-            return new Date(iso).toLocaleDateString("it-IT", {
-                weekday: "short", day: "2-digit", month: "2-digit", year: "numeric"
-            });
-        };
-
-        const groups = new Map();
-
-        items.forEach(item => {
-            const key = dayKey(item.createdAt);
-            if (!groups.has(key)) groups.set(key, []);
-            groups.get(key).push(item);
-        });
-
-        gallery.innerHTML = [...groups.values()].map(group => `
-            <section class="patient-photo-day-group">
-                <h4 class="patient-photo-day">
-                    ${escapeHtml(dayLabel(group[0].createdAt))}
-                    <small>· ${group.length} foto</small>
-                </h4>
-                <div class="patient-photo-grid">
-                    ${group.map(item => {
-                        const url = URL.createObjectURL(item.blob);
-                        objectUrls.push(url);
-                        itemsById.set(item.id, item);
-
-                        const time = new Date(item.createdAt).toLocaleTimeString("it-IT", {
-                            hour: "2-digit", minute: "2-digit"
-                        });
-
-                        return `
-                            <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
-                                <img class="patient-photo-image" src="${url}"
-                                     alt="Foto delle ${escapeAttribute(time)}"
-                                     loading="lazy" decoding="async"
-                                     data-photo-view="${escapeAttribute(item.id)}">
-                                <span class="patient-photo-badge" aria-hidden="true"></span>
-                                <figcaption class="patient-photo-meta">
-                                    <span class="patient-photo-date">${escapeHtml(time)}</span>
-                                    <button class="patient-photo-delete" type="button"
-                                            data-photo-delete="${escapeAttribute(item.id)}"
-                                            aria-label="Elimina foto">🗑️</button>
-                                </figcaption>
-                            </figure>
-                        `;
-                    }).join("")}
-                </div>
-            </section>
-        `).join("");
+                    return `
+                        <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
+                            <img class="patient-photo-image" src="${url}"
+                                 alt="Foto del ${escapeAttribute(dateTime)}"
+                                 loading="lazy" decoding="async"
+                                 data-photo-view="${escapeAttribute(item.id)}">
+                            <span class="patient-photo-badge" aria-hidden="true"></span>
+                            <figcaption class="patient-photo-meta">
+                                <span class="patient-photo-date">${escapeHtml(dateTime)}</span>
+                                <button class="patient-photo-delete" type="button"
+                                        data-photo-delete="${escapeAttribute(item.id)}"
+                                        aria-label="Elimina foto">🗑️</button>
+                            </figcaption>
+                        </figure>
+                    `;
+                }).join("")}
+            </div>
+        `;
 
         selected = selected.filter(id => itemsById.has(id));
         updateSelectionUi();
@@ -859,6 +830,8 @@ function setupPatientPhotosPage(patient) {
         const viewer = document.createElement("div");
         viewer.id = "patientPhotoViewer";
         viewer.className = "patient-photo-viewer";
+        viewer.dataset.returnUrl = window.location.href;
+        window.history.pushState({ patientPhotoViewer: true }, "", window.location.href);
 
         const date = item
             ? new Date(item.createdAt).toLocaleString("it-IT", {
@@ -919,6 +892,14 @@ function setupPatientPhotosPage(patient) {
 
         const close = () => {
             document.removeEventListener("keydown", onKey);
+            if (window.history.state?.patientPhotoViewer) {
+                window.history.back();
+                return;
+            }
+            viewer.remove();
+        };
+        viewer.closeViewer = () => {
+            document.removeEventListener("keydown", onKey);
             viewer.remove();
         };
 
@@ -978,240 +959,6 @@ function setupPatientPhotosPage(patient) {
     renderGallery();
     refreshStorage();
 }
-
-/* =========================================================
-   CONSEGNA SBAR
-   Situation · Background · Assessment · Recommendation
-========================================================= */
-
-function sbarAge(patient) {
-    if (patient.age) return String(patient.age).replace(/\s*anni?$/i, "");
-
-    const birth = new Date(patient.birthDate);
-    if (!patient.birthDate || Number.isNaN(birth.getTime())) return "";
-
-    const now = new Date();
-    let age = now.getFullYear() - birth.getFullYear();
-    const hadBirthday =
-        now.getMonth() > birth.getMonth() ||
-        (now.getMonth() === birth.getMonth() && now.getDate() >= birth.getDate());
-    if (!hadBirthday) age -= 1;
-
-    return age >= 0 && age < 130 ? String(age) : "";
-}
-
-function sbarVitalsLine(entry) {
-    if (!entry) return "";
-
-    const parts = [];
-    const pa = String(entry.pa || "").trim();
-
-    if (pa) parts.push("PA " + pa.replace(/\s/g, "") + " mmHg");
-    if (entry.fc) parts.push("FC " + entry.fc + " bpm");
-    if (entry.sat) parts.push("SpO₂ " + entry.sat + "%");
-    if (entry.temperature) parts.push("T " + entry.temperature + " °C");
-    if (entry.glucose) parts.push("glicemia " + entry.glucose + " mg/dL");
-
-    if (!parts.length) return "";
-
-    const when = entry.recordedAt
-        ? new Date(entry.recordedAt).toLocaleString("it-IT", {
-            day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
-        })
-        : "";
-
-    return (when ? when + ": " : "") + parts.join(", ");
-}
-
-// Identificativo del paziente nel testo: per privacy, di default solo le iniziali.
-function sbarIdentity(patient, includeName) {
-    if (includeName && patient.name.trim()) return patient.name.trim();
-
-    const initials = getPatientInitials(patient.name).replace(/[\s'.]+/g, "");
-    return initials ? "Pz " + initials : "Paziente";
-}
-
-function buildSbarBlocks(patient, includeName) {
-    const identity = sbarIdentity(patient, includeName);
-    const age = sbarAge(patient);
-    const place = [
-        patient.room ? "stanza " + patient.room : "",
-        patient.bed ? "letto " + patient.bed : ""
-    ].filter(Boolean).join(", ");
-
-    const situation =
-        identity +
-        (age ? ", " + age + " anni" : "") +
-        (place ? ", " + place : "") +
-        ".\nMotivo della segnalazione: ";
-
-    const background = [
-        patient.admissionReason ? "Ricoverato per: " + patient.admissionReason : "",
-        patient.pathologies ? "Patologie: " + patient.pathologies : "",
-        // L'assenza di un'allergia nella scheda non vuol dire che il paziente non ne abbia.
-        "Allergie: " + (patient.allergies.trim() || "non registrate nella scheda"),
-        patient.diabetic ? "Diabetico: sì" : "",
-        patient.medications ? "Terapia: " + patient.medications : "",
-        patient.notes ? "Note: " + patient.notes : ""
-    ].filter(Boolean).join("\n");
-
-    const history = patient.pvHistory
-        .filter(entry => entry.recordedAt)
-        .slice()
-        .sort((a, b) => String(a.recordedAt).localeCompare(String(b.recordedAt)));
-
-    const last = sbarVitalsLine(history[history.length - 1]);
-    const previous = sbarVitalsLine(history[history.length - 2]);
-
-    const assessment = [
-        last ? "Ultimi PV — " + last : "Nessun parametro vitale registrato.",
-        previous ? "Precedenti — " + previous : "",
-        "Valutazione: "
-    ].filter(Boolean).join("\n");
-
-    return {
-        S: situation,
-        B: background,
-        A: assessment,
-        R: "Richiesta: "
-    };
-}
-
-function openSbarModal(patient) {
-    document.getElementById("patientSbarModal")?.remove();
-
-    const blocks = buildSbarBlocks(patient, false);
-
-    const modal = document.createElement("div");
-    modal.id = "patientSbarModal";
-    modal.className = "patient-photo-modal";
-
-    modal.innerHTML = `
-        <div class="patient-photo-modal-card patient-sbar-card">
-            <h3>🗣️ Consegna SBAR</h3>
-
-            <label class="patient-sbar-toggle">
-                <input id="sbarIncludeName" type="checkbox">
-                <span>Includi nome e cognome (altrimenti solo iniziali)</span>
-            </label>
-
-            ${[
-                ["S", "Situazione", "Chi è il paziente e cosa sta succedendo ora"],
-                ["B", "Anamnesi", "Contesto: motivo del ricovero, patologie, allergie, terapia"],
-                ["A", "Valutazione", "Cosa hai rilevato e cosa pensi"],
-                ["R", "Richiesta", "Cosa serve o cosa proponi"]
-            ].map(([key, title, hint]) => `
-                <label class="patient-sbar-block">
-                    <strong><span class="patient-sbar-letter">${key}</span> ${title}</strong>
-                    <small>${hint}</small>
-                    <textarea id="sbar${key}" rows="4"></textarea>
-                </label>
-            `).join("")}
-
-            <p class="patient-sbar-privacy">
-                Il testo contiene dati sanitari: condividilo solo con canali
-                autorizzati dalla tua struttura.
-            </p>
-
-            <p id="sbarStatus" class="settings-message" role="status"></p>
-
-            <button id="sbarCopy" class="settings-action" type="button">📋 Copia testo</button>
-            <button id="sbarShare" class="settings-action" type="button" hidden>↗️ Condividi</button>
-            <button id="sbarClose" class="settings-action" type="button">Chiudi</button>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const field = key => modal.querySelector("#sbar" + key);
-    const status = modal.querySelector("#sbarStatus");
-    const includeName = modal.querySelector("#sbarIncludeName");
-
-    ["S", "B", "A", "R"].forEach(key => {
-        field(key).value = blocks[key];
-        field(key).addEventListener("input", () => {
-            field(key).style.height = "auto";
-            field(key).style.height = field(key).scrollHeight + "px";
-        });
-        field(key).style.height = "auto";
-        field(key).style.height = Math.max(field(key).scrollHeight, 70) + "px";
-    });
-
-    // Cambia solo l'identificativo nel blocco S, senza perdere ciò che hai scritto.
-    includeName.addEventListener("change", () => {
-        const oldIdentity = sbarIdentity(patient, !includeName.checked);
-        const newIdentity = sbarIdentity(patient, includeName.checked);
-        const target = field("S");
-
-        if (target.value.startsWith(oldIdentity)) {
-            target.value = newIdentity + target.value.slice(oldIdentity.length);
-        }
-    });
-
-    const fullText = () => {
-        const when = new Date().toLocaleString("it-IT", {
-            day: "2-digit", month: "2-digit", year: "numeric",
-            hour: "2-digit", minute: "2-digit"
-        });
-
-        return [
-            "SBAR — " + when,
-            "S – Situazione:\n" + field("S").value.trim(),
-            "B – Anamnesi:\n" + field("B").value.trim(),
-            "A – Valutazione:\n" + field("A").value.trim(),
-            "R – Richiesta:\n" + field("R").value.trim()
-        ].join("\n\n");
-    };
-
-    modal.querySelector("#sbarCopy").addEventListener("click", async () => {
-        const text = fullText();
-
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch (_) {
-            // Ripiego per browser senza Clipboard API.
-            const helper = document.createElement("textarea");
-            helper.value = text;
-            helper.style.position = "fixed";
-            helper.style.opacity = "0";
-            document.body.appendChild(helper);
-            helper.select();
-
-            let ok = false;
-            try { ok = document.execCommand("copy"); } catch (_) {}
-            helper.remove();
-
-            if (!ok) {
-                status.textContent = "Copia non riuscita: seleziona il testo e copialo a mano.";
-                return;
-            }
-        }
-
-        status.textContent = "Testo copiato.";
-    });
-
-    const shareButton = modal.querySelector("#sbarShare");
-
-    if (navigator.share) {
-        shareButton.hidden = false;
-        shareButton.addEventListener("click", async () => {
-            try {
-                await navigator.share({ title: "Consegna SBAR", text: fullText() });
-            } catch (error) {
-                if (error?.name !== "AbortError") {
-                    status.textContent = "Condivisione non riuscita.";
-                }
-            }
-        });
-    }
-
-    const close = () => modal.remove();
-    modal.querySelector("#sbarClose").addEventListener("click", close);
-    modal.addEventListener("click", event => {
-        if (event.target === modal) close();
-    });
-}
-
 
 function renderPatientsPage(selectedPatientId = "", editMode = false, newPatientMode = false) {
     const patients = applyPatientOrder(getPatients());
@@ -1335,19 +1082,6 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                             <div class="patient-pv-history">${renderPatientPvHistory(selectedPatient.pvHistory, selectedPatient.id)}</div>
                             <button id="openPvRecorder" class="settings-action" type="button"
                                 data-patient-id="${escapeAttribute(selectedPatient.id)}">➕ Nuova rilevazione PV</button>
-                        </div>
-
-                        <div class="patient-sbar-section">
-                            <div class="patient-evolution-row">
-                                <div>
-                                    <strong>🗣️ Consegna SBAR</strong>
-                                    <small>Riepilogo pronto da copiare o condividere.</small>
-                                </div>
-                                <button id="openPatientSbar" class="settings-action" type="button"
-                                    data-patient-id="${escapeAttribute(selectedPatient.id)}">
-                                    Apri
-                                </button>
-                            </div>
                         </div>
 
                         <div class="patient-evolution-section">
@@ -1546,13 +1280,6 @@ function setupPatients() {
             url.searchParams.set("patients", "1");
             url.searchParams.set("patient", patientId);
             window.location.href = url.toString();
-            return;
-        }
-
-        if (event.target.closest("#openPatientSbar")) {
-            const patientId = event.target.closest("#openPatientSbar")?.dataset.patientId || "";
-            const patient = getPatients().find(current => current.id === patientId);
-            if (patient) openSbarModal(patient);
             return;
         }
 
@@ -1853,6 +1580,12 @@ function resetAllPersonalization() {
 if (backButton) {
 
     backButton.addEventListener("click", () => {
+
+        const photoViewer = document.getElementById("patientPhotoViewer");
+        if (photoViewer) {
+            photoViewer.closeViewer?.();
+            return;
+        }
 
         if (patientPhotosRoute === "1") {
             const url = new URL(window.location.href);
@@ -10609,6 +10342,15 @@ if (incomingPersonalization) {
 
 }
 window.addEventListener("popstate", () => {
+    const viewer = document.getElementById("patientPhotoViewer");
+    if (viewer) {
+        const returnUrl = viewer.dataset.returnUrl;
+        viewer.closeViewer?.();
+        if (returnUrl && window.location.href !== returnUrl) {
+            window.history.pushState({}, "", returnUrl);
+        }
+        return;
+    }
     window.location.reload();
 });
 
