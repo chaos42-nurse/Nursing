@@ -4315,32 +4315,44 @@ function parseItalianNumber(value) {
         return NaN;
     }
 
-    let text = String(value).trim();
+    const text = String(value).trim();
 
     if (!text) {
         return NaN;
     }
 
     /*
-     * Controllo formato:
-     *
-     * Sono ammessi:
-     * 1000
-     * 1.000
-     * 0,5
-     * 1.500,25
+     * Con la virgola: il punto può essere solo separatore delle
+     * migliaia, in gruppi esatti da 3 cifre (1.500,25).
      */
 
-    if (!/^\d{1,3}(\.\d{3})*(,\d+)?$|^\d+(,\d+)?$/.test(text)) {
-        return NaN;
+    if (text.includes(",")) {
+
+        if (!/^(\d{1,3}(\.\d{3})+|\d+),\d+$/.test(text)) {
+            return NaN;
+        }
+
+        return Number(text.replace(/\./g, "").replace(",", "."));
     }
 
-    text = text.replace(/\./g, "");
-    text = text.replace(",", ".");
+    // Solo cifre: 1000
+    if (/^\d+$/.test(text)) {
+        return Number(text);
+    }
 
-    const number = Number(text);
+    // Raggruppamento delle migliaia: 1.500 / 12.500.000.
+    // Un numero che inizia con "0." (es. 0.250) NON può essere un raggruppamento:
+    // è un decimale scritto col punto, quindi vale 0,25 e non 250.
+    if (/^[1-9]\d{0,2}(\.\d{3})+$/.test(text)) {
+        return Number(text.replace(/\./g, ""));
+    }
 
-    return number;
+    // Decimale col punto (tastiere con il punto): 1.5, 0.25, 2.75
+    if (/^\d+\.\d+$/.test(text)) {
+        return Number(text);
+    }
+
+    return NaN;
 }
 
 
@@ -5055,7 +5067,7 @@ function renderDropsCalculator() {
 
 function volumeToMl(value, unit) {
 
-    if (unit === "L") {
+    if (String(unit).toLowerCase() === "l") {
         return value * 1000;
     }
 
@@ -5616,7 +5628,7 @@ function attachCalculatorEvents(id) {
         document.getElementById("dilution-result");
 
 
-    function concentrationToMgMl(value, unit) {
+    function dilutionToMgMl(value, unit) {
 
         if (unit === "mg/ml") {
             return value;
@@ -5634,7 +5646,7 @@ function attachCalculatorEvents(id) {
     }
 
 
-    function mgMlToUnit(value, unit) {
+    function dilutionFromMgMl(value, unit) {
 
         if (unit === "mg/ml") {
             return value;
@@ -5715,11 +5727,11 @@ function attachCalculatorEvents(id) {
 
         // Conversione concentrazioni in mg/mL
         const c1MgMl = c1
-            ? concentrationToMgMl(c1Value, c1Unit.value)
+            ? dilutionToMgMl(c1Value, c1Unit.value)
             : null;
 
         const c2MgMl = c2
-            ? concentrationToMgMl(c2Value, c2Unit.value)
+            ? dilutionToMgMl(c2Value, c2Unit.value)
             : null;
 
 
@@ -5733,6 +5745,25 @@ function attachCalculatorEvents(id) {
             : null;
 
 
+        // Validazione: numeri validi e positivi, unità riconosciute
+        const given = [
+            [c1, c1MgMl], [c2, c2MgMl], [v1, v1Ml], [v2, v2Ml]
+        ].filter(([filledField]) => filledField).map(([, value]) => value);
+
+        if (!given.every(value => Number.isFinite(value) && value > 0)) {
+
+            result.innerHTML = `
+                <strong>Controlla i valori inseriti</strong>
+                <p>
+                    Usa numeri maggiori di zero (es. 2,5 oppure 1.500).
+                </p>
+            `;
+
+            result.style.display = "block";
+            return;
+        }
+
+
         // CALCOLA C1
         if (!c1) {
 
@@ -5740,7 +5771,7 @@ function attachCalculatorEvents(id) {
                 (c2MgMl * v2Ml) / v1Ml;
 
             const finalValue =
-                mgMlToUnit(calculated, c1Unit.value);
+                dilutionFromMgMl(calculated, c1Unit.value);
 
             c1Input.value =
                 formatNumber(finalValue);
@@ -5765,7 +5796,7 @@ function attachCalculatorEvents(id) {
                 (c2MgMl * v2Ml) / c1MgMl;
 
             const finalValue =
-                v1Unit.value === "L"
+                v1Unit.value.toLowerCase() === "l"
                     ? calculated / 1000
                     : calculated;
 
@@ -5778,7 +5809,7 @@ function attachCalculatorEvents(id) {
                     V1 =
                     <strong>
                         ${formatNumber(finalValue)}
-                        ${v1Unit.value}
+                        ${volumeLabel(v1Unit.value)}
                     </strong>
                 </p>
             `;
@@ -5792,7 +5823,7 @@ function attachCalculatorEvents(id) {
                 (c1MgMl * v1Ml) / v2Ml;
 
             const finalValue =
-                mgMlToUnit(calculated, c2Unit.value);
+                dilutionFromMgMl(calculated, c2Unit.value);
 
             c2Input.value =
                 formatNumber(finalValue);
@@ -5817,7 +5848,7 @@ function attachCalculatorEvents(id) {
                 (c1MgMl * v1Ml) / c2MgMl;
 
             const finalValue =
-                v2Unit.value === "L"
+                v2Unit.value.toLowerCase() === "l"
                     ? calculated / 1000
                     : calculated;
 
@@ -5830,7 +5861,7 @@ function attachCalculatorEvents(id) {
                     V2 =
                     <strong>
                         ${formatNumber(finalValue)}
-                        ${v2Unit.value}
+                        ${volumeLabel(v2Unit.value)}
                     </strong>
                 </p>
             `;
@@ -7095,11 +7126,24 @@ function showResult(id, text) {
 
 function formatNumber(number) {
 
-    return Number(number)
-        .toLocaleString("it-IT", {
-            maximumFractionDigits: 2
-        });
+    const value = Number(number);
 
+    if (!Number.isFinite(value)) {
+        return "—";
+    }
+
+    // Sotto 1 si mantengono 3 cifre significative: 0,125 resta 0,125 e
+    // 0,005 non diventa 0,01. Da 1 in su bastano 2 decimali.
+    const options = Math.abs(value) > 0 && Math.abs(value) < 1
+        ? { maximumSignificantDigits: 3 }
+        : { maximumFractionDigits: 2 };
+
+    return value.toLocaleString("it-IT", options);
+
+}
+
+function volumeLabel(unit) {
+    return String(unit).toLowerCase() === "l" ? "L" : "mL";
 }
 
 
