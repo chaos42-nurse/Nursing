@@ -1583,7 +1583,7 @@ if (backButton) {
 
         const photoViewer = document.getElementById("patientPhotoViewer");
         if (photoViewer) {
-            photoViewer.closeViewer?.();
+            photoViewer.querySelector('[data-viewer="close"]')?.click();
             return;
         }
 
