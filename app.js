@@ -8375,6 +8375,22 @@ function setupAppNotes() {
 
         const item = checkbox.closest(".note-checklist-item");
         if (item) item.classList.toggle("is-checked", checkbox.checked);
+
+        const noteCard = checkbox.closest(".app-note-card");
+        const noteId = noteCard?.dataset.appNoteId || "";
+        if (noteId) {
+            let orderSettings = {};
+            try {
+                orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+            } catch (error) {
+                orderSettings = {};
+            }
+            if (orderSettings[noteId] === "top" || orderSettings[noteId] === "bottom") {
+                const scrollPosition = window.scrollY;
+                renderAppNotesPage();
+                window.scrollTo(0, scrollPosition);
+            }
+        }
     });
 
     document.addEventListener("click", event => {
