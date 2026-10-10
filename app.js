@@ -382,6 +382,7 @@ function setupPatientPhotosPage(patient) {
                         hour: "2-digit", minute: "2-digit"
                     });
 
+<<<<<<< Updated upstream
                     return `
                         <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
                             <img class="patient-photo-image" src="${url}"
@@ -400,6 +401,56 @@ function setupPatientPhotosPage(patient) {
                 }).join("")}
             </div>
         `;
+=======
+            return new Date(iso).toLocaleDateString("it-IT", {
+                weekday: "short", day: "2-digit", month: "2-digit", year: "numeric"
+            });
+        };
+
+        const groups = new Map();
+
+        items.forEach(item => {
+            const key = dayKey(item.createdAt);
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(item);
+        });
+
+        gallery.innerHTML = [...groups.values()].map(group => `
+            <section class="patient-photo-day-group">
+                <h4 class="patient-photo-day">
+                    ${escapeHtml(dayLabel(group[0].createdAt))}
+                    <small>· ${group.length} foto</small>
+                </h4>
+                <div class="patient-photo-grid">
+                    ${group.map(item => {
+                        const url = URL.createObjectURL(item.blob);
+                        objectUrls.push(url);
+                        itemsById.set(item.id, item);
+
+                        const time = new Date(item.createdAt).toLocaleTimeString("it-IT", {
+                            hour: "2-digit", minute: "2-digit"
+                        });
+
+                        return `
+                            <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
+                                <img class="patient-photo-image" src="${url}"
+                                     alt="Foto delle ${escapeAttribute(time)}"
+                                     loading="lazy" decoding="async"
+                                     data-photo-view="${escapeAttribute(item.id)}">
+                                <span class="patient-photo-badge" aria-hidden="true"></span>
+                                <figcaption class="patient-photo-meta">
+                                    <span class="patient-photo-date">${escapeHtml(time)}${measureSummary(item.measure) ? " 📏" : ""}</span>
+                                    <button class="patient-photo-delete" type="button"
+                                            data-photo-delete="${escapeAttribute(item.id)}"
+                                            aria-label="Elimina foto">🗑️</button>
+                                </figcaption>
+                            </figure>
+                        `;
+                    }).join("")}
+                </div>
+            </section>
+        `).join("");
+>>>>>>> Stashed changes
 
         selected = selected.filter(id => itemsById.has(id));
         updateSelectionUi();
@@ -567,7 +618,7 @@ function setupPatientPhotosPage(patient) {
                          src="${escapeAttribute(URL.createObjectURL(item.blob))}" alt="" draggable="false">
                 </div>
                 <div class="patient-photo-compare-cap">
-                    <strong>${label}</strong> ${escapeHtml(fmt(item))}${item.note ? " · " + escapeHtml(item.note) : ""}
+                    <strong>${label}</strong> ${escapeHtml(fmt(item))}${item.note ? " · " + escapeHtml(item.note) : ""}${measureSummary(item.measure) ? " · " + escapeHtml(measureSummary(item.measure)) : ""}
                 </div>
             </div>`;
 
@@ -689,7 +740,7 @@ function setupPatientPhotosPage(patient) {
     };
 
     // Zoom e spostamento con i gesti: pizzico, rotella, doppio tocco, trascinamento.
-    const attachZoom = (stage, img, onBackgroundTap) => {
+    const attachZoom = (stage, img, options = {}) => {
         const MIN = 1;
         const MAX = 8;
         let scale = 1, x = 0, y = 0;
@@ -712,6 +763,7 @@ function setupPatientPhotosPage(patient) {
             if (scale <= MIN) { x = 0; y = 0; }
             clampPan();
             img.style.transform = "translate(" + x + "px," + y + "px) scale(" + scale + ")";
+            options.onChange?.(scale);
         };
 
         // Zoom mantenendo fermo il punto (cx, cy), in coordinate dello schermo.
@@ -795,6 +847,19 @@ function setupPatientPhotosPage(patient) {
 
             if (!wasSingle || moved || event.type === "pointercancel") return;
 
+            // Con il tocco "catturato" dal contenitore, event.target è sempre lo stage:
+            // si capisce se il tocco è sulla foto confrontando le coordinate.
+            const box = img.getBoundingClientRect();
+            const onPhoto =
+                event.clientX >= box.left && event.clientX <= box.right &&
+                event.clientY >= box.top && event.clientY <= box.bottom;
+
+            // Modalità misura: tocco immediato, senza zoom con doppio tocco.
+            if (options.doubleTap && !options.doubleTap()) {
+                options.onTap?.(event, onPhoto);
+                return;
+            }
+
             // Doppio tocco: alterna tra adattata e ingrandita.
             const now = Date.now();
 
@@ -808,8 +873,8 @@ function setupPatientPhotosPage(patient) {
             lastTap = now;
 
             // Tocco singolo sullo sfondo (fuori dalla foto) con foto adattata: chiude.
-            if (scale === MIN && event.target === stage) {
-                setTimeout(() => { if (lastTap === now) onBackgroundTap?.(); }, 330);
+            if (scale === MIN && !onPhoto) {
+                setTimeout(() => { if (lastTap === now) options.onBackgroundTap?.(); }, 330);
             }
         };
 
@@ -817,13 +882,58 @@ function setupPatientPhotosPage(patient) {
         stage.addEventListener("pointercancel", release);
 
         return {
+            getScale: () => scale,
             zoomBy: factor => zoomAt(scale * factor, center().x, center().y),
             reset: () => { scale = 1; x = 0; y = 0; apply(); }
         };
     };
 
+    // Posizione e orientamento del righello a L: restano tra una foto e l'altra.
+    let rulerState = null;
+
+    /* ---------- Misura della lesione ---------- */
+
+    // Diametri ufficiali delle monete euro (mm), usabili come riferimento di scala.
+    const MEASURE_REFS = [
+        { key: "coin-200", label: "Moneta 2 €", mm: 25.75 },
+        { key: "coin-100", label: "Moneta 1 €", mm: 23.25 },
+        { key: "coin-050", label: "Moneta 50 cent", mm: 24.25 },
+        { key: "coin-020", label: "Moneta 20 cent", mm: 22.25 },
+        { key: "coin-010", label: "Moneta 10 cent", mm: 19.75 },
+        { key: "custom", label: "Righello / altra misura (mm)", mm: 0 }
+    ];
+
+    const formatCm = mm => (mm / 10).toLocaleString("it-IT", {
+        minimumFractionDigits: 1, maximumFractionDigits: 1
+    });
+
+    // Es.: "L 3,2 cm · P 2,1 cm · ≈ 6,7 cm² (L×P)".
+    const measureSummary = measure => {
+        const length = measure?.lines?.L?.mm;
+        const width = measure?.lines?.W?.mm;
+        const parts = [];
+
+        if (length) parts.push("L " + formatCm(length) + " cm");
+        if (width) parts.push("P " + formatCm(width) + " cm");
+
+        if (length && width) {
+            parts.push("≈ " + ((length / 10) * (width / 10)).toLocaleString("it-IT", {
+                minimumFractionDigits: 1, maximumFractionDigits: 1
+            }) + " cm² (L×P)");
+        }
+
+        return parts.join(" · ");
+    };
+
+    const markMeasured = (id, on) => {
+        const date = gallery.querySelector('[data-card="' + CSS.escape(id) + '"] .patient-photo-date');
+        if (!date) return;
+        date.textContent = date.textContent.replace(" 📏", "") + (on ? " 📏" : "");
+    };
+
     // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
     // tocco, pulsanti +/− e trascinamento per spostare la foto ingrandita.
+    // Include il righello: calibra su un riferimento noto e misura L e P.
     const openPhotoViewer = (src, item) => {
         document.getElementById("patientPhotoViewer")?.remove();
 
@@ -842,28 +952,511 @@ function setupPatientPhotosPage(patient) {
 
         viewer.innerHTML = `
             <div class="patient-photo-viewer-stage">
-                <img class="patient-photo-viewer-img" src="${escapeAttribute(src)}" alt="" draggable="false">
+                <div class="patient-photo-viewer-layer">
+                    <img src="${escapeAttribute(src)}" alt="" draggable="false">
+                    <svg class="patient-photo-measure-svg" aria-hidden="true"></svg>
+                    <svg class="patient-photo-ruler-svg" aria-hidden="true"></svg>
+                </div>
             </div>
             <div class="patient-photo-viewer-top">
-                <span class="patient-photo-viewer-caption">
-                    ${escapeHtml(date)}${item?.note ? " · " + escapeHtml(item.note) : ""}
-                </span>
+                <span class="patient-photo-viewer-caption"></span>
+                ${item ? '<button type="button" data-viewer="ruler" class="active" aria-label="Mostra o nascondi il righello a L">📐</button>' : ""}
+                ${item ? '<button type="button" data-viewer="measure" aria-label="Misura">📏</button>' : ""}
                 <button type="button" data-viewer="out" aria-label="Riduci">−</button>
                 <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
                 <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
             </div>
-            ${item ? `
-            <form class="patient-photo-viewer-note" autocomplete="off">
-                <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
-                       value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
-                <button type="submit">Salva nota</button>
-            </form>` : ""}
+            <div class="patient-photo-viewer-bottom">
+                <div class="patient-photo-measure" hidden></div>
+                ${item ? `
+                <form class="patient-photo-viewer-note" autocomplete="off">
+                    <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
+                           value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
+                    <button type="submit">Salva nota</button>
+                </form>` : ""}
+            </div>
         `;
 
         document.body.appendChild(viewer);
 
-        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
+        const stage = viewer.querySelector(".patient-photo-viewer-stage");
+        const layer = viewer.querySelector(".patient-photo-viewer-layer");
+        const img = layer.querySelector("img");
+        const svg = viewer.querySelector(".patient-photo-measure-svg");
+        const rulerSvg = viewer.querySelector(".patient-photo-ruler-svg");
         const caption = viewer.querySelector(".patient-photo-viewer-caption");
+        const panel = viewer.querySelector(".patient-photo-measure");
+        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
+
+        /* ----- stato della misura ----- */
+
+        let measure = item?.measure
+            ? JSON.parse(JSON.stringify(item.measure))
+            : { ref: null, refMm: 0, refKey: "coin-200", lines: {} };
+
+        let refKey = measure.refKey || "coin-200";
+        let refMm = measure.refMm || 25.75;
+        let measuring = false;
+        let step = null;          // "ref" | "L" | "W" | null
+        let pending = [];
+        let dirty = false;
+        let panelMessage = "";
+
+        // Righello a L sovrapposto: sempre visibile all'apertura, trascinabile.
+        // La posizione resta quella dell'ultima volta finché non si ricarica la pagina.
+        let rulerVisible = true;
+
+        const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+        const hasContent = () => Boolean(measure.ref || Object.keys(measure.lines).length);
+
+        const mmPerPx = () => measure.ref ? measure.refMm / dist(measure.ref[0], measure.ref[1]) : 0;
+
+        const recompute = () => {
+            const scale = mmPerPx();
+            Object.values(measure.lines).forEach(line => {
+                line.mm = dist(line.pts[0], line.pts[1]) * scale;
+            });
+        };
+
+        const captionText = () => {
+            const summary = measureSummary(measure);
+            return date +
+                (item?.note ? " · " + item.note : "") +
+                (summary ? " · " + summary : "");
+        };
+
+        const updateCaption = () => { caption.textContent = captionText(); };
+
+        /* ----- disegno dei segni sulla foto ----- */
+
+        const draw = () => {
+            const naturalW = img.naturalWidth || 1;
+            const naturalH = img.naturalHeight || 1;
+            svg.setAttribute("viewBox", "0 0 " + naturalW + " " + naturalH);
+
+            const zoomScale = zoom ? zoom.getScale() : 1;
+            const screenPerImage = (layer.offsetWidth / naturalW) * zoomScale || 1;
+            const unit = 1 / screenPerImage;               // unità immagine per pixel schermo
+            const radius = 7 * unit;
+            const fontSize = 13 * unit;
+
+            const colors = { ref: "#ffb020", L: "#22d3ee", W: "#4ade80" };
+            const parts = [];
+
+            const segment = (pts, color, label, dashed, side) => {
+                const [a, b] = pts;
+                const midX = (a[0] + b[0]) / 2;
+                const midY = (a[1] + b[1]) / 2;
+
+                parts.push(
+                    `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#000" stroke-opacity=".55" stroke-width="5" vector-effect="non-scaling-stroke"/>`,
+                    `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"${dashed ? ' stroke-dasharray="6 4"' : ""}/>`
+                );
+
+                [a, b].forEach(point => parts.push(
+                    `<circle cx="${point[0]}" cy="${point[1]}" r="${radius}" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="${4 * unit}"/>`,
+                    `<circle cx="${point[0]}" cy="${point[1]}" r="${radius}" fill="none" stroke="${color}" stroke-width="${2 * unit}"/>`
+                ));
+
+                if (label) {
+                    // La larghezza si scrive a destra della linea, così non copre la lunghezza.
+                    const right = side === "right";
+                    const textX = right ? midX + 14 * unit : midX;
+                    const textY = right ? midY + 4 * unit : midY - 12 * unit;
+
+                    parts.push(
+                        `<text x="${textX}" y="${textY}" text-anchor="${right ? "start" : "middle"}" font-size="${fontSize}" font-weight="700" fill="${color}" stroke="#000" stroke-width="${3 * unit}" paint-order="stroke">${escapeHtml(label)}</text>`
+                    );
+                }
+            };
+
+            if (measure.ref) segment(measure.ref, colors.ref, measure.refMm.toLocaleString("it-IT") + " mm", true);
+            if (measure.lines.L) segment(measure.lines.L.pts, colors.L, "L " + formatCm(measure.lines.L.mm) + " cm", false);
+            if (measure.lines.W) segment(measure.lines.W.pts, colors.W, "P " + formatCm(measure.lines.W.mm) + " cm", false, "right");
+
+            pending.forEach(point => parts.push(
+                `<circle cx="${point[0]}" cy="${point[1]}" r="${radius}" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="${4 * unit}"/>`,
+                `<circle cx="${point[0]}" cy="${point[1]}" r="${radius}" fill="none" stroke="#fff" stroke-width="${2 * unit}"/>`,
+                `<circle cx="${point[0]}" cy="${point[1]}" r="${1.5 * unit}" fill="#fff"/>`
+            ));
+
+            svg.innerHTML = parts.join("");
+            drawRuler(naturalW, naturalH, unit, screenPerImage);
+        };
+
+        const drawRuler = (naturalW, naturalH, unit, screenPerImage) => {
+            rulerSvg.setAttribute("viewBox", "0 0 " + naturalW + " " + naturalH);
+
+            if (!rulerVisible) {
+                rulerSvg.innerHTML = "";
+                return;
+            }
+
+            const scaleMm = mmPerPx();                 // 0 = non calibrato
+            const calibrated = scaleMm > 0;
+            const pxPerMm = calibrated ? 1 / scaleMm : 0;
+            const minSide = Math.min(naturalW, naturalH);
+
+            // Lunghezza dei bracci: in scala solo se calibrato, altrimenti forma neutra.
+            let armPx;
+            let armCm = 0;
+
+            if (calibrated) {
+                armCm = [10, 5, 3, 2, 1].find(cm => cm * 10 * pxPerMm <= minSide * 0.8) || 1;
+                armPx = armCm * 10 * pxPerMm;
+            } else {
+                armPx = minSide * 0.4;
+            }
+
+            const stripPx = Math.min(
+                Math.max(calibrated ? 12 * pxPerMm : armPx * 0.12, 22 * unit),
+                armPx * 0.4
+            );
+
+            // Posizione (angolo) e rotazione: predefinita in alto a sinistra.
+            if (!rulerState) rulerState = { x: naturalW * 0.05, y: naturalH * 0.05, r: 0 };
+
+            const rad = rulerState.r * Math.PI / 180;
+            const cos = Math.round(Math.cos(rad));
+            const sin = Math.round(Math.sin(rad));
+
+            // L'intera "L" deve restare dentro la foto, anche dopo la rotazione:
+            // altrimenti la maniglia o i bracci potrebbero uscire e non essere più raggiungibili.
+            const corners = [[0, 0], [armPx, 0], [armPx, stripPx], [stripPx, stripPx], [stripPx, armPx], [0, armPx]];
+            const spread = (ox, oy) => corners.map(([lx, ly]) => [ox + lx * cos - ly * sin, oy + lx * sin + ly * cos]);
+            const extent = spread(rulerState.x, rulerState.y);
+            const minX = Math.min(...extent.map(q => q[0]));
+            const maxX = Math.max(...extent.map(q => q[0]));
+            const minY = Math.min(...extent.map(q => q[1]));
+            const maxY = Math.max(...extent.map(q => q[1]));
+
+            let shiftX = maxX > naturalW ? naturalW - maxX : 0;
+            if (minX + shiftX < 0) shiftX = -minX;
+            let shiftY = maxY > naturalH ? naturalH - maxY : 0;
+            if (minY + shiftY < 0) shiftY = -minY;
+
+            rulerState.x += shiftX;
+            rulerState.y += shiftY;
+
+            const { x, y, r } = rulerState;
+            const toGlobal = (lx, ly) => [x + lx * cos - ly * sin, y + lx * sin + ly * cos];
+
+            const body = `M0,0 H${armPx} V${stripPx} H${stripPx} V${armPx} H0 Z`;
+            const parts = [];
+
+            // Mentre si segnano i punti di una misura il righello lascia passare i tocchi.
+            const interactive = !(measuring && step);
+            const grab = interactive ? "pointer-events:all;cursor:grab" : "pointer-events:none";
+
+            parts.push(`<g data-ruler="1" transform="translate(${x} ${y}) rotate(${r})" style="${grab}">`);
+
+            // Area di presa più larga del righello, per il dito.
+            parts.push(`<path d="${body}" fill="transparent" stroke="transparent" stroke-width="22" vector-effect="non-scaling-stroke"/>`);
+            parts.push(`<path d="${body}" fill="${calibrated ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.35)"}" stroke="#000" stroke-width="1.6" vector-effect="non-scaling-stroke"${calibrated ? "" : ' stroke-dasharray="7 5"'}/>`);
+
+            const labels = [];
+
+            if (calibrated) {
+                const mmScreen = pxPerMm * screenPerImage;       // pixel schermo per mm
+                const cmScreen = mmScreen * 10;
+                const totalMm = armCm * 10;
+                const tick = (t, len) => {
+                    const pos = t * pxPerMm;
+                    // braccio orizzontale (bordo superiore) e verticale (bordo sinistro)
+                    parts.push(`<path d="M${pos},0 V${len} M0,${pos} H${len}" stroke="#000" stroke-width="1" vector-effect="non-scaling-stroke"/>`);
+                };
+
+                for (let t = 0; t <= totalMm; t++) {
+                    if (t % 10 === 0) tick(t, stripPx * 0.55);
+                    else if (t % 5 === 0 && mmScreen * 5 >= 4) tick(t, stripPx * 0.38);
+                    else if (mmScreen >= 3.2) tick(t, stripPx * 0.24);
+                }
+
+                const every = cmScreen >= 18 ? 1 : cmScreen >= 9 ? 2 : 5;
+                const fontSize = Math.min(11 * unit, stripPx * 0.36);
+
+                for (let n = every; n <= armCm; n += every) {
+                    const along = n * 10 * pxPerMm;
+                    const [hx, hy] = toGlobal(along, stripPx * 0.8);
+                    const [vx, vy] = toGlobal(stripPx * 0.8, along);
+
+                    [[hx, hy], [vx, vy]].forEach(([tx, ty]) => labels.push(
+                        `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}" font-weight="700" fill="#000">${n}</text>`
+                    ));
+                }
+
+                const [ux, uy] = toGlobal(stripPx * 0.5, stripPx * 0.5);
+                labels.push(`<text x="${ux}" y="${uy + fontSize * 1.2}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize * 0.9}" fill="#000">cm</text>`);
+            } else {
+                const [tx, ty] = toGlobal(armPx / 2, stripPx * 0.5);
+                labels.push(`<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="${Math.min(12 * unit, stripPx * 0.5)}" font-weight="700" fill="#b45309" stroke="#fff" stroke-width="${3 * unit}" paint-order="stroke">NON IN SCALA</text>`);
+            }
+
+            parts.push("</g>");
+
+            // Maniglia di rotazione di 90° nell'angolo.
+            const [hx, hy] = toGlobal(stripPx * 0.5, stripPx * 0.5);
+            const handleR = Math.min(stripPx * 0.42, 15 * unit);
+            parts.push(
+                `<circle data-ruler-rot="1" cx="${hx}" cy="${hy}" r="${handleR}" fill="#2f81f7" stroke="#fff" stroke-width="${1.5 * unit}" style="${interactive ? "pointer-events:all;cursor:pointer" : "pointer-events:none"}"/>`,
+                `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="central" font-size="${handleR * 1.3}" fill="#fff" style="pointer-events:none">↻</text>`
+            );
+
+            rulerSvg.innerHTML = parts.join("") + labels.join("");
+        };
+
+        /* ----- trascinamento e rotazione del righello ----- */
+
+        let rulerDrag = null;
+
+        rulerSvg.addEventListener("pointerdown", event => {
+            const handle = event.target.closest("[data-ruler-rot]");
+            const body = event.target.closest("[data-ruler]");
+            if (!handle && !body) return;
+
+            // Il gesto è del righello: la foto sotto non si sposta e non riceve il tocco.
+            event.stopPropagation();
+            event.preventDefault();
+
+            rulerSvg.setPointerCapture(event.pointerId);
+            rulerDrag = {
+                id: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                originX: rulerState.x,
+                originY: rulerState.y,
+                rotate: Boolean(handle),
+                moved: false
+            };
+        });
+
+        rulerSvg.addEventListener("pointermove", event => {
+            if (!rulerDrag || rulerDrag.id !== event.pointerId || rulerDrag.rotate) return;
+
+            const dx = event.clientX - rulerDrag.startX;
+            const dy = event.clientY - rulerDrag.startY;
+            if (Math.abs(dx) + Math.abs(dy) > 3) rulerDrag.moved = true;
+
+            const naturalW = img.naturalWidth || 1;
+            const screenPerImage = (layer.offsetWidth / naturalW) * (zoom ? zoom.getScale() : 1) || 1;
+
+            rulerState.x = rulerDrag.originX + dx / screenPerImage;
+            rulerState.y = rulerDrag.originY + dy / screenPerImage;
+            draw();
+        });
+
+        const endRulerDrag = event => {
+            if (!rulerDrag || rulerDrag.id !== event.pointerId) return;
+
+            if (rulerDrag.rotate && event.type === "pointerup") {
+                rulerState.r = (rulerState.r + 90) % 360;
+                draw();
+            }
+
+            rulerDrag = null;
+        };
+
+        rulerSvg.addEventListener("pointerup", endRulerDrag);
+        rulerSvg.addEventListener("pointercancel", endRulerDrag);
+
+        /* ----- pannello di misura ----- */
+
+        const stepLabel = { ref: "il riferimento", L: "la lunghezza", W: "la larghezza" };
+
+        const renderPanel = () => {
+            panel.hidden = !measuring;
+            if (!measuring) return;
+
+            const calibrated = Boolean(measure.ref);
+            let html = "";
+
+            if (!calibrated || step === "ref") {
+                html += `
+                    <strong>1 · Riferimento di scala</strong>
+                    <div class="patient-photo-measure-row">
+                        <select id="measureRef" aria-label="Riferimento">
+                            ${MEASURE_REFS.map(ref => `<option value="${ref.key}"${ref.key === refKey ? " selected" : ""}>${ref.label}</option>`).join("")}
+                        </select>
+                        <input id="measureRefMm" type="text" inputmode="decimal" placeholder="mm"
+                               value="${refMm ? String(refMm).replace(".", ",") : ""}"
+                               ${refKey === "custom" ? "" : "disabled"} aria-label="Misura del riferimento in mm">
+                    </div>
+                    <p>Inquadra la moneta o il righello vicino alla lesione, sullo stesso piano. Poi tocca le due estremità del riferimento (per la moneta, il diametro).</p>
+                `;
+                step = "ref";
+            } else {
+                html += `
+                    <strong>2 · Misura</strong>
+                    <span class="patient-photo-measure-ref">scala: ${measure.refMm.toLocaleString("it-IT")} mm</span>
+                    <div class="patient-photo-measure-row">
+                        <button type="button" data-m="L" class="${step === "L" ? "active" : ""}">Lunghezza</button>
+                        <button type="button" data-m="W" class="${step === "W" ? "active" : ""}">Larghezza</button>
+                    </div>
+                `;
+            }
+
+            html += `<p class="patient-photo-measure-status">${
+                escapeHtml(panelMessage || (step
+                    ? "Tocca " + stepLabel[step] + ": punto " + (pending.length + 1) + " di 2."
+                    : "Scegli cosa misurare."))
+            }</p>`;
+
+            const summary = measureSummary(measure);
+            if (summary) html += `<p class="patient-photo-measure-result">${escapeHtml(summary)}</p>`;
+
+            html += `
+                <div class="patient-photo-measure-row">
+                    <button type="button" data-m="recal"${calibrated ? "" : " disabled"}>Ricalibra</button>
+                    <button type="button" data-m="clear"${hasContent() ? "" : " disabled"}>Azzera</button>
+                    <button type="button" data-m="save"${dirty ? "" : " disabled"}>💾 Salva</button>
+                    <button type="button" data-m="done">Fine</button>
+                </div>
+                <p class="patient-photo-measure-warn">⚠️ Misura indicativa: vale con riferimento sullo stesso piano della lesione e fotocamera perpendicolare. Non sostituisce la misurazione clinica.</p>
+            `;
+
+            panel.innerHTML = html;
+        };
+
+        const setMeasuring = on => {
+            measuring = on;
+            pending = [];
+            panelMessage = "";
+            step = on ? (measure.ref ? null : "ref") : null;
+            viewer.querySelector('[data-viewer="measure"]')?.classList.toggle("active", on);
+            renderPanel();
+            draw();
+        };
+
+        const finishStep = () => {
+            if (step === "ref") {
+                if (!(refMm > 0)) {
+                    panelMessage = "Inserisci la misura del riferimento in mm.";
+                    pending = [];
+                    return;
+                }
+
+                if (dist(pending[0], pending[1]) < 2) {
+                    panelMessage = "I due punti sono troppo vicini: riprova.";
+                    pending = [];
+                    return;
+                }
+
+                measure.ref = pending.map(point => point.slice());
+                measure.refMm = refMm;
+                measure.refKey = refKey;
+                recompute();
+                step = null;
+            } else if (step === "L" || step === "W") {
+                if (dist(pending[0], pending[1]) < 2) {
+                    panelMessage = "I due punti sono troppo vicini: riprova.";
+                    pending = [];
+                    return;
+                }
+
+                measure.lines[step] = {
+                    pts: pending.map(point => point.slice()),
+                    mm: dist(pending[0], pending[1]) * mmPerPx()
+                };
+                step = null;
+            }
+
+            pending = [];
+            panelMessage = "";
+            dirty = true;
+            updateCaption();
+        };
+
+        // Tocco sulla foto in modalità misura: lo converte in coordinate dell'immagine.
+        const onMeasureTap = (event, onPhoto) => {
+            if (!measuring || !step || !onPhoto) return;
+
+            const box = layer.getBoundingClientRect();
+            const naturalW = img.naturalWidth || 1;
+            const naturalH = img.naturalHeight || 1;
+
+            pending.push([
+                Math.round((event.clientX - box.left) / box.width * naturalW * 10) / 10,
+                Math.round((event.clientY - box.top) / box.height * naturalH * 10) / 10
+            ]);
+
+            panelMessage = "";
+
+            if (pending.length === 2) finishStep();
+
+            renderPanel();
+            draw();
+        };
+
+        panel.addEventListener("change", event => {
+            if (event.target.id === "measureRef") {
+                refKey = event.target.value;
+                const preset = MEASURE_REFS.find(ref => ref.key === refKey);
+                refMm = preset?.mm || 0;
+                renderPanel();
+            }
+
+            if (event.target.id === "measureRefMm") {
+                refMm = parseItalianNumber(event.target.value);
+                if (!Number.isFinite(refMm)) refMm = 0;
+            }
+        });
+
+        panel.addEventListener("input", event => {
+            if (event.target.id === "measureRefMm") {
+                const value = parseItalianNumber(event.target.value);
+                refMm = Number.isFinite(value) ? value : 0;
+            }
+        });
+
+        panel.addEventListener("click", async event => {
+            const action = event.target.closest("[data-m]")?.dataset.m;
+            if (!action) return;
+
+            if (action === "L" || action === "W") {
+                step = action;
+                pending = [];
+                panelMessage = "";
+            }
+
+            if (action === "recal") {
+                step = "ref";
+                pending = [];
+                panelMessage = "";
+            }
+
+            if (action === "clear") {
+                if (!window.confirm("Azzerare riferimento e misure di questa foto?")) return;
+                measure = { ref: null, refMm: 0, refKey, lines: {} };
+                step = "ref";
+                pending = [];
+                dirty = true;
+                updateCaption();
+            }
+
+            if (action === "save") {
+                try {
+                    await photos.updateRecord(item.id, { measure: hasContent() ? measure : null });
+                    item.measure = hasContent() ? JSON.parse(JSON.stringify(measure)) : undefined;
+                    dirty = false;
+                    markMeasured(item.id, Boolean(measureSummary(measure)));
+                    panelMessage = "Misura salvata con la foto.";
+                    showMessage("Misura salvata.");
+                } catch (error) {
+                    console.error("Errore salvataggio misura:", error);
+                    panelMessage = "Impossibile salvare la misura.";
+                }
+            }
+
+            if (action === "done") {
+                setMeasuring(false);
+                return;
+            }
+
+            renderPanel();
+            draw();
+        });
+
+        /* ----- nota ----- */
 
         noteForm?.addEventListener("submit", async event => {
             event.preventDefault();
@@ -874,7 +1467,7 @@ function setupPatientPhotosPage(patient) {
                 const saved = await photos.updateNote(item.id, input.value);
                 item.note = saved;
                 input.value = saved;
-                caption.textContent = date + (saved ? " · " + saved : "");
+                updateCaption();
                 showMessage(saved ? "Nota salvata." : "Nota rimossa.");
             } catch (error) {
                 console.error("Errore salvataggio nota:", error);
@@ -882,16 +1475,26 @@ function setupPatientPhotosPage(patient) {
             }
         });
 
-        // I gesti sulla foto non devono togliere il focus né chiudere con la tastiera aperta.
-        noteForm?.addEventListener("pointerdown", event => event.stopPropagation());
+        /* ----- zoom e chiusura ----- */
 
-        const stage = viewer.querySelector(".patient-photo-viewer-stage");
-        const img = viewer.querySelector("img");
+        let zoom = null;
 
-        const zoom = attachZoom(stage, img, () => close());
+        const fit = () => {
+            const naturalW = img.naturalWidth || 1;
+            const naturalH = img.naturalHeight || 1;
+            const box = stage.getBoundingClientRect();
+            const factor = Math.min(box.width / naturalW, box.height / naturalH);
+
+            layer.style.width = Math.round(naturalW * factor) + "px";
+            layer.style.height = Math.round(naturalH * factor) + "px";
+            draw();
+        };
 
         const close = () => {
+            if (dirty && !window.confirm("La misura non è stata salvata. Chiudere senza salvare?")) return;
+
             document.removeEventListener("keydown", onKey);
+<<<<<<< Updated upstream
             if (window.history.state?.patientPhotoViewer) {
                 window.history.back();
                 return;
@@ -900,11 +1503,14 @@ function setupPatientPhotosPage(patient) {
         };
         viewer.closeViewer = () => {
             document.removeEventListener("keydown", onKey);
+=======
+            window.removeEventListener("resize", fit);
+>>>>>>> Stashed changes
             viewer.remove();
         };
 
         const onKey = event => {
-            if (event.target instanceof HTMLInputElement) {
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) {
                 if (event.key === "Escape") event.target.blur();
                 return;
             }
@@ -913,14 +1519,35 @@ function setupPatientPhotosPage(patient) {
             if (event.key === "-") zoom.zoomBy(1 / 1.5);
         };
 
+        zoom = attachZoom(stage, layer, {
+            onBackgroundTap: () => { if (!measuring) close(); },
+            onTap: onMeasureTap,
+            // In modalità misura il doppio tocco non ingrandisce: ogni tocco è un punto.
+            doubleTap: () => !(measuring && step),
+            onChange: () => draw()
+        });
+
         document.addEventListener("keydown", onKey);
+        window.addEventListener("resize", fit);
+        img.addEventListener("load", fit);
+        if (img.complete) fit();
 
         viewer.querySelector(".patient-photo-viewer-top").addEventListener("click", event => {
             const action = event.target.closest("[data-viewer]")?.dataset.viewer;
             if (action === "close") close();
             if (action === "in") zoom.zoomBy(1.5);
             if (action === "out") zoom.zoomBy(1 / 1.5);
+            if (action === "measure") setMeasuring(!measuring);
+
+            if (action === "ruler") {
+                rulerVisible = !rulerVisible;
+                event.target.closest("[data-viewer]").classList.toggle("active", rulerVisible);
+                draw();
+            }
         });
+
+        updateCaption();
+        draw();
     };
 
     addButton.addEventListener("click", openAddModal);

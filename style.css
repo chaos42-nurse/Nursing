@@ -3240,14 +3240,9 @@ section h2 {
 }
 
 .patient-photo-viewer-note {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
     display: flex;
     gap: 8px;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-    background: linear-gradient(transparent, rgba(0,0,0,.8));
 }
 
 .patient-photo-viewer-note input {
@@ -3384,3 +3379,207 @@ section h2 {
     border-bottom: none !important;
     box-shadow: none !important;
 }
+<<<<<<< Updated upstream
+=======
+
+
+/* ---------- Consegna SBAR ---------- */
+
+.patient-sbar-section {
+    margin: 12px 0;
+}
+
+.patient-sbar-card {
+    max-height: calc(100vh - 36px);
+}
+
+.patient-sbar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+    cursor: pointer;
+}
+
+.patient-sbar-toggle input {
+    width: 18px !important;
+    height: 18px;
+    flex: 0 0 auto;
+}
+
+.patient-sbar-block {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.patient-sbar-block small {
+    display: block;
+    margin: 2px 0 6px;
+    opacity: .7;
+}
+
+.patient-sbar-block textarea {
+    display: block;
+    width: 100%;
+    min-height: 70px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--background, transparent);
+    color: var(--text);
+    font: inherit;
+    line-height: 1.4;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.patient-sbar-letter {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    margin-right: 4px;
+    border-radius: 6px;
+    background: #2f81f7;
+    color: #fff;
+    font-size: .85rem;
+    line-height: 22px;
+    text-align: center;
+}
+
+.patient-sbar-privacy {
+    margin: 8px 0;
+    font-size: .8rem;
+    opacity: .75;
+}
+
+
+/* ---------- Visualizzatore: livello foto + righello ---------- */
+
+.patient-photo-viewer-layer {
+    position: relative;
+    flex: 0 0 auto;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.patient-photo-viewer-layer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    -webkit-user-drag: none;
+}
+
+.patient-photo-measure-svg,
+.patient-photo-ruler-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.patient-photo-viewer-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(transparent, rgba(0,0,0,.85) 28%);
+}
+
+.patient-photo-viewer-top button.active {
+    background: #2f81f7;
+}
+
+.patient-photo-measure {
+    max-height: 46vh;
+    overflow-y: auto;
+    margin: 0 10px 6px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 12px;
+    background: rgba(13,17,23,.92);
+    font-size: .85rem;
+    line-height: 1.35;
+}
+
+.patient-photo-measure[hidden] {
+    display: none;
+}
+
+.patient-photo-measure p {
+    margin: 6px 0;
+}
+
+.patient-photo-measure-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0;
+}
+
+.patient-photo-measure-row > * {
+    flex: 1 1 auto;
+}
+
+.patient-photo-measure select,
+.patient-photo-measure input {
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 8px;
+    background: rgba(0,0,0,.5);
+    color: #fff;
+    font-size: 16px;
+}
+
+.patient-photo-measure input {
+    flex: 0 0 90px;
+}
+
+.patient-photo-measure input:disabled {
+    opacity: .5;
+}
+
+.patient-photo-measure button {
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.patient-photo-measure button.active {
+    background: #2f81f7;
+    border-color: #2f81f7;
+}
+
+.patient-photo-measure button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.patient-photo-measure-ref {
+    margin-left: 6px;
+    opacity: .75;
+}
+
+.patient-photo-measure-status {
+    color: #9ecbff;
+}
+
+.patient-photo-measure-result {
+    font-weight: 700;
+    color: #7ee787;
+}
+
+.patient-photo-measure-warn {
+    font-size: .74rem;
+    opacity: .7;
+}
+>>>>>>> Stashed changes

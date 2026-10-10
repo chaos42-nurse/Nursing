@@ -351,6 +351,39 @@
         }));
     }
 
+    // Aggiorna campi di una foto già salvata (es. la misura) senza toccare l'immagine.
+    // Un valore null elimina il campo.
+    function updateRecord(id, patch) {
+        return openDb().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE, "readwrite");
+            const store = tx.objectStore(STORE);
+            const request = store.get(id);
+
+            request.onsuccess = () => {
+                const record = request.result;
+
+                if (!record) {
+                    tx.abort();
+                    reject(new PhotoError("missing", "Foto non trovata."));
+                    return;
+                }
+
+                Object.keys(patch || {}).forEach(key => {
+                    if (key === "id" || key === "blob" || key === "patientId") return;
+
+                    if (patch[key] === null) delete record[key];
+                    else record[key] = patch[key];
+                });
+
+                store.put(record);
+            };
+
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error || new PhotoError("db", "Operazione non riuscita."));
+            tx.onabort = () => reject(tx.error || new PhotoError("db", "Operazione annullata."));
+        }));
+    }
+
     function deletePhoto(id) {
         return runTransaction("readwrite", store => store.delete(id));
     }
@@ -385,6 +418,7 @@
         listPhotos,
         deletePhoto,
         updateNote,
+        updateRecord,
         removeAllForPatient,
         clearAll,
         getStorageInfo,
