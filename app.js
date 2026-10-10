@@ -8263,7 +8263,7 @@ function renderAppNotesPage() {
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
                             </div>
-                            <div class="app-note-text">${renderNoteText(note.text)}</div>
+                            <div class="app-note-text">${renderNoteText(note.text, "", "", "app-" + note.id)}</div>
                         </article>
                     `).join("")
                     : `
@@ -8296,6 +8296,24 @@ function renderAppNotesPage() {
 }
 
 function setupAppNotes() {
+    document.addEventListener("change", event => {
+        const checkbox = event.target.closest(".note-checklist-checkbox");
+        if (!checkbox) return;
+
+        let checklistState = {};
+        try {
+            checklistState = JSON.parse(localStorage.getItem("nursing-note-checklists") || "{}");
+        } catch (error) {
+            checklistState = {};
+        }
+
+        checklistState[checkbox.dataset.noteChecklistKey || ""] = checkbox.checked;
+        localStorage.setItem("nursing-note-checklists", JSON.stringify(checklistState));
+
+        const item = checkbox.closest(".note-checklist-item");
+        if (item) item.classList.toggle("is-checked", checkbox.checked);
+    });
+
     document.addEventListener("click", event => {
         const editButton = event.target.closest("[data-app-note-edit]");
         if (editButton) {
@@ -8659,6 +8677,36 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
     let index = 0;
 
     while (index < lines.length) {
+        const checklistMatch = noteId
+            ? lines[index].match(/^\\s*-\\s*\\[([ xX])\\]\\s+(.+)$/)
+            : null;
+
+        if (checklistMatch) {
+            const checklistText = checklistMatch[2];
+            const checklistKey = String(noteId) + "::" + index + "::" + checklistText;
+            let checklistState = {};
+
+            try {
+                checklistState = JSON.parse(localStorage.getItem("nursing-note-checklists") || "{}");
+            } catch (error) {
+                checklistState = {};
+            }
+
+            const checked = Object.prototype.hasOwnProperty.call(checklistState, checklistKey)
+                ? Boolean(checklistState[checklistKey])
+                : checklistMatch[1].toLowerCase() === "x";
+
+            html += '<label class="note-checklist-item' + (checked ? ' is-checked' : '') + '">' +
+                '<input type="checkbox" class="note-checklist-checkbox" data-note-checklist-key="' +
+                escapeAttribute(checklistKey) + '"' + (checked ? ' checked' : '') + '>' +
+                '<span>' + renderInlineNoteText(checklistText) + '</span>' +
+                '</label>';
+
+            if (index < lines.length - 1) html += '<br>';
+            index++;
+            continue;
+        }
+
         const firstRow = parseNoteTableRow(lines[index]);
 
         if (firstRow) {
