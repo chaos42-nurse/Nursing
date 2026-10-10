@@ -3510,3 +3510,15 @@ section h2 {
     font-size: .74rem;
     opacity: .7;
 }
+
+
+/* ---------- Confronto: righello e pulsanti ---------- */
+
+.patient-photo-compare-tools {
+    display: flex;
+    gap: 8px;
+}
+
+.patient-photo-compare-top button.active {
+    background: #2f81f7;
+}

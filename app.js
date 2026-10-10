@@ -563,8 +563,10 @@ function setupPatientPhotosPage(patient) {
         const pane = (label, item) => `
             <div class="patient-photo-compare-pane">
                 <div class="patient-photo-viewer-stage">
-                    <img class="patient-photo-viewer-img"
-                         src="${escapeAttribute(URL.createObjectURL(item.blob))}" alt="" draggable="false">
+                    <div class="patient-photo-viewer-layer">
+                        <img src="${escapeAttribute(URL.createObjectURL(item.blob))}" alt="" draggable="false">
+                        <svg class="patient-photo-ruler-svg" aria-hidden="true"></svg>
+                    </div>
                 </div>
                 <div class="patient-photo-compare-cap">
                     <strong>${label}</strong> ${escapeHtml(fmt(item))}${item.note ? " · " + escapeHtml(item.note) : ""}${measureSummary(item.measure) ? " · " + escapeHtml(measureSummary(item.measure)) : ""}
@@ -577,7 +579,10 @@ function setupPatientPhotosPage(patient) {
         view.innerHTML = `
             <div class="patient-photo-compare-top">
                 <span>Confronto · distanza ${escapeHtml(formatGap(before.createdAt, after.createdAt))}</span>
-                <button type="button" data-cmp="close" aria-label="Chiudi">✕</button>
+                <span class="patient-photo-compare-tools">
+                    <button type="button" data-cmp="ruler" class="active" aria-label="Mostra o nascondi i righelli">📐</button>
+                    <button type="button" data-cmp="close" aria-label="Chiudi">✕</button>
+                </span>
             </div>
             <div class="patient-photo-compare-panes">
                 ${pane("Prima", before)}
@@ -589,12 +594,53 @@ function setupPatientPhotosPage(patient) {
 
         const urls = [...view.querySelectorAll("img")].map(img => img.src);
 
-        view.querySelectorAll(".patient-photo-compare-pane").forEach(el => {
-            attachZoom(el.querySelector(".patient-photo-viewer-stage"), el.querySelector("img"));
+        // Ogni foto ha il suo righello (posizione, angolo e dimensione indipendenti)
+        // e usa la scala della propria calibrazione, se esiste.
+        const rulers = [];
+        const refits = [];
+
+        view.querySelectorAll(".patient-photo-compare-pane").forEach((el, index) => {
+            const item = index === 0 ? before : after;
+            const stage = el.querySelector(".patient-photo-viewer-stage");
+            const layerEl = el.querySelector(".patient-photo-viewer-layer");
+            const image = layerEl.querySelector("img");
+            let paneZoom = null;
+
+            const paneRuler = createRuler({
+                svg: layerEl.querySelector("svg"),
+                layer: layerEl,
+                img: image,
+                state: { x: null, y: null, r: 0, arm: null },
+                getMmPerPx: () => measureScale(item.measure),
+                getZoomScale: () => paneZoom ? paneZoom.getScale() : 1
+            });
+
+            const fitPane = () => {
+                const naturalW = image.naturalWidth || 1;
+                const naturalH = image.naturalHeight || 1;
+                const box = stage.getBoundingClientRect();
+                const factor = Math.min(box.width / naturalW, box.height / naturalH);
+
+                layerEl.style.width = Math.round(naturalW * factor) + "px";
+                layerEl.style.height = Math.round(naturalH * factor) + "px";
+                paneRuler.draw();
+            };
+
+            paneZoom = attachZoom(stage, layerEl, { onChange: () => paneRuler.draw() });
+
+            image.addEventListener("load", fitPane);
+            if (image.complete) fitPane();
+
+            rulers.push(paneRuler);
+            refits.push(fitPane);
         });
+
+        const onResize = () => refits.forEach(fit => fit());
+        window.addEventListener("resize", onResize);
 
         const close = () => {
             document.removeEventListener("keydown", onKey);
+            window.removeEventListener("resize", onResize);
             urls.forEach(url => URL.revokeObjectURL(url));
             view.remove();
             setCompareMode(false);
@@ -604,6 +650,12 @@ function setupPatientPhotosPage(patient) {
 
         document.addEventListener("keydown", onKey);
         view.querySelector("[data-cmp=close]").addEventListener("click", close);
+
+        view.querySelector("[data-cmp=ruler]").addEventListener("click", event => {
+            const on = !rulers[0].isVisible();
+            rulers.forEach(r => r.setVisible(on));
+            event.currentTarget.classList.toggle("active", on);
+        });
     };
 
     compareButton.addEventListener("click", () => setCompareMode(!compareMode));
@@ -838,7 +890,7 @@ function setupPatientPhotosPage(patient) {
     };
 
     // Posizione e orientamento del righello a L: restano tra una foto e l'altra.
-    let rulerState = null;
+    const rulerState = { x: null, y: null, r: 0, arm: null };
 
     /* ---------- Misura della lesione ---------- */
 
@@ -878,6 +930,330 @@ function setupPatientPhotosPage(patient) {
         const date = gallery.querySelector('[data-card="' + CSS.escape(id) + '"] .patient-photo-date');
         if (!date) return;
         date.textContent = date.textContent.replace(" 📏", "") + (on ? " 📏" : "");
+    };
+
+    // Scala della foto in mm per pixel, ricavata dal riferimento salvato (0 = non calibrata).
+    const measureScale = measure => {
+        if (!measure?.ref) return 0;
+        const [a, b] = measure.ref;
+        const length = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        return length > 0 ? measure.refMm / length : 0;
+    };
+
+    /*
+     * Righello a L sovrapposto alla foto. Si comporta come una foto:
+     *  - un dito sul righello lo sposta;
+     *  - due dita lo ingrandiscono/rimpiccioliscono e lo ruotano (pizzico + torsione);
+     *  - la maniglia blu all'angolo lo ruota liberamente (un tocco = +90°);
+     *  - la maniglia verde sulla punta lo allunga o lo accorcia;
+     *  - rotella = dimensione, Maiusc + rotella = rotazione.
+     * Calibrato: tacche in scala reale, la lunghezza è un numero intero di cm.
+     * Non calibrato: stesso righello con 10 cm nominali, marcato "NON IN SCALA".
+     */
+    const createRuler = ({ svg, layer, img, state, getMmPerPx, getZoomScale, isInteractive = () => true }) => {
+        let visible = true;
+        const pointers = new Map();
+        let mode = null;
+
+        const normalize = degrees => ((degrees % 360) + 360) % 360;
+
+        const geometry = () => {
+            const width = img.naturalWidth || 1;
+            const height = img.naturalHeight || 1;
+            const screenPerImage = (layer.offsetWidth / width) * getZoomScale() || 1;
+            const unit = 1 / screenPerImage;
+            const scaleMm = getMmPerPx();
+            const calibrated = scaleMm > 0;
+            const pxPerMm = calibrated ? 1 / scaleMm : 0;
+            const minSide = Math.min(width, height);
+
+            if (!state.arm) {
+                state.arm = calibrated
+                    ? ([10, 5, 3, 2, 1].find(cm => cm * 10 * pxPerMm <= minSide * 0.8) || 1) * 10 * pxPerMm
+                    : minSide * 0.4;
+            }
+
+            let armPx = Math.min(Math.max(state.arm, minSide * 0.08), minSide * 0.7);
+            state.arm = armPx;   // lo stato non resta mai oltre i limiti: rotella e pizzico rispondono subito
+            let armCm = 0;
+
+            if (calibrated) {
+                const maxCm = Math.max(1, Math.floor(minSide * 0.7 / (10 * pxPerMm)));
+                armCm = Math.min(maxCm, Math.max(1, Math.round(armPx / (10 * pxPerMm))));
+                armPx = armCm * 10 * pxPerMm;
+            }
+
+            const tickPxPerMm = calibrated ? pxPerMm : armPx / 100;      // non calibrato: 10 cm nominali
+            const totalMm = calibrated ? armCm * 10 : 100;
+            const stripPx = Math.min(Math.max(12 * tickPxPerMm, 22 * unit), armPx * 0.4);
+
+            return { width, height, screenPerImage, unit, calibrated, armPx, tickPxPerMm, totalMm, stripPx };
+        };
+
+        const draw = (clampPosition = true) => {
+            const g0 = geometry();
+            svg.setAttribute("viewBox", "0 0 " + g0.width + " " + g0.height);
+
+            if (!visible) {
+                svg.innerHTML = "";
+                return;
+            }
+
+            const { width, height, screenPerImage, unit, calibrated, armPx, tickPxPerMm, totalMm, stripPx } = g0;
+
+            if (state.x === null) {
+                state.x = width * 0.05;
+                state.y = height * 0.05;
+            }
+
+            const rad = state.r * Math.PI / 180;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
+
+            // L'intera "L" resta dentro la foto, a qualunque angolo e dimensione.
+            // Durante una rotazione/ridimensionamento col dito il vincolo si rimanda al
+            // rilascio, altrimenti il righello verrebbe spinto via da sotto il dito.
+            if (clampPosition) {
+                const corners = [[0, 0], [armPx, 0], [armPx, stripPx], [stripPx, stripPx], [stripPx, armPx], [0, armPx]];
+                const spread = corners.map(([lx, ly]) => [state.x + lx * cos - ly * sin, state.y + lx * sin + ly * cos]);
+                const minX = Math.min(...spread.map(q => q[0]));
+                const maxX = Math.max(...spread.map(q => q[0]));
+                const minY = Math.min(...spread.map(q => q[1]));
+                const maxY = Math.max(...spread.map(q => q[1]));
+
+                let shiftX = maxX > width ? width - maxX : 0;
+                if (minX + shiftX < 0) shiftX = -minX;
+                let shiftY = maxY > height ? height - maxY : 0;
+                if (minY + shiftY < 0) shiftY = -minY;
+
+                state.x += shiftX;
+                state.y += shiftY;
+            }
+
+            const toGlobal = (lx, ly) => [state.x + lx * cos - ly * sin, state.y + lx * sin + ly * cos];
+            const interactive = isInteractive();
+            const pe = interactive ? "pointer-events:all" : "pointer-events:none";
+            const body = `M0,0 H${armPx} V${stripPx} H${stripPx} V${armPx} H0 Z`;
+            const parts = [];
+            const labels = [];
+
+            parts.push(`<g data-ruler="1" transform="translate(${state.x} ${state.y}) rotate(${state.r})" style="${pe};${interactive ? "cursor:grab" : ""}">`);
+            parts.push(`<path d="${body}" fill="transparent" stroke="transparent" stroke-width="22" vector-effect="non-scaling-stroke"/>`);
+            parts.push(`<path d="${body}" fill="rgba(255,255,255,.92)" stroke="${calibrated ? "#000" : "#d97706"}" stroke-width="${calibrated ? 1.6 : 2.4}" vector-effect="non-scaling-stroke"${calibrated ? "" : ' stroke-dasharray="8 4"'}/>`);
+
+            // Bordo interno: fascia a quadretti bianchi e neri da 1 cm (stile righello forense),
+            // solo sui bracci, fuori dal quadrato d'angolo.
+            const barThickness = stripPx * 0.24;
+            const cmPx = tickPxPerMm * 10;
+            const cmCount = Math.floor(totalMm / 10);
+
+            for (let i = 0; i < cmCount; i++) {
+                const fill = i % 2 === 0 ? "#111" : "#fff";
+                const start = Math.max(i * cmPx, stripPx);
+                const length = (i + 1) * cmPx - start;
+                if (length <= 0) continue;
+
+                parts.push(
+                    `<rect x="${start}" y="${stripPx - barThickness}" width="${length}" height="${barThickness}" fill="${fill}" stroke="#111" stroke-width="0.8" vector-effect="non-scaling-stroke"/>`,
+                    `<rect x="${stripPx - barThickness}" y="${start}" width="${barThickness}" height="${length}" fill="${fill}" stroke="#111" stroke-width="0.8" vector-effect="non-scaling-stroke"/>`
+                );
+            }
+
+            const mmScreen = tickPxPerMm * screenPerImage;       // pixel dello schermo per mm
+            const cmScreen = mmScreen * 10;
+            const tick = (t, length) => {
+                const pos = t * tickPxPerMm;
+                parts.push(`<path d="M${pos},0 V${length} M0,${pos} H${length}" stroke="#000" stroke-width="1" vector-effect="non-scaling-stroke"/>`);
+            };
+
+            for (let t = 0; t <= totalMm; t++) {
+                if (t % 10 === 0) tick(t, stripPx * 0.44);
+                else if (t % 5 === 0 && mmScreen * 5 >= 4) tick(t, stripPx * 0.32);
+                else if (mmScreen >= 3.2) tick(t, stripPx * 0.2);
+            }
+
+            parts.push("</g>");
+
+            const every = cmScreen >= 18 ? 1 : cmScreen >= 9 ? 2 : 5;
+            const fontSize = Math.min(11 * unit, stripPx * 0.24);
+            const numberColor = "#000";
+
+            for (let n = every; n * 10 <= totalMm; n += every) {
+                const along = n * 10 * tickPxPerMm;
+                const [hx, hy] = toGlobal(along, stripPx * 0.6);
+                const [vx, vy] = toGlobal(stripPx * 0.6, along);
+
+                [[hx, hy], [vx, vy]].forEach(([tx, ty]) => labels.push(
+                    `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}" font-weight="700" fill="${numberColor}">${n}</text>`
+                ));
+            }
+
+            const [cx, cy] = toGlobal(stripPx * 0.5, stripPx * 0.5);
+            // L'unità si scrive solo quando la scala è vera.
+            if (calibrated) {
+                labels.push(`<text x="${cx}" y="${cy + fontSize * 1.5}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize * 0.9}" fill="${numberColor}">cm</text>`);
+            }
+
+            if (!calibrated) {
+                const [bx, by] = toGlobal(stripPx * 1.2, stripPx * 1.8);
+                labels.push(`<text x="${bx}" y="${by}" text-anchor="start" dominant-baseline="central" font-size="${Math.min(12 * unit, stripPx * 0.55)}" font-weight="700" fill="#b45309" stroke="#fff" stroke-width="${3 * unit}" paint-order="stroke">NON IN SCALA</text>`);
+            }
+
+            // Maniglie: rotazione (angolo) e lunghezza (punta del braccio).
+            const handleR = Math.min(stripPx * 0.42, 15 * unit);
+            const handle = (kind, lx, ly, fill, glyph) => {
+                const [hx, hy] = toGlobal(lx, ly);
+                parts.push(
+                    `<circle ${kind}="1" cx="${hx}" cy="${hy}" r="${handleR}" fill="${fill}" stroke="#fff" stroke-width="${1.5 * unit}" style="${pe}"/>`,
+                    `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="central" font-size="${handleR * 1.3}" fill="#fff" style="pointer-events:none">${glyph}</text>`
+                );
+            };
+
+            handle("data-ruler-rot", stripPx * 0.5, stripPx * 0.5, "#2f81f7", "↻");
+            handle("data-ruler-size", armPx - stripPx * 0.5, stripPx * 0.5, "#238636", "⤢");
+
+            svg.innerHTML = parts.join("") + labels.join("");
+        };
+
+        const cornerOnScreen = g => {
+            const box = layer.getBoundingClientRect();
+            return [
+                box.left + state.x / g.width * box.width,
+                box.top + state.y / g.height * box.height
+            ];
+        };
+
+        svg.addEventListener("pointerdown", event => {
+            const rot = event.target.closest?.("[data-ruler-rot]");
+            const size = event.target.closest?.("[data-ruler-size]");
+            const body = event.target.closest?.("[data-ruler]");
+            if (!rot && !size && !body) return;
+
+            // Il gesto è del righello: la foto sotto non si sposta e non riceve il tocco.
+            event.stopPropagation();
+            event.preventDefault();
+
+            try { svg.setPointerCapture(event.pointerId); } catch (_) {}
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+            if (pointers.size === 2) {
+                const [a, b] = [...pointers.values()];
+                mode = {
+                    type: "pinch",
+                    d0: Math.hypot(b.x - a.x, b.y - a.y) || 1,
+                    a0: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI,
+                    mx0: (a.x + b.x) / 2,
+                    my0: (a.y + b.y) / 2,
+                    arm0: state.arm,
+                    r0: state.r,
+                    x0: state.x,
+                    y0: state.y
+                };
+                return;
+            }
+
+            mode = {
+                type: rot ? "rot" : size ? "size" : "move",
+                id: event.pointerId,
+                sx: event.clientX,
+                sy: event.clientY,
+                x0: state.x,
+                y0: state.y,
+                moved: false
+            };
+        });
+
+        svg.addEventListener("pointermove", event => {
+            if (!mode || !pointers.has(event.pointerId)) return;
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+            const g = geometry();
+
+            if (mode.type === "pinch") {
+                if (pointers.size < 2) return;
+
+                const [a, b] = [...pointers.values()];
+                const distance = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+                const angle = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+
+                state.arm = mode.arm0 * distance / mode.d0;
+                state.r = normalize(mode.r0 + (angle - mode.a0));
+                state.x = mode.x0 + ((a.x + b.x) / 2 - mode.mx0) / g.screenPerImage;
+                state.y = mode.y0 + ((a.y + b.y) / 2 - mode.my0) / g.screenPerImage;
+                draw(false);
+                return;
+            }
+
+            if (event.pointerId !== mode.id) return;
+
+            const dx = event.clientX - mode.sx;
+            const dy = event.clientY - mode.sy;
+            if (Math.abs(dx) + Math.abs(dy) > 4) mode.moved = true;
+            if (!mode.moved) return;
+
+            if (mode.type === "move") {
+                state.x = mode.x0 + dx / g.screenPerImage;
+                state.y = mode.y0 + dy / g.screenPerImage;
+            } else {
+                const [cx, cy] = cornerOnScreen(g);
+                const vx = event.clientX - cx;
+                const vy = event.clientY - cy;
+
+                if (mode.type === "rot") {
+                    // La maniglia sta a 45° dall'asse del braccio: la si segue col dito.
+                    let angle = normalize(Math.atan2(vy, vx) * 180 / Math.PI - 45);
+                    const nearest = Math.round(angle / 90) * 90;
+                    if (Math.abs(angle - nearest) < 4) angle = normalize(nearest);
+                    state.r = angle;
+                } else {
+                    const rad = state.r * Math.PI / 180;
+                    const along = (vx * Math.cos(rad) + vy * Math.sin(rad)) / g.screenPerImage;
+                    state.arm = Math.max(along + g.stripPx * 0.5, 1);
+                }
+            }
+
+            draw(mode.type === "move");
+        });
+
+        const release = event => {
+            if (!pointers.has(event.pointerId)) return;
+            pointers.delete(event.pointerId);
+
+            if (mode && mode.type === "rot" && !mode.moved && event.type === "pointerup") {
+                state.r = normalize(state.r + 90);
+                draw();
+            }
+
+            if (!mode || mode.type === "pinch" || mode.id === event.pointerId) {
+                mode = null;
+                pointers.clear();
+                draw(true);          // al rilascio la "L" torna entro i bordi della foto
+            }
+        };
+
+        svg.addEventListener("pointerup", release);
+        svg.addEventListener("pointercancel", release);
+
+        svg.addEventListener("wheel", event => {
+            if (!event.target.closest?.("[data-ruler],[data-ruler-rot],[data-ruler-size]")) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (event.shiftKey) {
+                state.r = normalize(state.r + (event.deltaY < 0 ? -5 : 5));
+            } else {
+                state.arm = (state.arm || 1) * (event.deltaY < 0 ? 1.08 : 1 / 1.08);
+            }
+
+            draw();
+        }, { passive: false });
+
+        return {
+            draw: () => draw(true),
+            setVisible: on => { visible = on; draw(true); },
+            isVisible: () => visible
+        };
     };
 
     // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
@@ -953,8 +1329,6 @@ function setupPatientPhotosPage(patient) {
 
         // Righello a L sovrapposto: sempre visibile all'apertura, trascinabile.
         // La posizione resta quella dell'ultima volta finché non si ricarica la pagina.
-        let rulerVisible = true;
-
         const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
         const hasContent = () => Boolean(measure.ref || Object.keys(measure.lines).length);
 
@@ -1030,183 +1404,10 @@ function setupPatientPhotosPage(patient) {
             ));
 
             svg.innerHTML = parts.join("");
-            drawRuler(naturalW, naturalH, unit, screenPerImage);
+            ruler.draw();
         };
 
-        const drawRuler = (naturalW, naturalH, unit, screenPerImage) => {
-            rulerSvg.setAttribute("viewBox", "0 0 " + naturalW + " " + naturalH);
 
-            if (!rulerVisible) {
-                rulerSvg.innerHTML = "";
-                return;
-            }
-
-            const scaleMm = mmPerPx();                 // 0 = non calibrato
-            const calibrated = scaleMm > 0;
-            const pxPerMm = calibrated ? 1 / scaleMm : 0;
-            const minSide = Math.min(naturalW, naturalH);
-
-            // Lunghezza dei bracci: in scala solo se calibrato, altrimenti forma neutra.
-            let armPx;
-            let armCm = 0;
-
-            if (calibrated) {
-                armCm = [10, 5, 3, 2, 1].find(cm => cm * 10 * pxPerMm <= minSide * 0.8) || 1;
-                armPx = armCm * 10 * pxPerMm;
-            } else {
-                armPx = minSide * 0.4;
-            }
-
-            const stripPx = Math.min(
-                Math.max(calibrated ? 12 * pxPerMm : armPx * 0.12, 22 * unit),
-                armPx * 0.4
-            );
-
-            // Posizione (angolo) e rotazione: predefinita in alto a sinistra.
-            if (!rulerState) rulerState = { x: naturalW * 0.05, y: naturalH * 0.05, r: 0 };
-
-            const rad = rulerState.r * Math.PI / 180;
-            const cos = Math.round(Math.cos(rad));
-            const sin = Math.round(Math.sin(rad));
-
-            // L'intera "L" deve restare dentro la foto, anche dopo la rotazione:
-            // altrimenti la maniglia o i bracci potrebbero uscire e non essere più raggiungibili.
-            const corners = [[0, 0], [armPx, 0], [armPx, stripPx], [stripPx, stripPx], [stripPx, armPx], [0, armPx]];
-            const spread = (ox, oy) => corners.map(([lx, ly]) => [ox + lx * cos - ly * sin, oy + lx * sin + ly * cos]);
-            const extent = spread(rulerState.x, rulerState.y);
-            const minX = Math.min(...extent.map(q => q[0]));
-            const maxX = Math.max(...extent.map(q => q[0]));
-            const minY = Math.min(...extent.map(q => q[1]));
-            const maxY = Math.max(...extent.map(q => q[1]));
-
-            let shiftX = maxX > naturalW ? naturalW - maxX : 0;
-            if (minX + shiftX < 0) shiftX = -minX;
-            let shiftY = maxY > naturalH ? naturalH - maxY : 0;
-            if (minY + shiftY < 0) shiftY = -minY;
-
-            rulerState.x += shiftX;
-            rulerState.y += shiftY;
-
-            const { x, y, r } = rulerState;
-            const toGlobal = (lx, ly) => [x + lx * cos - ly * sin, y + lx * sin + ly * cos];
-
-            const body = `M0,0 H${armPx} V${stripPx} H${stripPx} V${armPx} H0 Z`;
-            const parts = [];
-
-            // Mentre si segnano i punti di una misura il righello lascia passare i tocchi.
-            const interactive = !(measuring && step);
-            const grab = interactive ? "pointer-events:all;cursor:grab" : "pointer-events:none";
-
-            parts.push(`<g data-ruler="1" transform="translate(${x} ${y}) rotate(${r})" style="${grab}">`);
-
-            // Area di presa più larga del righello, per il dito.
-            parts.push(`<path d="${body}" fill="transparent" stroke="transparent" stroke-width="22" vector-effect="non-scaling-stroke"/>`);
-            parts.push(`<path d="${body}" fill="${calibrated ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.35)"}" stroke="#000" stroke-width="1.6" vector-effect="non-scaling-stroke"${calibrated ? "" : ' stroke-dasharray="7 5"'}/>`);
-
-            const labels = [];
-
-            if (calibrated) {
-                const mmScreen = pxPerMm * screenPerImage;       // pixel schermo per mm
-                const cmScreen = mmScreen * 10;
-                const totalMm = armCm * 10;
-                const tick = (t, len) => {
-                    const pos = t * pxPerMm;
-                    // braccio orizzontale (bordo superiore) e verticale (bordo sinistro)
-                    parts.push(`<path d="M${pos},0 V${len} M0,${pos} H${len}" stroke="#000" stroke-width="1" vector-effect="non-scaling-stroke"/>`);
-                };
-
-                for (let t = 0; t <= totalMm; t++) {
-                    if (t % 10 === 0) tick(t, stripPx * 0.55);
-                    else if (t % 5 === 0 && mmScreen * 5 >= 4) tick(t, stripPx * 0.38);
-                    else if (mmScreen >= 3.2) tick(t, stripPx * 0.24);
-                }
-
-                const every = cmScreen >= 18 ? 1 : cmScreen >= 9 ? 2 : 5;
-                const fontSize = Math.min(11 * unit, stripPx * 0.36);
-
-                for (let n = every; n <= armCm; n += every) {
-                    const along = n * 10 * pxPerMm;
-                    const [hx, hy] = toGlobal(along, stripPx * 0.8);
-                    const [vx, vy] = toGlobal(stripPx * 0.8, along);
-
-                    [[hx, hy], [vx, vy]].forEach(([tx, ty]) => labels.push(
-                        `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}" font-weight="700" fill="#000">${n}</text>`
-                    ));
-                }
-
-                const [ux, uy] = toGlobal(stripPx * 0.5, stripPx * 0.5);
-                labels.push(`<text x="${ux}" y="${uy + fontSize * 1.2}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize * 0.9}" fill="#000">cm</text>`);
-            } else {
-                const [tx, ty] = toGlobal(armPx / 2, stripPx * 0.5);
-                labels.push(`<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="${Math.min(12 * unit, stripPx * 0.5)}" font-weight="700" fill="#b45309" stroke="#fff" stroke-width="${3 * unit}" paint-order="stroke">NON IN SCALA</text>`);
-            }
-
-            parts.push("</g>");
-
-            // Maniglia di rotazione di 90° nell'angolo.
-            const [hx, hy] = toGlobal(stripPx * 0.5, stripPx * 0.5);
-            const handleR = Math.min(stripPx * 0.42, 15 * unit);
-            parts.push(
-                `<circle data-ruler-rot="1" cx="${hx}" cy="${hy}" r="${handleR}" fill="#2f81f7" stroke="#fff" stroke-width="${1.5 * unit}" style="${interactive ? "pointer-events:all;cursor:pointer" : "pointer-events:none"}"/>`,
-                `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="central" font-size="${handleR * 1.3}" fill="#fff" style="pointer-events:none">↻</text>`
-            );
-
-            rulerSvg.innerHTML = parts.join("") + labels.join("");
-        };
-
-        /* ----- trascinamento e rotazione del righello ----- */
-
-        let rulerDrag = null;
-
-        rulerSvg.addEventListener("pointerdown", event => {
-            const handle = event.target.closest("[data-ruler-rot]");
-            const body = event.target.closest("[data-ruler]");
-            if (!handle && !body) return;
-
-            // Il gesto è del righello: la foto sotto non si sposta e non riceve il tocco.
-            event.stopPropagation();
-            event.preventDefault();
-
-            rulerSvg.setPointerCapture(event.pointerId);
-            rulerDrag = {
-                id: event.pointerId,
-                startX: event.clientX,
-                startY: event.clientY,
-                originX: rulerState.x,
-                originY: rulerState.y,
-                rotate: Boolean(handle),
-                moved: false
-            };
-        });
-
-        rulerSvg.addEventListener("pointermove", event => {
-            if (!rulerDrag || rulerDrag.id !== event.pointerId || rulerDrag.rotate) return;
-
-            const dx = event.clientX - rulerDrag.startX;
-            const dy = event.clientY - rulerDrag.startY;
-            if (Math.abs(dx) + Math.abs(dy) > 3) rulerDrag.moved = true;
-
-            const naturalW = img.naturalWidth || 1;
-            const screenPerImage = (layer.offsetWidth / naturalW) * (zoom ? zoom.getScale() : 1) || 1;
-
-            rulerState.x = rulerDrag.originX + dx / screenPerImage;
-            rulerState.y = rulerDrag.originY + dy / screenPerImage;
-            draw();
-        });
-
-        const endRulerDrag = event => {
-            if (!rulerDrag || rulerDrag.id !== event.pointerId) return;
-
-            if (rulerDrag.rotate && event.type === "pointerup") {
-                rulerState.r = (rulerState.r + 90) % 360;
-                draw();
-            }
-
-            rulerDrag = null;
-        };
-
-        rulerSvg.addEventListener("pointerup", endRulerDrag);
-        rulerSvg.addEventListener("pointercancel", endRulerDrag);
 
         /* ----- pannello di misura ----- */
 
@@ -1474,6 +1675,17 @@ function setupPatientPhotosPage(patient) {
             onChange: () => draw()
         });
 
+        const ruler = createRuler({
+            svg: rulerSvg,
+            layer,
+            img,
+            state: rulerState,
+            getMmPerPx: mmPerPx,
+            getZoomScale: () => zoom.getScale(),
+            // Mentre si segnano i punti di una misura il righello lascia passare i tocchi.
+            isInteractive: () => !(measuring && step)
+        });
+
         document.addEventListener("keydown", onKey);
         window.addEventListener("resize", fit);
         img.addEventListener("load", fit);
@@ -1487,9 +1699,8 @@ function setupPatientPhotosPage(patient) {
             if (action === "measure") setMeasuring(!measuring);
 
             if (action === "ruler") {
-                rulerVisible = !rulerVisible;
-                event.target.closest("[data-viewer]").classList.toggle("active", rulerVisible);
-                draw();
+                ruler.setVisible(!ruler.isVisible());
+                event.target.closest("[data-viewer]").classList.toggle("active", ruler.isVisible());
             }
         });
 
