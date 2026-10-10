@@ -8254,18 +8254,35 @@ function renderAppNotesPage() {
 
             <div class="app-notes-list">
                 ${notes.length
-                    ? notes.map(note => `
+                    ? notes.map(note => {
+                        let checklistOrder = "original";
+                        try {
+                            const orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+                            checklistOrder = orderSettings[String(note.id)] || "original";
+                        } catch (error) {
+                            checklistOrder = "original";
+                        }
+                        return `
                         <article id="app-note-${escapeAttribute(note.id)}" class="app-note-card" data-app-note-id="${escapeAttribute(note.id)}">
                             <div class="app-note-card-header">
                                 <h3>${renderNoteText(note.title || "Nota")}</h3>
-                                <div class="personal-note-actions">
+                                <div class="personal-note-actions app-note-actions">
+                                    <label class="app-note-checklist-order-label" title="Ordine delle voci spuntate">
+                                        <span>Spunte</span>
+                                        <select class="app-note-checklist-order" data-app-note-checklist-order="${escapeAttribute(note.id)}" aria-label="Ordine delle voci spuntate">
+                                            <option value="original" ${checklistOrder === "original" ? "selected" : ""}>Al loro posto</option>
+                                            <option value="top" ${checklistOrder === "top" ? "selected" : ""}>In cima</option>
+                                            <option value="bottom" ${checklistOrder === "bottom" ? "selected" : ""}>In fondo</option>
+                                        </select>
+                                    </label>
                                     <button class="app-note-edit" type="button" data-app-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
                             </div>
                             <div class="app-note-text">${renderNoteText(note.text, "", "", "app-" + note.id)}</div>
                         </article>
-                    `).join("")
+                    `;
+                    }).join("")
                     : `
                         <div class="personal-note-empty">
                             Nessuna nota.
@@ -8326,6 +8343,23 @@ function setupAppNotes() {
     });
 
     document.addEventListener("change", event => {
+        const orderSelect = event.target.closest("[data-app-note-checklist-order]");
+        if (orderSelect) {
+            let orderSettings = {};
+            try {
+                orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+            } catch (error) {
+                orderSettings = {};
+            }
+            const noteId = orderSelect.dataset.appNoteChecklistOrder || "";
+            orderSettings[noteId] = ["original", "top", "bottom"].includes(orderSelect.value)
+                ? orderSelect.value
+                : "original";
+            localStorage.setItem("nursing-note-checklist-order", JSON.stringify(orderSettings));
+            renderAppNotesPage();
+            return;
+        }
+
         const checkbox = event.target.closest(".note-checklist-checkbox");
         if (!checkbox) return;
 
@@ -8704,74 +8738,82 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
     const lines = source.split(/\r?\n/);
     let html = "";
     let index = 0;
+    let checklistState = {};
+    let checklistOrder = "original";
+
+    if (noteId) {
+        try {
+            checklistState = JSON.parse(localStorage.getItem("nursing-note-checklists") || "{}");
+        } catch (error) {
+            checklistState = {};
+        }
+        try {
+            const orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+            checklistOrder = orderSettings[String(noteId)] || "original";
+        } catch (error) {
+            checklistOrder = "original";
+        }
+    }
+
+    const isChecklistLine = line => Boolean(noteId) && /^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/.test(line);
+    const getChecklistEntry = (line, lineIndex) => {
+        const match = line.match(/^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/);
+        if (!match) return null;
+        const checklistText = match[2];
+        const key = String(noteId) + "::" + lineIndex + "::" + checklistText;
+        const checked = Object.prototype.hasOwnProperty.call(checklistState, key)
+            ? Boolean(checklistState[key])
+            : Boolean(match[1]) && match[1].toLowerCase() === "x";
+        return { text: checklistText, key, checked, index: lineIndex };
+    };
+    const renderChecklistEntry = entry =>
+        '<label class="note-checklist-item' + (entry.checked ? ' is-checked' : '') + '">' +
+        '<input type="checkbox" class="note-checklist-checkbox" data-note-checklist-key="' +
+        escapeAttribute(entry.key) + '"' + (entry.checked ? ' checked' : '') + '>' +
+        '<span>' + renderInlineNoteText(entry.text) + '</span>' +
+        '</label>';
 
     while (index < lines.length) {
-        const checklistMatch = noteId
-            ? lines[index].match(/^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/)
-            : null;
-
-        if (checklistMatch) {
-            const checklistText = checklistMatch[2];
-            const checklistKey = String(noteId) + "::" + index + "::" + checklistText;
-            let checklistState = {};
-
-            try {
-                checklistState = JSON.parse(localStorage.getItem("nursing-note-checklists") || "{}");
-            } catch (error) {
-                checklistState = {};
+        if (isChecklistLine(lines[index])) {
+            const entries = [];
+            while (index < lines.length && isChecklistLine(lines[index])) {
+                entries.push(getChecklistEntry(lines[index], index));
+                index++;
             }
 
-            const checked = Object.prototype.hasOwnProperty.call(checklistState, checklistKey)
-                ? Boolean(checklistState[checklistKey])
-                : Boolean(checklistMatch[1]) && checklistMatch[1].toLowerCase() === "x";
+            if (checklistOrder === "top") {
+                entries.sort((a, b) => Number(b.checked) - Number(a.checked) || a.index - b.index);
+            } else if (checklistOrder === "bottom") {
+                entries.sort((a, b) => Number(a.checked) - Number(b.checked) || a.index - b.index);
+            }
 
-            html += '<label class="note-checklist-item' + (checked ? ' is-checked' : '') + '">' +
-                '<input type="checkbox" class="note-checklist-checkbox" data-note-checklist-key="' +
-                escapeAttribute(checklistKey) + '"' + (checked ? ' checked' : '') + '>' +
-                '<span>' + renderInlineNoteText(checklistText) + '</span>' +
-                '</label>';
-
-            if (index < lines.length - 1) html += '<br>';
-            index++;
+            html += entries.map(renderChecklistEntry).join("<br>");
+            if (index < lines.length) html += "<br>";
             continue;
         }
 
         const firstRow = parseNoteTableRow(lines[index]);
-
         if (firstRow) {
             const tableRows = [firstRow];
             let nextIndex = index + 1;
-
             while (nextIndex < lines.length) {
                 const row = parseNoteTableRow(lines[nextIndex]);
-
                 if (!row || row.length !== firstRow.length) break;
-
                 tableRows.push(row);
                 nextIndex++;
             }
-
             if (tableRows.length >= 2) {
                 html += renderNoteTable(tableRows);
-
-                if (nextIndex < lines.length) {
-                    html += "<br>";
-                }
-
+                if (nextIndex < lines.length) html += "<br>";
                 index = nextIndex;
                 continue;
             }
         }
 
         html += renderInlineNoteText(lines[index]);
-
-        if (index < lines.length - 1) {
-            html += "<br>";
-        }
-
+        if (index < lines.length - 1) html += "<br>";
         index++;
     }
-
     return html;
 }
 
