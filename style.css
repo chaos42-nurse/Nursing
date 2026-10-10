@@ -3552,3 +3552,69 @@ section h2 {
     opacity: 0.68;
     text-decoration: line-through;
 }
+
+
+/* Liste spuntabili: controlli discreti, coerenti con il tema attivo. */
+.app-note-text .note-checklist-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex: 0 0 17px;
+    width: 17px;
+    height: 17px;
+    margin: 3px 0 0;
+    border: 1.5px solid color-mix(in srgb, var(--text) 34%, var(--border));
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    box-shadow: none;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, opacity .15s ease;
+}
+.app-note-text .note-checklist-checkbox::after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    border: solid var(--surface);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transform-origin: center;
+    transition: transform .12s ease;
+}
+.app-note-text .note-checklist-checkbox:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.app-note-text .note-checklist-checkbox:checked::after {
+    transform: rotate(45deg) scale(1);
+}
+.app-note-text .note-checklist-checkbox:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+.app-note-text .note-checklist-item:hover .note-checklist-checkbox {
+    border-color: var(--accent);
+}
+.app-note-actions {
+    flex-wrap: wrap;
+    align-items: center;
+}
+.app-note-checklist-order-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted, var(--text));
+    font-size: .78rem;
+    white-space: nowrap;
+}
+.app-note-checklist-order {
+    max-width: 135px;
+    min-height: 34px;
+    padding: 5px 22px 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: .78rem;
+}
