@@ -8305,9 +8305,9 @@ function setupAppNotes() {
         if (start !== end) return;
 
         const value = input.value;
-        const lineStart = value.lastIndexOf("\\n", start - 1) + 1;
+        const lineStart = value.lastIndexOf("\n", start - 1) + 1;
         const linePrefix = value.slice(lineStart, start);
-        const listMatch = linePrefix.match(/^(\\s*)-\\s+(.*)$/);
+        const listMatch = linePrefix.match(/^(\s*)-\s+(.*)$/);
         if (!listMatch) return;
 
         const indentation = listMatch[1] || "";
@@ -8318,11 +8318,11 @@ function setupAppNotes() {
             // Invio su una voce vuota: rimuove il trattino e termina la lista.
             input.setRangeText("", lineStart, start, "start");
             const cursor = lineStart + indentation.length;
-            input.setRangeText("\\n", cursor, cursor, "end");
+            input.setRangeText("\n", cursor, cursor, "end");
             return;
         }
 
-        input.setRangeText("\\n" + indentation + "- ", start, end, "end");
+        input.setRangeText("\n" + indentation + "- ", start, end, "end");
     });
 
     document.addEventListener("change", event => {
