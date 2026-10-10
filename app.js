@@ -8296,6 +8296,35 @@ function renderAppNotesPage() {
 }
 
 function setupAppNotes() {
+    document.addEventListener("keydown", event => {
+        const input = event.target;
+        if (!input || input.id !== "appNoteInput" || event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
+
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        if (start !== end) return;
+
+        const value = input.value;
+        const lineStart = value.lastIndexOf("\\n", start - 1) + 1;
+        const linePrefix = value.slice(lineStart, start);
+        const listMatch = linePrefix.match(/^(\\s*)-\\s+(.*)$/);
+        if (!listMatch) return;
+
+        const indentation = listMatch[1] || "";
+        const itemText = listMatch[2] || "";
+        event.preventDefault();
+
+        if (!itemText.trim()) {
+            // Invio su una voce vuota: rimuove il trattino e termina la lista.
+            input.setRangeText("", lineStart, start, "start");
+            const cursor = lineStart + indentation.length;
+            input.setRangeText("\\n", cursor, cursor, "end");
+            return;
+        }
+
+        input.setRangeText("\\n" + indentation + "- ", start, end, "end");
+    });
+
     document.addEventListener("change", event => {
         const checkbox = event.target.closest(".note-checklist-checkbox");
         if (!checkbox) return;
@@ -8678,7 +8707,7 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
 
     while (index < lines.length) {
         const checklistMatch = noteId
-            ? lines[index].match(/^\s*-\s*\[([ xX])\]\s+(.+)$/)
+            ? lines[index].match(/^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/)
             : null;
 
         if (checklistMatch) {
@@ -8694,7 +8723,7 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
 
             const checked = Object.prototype.hasOwnProperty.call(checklistState, checklistKey)
                 ? Boolean(checklistState[checklistKey])
-                : checklistMatch[1].toLowerCase() === "x";
+                : Boolean(checklistMatch[1]) && checklistMatch[1].toLowerCase() === "x";
 
             html += '<label class="note-checklist-item' + (checked ? ' is-checked' : '') + '">' +
                 '<input type="checkbox" class="note-checklist-checkbox" data-note-checklist-key="' +
