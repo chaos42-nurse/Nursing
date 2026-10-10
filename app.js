@@ -8293,7 +8293,7 @@ function renderAppNotesPage() {
                 <label class="app-note-checklist-order-label app-note-editor-order-label" for="appNoteChecklistOrder">
                     <span>Ordine degli elementi spuntati</span>
                     <select id="appNoteChecklistOrder" class="app-note-checklist-order" aria-label="Ordine degli elementi spuntati">
-                        <option value="original">Al loro posto</option>
+                        <option value="original">Nessuno</option>
                         <option value="top">In cima</option>
                         <option value="bottom">In fondo</option>
                     </select>
