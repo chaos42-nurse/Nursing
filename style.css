@@ -3522,3 +3522,33 @@ section h2 {
 .patient-photo-compare-top button.active {
     background: #2f81f7;
 }
+
+
+/* Liste spuntabili nelle note: lo stato si aggiorna senza entrare in modifica. */
+.app-note-text .note-checklist-item {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 9px;
+    max-width: 100%;
+    cursor: pointer;
+    vertical-align: top;
+}
+
+.app-note-text .note-checklist-checkbox {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 3px 0 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.app-note-text .note-checklist-item > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.app-note-text .note-checklist-item.is-checked > span {
+    opacity: 0.68;
+    text-decoration: line-through;
+}
