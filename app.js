@@ -8678,7 +8678,7 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
 
     while (index < lines.length) {
         const checklistMatch = noteId
-            ? lines[index].match(/^\\s*-\\s*\\[([ xX])\\]\\s+(.+)$/)
+            ? lines[index].match(/^\s*-\s*\[([ xX])\]\s+(.+)$/)
             : null;
 
         if (checklistMatch) {
