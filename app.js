@@ -8361,7 +8361,7 @@ function setupAppNotes() {
             } catch (error) {
                 orderSettings = {};
             }
-            if (orderSettings[noteId] === "top" || orderSettings[noteId] === "bottom") {
+            if (orderSettings["app-" + noteId] === "top" || orderSettings["app-" + noteId] === "bottom") {
                 const scrollPosition = window.scrollY;
                 renderAppNotesPage();
                 window.scrollTo(0, scrollPosition);
@@ -8398,7 +8398,7 @@ function setupAppNotes() {
                 } catch (error) {
                     orderSettings = {};
                 }
-                orderSelect.value = orderSettings[String(note.id)] || "original";
+                orderSelect.value = orderSettings["app-" + String(note.id)] || orderSettings[String(note.id)] || "original";
             }
 
             if (saveButton) {
@@ -8470,7 +8470,7 @@ function setupAppNotes() {
                     orderSettings = {};
                 }
                 const orderSelect = document.getElementById("appNoteChecklistOrder");
-                orderSettings[String(editingId)] = ["original", "top", "bottom"].includes(orderSelect?.value)
+                orderSettings["app-" + String(editingId)] = ["original", "top", "bottom"].includes(orderSelect?.value)
                     ? orderSelect.value
                     : "original";
                 localStorage.setItem("nursing-note-checklist-order", JSON.stringify(orderSettings));
@@ -8496,7 +8496,7 @@ function setupAppNotes() {
                 orderSettings = {};
             }
             const orderSelect = document.getElementById("appNoteChecklistOrder");
-            orderSettings[String(newNote.id)] = ["original", "top", "bottom"].includes(orderSelect?.value)
+            orderSettings["app-" + String(newNote.id)] = ["original", "top", "bottom"].includes(orderSelect?.value)
                 ? orderSelect.value
                 : "original";
             localStorage.setItem("nursing-note-checklist-order", JSON.stringify(orderSettings));
