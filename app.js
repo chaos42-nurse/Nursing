@@ -8255,26 +8255,11 @@ function renderAppNotesPage() {
             <div class="app-notes-list">
                 ${notes.length
                     ? notes.map(note => {
-                        let checklistOrder = "original";
-                        try {
-                            const orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
-                            checklistOrder = orderSettings[String(note.id)] || "original";
-                        } catch (error) {
-                            checklistOrder = "original";
-                        }
                         return `
                         <article id="app-note-${escapeAttribute(note.id)}" class="app-note-card" data-app-note-id="${escapeAttribute(note.id)}">
                             <div class="app-note-card-header">
                                 <h3>${renderNoteText(note.title || "Nota")}</h3>
                                 <div class="personal-note-actions app-note-actions">
-                                    <label class="app-note-checklist-order-label" title="Ordine delle voci spuntate">
-                                        <span>Spunte</span>
-                                        <select class="app-note-checklist-order" data-app-note-checklist-order="${escapeAttribute(note.id)}" aria-label="Ordine delle voci spuntate">
-                                            <option value="original" ${checklistOrder === "original" ? "selected" : ""}>Al loro posto</option>
-                                            <option value="top" ${checklistOrder === "top" ? "selected" : ""}>In cima</option>
-                                            <option value="bottom" ${checklistOrder === "bottom" ? "selected" : ""}>In fondo</option>
-                                        </select>
-                                    </label>
                                     <button class="app-note-edit" type="button" data-app-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
@@ -8305,6 +8290,14 @@ function renderAppNotesPage() {
                     placeholder="Scrivi un'idea, una modifica da fare o un promemoria..."
                     rows="7"
                 ></textarea>
+                <label class="app-note-checklist-order-label app-note-editor-order-label" for="appNoteChecklistOrder">
+                    <span>Ordine degli elementi spuntati</span>
+                    <select id="appNoteChecklistOrder" class="app-note-checklist-order" aria-label="Ordine degli elementi spuntati">
+                        <option value="original">Al loro posto</option>
+                        <option value="top">In cima</option>
+                        <option value="bottom">In fondo</option>
+                    </select>
+                </label>
                 <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <p id="appNoteMessage" class="personal-note-message"></p>
             </div>
@@ -8343,23 +8336,6 @@ function setupAppNotes() {
     });
 
     document.addEventListener("change", event => {
-        const orderSelect = event.target.closest("[data-app-note-checklist-order]");
-        if (orderSelect) {
-            let orderSettings = {};
-            try {
-                orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
-            } catch (error) {
-                orderSettings = {};
-            }
-            const noteId = orderSelect.dataset.appNoteChecklistOrder || "";
-            orderSettings[noteId] = ["original", "top", "bottom"].includes(orderSelect.value)
-                ? orderSelect.value
-                : "original";
-            localStorage.setItem("nursing-note-checklist-order", JSON.stringify(orderSettings));
-            renderAppNotesPage();
-            return;
-        }
-
         const checkbox = event.target.closest(".note-checklist-checkbox");
         if (!checkbox) return;
 
@@ -8413,6 +8389,17 @@ function setupAppNotes() {
             editor.dataset.editingId = String(note.id);
             titleInput.value = note.title || "";
             input.value = note.text || "";
+
+            const orderSelect = document.getElementById("appNoteChecklistOrder");
+            if (orderSelect) {
+                let orderSettings = {};
+                try {
+                    orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+                } catch (error) {
+                    orderSettings = {};
+                }
+                orderSelect.value = orderSettings[String(note.id)] || "original";
+            }
 
             if (saveButton) {
                 saveButton.textContent = "💾 Salva modifiche";
@@ -8476,18 +8463,43 @@ function setupAppNotes() {
                     note.updatedAt = now;
                 }
 
+                let orderSettings = {};
+                try {
+                    orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+                } catch (error) {
+                    orderSettings = {};
+                }
+                const orderSelect = document.getElementById("appNoteChecklistOrder");
+                orderSettings[String(editingId)] = ["original", "top", "bottom"].includes(orderSelect?.value)
+                    ? orderSelect.value
+                    : "original";
+                localStorage.setItem("nursing-note-checklist-order", JSON.stringify(orderSettings));
+
                 saveAppNotes(notes);
                 renderAppNotesPage();
                 return;
             }
 
-            notes.unshift({
+            const newNote = {
                 id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
                 title: (titleInput?.value || "").trim() || "Nota",
                 text: textValue,
                 createdAt: now,
                 updatedAt: now
-            });
+            };
+            notes.unshift(newNote);
+
+            let orderSettings = {};
+            try {
+                orderSettings = JSON.parse(localStorage.getItem("nursing-note-checklist-order") || "{}");
+            } catch (error) {
+                orderSettings = {};
+            }
+            const orderSelect = document.getElementById("appNoteChecklistOrder");
+            orderSettings[String(newNote.id)] = ["original", "top", "bottom"].includes(orderSelect?.value)
+                ? orderSelect.value
+                : "original";
+            localStorage.setItem("nursing-note-checklist-order", JSON.stringify(orderSettings));
 
             saveAppNotes(notes);
             renderAppNotesPage();
