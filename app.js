@@ -382,7 +382,6 @@ function setupPatientPhotosPage(patient) {
                         hour: "2-digit", minute: "2-digit"
                     });
 
-<<<<<<< Updated upstream
                     return `
                         <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
                             <img class="patient-photo-image" src="${url}"
@@ -391,7 +390,7 @@ function setupPatientPhotosPage(patient) {
                                  data-photo-view="${escapeAttribute(item.id)}">
                             <span class="patient-photo-badge" aria-hidden="true"></span>
                             <figcaption class="patient-photo-meta">
-                                <span class="patient-photo-date">${escapeHtml(dateTime)}</span>
+                                <span class="patient-photo-date">${escapeHtml(dateTime)}${measureSummary(item.measure) ? " 📏" : ""}</span>
                                 <button class="patient-photo-delete" type="button"
                                         data-photo-delete="${escapeAttribute(item.id)}"
                                         aria-label="Elimina foto">🗑️</button>
@@ -401,56 +400,6 @@ function setupPatientPhotosPage(patient) {
                 }).join("")}
             </div>
         `;
-=======
-            return new Date(iso).toLocaleDateString("it-IT", {
-                weekday: "short", day: "2-digit", month: "2-digit", year: "numeric"
-            });
-        };
-
-        const groups = new Map();
-
-        items.forEach(item => {
-            const key = dayKey(item.createdAt);
-            if (!groups.has(key)) groups.set(key, []);
-            groups.get(key).push(item);
-        });
-
-        gallery.innerHTML = [...groups.values()].map(group => `
-            <section class="patient-photo-day-group">
-                <h4 class="patient-photo-day">
-                    ${escapeHtml(dayLabel(group[0].createdAt))}
-                    <small>· ${group.length} foto</small>
-                </h4>
-                <div class="patient-photo-grid">
-                    ${group.map(item => {
-                        const url = URL.createObjectURL(item.blob);
-                        objectUrls.push(url);
-                        itemsById.set(item.id, item);
-
-                        const time = new Date(item.createdAt).toLocaleTimeString("it-IT", {
-                            hour: "2-digit", minute: "2-digit"
-                        });
-
-                        return `
-                            <figure class="patient-photo-card" data-card="${escapeAttribute(item.id)}" style="margin:0">
-                                <img class="patient-photo-image" src="${url}"
-                                     alt="Foto delle ${escapeAttribute(time)}"
-                                     loading="lazy" decoding="async"
-                                     data-photo-view="${escapeAttribute(item.id)}">
-                                <span class="patient-photo-badge" aria-hidden="true"></span>
-                                <figcaption class="patient-photo-meta">
-                                    <span class="patient-photo-date">${escapeHtml(time)}${measureSummary(item.measure) ? " 📏" : ""}</span>
-                                    <button class="patient-photo-delete" type="button"
-                                            data-photo-delete="${escapeAttribute(item.id)}"
-                                            aria-label="Elimina foto">🗑️</button>
-                                </figcaption>
-                            </figure>
-                        `;
-                    }).join("")}
-                </div>
-            </section>
-        `).join("");
->>>>>>> Stashed changes
 
         selected = selected.filter(id => itemsById.has(id));
         updateSelectionUi();
@@ -1494,7 +1443,7 @@ function setupPatientPhotosPage(patient) {
             if (dirty && !window.confirm("La misura non è stata salvata. Chiudere senza salvare?")) return;
 
             document.removeEventListener("keydown", onKey);
-<<<<<<< Updated upstream
+            window.removeEventListener("resize", fit);
             if (window.history.state?.patientPhotoViewer) {
                 window.history.back();
                 return;
@@ -1503,9 +1452,7 @@ function setupPatientPhotosPage(patient) {
         };
         viewer.closeViewer = () => {
             document.removeEventListener("keydown", onKey);
-=======
             window.removeEventListener("resize", fit);
->>>>>>> Stashed changes
             viewer.remove();
         };
 

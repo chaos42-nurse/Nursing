@@ -3379,78 +3379,6 @@ section h2 {
     border-bottom: none !important;
     box-shadow: none !important;
 }
-<<<<<<< Updated upstream
-=======
-
-
-/* ---------- Consegna SBAR ---------- */
-
-.patient-sbar-section {
-    margin: 12px 0;
-}
-
-.patient-sbar-card {
-    max-height: calc(100vh - 36px);
-}
-
-.patient-sbar-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 12px 0;
-    cursor: pointer;
-}
-
-.patient-sbar-toggle input {
-    width: 18px !important;
-    height: 18px;
-    flex: 0 0 auto;
-}
-
-.patient-sbar-block {
-    display: block;
-    margin-bottom: 12px;
-}
-
-.patient-sbar-block small {
-    display: block;
-    margin: 2px 0 6px;
-    opacity: .7;
-}
-
-.patient-sbar-block textarea {
-    display: block;
-    width: 100%;
-    min-height: 70px;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--background, transparent);
-    color: var(--text);
-    font: inherit;
-    line-height: 1.4;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-.patient-sbar-letter {
-    display: inline-block;
-    width: 22px;
-    height: 22px;
-    margin-right: 4px;
-    border-radius: 6px;
-    background: #2f81f7;
-    color: #fff;
-    font-size: .85rem;
-    line-height: 22px;
-    text-align: center;
-}
-
-.patient-sbar-privacy {
-    margin: 8px 0;
-    font-size: .8rem;
-    opacity: .75;
-}
 
 
 /* ---------- Visualizzatore: livello foto + righello ---------- */
@@ -3582,4 +3510,3 @@ section h2 {
     font-size: .74rem;
     opacity: .7;
 }
->>>>>>> Stashed changes
