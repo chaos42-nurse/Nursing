@@ -8326,6 +8326,11 @@ function renderAppNotesPage() {
                     autocomplete="off"
                     placeholder="Titolo della nota"
                 >
+                <div class="note-format-bar" role="group" aria-label="Formattazione">
+                    <button type="button" data-note-format="**" data-note-format-target="appNoteInput" title="Grassetto: **testo**"><b>G</b></button>
+                    <button type="button" data-note-format="*" data-note-format-target="appNoteInput" title="Corsivo: *testo*"><i>C</i></button>
+                    <button type="button" data-note-format="__" data-note-format-target="appNoteInput" title="Sottolineato: __testo__"><u>S</u></button>
+                </div>
                 <textarea
                     id="appNoteInput"
                     class="personal-note-input"
@@ -8888,9 +8893,78 @@ document.addEventListener("click", event => {
 
 loadNoteCategoryIndex();
 
+document.addEventListener("click", event => {
+    const button = event.target.closest("[data-note-format]");
+    if (!button) return;
+
+    const textarea = document.getElementById(button.dataset.noteFormatTarget);
+    if (!textarea) return;
+
+    const mark = button.dataset.noteFormat;
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? start;
+    const selected = textarea.value.slice(start, end);
+
+    textarea.value = textarea.value.slice(0, start) + mark + selected + mark + textarea.value.slice(end);
+
+    // Senza selezione il cursore resta tra i due segni, pronto a scrivere.
+    // Con una selezione il testo resta selezionato, così si possono sommare più stili.
+    textarea.focus();
+    textarea.setSelectionRange(start + mark.length, start + mark.length + selected.length);
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+});
+
+
+
+/* =========================================================
+   FORMATTAZIONE NELLE NOTE
+   **grassetto**  *corsivo*  __sottolineato__  — combinabili: ***grassetto corsivo***,
+   **__grassetto sottolineato__**, *__corsivo sottolineato__*, ecc.
+========================================================= */
+
+const NOTE_FORMAT_TOKENS = {
+    b: ["\uE000", "\uE001", "<strong>", "</strong>"],
+    i: ["\uE002", "\uE003", "<em>", "</em>"],
+    u: ["\uE004", "\uE005", "<u>", "</u>"]
+};
+
+function markNoteFormatting(source) {
+    // I collegamenti [[...]] e <placeorder> vengono messi da parte: dentro non si formatta.
+    const saved = [];
+    let text = String(source).replace(/<placeorder>[\s\S]*?<\/placeorder>|\[\[[\s\S]*?\]\]/gi, match => {
+        saved.push(match);
+        return "\uE010" + (saved.length - 1) + "\uE011";
+    });
+
+    const wrap = (pattern, kinds) => {
+        text = text.replace(pattern, (all, inner) =>
+            kinds.map(k => NOTE_FORMAT_TOKENS[k][0]).join("") +
+            inner +
+            kinds.slice().reverse().map(k => NOTE_FORMAT_TOKENS[k][1]).join("")
+        );
+    };
+
+    wrap(/\*\*\*(?=[^\s*])([^\n]*?[^\s*])\*\*\*/g, ["b", "i"]);
+    wrap(/\*\*(?=[^\s*])([^\n]*?[^\s*])\*\*/g, ["b"]);
+    wrap(/__(?=[^\s_])([^\n]*?[^\s_])__/g, ["u"]);
+    // Il corsivo non scatta in operazioni come 2*3*4: l'asterisco non deve toccare lettere o numeri.
+    wrap(/(?<![\w*])\*(?=[^\s*])([^\n*]*?[^\s*])\*(?![\w*])/g, ["i"]);
+
+    return text.replace(/\uE010(\d+)\uE011/g, (all, index) => saved[Number(index)]);
+}
+
+function renderNoteFormatTokens(html) {
+    let out = String(html);
+
+    Object.values(NOTE_FORMAT_TOKENS).forEach(([open, close, openTag, closeTag]) => {
+        out = out.split(open).join(openTag).split(close).join(closeTag);
+    });
+
+    return out;
+}
 
 function renderInlineNoteText(text) {
-    const source = String(text || "");
+    const source = markNoteFormatting(String(text || ""));
     const pattern = /<placeorder>([\s\S]*?)<\/placeorder>|\[\[([\s\S]*?)\]\]/gi;
     let html = "";
     let lastIndex = 0;
@@ -8924,7 +8998,7 @@ function renderInlineNoteText(text) {
     }
 
     html += escapeNoteText(source.slice(lastIndex));
-    return html;
+    return renderNoteFormatTokens(html);
 }
 
 function parseNoteTableRow(line) {
@@ -9929,6 +10003,11 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             <div class="personal-note-editor">
                 <h3>➕ Nuova nota</h3>
                 <input id="personalNoteTitle" class="personal-note-title-input" type="text" autocomplete="off" placeholder="Titolo della nota">
+                <div class="note-format-bar" role="group" aria-label="Formattazione">
+                    <button type="button" data-note-format="**" data-note-format-target="personalNoteInput" title="Grassetto: **testo**"><b>G</b></button>
+                    <button type="button" data-note-format="*" data-note-format-target="personalNoteInput" title="Corsivo: *testo*"><i>C</i></button>
+                    <button type="button" data-note-format="__" data-note-format-target="personalNoteInput" title="Sottolineato: __testo__"><u>S</u></button>
+                </div>
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>

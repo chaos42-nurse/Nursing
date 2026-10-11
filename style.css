@@ -3782,3 +3782,30 @@ a.note-category-link-missing {
     color: var(--text-muted, var(--text));
     opacity: .8;
 }
+
+
+/* Barra G / C / S sopra il testo delle note */
+.note-format-bar {
+    display: flex;
+    gap: 6px;
+}
+
+.note-format-bar button {
+    min-width: 38px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.note-format-bar button:hover,
+.note-format-bar button:focus-visible {
+    border-color: var(--accent);
+}
+
+.app-note-text strong, .personal-note-text strong { font-weight: 700; }
+.app-note-text u, .personal-note-text u { text-underline-offset: 2px; }
