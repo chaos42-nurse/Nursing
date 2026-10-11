@@ -8277,6 +8277,7 @@ function renderContactPage() {
 
 function renderAppNotesPage() {
     const notes = getAppNotes();
+    const legendText = "- elenco puntato\\n\\n[[collegamento]]\\n[[@collegamento categoria]]\\n\\n[tabella] [esmpio]\\n[tra parentesi] [sere lo spazio]\\n\\n*grassetto*\\n/corsivo/\\n* _sottolineato_*";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
@@ -8315,6 +8316,12 @@ function renderAppNotesPage() {
                             Nessuna nota.
                         </div>
                     `}
+                <article class="app-note-card app-note-legend" id="app-note-legend">
+                    <details>
+                        <summary class="app-note-legend-title">LEGGENDA</summary>
+                        <div class="app-note-text">${renderNoteText(legendText, "", "", "app-legenda")}</div>
+                    </details>
+                </article>
             </div>
 
             <div class="app-note-editor">
