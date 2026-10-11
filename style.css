@@ -3624,3 +3624,14 @@ section h2 {
     color: #fff;
     box-shadow: 0 0 0 2px rgba(217, 119, 6, .45);
 }
+
+
+/* Nelle note generali, modifica ed elimina restano affiancati anche su mobile. */
+.app-note-card .app-note-actions {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
