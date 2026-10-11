@@ -8277,7 +8277,7 @@ function renderContactPage() {
 
 function renderAppNotesPage() {
     const notes = getAppNotes();
-    const legendText = "- elenco puntato\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esmpio]\n[tra parentesi] [sere lo spazio]\n\n*grassetto*\n/corsivo/\n* _sottolineato_*";
+    const legendText = "- elenco puntato\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esempio]\n[tra parentesi] [serve lo spazio]\n\n*grassetto*\n/corsivo/\n_sottolineato_";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
