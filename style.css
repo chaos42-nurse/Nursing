@@ -3839,3 +3839,17 @@ a.note-category-link-missing {
 .app-note-legend .app-note-text {
     margin-top: 10px;
 }
+
+
+/* Gli esempi della legenda mostrano la sintassi letterale, senza applicare la formattazione. */
+.app-note-legend-example {
+    margin: 10px 0 0;
+    padding: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: inherit;
+    line-height: 1.65;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+}
