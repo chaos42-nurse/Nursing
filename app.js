@@ -8525,7 +8525,7 @@ function renderContactPage() {
 
 function renderAppNotesPage() {
     const notes = getAppNotes();
-    const legendText = "- elenco con caselle\n\n1. elenco numerato\n2. continua automaticamente\n\na. elenco alfabetico\nb. continua automaticamente\n\n° elenco puntato\n• altro stile di elenco\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esempio]\n[tra parentesi] [serve lo spazio]\n\n*grassetto*\n/corsivo/\n_sottolineato_";
+    const legendText = "- elenco con caselle\n\n1. elenco numerato\n2. continua automaticamente\n\na. elenco alfabetico\nb. continua automaticamente\n\n° elenco puntato\n• stesso elenco puntato: simbolo equivalente a °\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esempio]\n[tra parentesi] [serve lo spazio]\n\n*grassetto*\n/corsivo/\n_sottolineato_";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
