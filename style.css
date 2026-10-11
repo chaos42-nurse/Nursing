@@ -3617,6 +3617,8 @@ section h2 {
     color: var(--text);
     font: inherit;
     font-size: .78rem;
+}
+
 /* Pulsante "riporta il righello dentro": si evidenzia quando la L sporge dalla foto */
 .patient-photo-viewer-top button.attention,
 .patient-photo-compare-tools button.attention {
@@ -3634,4 +3636,50 @@ section h2 {
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
+}
+
+
+/* Note compatte: anteprima di poche righe, un tocco per aprirle per intero. */
+.app-note-text,
+.personal-note-text {
+    max-height: 4.7em;
+    overflow: hidden;
+}
+
+.app-note-card.note-open .app-note-text,
+.personal-note-card.note-open .personal-note-text {
+    max-height: none;
+}
+
+.app-note-card.note-collapsible:not(.note-open) .app-note-text,
+.personal-note-card.note-collapsible:not(.note-open) .personal-note-text {
+    -webkit-mask-image: linear-gradient(#000 55%, transparent);
+    mask-image: linear-gradient(#000 55%, transparent);
+}
+
+.app-note-card.note-collapsible,
+.personal-note-card.note-collapsible {
+    position: relative;
+    cursor: pointer;
+}
+
+.app-note-card.note-collapsible::after,
+.personal-note-card.note-collapsible::after {
+    content: "▾ Apri";
+    display: block;
+    margin-top: 4px;
+    color: var(--accent);
+    font-size: .78rem;
+    text-align: center;
+}
+
+.app-note-card.note-collapsible.note-open::after,
+.personal-note-card.note-collapsible.note-open::after {
+    content: "▴ Chiudi";
+}
+
+/* Modifica ed elimina restano affiancati anche nelle note di sottocategoria. */
+.personal-note-actions {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
 }

@@ -11489,6 +11489,71 @@ function escapeAttribute(value) {
 }
 
 /* =========================================================
+   NOTE COMPATTE: anteprima ridotta, un tocco per leggerle intere
+========================================================= */
+
+(function setupCollapsibleNotes() {
+
+    const expanded = new Set();     // le note aperte restano aperte anche dopo un nuovo disegno
+
+    const noteKey = card =>
+        (card.dataset.appNoteId ? "app:" + card.dataset.appNoteId : "") ||
+        (card.dataset.noteId ? "personal:" + card.dataset.noteId : "");
+
+    const refresh = () => {
+
+        document.querySelectorAll(".app-note-card, .personal-note-card").forEach(card => {
+
+            const text = card.querySelector(".app-note-text, .personal-note-text");
+            const key = noteKey(card);
+            if (!text || !key) return;
+
+            const open = expanded.has(key);
+            card.classList.toggle("note-open", open);
+
+            // Misura con la nota chiusa: se è più alta dell'anteprima, si può espandere.
+            card.classList.remove("note-open");
+            const overflowing = text.scrollHeight > text.clientHeight + 2;
+            card.classList.toggle("note-open", open);
+
+            card.classList.toggle("note-collapsible", overflowing || open);
+            card.setAttribute("aria-expanded", String(open));
+        });
+    };
+
+    let queued = false;
+    const schedule = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => { queued = false; refresh(); });
+    };
+
+    new MutationObserver(schedule).observe(content, { childList: true, subtree: true });
+    window.addEventListener("resize", schedule);
+
+    document.addEventListener("click", event => {
+
+        const card = event.target.closest(".app-note-card, .personal-note-card");
+        if (!card || !card.classList.contains("note-collapsible")) return;
+
+        // Pulsanti, caselle della lista, link e testo selezionato non aprono/chiudono la nota.
+        if (event.target.closest("button, a, input, select, textarea, label")) return;
+        if (String(window.getSelection && window.getSelection()).length) return;
+
+        const key = noteKey(card);
+        if (!key) return;
+
+        if (expanded.has(key)) expanded.delete(key);
+        else expanded.add(key);
+
+        refresh();
+    });
+
+    schedule();
+})();
+
+
+/* =========================================================
    SERVICE WORKER
 ========================================================= */
 
