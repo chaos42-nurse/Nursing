@@ -10385,8 +10385,261 @@ function collectPersonalization(includePatients = false) {
             "dark",
         orders: collectOrderPreferences(),
         notes: getPersonalNotes(),
+        appNotes: getAppNotes(),
         patients: includePatients ? getPatients() : []
     };
+}
+
+/* Unisce note generali ricevute con quelle presenti: niente doppioni, nessuna nota sovrascritta. */
+function mergeIncomingAppNotes(incoming) {
+    if (!Array.isArray(incoming) || !incoming.length) return 0;
+
+    const current = getAppNotes();
+    const fingerprint = note => JSON.stringify([note.title, note.text]);
+    const known = new Set(current.map(fingerprint));
+    const usedIds = new Set(current.map(note => String(note.id)));
+    let added = 0;
+
+    for (const raw of incoming) {
+        if (!raw || typeof raw !== "object") continue;
+
+        const note = {
+            id: String(raw.id || Date.now()),
+            title: String(raw.title || "Nota"),
+            text: String(raw.text || ""),
+            createdAt: String(raw.createdAt || ""),
+            updatedAt: String(raw.updatedAt || "")
+        };
+
+        if (!note.text.trim() || known.has(fingerprint(note))) continue;
+
+        if (usedIds.has(note.id)) {
+            note.id = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+        }
+
+        usedIds.add(note.id);
+        known.add(fingerprint(note));
+        current.push(note);
+        added++;
+    }
+
+    if (added) saveAppNotes(current);
+    return added;
+}
+
+/* Unisce le note per sezione ({ "stato::scheda": [note] }) senza doppioni. */
+function mergeIncomingSectionNotes(incomingMap) {
+    if (!incomingMap || typeof incomingMap !== "object") return 0;
+
+    let existingNotes = {};
+    try {
+        existingNotes = JSON.parse(localStorage.getItem(PERSONALIZATION_KEYS.notes) || "{}") || {};
+    } catch (_) {
+        existingNotes = {};
+    }
+
+    let added = 0;
+
+    for (const [key, incomingNotes] of Object.entries(incomingMap)) {
+        if (!Array.isArray(incomingNotes)) continue;
+
+        const list = Array.isArray(existingNotes[key]) ? existingNotes[key] : [];
+        const fingerprint = note => JSON.stringify([note?.title || "", note?.text || ""]);
+        const known = new Set(list.map(fingerprint));
+        const usedIds = new Set(list.map(note => String(note?.id || "")));
+
+        for (const raw of incomingNotes) {
+            if (!raw || typeof raw !== "object") continue;
+            if (known.has(fingerprint(raw))) continue;
+
+            const note = { ...raw };
+            if (!note.id || usedIds.has(String(note.id))) {
+                note.id = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+            }
+
+            usedIds.add(String(note.id));
+            known.add(fingerprint(note));
+            list.push(note);
+            added++;
+        }
+
+        existingNotes[key] = list;
+    }
+
+    if (added) localStorage.setItem(PERSONALIZATION_KEYS.notes, JSON.stringify(existingNotes));
+    return added;
+}
+
+/* Scelta libera delle note da condividere: generali e di ogni area/sezione. */
+function showNoteSelectionShareDialog() {
+    document.getElementById("noteSelectionShareDialog")?.remove();
+
+    const appNotes = getAppNotes();
+    const sectionNotes = getPersonalNotes();
+
+    const labelOf = (stateId, itemId) => {
+        const entries = noteCategoryIndex.ready ? noteCategoryIndex.entries : [];
+        const found = entries.find(e => e.state === stateId && e.id === (itemId || ""));
+        return found ? found.title : (itemId || stateId);
+    };
+
+    // Raggruppa: area (stato) → sezione (scheda) → note
+    const areas = new Map();
+
+    for (const [key, notes] of Object.entries(sectionNotes)) {
+        const separator = key.indexOf("::");
+        if (separator === -1 || !Array.isArray(notes) || !notes.length) continue;
+
+        const stateId = key.slice(0, separator);
+        const itemId = key.slice(separator + 2);
+
+        if (!areas.has(stateId)) areas.set(stateId, new Map());
+        areas.get(stateId).set(itemId, { key, notes });
+    }
+
+    const currentKey = state && item ? state + "::" + item : "";
+    const noteRow = (note, attrs, checked) => `
+        <label class="share-tree-note">
+            <input type="checkbox" ${attrs} ${checked ? "checked" : ""}>
+            <span>${escapeHtml(note.title || "Nota")}</span>
+        </label>`;
+
+    const generalHtml = appNotes.length ? `
+        <details class="share-tree-group" open>
+            <summary>
+                <label><input type="checkbox" data-share-group="general"> <strong>📝 Note generali</strong></label>
+                <small>${appNotes.length}</small>
+            </summary>
+            <div class="share-tree-body">
+                ${appNotes.map(note => noteRow(note, `data-share-app="${escapeAttribute(note.id)}" data-share-in="general"`, false)).join("")}
+            </div>
+        </details>` : "";
+
+    const areasHtml = [...areas.entries()].map(([stateId, sections]) => {
+        const total = [...sections.values()].reduce((sum, sec) => sum + sec.notes.length, 0);
+        const hasCurrent = currentKey && [...sections.values()].some(sec => sec.key === currentKey);
+
+        return `
+        <details class="share-tree-group" ${hasCurrent ? "open" : ""}>
+            <summary>
+                <label><input type="checkbox" data-share-group="area:${escapeAttribute(stateId)}"> <strong>📚 ${escapeHtml(labelOf(stateId, ""))}</strong></label>
+                <small>${total}</small>
+            </summary>
+            <div class="share-tree-body">
+                ${[...sections.entries()].map(([itemId, sec]) => `
+                    <div class="share-tree-section">
+                        <label><input type="checkbox" data-share-group="sec:${escapeAttribute(sec.key)}" data-share-in="area:${escapeAttribute(stateId)}"> <strong>${escapeHtml(labelOf(stateId, itemId))}</strong></label>
+                        ${sec.notes.map(note => noteRow(note,
+                            `data-share-sec="${escapeAttribute(sec.key)}" data-share-id="${escapeAttribute(note.id)}" data-share-in="sec:${escapeAttribute(sec.key)}" data-share-area="area:${escapeAttribute(stateId)}"`,
+                            sec.key === currentKey)).join("")}
+                    </div>`).join("")}
+            </div>
+        </details>`;
+    }).join("");
+
+    const dialog = document.createElement("div");
+    dialog.id = "noteSelectionShareDialog";
+    dialog.className = "notes-qr-dialog";
+    dialog.innerHTML = `
+        <div class="notes-qr-card personalization-share-card share-tree-card">
+            <button class="notes-qr-close" type="button" aria-label="Chiudi">×</button>
+            <h3>🧩 Scegli le note da condividere</h3>
+            <p class="settings-message">Spunta un'area, una sezione o le singole note.</p>
+            ${generalHtml || areasHtml ? `
+                <div class="share-tree-tools">
+                    <button type="button" class="settings-action" data-share-all="1">Seleziona tutto</button>
+                    <button type="button" class="settings-action" data-share-all="0">Nessuna</button>
+                </div>
+                <div class="share-tree">${generalHtml}${areasHtml}</div>
+                <p class="settings-message" id="shareTreeCount"></p>
+                <button type="button" class="settings-action" id="shareTreeGo">📤 Continua</button>
+            ` : `<p class="settings-message">Non ci sono ancora note da condividere.</p>`}
+        </div>`;
+
+    document.body.appendChild(dialog);
+
+    const boxes = () => [...dialog.querySelectorAll("input[type=checkbox]")];
+    const leaves = () => boxes().filter(box => box.dataset.shareApp || box.dataset.shareId);
+
+    const refresh = () => {
+        // Aggiorna sezioni e aree in base alle singole note
+        const groups = boxes().filter(box => box.dataset.shareGroup);
+        for (const group of groups) {
+            const name = group.dataset.shareGroup;
+            const members = boxes().filter(box => !box.dataset.shareGroup
+                ? (box.dataset.shareIn === name || box.dataset.shareArea === name)
+                : false);
+            if (!members.length) continue;
+            const checked = members.filter(box => box.checked).length;
+            group.checked = checked === members.length;
+            group.indeterminate = checked > 0 && checked < members.length;
+        }
+
+        const count = leaves().filter(box => box.checked).length;
+        const label = dialog.querySelector("#shareTreeCount");
+        if (label) label.textContent = count ? count + (count === 1 ? " nota selezionata." : " note selezionate.") : "Nessuna nota selezionata.";
+    };
+
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog || event.target.closest(".notes-qr-close")) {
+            dialog.remove();
+            return;
+        }
+
+        const all = event.target.closest("[data-share-all]");
+        if (all) {
+            leaves().forEach(box => { box.checked = all.dataset.shareAll === "1"; });
+            refresh();
+            return;
+        }
+
+        if (event.target.closest("#shareTreeGo")) {
+            const chosenApp = new Set(leaves().filter(box => box.checked && box.dataset.shareApp).map(box => box.dataset.shareApp));
+            const chosenSec = {};
+
+            leaves().filter(box => box.checked && box.dataset.shareId).forEach(box => {
+                (chosenSec[box.dataset.shareSec] = chosenSec[box.dataset.shareSec] || new Set()).add(box.dataset.shareId);
+            });
+
+            const data = { appNotes: appNotes.filter(note => chosenApp.has(String(note.id))), notes: {} };
+
+            for (const [key, ids] of Object.entries(chosenSec)) {
+                data.notes[key] = (sectionNotes[key] || []).filter(note => ids.has(String(note.id)));
+            }
+
+            if (!data.appNotes.length && !Object.keys(data.notes).length) {
+                window.alert("Seleziona almeno una nota.");
+                return;
+            }
+
+            dialog.remove();
+            showShareMethodDialog("selection", data);
+        }
+    });
+
+    dialog.addEventListener("change", event => {
+        const box = event.target;
+        if (!(box instanceof HTMLInputElement)) return;
+
+        const name = box.dataset.shareGroup;
+        if (name) {
+            // Un gruppo (area/sezione/generali) spunta o toglie tutto ciò che contiene
+            boxes().forEach(other => {
+                if (other === box) return;
+                if (other.dataset.shareIn === name || other.dataset.shareArea === name) other.checked = box.checked;
+            });
+            box.indeterminate = false;
+        }
+
+        refresh();
+    });
+
+    // Le caselle dentro il titolo non devono aprire o chiudere il gruppo
+    dialog.querySelectorAll("summary label").forEach(label =>
+        label.addEventListener("click", event => event.stopPropagation())
+    );
+
+    refresh();
 }
 
 function getCurrentSectionShareData() {
@@ -10540,10 +10793,19 @@ function showPersonalizationShareDialog() {
                 <button
                     class="settings-action share-choice"
                     type="button"
+                    data-share-scope="pick"
+                >
+                    🧩 Scegli le note
+                    <small>Note generali, aree, sezioni o singole note</small>
+                </button>
+
+                <button
+                    class="settings-action share-choice"
+                    type="button"
                     data-share-scope="all"
                 >
                     🗂️ Intera personalizzazione
-                    <small>Tema, ordini e tutte le note</small>
+                    <small>Tema, ordini, note generali e note di tutte le sezioni</small>
                 </button>
             </div>
 
@@ -10572,6 +10834,12 @@ function showPersonalizationShareDialog() {
         const scope = button.dataset.shareScope;
         let data = null;
         let type = scope;
+
+        if (scope === "pick") {
+            close();
+            showNoteSelectionShareDialog();
+            return;
+        }
 
         if (scope === "section") {
             data = getCurrentSectionShareData();
@@ -10832,6 +11100,17 @@ function importSharedPersonalization(payload) {
         return true;
     }
 
+    if (payload.type === "selection") {
+        const data = payload.data;
+        if (!data || typeof data !== "object") return false;
+
+        const added =
+            mergeIncomingAppNotes(data.appNotes) +
+            mergeIncomingSectionNotes(data.notes);
+
+        return added > 0 || Array.isArray(data.appNotes) || typeof data.notes === "object";
+    }
+
     if (payload.type === "all") {
         const data = payload.data;
 
@@ -10887,6 +11166,8 @@ function importSharedPersonalization(payload) {
                 }
             }
         }
+
+        mergeIncomingAppNotes(data.appNotes);
 
         if (
             data.notes &&
@@ -11001,6 +11282,11 @@ function renderSharedPersonalizationImport(payload) {
     } else if (payload.type === "notes") {
         descriptionText =
             "Sono disponibili le micronote selezionate.";
+    } else if (payload.type === "selection") {
+        const nApp = Array.isArray(payload.data?.appNotes) ? payload.data.appNotes.length : 0;
+        const nSec = Object.values(payload.data?.notes || {}).reduce((sum, list) => sum + (Array.isArray(list) ? list.length : 0), 0);
+        descriptionText = "Note selezionate: " + (nApp + nSec) +
+            (nApp ? " (di cui " + nApp + " generali)" : "") + ".";
     } else if (payload.type === "all") {
         const hasPatients =
             Array.isArray(payload.data?.patients) &&

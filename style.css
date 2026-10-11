@@ -3894,3 +3894,81 @@ a.note-category-link-missing {
 .ddi-badge-tipo {
     margin-left: 6px;
 }
+
+
+/* Scelta delle note da condividere */
+.share-tree-card {
+    max-height: 88vh;
+    overflow-y: auto;
+}
+
+.share-tree-tools {
+    display: flex;
+    gap: 8px;
+    margin: 6px 0;
+}
+
+.share-tree-tools .settings-action {
+    flex: 1;
+}
+
+.share-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 6px 0;
+}
+
+.share-tree-group {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.share-tree-group > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+.share-tree-group > summary label,
+.share-tree-section > label,
+.share-tree-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.share-tree-group input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+.share-tree-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 12px 10px;
+}
+
+.share-tree-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-top: 4px;
+}
+
+.share-tree-section .share-tree-note {
+    padding-left: 24px;
+}
+
+.share-tree-body > .share-tree-note span,
+.share-tree-section .share-tree-note span {
+    overflow-wrap: anywhere;
+}
