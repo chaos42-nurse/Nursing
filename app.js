@@ -8340,6 +8340,7 @@ function renderAppNotesPage() {
                         <option value="bottom">In fondo</option>
                     </select>
                 </label>
+                <button class="settings-action note-category-button" type="button" data-note-category-picker="appNoteInput">📂 Collega categoria</button>
                 <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <p id="appNoteMessage" class="personal-note-message"></p>
             </div>
@@ -8628,6 +8629,9 @@ function extractPlaceorders(text) {
         while ((match = regex.exec(String(text || ""))) !== null) {
             const term = match[1].trim();
 
+            // [[@Categoria]] è un collegamento a una categoria, non una parola-chiave tra note.
+            if (term.startsWith("@")) continue;
+
             if (
                 term &&
                 !matches.some(existing =>
@@ -8697,6 +8701,194 @@ function makeNoteUrl(stateId, itemId, noteId) {
     return "?" + params.toString();
 }
 
+/* =========================================================
+   COLLEGAMENTI DALLE NOTE ALLE CATEGORIE
+   Sintassi: [[@ECG]]  oppure  [[@Titolo|stato/scheda]] (se il titolo è ambiguo)
+========================================================= */
+
+const noteCategoryIndex = { entries: [], ready: false };
+
+const normalizeCategoryText = value =>
+    String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+const categoryHref = entry =>
+    "?state=" + encodeURIComponent(entry.state) +
+    (entry.id ? "&item=" + encodeURIComponent(entry.id) : "");
+
+function parseCategoryLinkSpec(term) {
+    const body = String(term).replace(/^@/, "").trim();
+    const bar = body.indexOf("|");
+    const label = (bar === -1 ? body : body.slice(0, bar)).trim();
+    const where = bar === -1 ? "" : body.slice(bar + 1).trim();
+    const [state, id] = where.split("/");
+    return { label, state: state || "", id: id || "" };
+}
+
+function resolveCategoryLink(spec) {
+    if (!noteCategoryIndex.ready) return null;
+
+    const entries = noteCategoryIndex.entries;
+    let found = null;
+
+    if (spec.state) {
+        found = entries.find(entry =>
+            entry.state === spec.state && (entry.id || "") === spec.id
+        );
+    }
+
+    if (!found) {
+        const wanted = normalizeCategoryText(spec.label);
+        found = entries.find(entry => normalizeCategoryText(entry.title) === wanted);
+
+        if (!found) {
+            const partial = entries.filter(entry => normalizeCategoryText(entry.title).includes(wanted));
+            if (partial.length === 1 && wanted.length >= 3) found = partial[0];
+        }
+    }
+
+    return found ? { href: categoryHref(found), path: found.path } : null;
+}
+
+async function loadNoteCategoryIndex() {
+    try {
+        const categories = await (await fetch("./data/categories.json")).json();
+        const entries = [];
+
+        const walk = (node, stateId, trail) => {
+            if (Array.isArray(node)) {
+                node.forEach(child => walk(child, stateId, trail));
+                return;
+            }
+
+            if (!node || typeof node !== "object") return;
+
+            const here = node.id && node.title ? trail.concat(node.title) : trail;
+
+            if (node.id && node.title && node.id !== stateId) {
+                entries.push({ state: stateId, id: String(node.id), title: String(node.title), path: here.join(" › ") });
+            }
+
+            // I blocchi sono il contenuto della scheda: non contengono altre categorie.
+            if (node.items) walk(node.items, stateId, here);
+            if (node.sections) walk(node.sections, stateId, here);
+        };
+
+        for (const category of categories) {
+            if (category.route) continue;
+
+            entries.push({ state: category.id, id: "", title: category.title, path: category.title });
+
+            try {
+                const data = await (await fetch("./data/" + category.id + ".json")).json();
+                walk(data.sections || [], category.id, [category.title]);
+            } catch (error) {
+                console.warn("Indice categorie: dati non letti per", category.id);
+            }
+        }
+
+        // Schede raggiungibili come stato a sé (es. ECG) ma elencate dentro altre categorie.
+        noteCategoryIndex.entries = entries;
+        noteCategoryIndex.ready = true;
+        resolveNoteCategoryLinks();
+    } catch (error) {
+        console.warn("Indice categorie non disponibile", error);
+    }
+}
+
+// Aggiorna i link già disegnati quando l'indice è pronto.
+function resolveNoteCategoryLinks() {
+    document.querySelectorAll("a[data-note-cat]").forEach(link => {
+        const target = resolveCategoryLink(parseCategoryLinkSpec("@" + link.dataset.noteCat));
+        link.classList.toggle("note-category-link-missing", !target);
+        link.setAttribute("href", target ? target.href : "#");
+        link.title = target ? "Apri: " + target.path : "Categoria non trovata";
+    });
+}
+
+// Selettore con ricerca: inserisce [[@Titolo]] dove si trova il cursore.
+function openCategoryPicker(textarea) {
+    if (!textarea) return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "note-category-picker";
+    overlay.innerHTML = `
+        <div class="note-category-picker-box" role="dialog" aria-label="Collega una categoria">
+            <div class="note-category-picker-head">
+                <strong>📂 Collega una categoria</strong>
+                <button type="button" data-pick-close aria-label="Chiudi">✕</button>
+            </div>
+            <input type="search" placeholder="Cerca (es. ECG, primo soccorso)" autocomplete="off" aria-label="Cerca categoria">
+            <div class="note-category-picker-list"></div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector("input");
+    const list = overlay.querySelector(".note-category-picker-list");
+
+    const render = () => {
+        if (!noteCategoryIndex.ready) {
+            list.innerHTML = '<p class="note-category-picker-empty">Caricamento…</p>';
+            return;
+        }
+
+        const wanted = normalizeCategoryText(input.value);
+        const matches = noteCategoryIndex.entries
+            .filter(entry => !wanted || normalizeCategoryText(entry.title + " " + entry.path).includes(wanted))
+            .slice(0, 60);
+
+        list.innerHTML = matches.length
+            ? matches.map(entry => `
+                <button type="button" data-pick="${escapeAttribute(entry.state + "/" + entry.id)}">
+                    <strong>${escapeHtml(entry.title)}</strong>
+                    <small>${escapeHtml(entry.path)}</small>
+                </button>`).join("")
+            : '<p class="note-category-picker-empty">Nessuna categoria trovata.</p>';
+    };
+
+    const close = () => overlay.remove();
+
+    overlay.addEventListener("click", event => {
+        if (event.target === overlay || event.target.closest("[data-pick-close]")) {
+            close();
+            return;
+        }
+
+        const pick = event.target.closest("[data-pick]");
+        if (!pick) return;
+
+        const [stateId, itemId] = pick.dataset.pick.split("/");
+        const entry = noteCategoryIndex.entries.find(e => e.state === stateId && e.id === (itemId || ""));
+        if (!entry) return;
+
+        // Se più categorie hanno lo stesso titolo si aggiunge la destinazione esatta.
+        const duplicates = noteCategoryIndex.entries.filter(e =>
+            normalizeCategoryText(e.title) === normalizeCategoryText(entry.title)
+        ).length > 1;
+
+        const token = "[[@" + entry.title + (duplicates ? "|" + entry.state + "/" + entry.id : "") + "]]";
+        const start = textarea.selectionStart ?? textarea.value.length;
+        const end = textarea.selectionEnd ?? start;
+
+        textarea.value = textarea.value.slice(0, start) + token + textarea.value.slice(end);
+        textarea.selectionStart = textarea.selectionEnd = start + token.length;
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        close();
+        textarea.focus();
+    });
+
+    input.addEventListener("input", render);
+    render();
+    input.focus();
+}
+
+document.addEventListener("click", event => {
+    const button = event.target.closest("[data-note-category-picker]");
+    if (button) openCategoryPicker(document.getElementById(button.dataset.noteCategoryPicker));
+});
+
+loadNoteCategoryIndex();
+
+
 function renderInlineNoteText(text) {
     const source = String(text || "");
     const pattern = /<placeorder>([\s\S]*?)<\/placeorder>|\[\[([\s\S]*?)\]\]/gi;
@@ -8709,7 +8901,16 @@ function renderInlineNoteText(text) {
 
         const term = String(match[1] || match[2] || "").trim();
 
-        if (term) {
+        if (term.startsWith("@")) {
+            const spec = parseCategoryLinkSpec(term);
+            const target = resolveCategoryLink(spec);
+
+            html += '<a class="note-category-link' + (target ? "" : " note-category-link-missing") + '"' +
+                ' data-note-cat="' + escapeAttribute(term.slice(1)) + '"' +
+                ' href="' + escapeAttribute(target ? target.href : "#") + '"' +
+                ' title="' + escapeAttribute(target ? "Apri: " + target.path : "Categoria non trovata") + '">📂 ' +
+                escapeHtml(spec.label) + '</a>';
+        } else if (term) {
             html += '<a class="personal-note-linked-term" href="?links=1&term=' +
                 encodeURIComponent(term) +
                 '" title="Visualizza i collegamenti di ' +
@@ -9728,7 +9929,8 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
             <div class="personal-note-editor">
                 <h3>➕ Nuova nota</h3>
                 <input id="personalNoteTitle" class="personal-note-title-input" type="text" autocomplete="off" placeholder="Titolo della nota">
-                <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]" rows="7"></textarea>
+                <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
+                <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>
             </div>
