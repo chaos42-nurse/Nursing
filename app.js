@@ -8525,7 +8525,7 @@ function renderContactPage() {
 
 function renderAppNotesPage() {
     const notes = getAppNotes();
-    const legendText = "- elenco con caselle\\n\\n1. elenco numerato\\n2. continua automaticamente\\n\\na. elenco alfabetico\\nb. continua automaticamente\\n\\n° elenco puntato\\n• altro stile di elenco\\n\\n[[collegamento]]\\n[[@collegamento categoria]]\\n\\n[tabella] [esempio]\\n[tra parentesi] [serve lo spazio]\\n\\n*grassetto*\\n/corsivo/\\n_sottolineato_";
+    const legendText = "- elenco con caselle\n\n1. elenco numerato\n2. continua automaticamente\n\na. elenco alfabetico\nb. continua automaticamente\n\n° elenco puntato\n• altro stile di elenco\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esempio]\n[tra parentesi] [serve lo spazio]\n\n*grassetto*\n/corsivo/\n_sottolineato_";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
@@ -9494,16 +9494,16 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
             continue;
         }
 
-        const orderedMatch = lines[index].match(/^\\s*(\\d+|[a-zA-Z])\\.\\s+(.+)$/);
-        const bulletMatch = lines[index].match(/^\\s*([°•])\\s+(.+)$/);
+        const orderedMatch = lines[index].match(/^\s*(\d+|[a-zA-Z])\.\s+(.+)$/);
+        const bulletMatch = lines[index].match(/^\s*([°•])\s+(.+)$/);
         if (orderedMatch) {
-            const isNumeric = /^\\d+$/.test(orderedMatch[1]);
+            const isNumeric = /^\d+$/.test(orderedMatch[1]);
             const startValue = isNumeric ? Number.parseInt(orderedMatch[1], 10) : orderedMatch[1].toLowerCase().charCodeAt(0) - 96;
             const listType = isNumeric ? "" : (orderedMatch[1] === orderedMatch[1].toUpperCase() ? ' type="A"' : ' type="a"');
             const items = [];
             while (index < lines.length) {
-                const match = lines[index].match(/^\\s*(\\d+|[a-zA-Z])\\.\\s+(.+)$/);
-                if (!match || /^\\d+$/.test(match[1]) !== isNumeric) break;
+                const match = lines[index].match(/^\s*(\d+|[a-zA-Z])\.\s+(.+)$/);
+                if (!match || /^\d+$/.test(match[1]) !== isNumeric) break;
                 items.push(match[2]);
                 index++;
             }
@@ -9515,7 +9515,7 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
         if (bulletMatch) {
             const items = [];
             while (index < lines.length) {
-                const match = lines[index].match(/^\\s*([°•])\\s+(.+)$/);
+                const match = lines[index].match(/^\s*([°•])\s+(.+)$/);
                 if (!match) break;
                 items.push(match[2]);
                 index++;
