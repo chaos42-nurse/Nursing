@@ -8277,7 +8277,7 @@ function renderContactPage() {
 
 function renderAppNotesPage() {
     const notes = getAppNotes();
-    const legendText = "- elenco puntato\\n\\n[[collegamento]]\\n[[@collegamento categoria]]\\n\\n[tabella] [esmpio]\\n[tra parentesi] [sere lo spazio]\\n\\n*grassetto*\\n/corsivo/\\n* _sottolineato_*";
+    const legendText = "- elenco puntato\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esmpio]\n[tra parentesi] [sere lo spazio]\n\n*grassetto*\n/corsivo/\n* _sottolineato_*";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
@@ -8957,7 +8957,7 @@ function markNoteFormatting(source) {
     const single = (mark, kind) => {
         const m = mark.replace(/[*/]/g, c => "\\" + c);
         const wordChar = "\\p{L}\\p{N}";
-        wrap(new RegExp("(?<![" + wordChar + m + "])" + m + "(?=[^\\s" + m + "])([^\\n" + m + "]*?[^\\s" + m + "])" + m + "(?![" + wordChar + m + "])", "gu"), [kind]);
+        wrap(new RegExp("(?<![" + wordChar + m + "])" + m + "(?=[^\\s" + m + "])([^\n" + m + "]*?[^\\s" + m + "])" + m + "(?![" + wordChar + m + "])", "gu"), [kind]);
     };
 
     wrap(/\*\*(?=[^\s*])([^\n]*?[^\s*])\*\*/g, ["b"]);
