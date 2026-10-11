@@ -9325,6 +9325,61 @@ function parseNoteTableRow(line) {
     return cells.length >= 2 ? cells : null;
 }
 
+function parseNoteTableRowFromLines(lines, startIndex) {
+    if (startIndex >= lines.length) return null;
+
+    const singleLine = parseNoteTableRow(lines[startIndex]);
+    if (singleLine) return { row: singleLine, nextIndex: startIndex + 1 };
+
+    // Se una cella resta aperta, le righe successive diventano parte della cella
+    // fino alla parentesi ] di chiusura. In questo modo il contenuto può andare a capo.
+    if (!/^\s*\[/.test(lines[startIndex])) return null;
+
+    let candidate = lines[startIndex];
+    for (let nextIndex = startIndex + 1; nextIndex < lines.length; nextIndex++) {
+        candidate += "\n" + lines[nextIndex];
+        const row = parseNoteTableRow(candidate);
+        if (row) return { row, nextIndex: nextIndex + 1 };
+
+        // Se inizia una nuova riga-tabella completa, la cella precedente era incompleta.
+        if (parseNoteTableRow(lines[nextIndex])) return null;
+    }
+
+    return null;
+}
+
+function renderNoteTableCell(cell) {
+    const lines = String(cell ?? "").split(/\r?\n/);
+    let html = "";
+    let bulletItems = [];
+
+    const flushBullets = () => {
+        if (!bulletItems.length) return;
+        html += '<ul class="personal-note-table-list">' +
+            bulletItems.map(item => '<li>' + renderInlineNoteText(item) + '</li>').join("") +
+            '</ul>';
+        bulletItems = [];
+    };
+
+    lines.forEach(line => {
+        const bullet = line.match(/^\s*-\s+(.+)$/);
+        if (bullet) {
+            bulletItems.push(bullet[1]);
+            return;
+        }
+
+        flushBullets();
+        if (line.trim()) {
+            html += '<div>' + renderInlineNoteText(line) + '</div>';
+        } else {
+            html += '<div class="personal-note-table-line-break"></div>';
+        }
+    });
+
+    flushBullets();
+    return html;
+}
+
 function renderNoteTable(rows) {
     if (!Array.isArray(rows) || rows.length < 2) return "";
 
@@ -9336,12 +9391,12 @@ function renderNoteTable(rows) {
 
     return '<div class="personal-note-table-wrapper"><table class="personal-note-table">' +
         '<thead><tr>' +
-        rows[0].map(cell => '<th>' + renderInlineNoteText(cell) + '</th>').join("") +
+        rows[0].map(cell => '<th>' + renderNoteTableCell(cell) + '</th>').join("") +
         '</tr></thead>' +
         '<tbody>' +
         rows.slice(1).map(row =>
             '<tr>' +
-            row.map(cell => '<td>' + renderInlineNoteText(cell) + '</td>').join("") +
+            row.map(cell => '<td>' + renderNoteTableCell(cell) + '</td>').join("") +
             '</tr>'
         ).join("") +
         '</tbody></table></div>';
@@ -9406,15 +9461,16 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
             continue;
         }
 
-        const firstRow = parseNoteTableRow(lines[index]);
-        if (firstRow) {
+        const firstParsedRow = parseNoteTableRowFromLines(lines, index);
+        if (firstParsedRow) {
+            const firstRow = firstParsedRow.row;
             const tableRows = [firstRow];
-            let nextIndex = index + 1;
+            let nextIndex = firstParsedRow.nextIndex;
             while (nextIndex < lines.length) {
-                const row = parseNoteTableRow(lines[nextIndex]);
-                if (!row || row.length !== firstRow.length) break;
-                tableRows.push(row);
-                nextIndex++;
+                const parsedRow = parseNoteTableRowFromLines(lines, nextIndex);
+                if (!parsedRow || parsedRow.row.length !== firstRow.length) break;
+                tableRows.push(parsedRow.row);
+                nextIndex = parsedRow.nextIndex;
             }
             if (tableRows.length >= 2) {
                 html += renderNoteTable(tableRows);
