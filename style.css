@@ -1851,6 +1851,17 @@ section h2 {
     border-color: var(--accent) !important;
 }
 
+.app-note-card .personal-note-actions button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.app-notes-page.is-editing-note .app-notes-list,
+.personal-notes-page.is-editing-note .personal-notes-list,
+.personal-notes-page.is-editing-note .personal-notes-share-actions {
+    display: none !important;
+}
+
 /* =========================================================
    NOTE GENERALI DELL'APP
 ========================================================= */
