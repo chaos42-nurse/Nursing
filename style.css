@@ -2925,17 +2925,32 @@ section h2 {
 }
 
 .patient-evolution-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 3px;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
 }
 
+/* Titolo su una sola riga, sopra; sotto il testo e il pulsante, centrato in verticale sul testo. */
 .patient-evolution-row > div:first-child {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
+    display: contents;
+}
+
+.patient-evolution-row > div:first-child > strong {
+    grid-column: 1 / -1;
+    white-space: nowrap;
+}
+
+.patient-evolution-row > div:first-child > small {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.patient-evolution-row > button {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
 }
 
 .patient-evolution-row small {
@@ -2965,7 +2980,7 @@ section h2 {
 .patient-photo-privacy-warning.compact {
     display: flex;
     gap: 7px;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .patient-photo-privacy-warning.compact strong {
