@@ -3972,3 +3972,15 @@ a.note-category-link-missing {
 .share-tree-section .share-tree-note span {
     overflow-wrap: anywhere;
 }
+
+
+/* "Nuova nota": solo un pulsante, in cima; il riquadro si apre al tocco. */
+.note-new-toggle {
+    order: 1;
+    width: 100%;
+}
+
+.note-new-toggle[hidden],
+.app-note-editor[hidden] {
+    display: none;
+}

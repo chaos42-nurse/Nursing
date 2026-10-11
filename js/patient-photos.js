@@ -411,7 +411,85 @@
         } catch (_) {}
     }
 
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    function base64ToBlob(base64, mime) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new Blob([bytes], { type: mime || "image/webp" });
+    }
+
+    // Foto dei pazienti indicati, pronte per un file di condivisione (immagine in base64).
+    async function exportRecords(patientIds) {
+        const out = [];
+
+        for (const patientId of patientIds) {
+            for (const record of await listPhotos(patientId)) {
+                out.push({
+                    id: record.id,
+                    patientId: record.patientId,
+                    createdAt: record.createdAt,
+                    note: record.note || "",
+                    width: record.width,
+                    height: record.height,
+                    measure: record.measure || null,
+                    mime: record.blob.type || "image/webp",
+                    data: await blobToBase64(record.blob)
+                });
+            }
+        }
+
+        return out;
+    }
+
+    // Aggiunge le foto ricevute; quelle già presenti (stesso id) vengono saltate.
+    async function importRecords(list) {
+        let added = 0;
+        let skipped = 0;
+
+        for (const item of Array.isArray(list) ? list : []) {
+            if (!item || !item.patientId || !item.data) continue;
+
+            const id = String(item.id || createId());
+            const existing = await runTransaction("readonly", store => store.get(id));
+
+            if (existing) {
+                skipped++;
+                continue;
+            }
+
+            const blob = base64ToBlob(item.data, item.mime);
+            const record = {
+                id,
+                patientId: String(item.patientId),
+                createdAt: String(item.createdAt || new Date().toISOString()),
+                note: String(item.note || "").slice(0, 120),
+                width: item.width || 0,
+                height: item.height || 0,
+                size: blob.size,
+                blob
+            };
+
+            if (item.measure && typeof item.measure === "object") record.measure = item.measure;
+
+            await runTransaction("readwrite", store => store.put(record));
+            added++;
+        }
+
+        return { added, skipped };
+    }
+
     window.PatientPhotos = {
+        exportRecords,
+        importRecords,
         PhotoError,
         LOW_SPACE_BYTES,
         addPhoto,

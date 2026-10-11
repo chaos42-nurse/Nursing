@@ -8037,13 +8037,126 @@ function fromBase64(value) {
     return new TextDecoder().decode(bytes);
 }
 
+/* Compressione per le condivisioni (collegamento, QR, NFC): LZW sui byte UTF-8 + base64url.
+   Il collegamento risulta circa la metà di prima e non contiene caratteri da codificare. */
+function lzwWidth(index) {
+    return Math.max(9, (255 + index).toString(2).length);
+}
+
+function lzwCompress(text) {
+    const input = new TextEncoder().encode(String(text));
+    if (!input.length) return new Uint8Array(0);
+
+    const dict = new Map();
+    for (let i = 0; i < 256; i++) dict.set(String.fromCharCode(i), i);
+
+    const out = [];
+    let buffer = 0, length = 0, next = 256, index = 0;
+
+    const emit = code => {
+        buffer |= code << length;
+        length += lzwWidth(index++);
+        while (length >= 8) {
+            out.push(buffer & 255);
+            buffer >>>= 8;
+            length -= 8;
+        }
+    };
+
+    let w = String.fromCharCode(input[0]);
+    for (let i = 1; i < input.length; i++) {
+        const c = String.fromCharCode(input[i]);
+        const wc = w + c;
+        if (dict.has(wc)) {
+            w = wc;
+        } else {
+            emit(dict.get(w));
+            dict.set(wc, next++);
+            w = c;
+        }
+    }
+    emit(dict.get(w));
+    if (length > 0) out.push(buffer & 255);
+    return Uint8Array.from(out);
+}
+
+function lzwDecompress(bytes) {
+    if (!bytes.length) return "";
+
+    const table = [];
+    for (let i = 0; i < 256; i++) table.push([i]);
+
+    let buffer = 0, length = 0, position = 0, index = 0;
+    const read = () => {
+        const width = lzwWidth(index);
+        while (length < width) {
+            if (position >= bytes.length) return null;
+            buffer |= bytes[position++] << length;
+            length += 8;
+        }
+        const code = buffer & ((1 << width) - 1);
+        buffer >>>= width;
+        length -= width;
+        index++;
+        return code;
+    };
+
+    let code = read();
+    if (code === null) return "";
+    let previous = table[code];
+    const result = [...previous];
+
+    while ((code = read()) !== null) {
+        let entry;
+        if (code < table.length) entry = table[code];
+        else if (code === table.length) entry = [...previous, previous[0]];
+        else throw new Error("Dati compressi non validi");
+
+        result.push(...entry);
+        table.push([...previous, entry[0]]);
+        previous = entry;
+    }
+
+    return new TextDecoder().decode(Uint8Array.from(result));
+}
+
+function bytesToBase64Url(bytes) {
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlToBytes(value) {
+    const padded = String(value).replace(/-/g, "+").replace(/_/g, "/");
+    const binary = atob(padded + "=".repeat((4 - padded.length % 4) % 4));
+    return Uint8Array.from(binary, char => char.charCodeAt(0));
+}
+
+/* Nelle condivisioni di sole note si tolgono ids e date: chi riceve le rigenera. */
+function compactShareData(type, data) {
+    const slim = notes => (Array.isArray(notes) ? notes : []).map(note => ({
+        title: note?.title || "",
+        text: note?.text || ""
+    }));
+
+    if (type === "selection" && data) {
+        const notes = {};
+        for (const [key, list] of Object.entries(data.notes || {})) notes[key] = slim(list);
+        return { appNotes: slim(data.appNotes), notes };
+    }
+
+    if ((type === "section" || type === "notes") && data) {
+        return { stateId: data.stateId, itemId: data.itemId, notes: slim(data.notes) };
+    }
+
+    return data;
+}
+
 function createSharePayload(type, data) {
 
-    return [
-        "NS2",
-        toBase64(type),
-        toBase64(JSON.stringify(data))
-    ].join("|");
+    const json = JSON.stringify(compactShareData(type, data));
+
+    return "NS3." + type + "." + bytesToBase64Url(lzwCompress(json));
 }
 
 function buildShareUrl(type, data) {
@@ -8092,6 +8205,15 @@ function readSharePayload() {
 
         const payload =
             decodeURIComponent(encodedPayload);
+
+        // Formato compresso (NS3): NS3.<tipo>.<dati>
+        if (payload.startsWith("NS3.")) {
+            const [, type, packed] = payload.split(".");
+            return {
+                type,
+                data: JSON.parse(lzwDecompress(base64UrlToBytes(packed)))
+            };
+        }
 
         const parts =
             payload.split("|");
@@ -8337,6 +8459,36 @@ function getAppNotes() {
     }
 }
 
+/* "Nuova nota" è solo un pulsante in cima: il riquadro per scrivere si apre al tocco. */
+function showNoteEditor(editor) {
+    if (!editor) return;
+    editor.hidden = false;
+    document.querySelectorAll("[data-note-new-toggle]").forEach(button => { button.hidden = true; });
+}
+
+function hideNoteEditor() {
+    document.querySelectorAll(".app-note-editor, .personal-note-editor").forEach(editor => {
+        editor.hidden = true;
+        delete editor.dataset.editingId;
+        editor.querySelectorAll("input[type=text], textarea").forEach(field => { field.value = ""; });
+        const save = editor.querySelector("#saveAppNote, #savePersonalNote");
+        if (save) save.textContent = "💾 Aggiungi nota";
+    });
+    document.querySelectorAll("[data-note-new-toggle]").forEach(button => { button.hidden = false; });
+}
+
+document.addEventListener("click", event => {
+    if (event.target.closest("[data-note-new-toggle]")) {
+        const editor = document.querySelector(".app-note-editor, .personal-note-editor");
+        showNoteEditor(editor);
+        editor?.scrollIntoView({ behavior: "smooth", block: "start" });
+        editor?.querySelector("input[type=text]")?.focus();
+        return;
+    }
+
+    if (event.target.closest("[data-note-new-cancel]")) hideNoteEditor();
+});
+
 function saveAppNotes(notes) {
     localStorage.setItem(
         PERSONALIZATION_KEYS.appNotes,
@@ -8385,6 +8537,8 @@ function renderAppNotesPage() {
                 Appunti liberi.
             </p>
 
+            <button class="settings-action note-new-toggle" type="button" data-note-new-toggle>➕ Nuova nota</button>
+
             <div class="app-notes-list">
                 ${notes.length
                     ? notes.map(note => {
@@ -8414,7 +8568,7 @@ function renderAppNotesPage() {
                 </article>
             </div>
 
-            <div class="app-note-editor">
+            <div class="app-note-editor" hidden>
                 <h3>➕ Nuova nota</h3>
                 <input
                     id="appNoteTitle"
@@ -8444,6 +8598,7 @@ function renderAppNotesPage() {
                 </label>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="appNoteInput">📂 Collega categoria</button>
                 <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
+                <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="appNoteMessage" class="personal-note-message"></p>
             </div>
         </section>
@@ -8531,6 +8686,7 @@ function setupAppNotes() {
 
             if (!editor || !titleInput || !input) return;
 
+            showNoteEditor(editor);
             editor.dataset.editingId = String(note.id);
             titleInput.value = note.title || "";
             input.value = note.text || "";
@@ -8859,6 +9015,13 @@ async function loadNoteCategoryIndex() {
         const walk = (node, stateId, trail) => {
             if (Array.isArray(node)) {
                 node.forEach(child => walk(child, stateId, trail));
+                return;
+            }
+
+            // Microaree: voci semplici (solo testo) di una sezione, es. "EGA" o "Glicemia".
+            if (typeof node === "string") {
+                const title = node.trim();
+                if (title) entries.push({ state: stateId, id: createId(title), title, path: trail.concat(title).join(" › ") });
                 return;
             }
 
@@ -10078,6 +10241,8 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 <button id="sharePersonalNotes" class="settings-action" type="button">🔗 Condividi / importa</button>
             </div>
 
+            <button class="settings-action note-new-toggle" type="button" data-note-new-toggle>➕ Nuova nota</button>
+
             <div class="personal-notes-list">
                 ${filteredNotes.length
                     ? filteredNotes.map(note => `
@@ -10106,7 +10271,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                     `}
             </div>
 
-            <div class="personal-note-editor">
+            <div class="personal-note-editor" hidden>
                 <h3>➕ Nuova nota</h3>
                 <input id="personalNoteTitle" class="personal-note-title-input" type="text" autocomplete="off" placeholder="Titolo della nota">
                 <div class="note-format-bar" role="group" aria-label="Formattazione">
@@ -10117,6 +10282,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
+                <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>
             </div>
 
@@ -10169,6 +10335,7 @@ function setupPersonalNotes() {
 
             if (!editor || !titleInput || !input) return;
 
+            showNoteEditor(editor);
             editor.dataset.editingId = String(note.id);
             titleInput.value = note.title || "";
             input.value = note.text || "";
@@ -10660,6 +10827,109 @@ function getSelectedNotesFromDialog(dialog) {
     ).map(input => input.dataset.shareNote);
 }
 
+/* File di condivisione con le foto: JSON con le immagini in base64. */
+async function sharePersonalizationAsFile(data, photos) {
+    const payload = {
+        app: "Nursing Shot",
+        type: "share-file",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        share: { type: "all", data },
+        photos
+    };
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    const file = new File(
+        [JSON.stringify(payload)],
+        "nursing-shot-condivisione-" + stamp + ".json",
+        { type: "application/json" }
+    );
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({ files: [file], title: "Nursing Shot — condivisione" });
+            return;
+        } catch (error) {
+            if (error && error.name === "AbortError") return;
+            // Condivisione di sistema non riuscita: si ripiega sul download.
+        }
+    }
+
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+    window.alert("File salvato: " + file.name + ". Invialo al destinatario, che lo aprirà da Condividi / importa → Importa da file.");
+}
+
+/* Importa un file creato da sharePersonalizationAsFile (note, pazienti e foto). */
+async function importShareFile(file) {
+    let payload;
+
+    try {
+        payload = JSON.parse(await file.text());
+    } catch (_) {
+        window.alert("Il file non è leggibile.");
+        return;
+    }
+
+    if (!payload || payload.app !== "Nursing Shot" || payload.type !== "share-file" || !payload.share) {
+        window.alert("Questo file non è una condivisione di Nursing Shot.");
+        return;
+    }
+
+    const photos = Array.isArray(payload.photos) ? payload.photos : [];
+
+    if (!window.confirm(
+        "Importare la condivisione" + (photos.length ? " con " + photos.length + " foto" : "") + "?"
+    )) return;
+
+    const ok = importSharedPersonalization(payload.share);
+
+    if (!ok) {
+        window.alert("Condivisione non valida.");
+        return;
+    }
+
+    let summary = "Importazione completata.";
+
+    if (photos.length && window.PatientPhotos) {
+        // Le foto si importano solo per i pazienti presenti su questo dispositivo.
+        const known = new Set(getPatients().map(patient => String(patient.id)));
+        const usable = photos.filter(photo => known.has(String(photo.patientId)));
+
+        try {
+            const result = await window.PatientPhotos.importRecords(usable);
+            summary += " Foto aggiunte: " + result.added +
+                (result.skipped ? " (già presenti: " + result.skipped + ")" : "") + ".";
+            if (usable.length < photos.length) {
+                summary += " " + (photos.length - usable.length) + " foto non importate perché il paziente non è stato importato.";
+            }
+        } catch (error) {
+            console.error("Importazione foto:", error);
+            summary += " Le foto non si sono potute salvare (memoria insufficiente?).";
+        }
+    }
+
+    window.alert(summary);
+    window.location.reload();
+}
+
+function pickShareFile() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.addEventListener("change", () => {
+        if (input.files && input.files[0]) importShareFile(input.files[0]);
+    });
+    input.click();
+}
+
 function showShareCenter() {
     document.getElementById("shareCenterDialog")?.remove();
 
@@ -10687,6 +10957,10 @@ function showShareCenter() {
 
             <button id="shareCenterNfc" class="settings-action" type="button">
                 📡 Importa da NFC
+            </button>
+
+            <button id="shareCenterFile" class="settings-action" type="button">
+                📁 Importa da file (con foto)
             </button>
         </div>
     `;
@@ -10718,6 +10992,12 @@ function showShareCenter() {
         ?.addEventListener("click", () => {
             close();
             readNotesNfc();
+        });
+
+    dialog.querySelector("#shareCenterFile")
+        ?.addEventListener("click", () => {
+            close();
+            pickShareFile();
         });
 }
 
@@ -10823,7 +11103,7 @@ function showPersonalizationShareDialog() {
     dialog.querySelector(".notes-qr-close")
         ?.addEventListener("click", close);
 
-    dialog.addEventListener("click", event => {
+    dialog.addEventListener("click", async event => {
         if (event.target === dialog) close();
 
         const button =
@@ -10888,6 +11168,28 @@ function showPersonalizationShareDialog() {
         }
 
         if (!data) return;
+
+        // Foto delle medicazioni: troppo grandi per collegamento, QR o NFC, vanno in un file.
+        if (scope === "all" && Array.isArray(data.patients) && data.patients.length && window.PatientPhotos) {
+            try {
+                const photos = await window.PatientPhotos.exportRecords(
+                    data.patients.map(patient => patient.id)
+                );
+
+                if (photos.length && window.confirm(
+                    "Vuoi includere anche le " + photos.length + " foto di medicazione di questi pazienti?\n\n" +
+                    "Con le foto la condivisione diventa un file (non entra in collegamento, QR o NFC) da inviare con l'app che preferisci. " +
+                    "Le foto contengono dati sanitari: condividile solo con chi ne ha titolo."
+                )) {
+                    close();
+                    await sharePersonalizationAsFile(data, photos);
+                    return;
+                }
+            } catch (error) {
+                console.error("Foto non incluse:", error);
+                window.alert("Non è stato possibile leggere le foto: la condivisione prosegue senza.");
+            }
+        }
 
         close();
         showShareMethodDialog(type, data);
@@ -11023,15 +11325,20 @@ async function writeGenericNfc(url) {
     const byteLength =
         new TextEncoder().encode(url).length;
 
-    if (byteLength > 450) {
+    if (byteLength > 880) {
         window.alert(
-            "La condivisione è troppo grande per essere scritta in modo affidabile su un tag NFC. Usa il collegamento o il QR."
+            "La condivisione è troppo grande anche per i tag NFC più capienti (circa 880 byte, es. NTAG216): ora occupa " +
+            byteLength + " byte. Condividi meno note oppure usa il collegamento o il QR."
         );
         return;
     }
 
+    const advice = byteLength > 480
+        ? "\n\nOccupa " + byteLength + " byte: serve un tag da almeno 880 byte (NTAG216)."
+        : "\n\nOccupa " + byteLength + " byte: entra in un tag NTAG215 o NTAG216.";
+
     if (!window.confirm(
-        "Il collegamento verrà scritto sul tag NFC. Continuare?"
+        "Il collegamento verrà scritto sul tag NFC. Continuare?" + advice
     )) {
         return;
     }
