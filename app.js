@@ -8463,16 +8463,22 @@ function getAppNotes() {
 function showNoteEditor(editor) {
     if (!editor) return;
     editor.hidden = false;
+    const page = editor.closest(".app-notes-page, .personal-notes-page");
+    page?.classList.add("is-editing-note");
     document.querySelectorAll("[data-note-new-toggle]").forEach(button => { button.hidden = true; });
 }
 
 function hideNoteEditor() {
     document.querySelectorAll(".app-note-editor, .personal-note-editor").forEach(editor => {
         editor.hidden = true;
+        const page = editor.closest(".app-notes-page, .personal-notes-page");
+        page?.classList.remove("is-editing-note");
         delete editor.dataset.editingId;
         editor.querySelectorAll("input[type=text], textarea").forEach(field => { field.value = ""; });
         const save = editor.querySelector("#saveAppNote, #savePersonalNote");
         if (save) save.textContent = "💾 Aggiungi nota";
+        const heading = editor.querySelector("h3");
+        if (heading && editor.classList.contains("app-note-editor")) heading.textContent = "➕ Nuova nota";
     });
     document.querySelectorAll("[data-note-new-toggle]").forEach(button => { button.hidden = false; });
 }
@@ -8547,6 +8553,8 @@ function renderAppNotesPage() {
                             <div class="app-note-card-header">
                                 <h3>${renderNoteText(note.title || "Nota")}</h3>
                                 <div class="personal-note-actions app-note-actions">
+                                    <button class="app-note-move" type="button" data-app-note-move="up" data-app-note-id="${escapeAttribute(note.id)}" title="Sposta nota in alto" aria-label="Sposta ${escapeAttribute(note.title || "nota")} in alto" ${notes.indexOf(note) === 0 ? "disabled" : ""}>↑</button>
+                                    <button class="app-note-move" type="button" data-app-note-move="down" data-app-note-id="${escapeAttribute(note.id)}" title="Sposta nota in basso" aria-label="Sposta ${escapeAttribute(note.title || "nota")} in basso" ${notes.indexOf(note) === notes.length - 1 ? "disabled" : ""}>↓</button>
                                     <button class="app-note-edit" type="button" data-app-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
@@ -8670,6 +8678,20 @@ function setupAppNotes() {
     });
 
     document.addEventListener("click", event => {
+        const moveButton = event.target.closest("[data-app-note-move]");
+        if (moveButton) {
+            const noteId = moveButton.dataset.appNoteId || "";
+            const direction = moveButton.dataset.appNoteMove;
+            const notes = getAppNotes();
+            const fromIndex = notes.findIndex(note => String(note.id) === String(noteId));
+            const toIndex = fromIndex + (direction === "up" ? -1 : 1);
+            if (fromIndex < 0 || toIndex < 0 || toIndex >= notes.length) return;
+            [notes[fromIndex], notes[toIndex]] = [notes[toIndex], notes[fromIndex]];
+            saveAppNotes(notes);
+            renderAppNotesPage();
+            return;
+        }
+
         const editButton = event.target.closest("[data-app-note-edit]");
         if (editButton) {
             const noteId = editButton.dataset.appNoteEdit || "";
@@ -8687,6 +8709,8 @@ function setupAppNotes() {
             if (!editor || !titleInput || !input) return;
 
             showNoteEditor(editor);
+            const editorHeading = editor.querySelector("h3");
+            if (editorHeading) editorHeading.textContent = "✏️ Modifica nota";
             editor.dataset.editingId = String(note.id);
             titleInput.value = note.title || "";
             input.value = note.text || "";
