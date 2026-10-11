@@ -6,7 +6,7 @@ const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
-    "./app.js?v=121",
+    "./app.js?v=122",
     "./js/interazioni.js?v=105",
     "./js/patient-photos.js?v=105",
     "./manifest.json",
