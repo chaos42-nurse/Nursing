@@ -8525,7 +8525,7 @@ function renderContactPage() {
 
 function renderAppNotesPage() {
     const notes = getAppNotes();
-    const legendText = "- elenco puntato\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esempio]\n[tra parentesi] [serve lo spazio]\n\n*grassetto*\n/corsivo/\n_sottolineato_";
+    const legendText = "- elenco con caselle\\n\\n1. elenco numerato\\n2. continua automaticamente\\n\\na. elenco alfabetico\\nb. continua automaticamente\\n\\n° elenco puntato\\n• altro stile di elenco\\n\\n[[collegamento]]\\n[[@collegamento categoria]]\\n\\n[tabella] [esempio]\\n[tra parentesi] [serve lo spazio]\\n\\n*grassetto*\\n/corsivo/\\n_sottolineato_";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
@@ -8625,22 +8625,31 @@ function setupAppNotes() {
         const value = input.value;
         const lineStart = value.lastIndexOf("\n", start - 1) + 1;
         const linePrefix = value.slice(lineStart, start);
-        const listMatch = linePrefix.match(/^(\s*)-\s+(.*)$/);
+        const listMatch = linePrefix.match(/^(\s*)(-\s+|[°•]\s+|\d+\.\s+|[a-zA-Z]\.\s+)(.*)$/);
         if (!listMatch) return;
 
         const indentation = listMatch[1] || "";
-        const itemText = listMatch[2] || "";
+        const marker = listMatch[2] || "";
+        const itemText = listMatch[3] || "";
         event.preventDefault();
 
         if (!itemText.trim()) {
-            // Invio su una voce vuota: rimuove il trattino e termina la lista.
             input.setRangeText("", lineStart, start, "start");
             const cursor = lineStart + indentation.length;
             input.setRangeText("\n", cursor, cursor, "end");
             return;
         }
 
-        input.setRangeText("\n" + indentation + "- ", start, end, "end");
+        let nextMarker = marker;
+        if (/^\d+\.\s+$/.test(marker)) {
+            nextMarker = (Number.parseInt(marker, 10) + 1) + ". ";
+        } else if (/^[a-zA-Z]\.\s+$/.test(marker)) {
+            const letter = marker.trim()[0];
+            const upper = letter === letter.toUpperCase();
+            const code = letter.charCodeAt(0) + 1;
+            nextMarker = (code > (upper ? 90 : 122) ? letter : String.fromCharCode(code)) + ". ";
+        }
+        input.setRangeText("\n" + indentation + nextMarker, start, end, "end");
     });
 
     document.addEventListener("change", event => {
@@ -9481,6 +9490,38 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
             }
 
             html += entries.map(renderChecklistEntry).join("<br>");
+            if (index < lines.length) html += "<br>";
+            continue;
+        }
+
+        const orderedMatch = lines[index].match(/^\\s*(\\d+|[a-zA-Z])\\.\\s+(.+)$/);
+        const bulletMatch = lines[index].match(/^\\s*([°•])\\s+(.+)$/);
+        if (orderedMatch) {
+            const isNumeric = /^\\d+$/.test(orderedMatch[1]);
+            const startValue = isNumeric ? Number.parseInt(orderedMatch[1], 10) : orderedMatch[1].toLowerCase().charCodeAt(0) - 96;
+            const listType = isNumeric ? "" : (orderedMatch[1] === orderedMatch[1].toUpperCase() ? ' type="A"' : ' type="a"');
+            const items = [];
+            while (index < lines.length) {
+                const match = lines[index].match(/^\\s*(\\d+|[a-zA-Z])\\.\\s+(.+)$/);
+                if (!match || /^\\d+$/.test(match[1]) !== isNumeric) break;
+                items.push(match[2]);
+                index++;
+            }
+            html += '<ol' + listType + (isNumeric && startValue !== 1 ? ' start="' + startValue + '"' : '') + '>' +
+                items.map(item => '<li>' + renderInlineNoteText(item) + '</li>').join("") + '</ol>';
+            if (index < lines.length) html += "<br>";
+            continue;
+        }
+        if (bulletMatch) {
+            const items = [];
+            while (index < lines.length) {
+                const match = lines[index].match(/^\\s*([°•])\\s+(.+)$/);
+                if (!match) break;
+                items.push(match[2]);
+                index++;
+            }
+            html += '<ul class="personal-note-symbol-list">' +
+                items.map(item => '<li>' + renderInlineNoteText(item) + '</li>').join("") + '</ul>';
             if (index < lines.length) html += "<br>";
             continue;
         }
