@@ -3809,3 +3809,18 @@ a.note-category-link-missing {
 
 .app-note-text strong, .personal-note-text strong { font-weight: 700; }
 .app-note-text u, .personal-note-text u { text-underline-offset: 2px; }
+
+
+/* Nota LEGGENDA integrata: chiusa per impostazione predefinita e sempre in fondo. */
+.app-note-legend details {
+    margin: 0;
+}
+.app-note-legend-title {
+    cursor: pointer;
+    font-weight: 700;
+    list-style-position: inside;
+    overflow-wrap: anywhere;
+}
+.app-note-legend .app-note-text {
+    margin-top: 10px;
+}
