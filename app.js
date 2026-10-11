@@ -8319,7 +8319,7 @@ function renderAppNotesPage() {
                 <article class="app-note-card app-note-legend" id="app-note-legend">
                     <details>
                         <summary class="app-note-legend-title">LEGGENDA</summary>
-                        <div class="app-note-text">${renderNoteText(legendText, "", "", "app-legenda")}</div>
+                        <pre class="app-note-legend-example">${escapeHtml(legendText)}</pre>
                     </details>
                 </article>
             </div>
