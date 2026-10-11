@@ -1904,6 +1904,20 @@ section h2 {
     overflow-wrap: anywhere;
 }
 
+.app-note-text ol,
+.app-note-text ul {
+    margin: 0 0 8px;
+    padding-left: 1.7em;
+}
+
+.app-note-text li {
+    padding-left: 2px;
+}
+
+.app-note-text .personal-note-symbol-list {
+    list-style-type: disc;
+}
+
 .app-note-editor {
     order: 4;
     display: flex;
