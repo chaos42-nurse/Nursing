@@ -8327,9 +8327,9 @@ function renderAppNotesPage() {
                     placeholder="Titolo della nota"
                 >
                 <div class="note-format-bar" role="group" aria-label="Formattazione">
-                    <button type="button" data-note-format="**" data-note-format-target="appNoteInput" title="Grassetto: **testo**"><b>G</b></button>
-                    <button type="button" data-note-format="*" data-note-format-target="appNoteInput" title="Corsivo: *testo*"><i>C</i></button>
-                    <button type="button" data-note-format="__" data-note-format-target="appNoteInput" title="Sottolineato: __testo__"><u>S</u></button>
+                    <button type="button" data-note-format="*" data-note-format-target="appNoteInput" title="Grassetto: *testo*"><b>G</b></button>
+                    <button type="button" data-note-format="/" data-note-format-target="appNoteInput" title="Corsivo: /testo/"><i>C</i></button>
+                    <button type="button" data-note-format="_" data-note-format-target="appNoteInput" title="Sottolineato: _testo_"><u>S</u></button>
                 </div>
                 <textarea
                     id="appNoteInput"
@@ -8918,8 +8918,8 @@ document.addEventListener("click", event => {
 
 /* =========================================================
    FORMATTAZIONE NELLE NOTE
-   **grassetto**  *corsivo*  __sottolineato__  — combinabili: ***grassetto corsivo***,
-   **__grassetto sottolineato__**, *__corsivo sottolineato__*, ecc.
+   Un carattere per stile: asterisco = grassetto, barra = corsivo, trattino basso = sottolineato.
+   Si possono sommare annidandoli (vedi esempi nella guida delle note).
 ========================================================= */
 
 const NOTE_FORMAT_TOKENS = {
@@ -8944,11 +8944,20 @@ function markNoteFormatting(source) {
         );
     };
 
-    wrap(/\*\*\*(?=[^\s*])([^\n]*?[^\s*])\*\*\*/g, ["b", "i"]);
+    // Un solo carattere per stile: *grassetto*  /corsivo/  _sottolineato_
+    // (restano valide anche le vecchie forme **grassetto** e __sottolineato__).
+    // Il segno deve toccare il testo e non stare dentro una parola: 2*3*4, mg/mL, 11/10 restano com'erano.
+    const single = (mark, kind) => {
+        const m = mark.replace(/[*/]/g, c => "\\" + c);
+        const wordChar = "\\p{L}\\p{N}";
+        wrap(new RegExp("(?<![" + wordChar + m + "])" + m + "(?=[^\\s" + m + "])([^\\n" + m + "]*?[^\\s" + m + "])" + m + "(?![" + wordChar + m + "])", "gu"), [kind]);
+    };
+
     wrap(/\*\*(?=[^\s*])([^\n]*?[^\s*])\*\*/g, ["b"]);
     wrap(/__(?=[^\s_])([^\n]*?[^\s_])__/g, ["u"]);
-    // Il corsivo non scatta in operazioni come 2*3*4: l'asterisco non deve toccare lettere o numeri.
-    wrap(/(?<![\w*])\*(?=[^\s*])([^\n*]*?[^\s*])\*(?![\w*])/g, ["i"]);
+    single("*", "b");
+    single("/", "i");
+    single("_", "u");
 
     return text.replace(/\uE010(\d+)\uE011/g, (all, index) => saved[Number(index)]);
 }
@@ -10004,9 +10013,9 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 <h3>➕ Nuova nota</h3>
                 <input id="personalNoteTitle" class="personal-note-title-input" type="text" autocomplete="off" placeholder="Titolo della nota">
                 <div class="note-format-bar" role="group" aria-label="Formattazione">
-                    <button type="button" data-note-format="**" data-note-format-target="personalNoteInput" title="Grassetto: **testo**"><b>G</b></button>
-                    <button type="button" data-note-format="*" data-note-format-target="personalNoteInput" title="Corsivo: *testo*"><i>C</i></button>
-                    <button type="button" data-note-format="__" data-note-format-target="personalNoteInput" title="Sottolineato: __testo__"><u>S</u></button>
+                    <button type="button" data-note-format="*" data-note-format-target="personalNoteInput" title="Grassetto: *testo*"><b>G</b></button>
+                    <button type="button" data-note-format="/" data-note-format-target="personalNoteInput" title="Corsivo: /testo/"><i>C</i></button>
+                    <button type="button" data-note-format="_" data-note-format-target="personalNoteInput" title="Sottolineato: _testo_"><u>S</u></button>
                 </div>
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
