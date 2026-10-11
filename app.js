@@ -580,6 +580,7 @@ function setupPatientPhotosPage(patient) {
             <div class="patient-photo-compare-top">
                 <span>Confronto · distanza ${escapeHtml(formatGap(before.createdAt, after.createdAt))}</span>
                 <span class="patient-photo-compare-tools">
+                    <button type="button" data-cmp="home" aria-label="Riporta i righelli dentro le foto" title="Riporta i righelli dentro le foto">🎯</button>
                     <button type="button" data-cmp="ruler" class="active" aria-label="Mostra o nascondi i righelli">📐</button>
                     <button type="button" data-cmp="close" aria-label="Chiudi">✕</button>
                 </span>
@@ -598,6 +599,11 @@ function setupPatientPhotosPage(patient) {
         // e usa la scala della propria calibrazione, se esiste.
         const rulers = [];
         const refits = [];
+        const homeButton = view.querySelector("[data-cmp=home]");
+        const updateHome = () => {
+            const out = rulers.some(r => r.isVisible() && r.isOutside());
+            homeButton.classList.toggle("attention", out);
+        };
 
         view.querySelectorAll(".patient-photo-compare-pane").forEach((el, index) => {
             const item = index === 0 ? before : after;
@@ -612,7 +618,8 @@ function setupPatientPhotosPage(patient) {
                 img: image,
                 state: { x: null, y: null, r: 0, arm: null },
                 getMmPerPx: () => measureScale(item.measure),
-                getZoomScale: () => paneZoom ? paneZoom.getScale() : 1
+                getZoomScale: () => paneZoom ? paneZoom.getScale() : 1,
+                onDraw: () => updateHome()
             });
 
             const fitPane = () => {
@@ -650,6 +657,8 @@ function setupPatientPhotosPage(patient) {
 
         document.addEventListener("keydown", onKey);
         view.querySelector("[data-cmp=close]").addEventListener("click", close);
+
+        homeButton.addEventListener("click", () => rulers.forEach(r => r.bringInside()));
 
         view.querySelector("[data-cmp=ruler]").addEventListener("click", event => {
             const on = !rulers[0].isVisible();
@@ -950,8 +959,10 @@ function setupPatientPhotosPage(patient) {
      * Calibrato: tacche in scala reale, la lunghezza è un numero intero di cm.
      * Non calibrato: stesso righello con 10 cm nominali, marcato "NON IN SCALA".
      */
-    const createRuler = ({ svg, layer, img, state, getMmPerPx, getZoomScale, isInteractive = () => true }) => {
+    const createRuler = ({ svg, layer, img, state, getMmPerPx, getZoomScale, isInteractive = () => true, onDraw = null }) => {
         let visible = true;
+        // Il righello è libero: può uscire dai bordi della foto e crescere ben oltre lo schermo.
+        const MAX_ARM = 6;
         const pointers = new Map();
         let mode = null;
 
@@ -973,12 +984,12 @@ function setupPatientPhotosPage(patient) {
                     : minSide * 0.4;
             }
 
-            let armPx = Math.min(Math.max(state.arm, minSide * 0.08), minSide * 0.7);
+            let armPx = Math.min(Math.max(state.arm, minSide * 0.08), minSide * MAX_ARM);
             state.arm = armPx;   // lo stato non resta mai oltre i limiti: rotella e pizzico rispondono subito
             let armCm = 0;
 
             if (calibrated) {
-                const maxCm = Math.max(1, Math.floor(minSide * 0.7 / (10 * pxPerMm)));
+                const maxCm = Math.max(1, Math.floor(minSide * MAX_ARM / (10 * pxPerMm)));
                 armCm = Math.min(maxCm, Math.max(1, Math.round(armPx / (10 * pxPerMm))));
                 armPx = armCm * 10 * pxPerMm;
             }
@@ -990,12 +1001,13 @@ function setupPatientPhotosPage(patient) {
             return { width, height, screenPerImage, unit, calibrated, armPx, tickPxPerMm, totalMm, stripPx };
         };
 
-        const draw = (clampPosition = true) => {
+        const draw = (clampPosition = false) => {
             const g0 = geometry();
             svg.setAttribute("viewBox", "0 0 " + g0.width + " " + g0.height);
 
             if (!visible) {
                 svg.innerHTML = "";
+                if (onDraw) onDraw();
                 return;
             }
 
@@ -1010,9 +1022,7 @@ function setupPatientPhotosPage(patient) {
             const cos = Math.cos(rad);
             const sin = Math.sin(rad);
 
-            // L'intera "L" resta dentro la foto, a qualunque angolo e dimensione.
-            // Durante una rotazione/ridimensionamento col dito il vincolo si rimanda al
-            // rilascio, altrimenti il righello verrebbe spinto via da sotto il dito.
+            // Il vincolo (L intera dentro la foto) si applica solo su richiesta: pulsante "Riporta dentro".
             if (clampPosition) {
                 const corners = [[0, 0], [armPx, 0], [armPx, stripPx], [stripPx, stripPx], [stripPx, armPx], [0, armPx]];
                 const spread = corners.map(([lx, ly]) => [state.x + lx * cos - ly * sin, state.y + lx * sin + ly * cos]);
@@ -1113,6 +1123,7 @@ function setupPatientPhotosPage(patient) {
             handle("data-ruler-size", armPx - stripPx * 0.5, stripPx * 0.5, "#238636", "⤢");
 
             svg.innerHTML = parts.join("") + labels.join("");
+            if (onDraw) onDraw();
         };
 
         const cornerOnScreen = g => {
@@ -1212,7 +1223,7 @@ function setupPatientPhotosPage(patient) {
                 }
             }
 
-            draw(mode.type === "move");
+            draw();
         });
 
         const release = event => {
@@ -1227,7 +1238,7 @@ function setupPatientPhotosPage(patient) {
             if (!mode || mode.type === "pinch" || mode.id === event.pointerId) {
                 mode = null;
                 pointers.clear();
-                draw(true);          // al rilascio la "L" torna entro i bordi della foto
+                draw();
             }
         };
 
@@ -1249,10 +1260,34 @@ function setupPatientPhotosPage(patient) {
             draw();
         }, { passive: false });
 
+        // Riporta la "L" dentro la foto (anche rimpicciolendola se è più grande dell'immagine).
+        const bringInside = () => {
+            const minSide = Math.min(img.naturalWidth || 1, img.naturalHeight || 1);
+            if (state.arm) state.arm = Math.min(state.arm, minSide * 0.7);
+            draw(true);
+            draw(true);   // seconda passata: il righello calibrato arrotonda i cm e può cambiare ingombro
+        };
+
+        // Vero se una parte della "L" sporge dalla foto (o se è più grande di essa).
+        const isOutside = () => {
+            const g = geometry();
+            if (state.x === null) return false;
+            const rad = state.r * Math.PI / 180;
+            const cos = Math.cos(rad), sin = Math.sin(rad);
+            const corners = [[0, 0], [g.armPx, 0], [g.armPx, g.stripPx], [0, g.armPx]];
+            return corners.some(([lx, ly]) => {
+                const x = state.x + lx * cos - ly * sin;
+                const y = state.y + lx * sin + ly * cos;
+                return x < -1 || y < -1 || x > g.width + 1 || y > g.height + 1;
+            });
+        };
+
         return {
-            draw: () => draw(true),
-            setVisible: on => { visible = on; draw(true); },
-            isVisible: () => visible
+            draw: () => draw(),
+            setVisible: on => { visible = on; draw(); },
+            isVisible: () => visible,
+            bringInside,
+            isOutside
         };
     };
 
@@ -1285,6 +1320,7 @@ function setupPatientPhotosPage(patient) {
             </div>
             <div class="patient-photo-viewer-top">
                 <span class="patient-photo-viewer-caption"></span>
+                ${item ? '<button type="button" data-viewer="home" aria-label="Riporta il righello dentro la foto" title="Riporta il righello dentro la foto">🎯</button>' : ""}
                 ${item ? '<button type="button" data-viewer="ruler" class="active" aria-label="Mostra o nascondi il righello a L">📐</button>' : ""}
                 ${item ? '<button type="button" data-viewer="measure" aria-label="Misura">📏</button>' : ""}
                 <button type="button" data-viewer="out" aria-label="Riduci">−</button>
@@ -1683,7 +1719,11 @@ function setupPatientPhotosPage(patient) {
             getMmPerPx: mmPerPx,
             getZoomScale: () => zoom.getScale(),
             // Mentre si segnano i punti di una misura il righello lascia passare i tocchi.
-            isInteractive: () => !(measuring && step)
+            isInteractive: () => !(measuring && step),
+            onDraw: () => {
+                const home = viewer.querySelector("[data-viewer=home]");
+                if (home) home.classList.toggle("attention", ruler.isVisible() && ruler.isOutside());
+            }
         });
 
         document.addEventListener("keydown", onKey);
@@ -1697,6 +1737,8 @@ function setupPatientPhotosPage(patient) {
             if (action === "in") zoom.zoomBy(1.5);
             if (action === "out") zoom.zoomBy(1 / 1.5);
             if (action === "measure") setMeasuring(!measuring);
+
+            if (action === "home") ruler.bringInside();
 
             if (action === "ruler") {
                 ruler.setVisible(!ruler.isVisible());

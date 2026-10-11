@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-v112";
+const CACHE_NAME = "nursing-v113";
 
 const PATIENT_PHOTO_CACHE = "nursing-patient-photos-v1";
 

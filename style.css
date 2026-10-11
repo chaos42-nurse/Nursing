@@ -3617,4 +3617,10 @@ section h2 {
     color: var(--text);
     font: inherit;
     font-size: .78rem;
+/* Pulsante "riporta il righello dentro": si evidenzia quando la L sporge dalla foto */
+.patient-photo-viewer-top button.attention,
+.patient-photo-compare-tools button.attention {
+    background: #d97706;
+    color: #fff;
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, .45);
 }
