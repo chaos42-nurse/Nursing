@@ -4234,6 +4234,92 @@ const DDI_BADGE = {
     nota: "Possibile"
 };
 
+const DDI_TIPO_ICONA = {
+    potenziamento: "⬆️",
+    antagonismo: "↘️",
+    farmacocinetica: "🧪",
+    protettiva: "🛡️"
+};
+
+const DDI_TIPO_BADGE = {
+    potenziamento: "Effetti che si sommano",
+    antagonismo: "Si riducono a vicenda",
+    farmacocinetica: "Cambia i livelli",
+    protettiva: "Riduce un effetto avverso"
+};
+
+/* Riepilogo di compatibilità della coppia: dice subito se l'associazione è da evitare,
+   se un farmaco riduce o annulla l'altro, se gli effetti si sommano o cambiano i livelli. */
+function ddiRenderRiepilogo(NI, idx, idA, idB, curate, esito) {
+    const voci = [
+        ...curate.map(v => ({ categoria: v.categoria, tipo: v.effetto, testo: v.testo, da: null, a: null, curata: true })),
+        ...esito.voci.map(v => ({ categoria: v.categoria, tipo: v.tipo, testo: v.testoIt, da: v.da, a: v.a, curata: false }))
+    ];
+
+    const coppia = `${escapeHtml(NI.nomeCompleto(idx, idA))} + ${escapeHtml(NI.nomeCompleto(idx, idB))}`;
+
+    if (!voci.length) return "";
+
+    const rischi = voci.filter(v => v.categoria === "rischio");
+    const cautele = voci.filter(v => v.categoria === "attenzione");
+
+    let classe, titolo;
+    if (rischi.length) {
+        classe = "ddi-rischio";
+        titolo = "⛔ Associazione a rischio: da evitare, o da somministrare solo con monitoraggio";
+    } else if (cautele.length) {
+        classe = "ddi-attenzione";
+        titolo = "⚠️ Associazione da usare con cautela";
+    } else {
+        classe = "ddi-nota";
+        titolo = "ℹ️ Nessun rischio rilevato dal database";
+    }
+
+    const righe = [];
+    const perTipo = tipo => voci.filter(v => v.tipo === tipo);
+
+    const pericolosiInsieme = rischi.filter(v => v.tipo !== "antagonismo");
+    if (pericolosiInsieme.length) {
+        righe.push(`<li><span>⛔</span><div><strong>Pericolosi se somministrati insieme</strong>
+            <small>${pericolosiInsieme.length} segnalazion${pericolosiInsieme.length === 1 ? "e" : "i"} di rischio: leggi i dettagli qui sotto.</small></div></li>`);
+    }
+
+    const antagonismi = perTipo("antagonismo");
+    if (antagonismi.length) {
+        const elenco = antagonismi.map(v => {
+            if (v.curata || v.da === null) return `<small>${escapeHtml(v.testo)}</small>`;
+            return `<small>${escapeHtml(NI.nomeVisto(idx, v.da))} può ridurre o annullare l'effetto di ${escapeHtml(NI.nomeVisto(idx, v.a))}.</small>`;
+        });
+        righe.push(`<li><span>${DDI_TIPO_ICONA.antagonismo}</span><div><strong>Un farmaco riduce o annulla l'effetto dell'altro</strong>${[...new Set(elenco)].join("")}</div></li>`);
+    }
+
+    const potenziamenti = perTipo("potenziamento").filter(v => v.categoria !== "rischio");
+    if (potenziamenti.length) {
+        righe.push(`<li><span>${DDI_TIPO_ICONA.potenziamento}</span><div><strong>Gli effetti si sommano o si potenziano</strong>
+            <small>${potenziamenti.length} segnalazion${potenziamenti.length === 1 ? "e" : "i"}.</small></div></li>`);
+    }
+
+    const cinetica = perTipo("farmacocinetica");
+    if (cinetica.length) {
+        righe.push(`<li><span>${DDI_TIPO_ICONA.farmacocinetica}</span><div><strong>Cambiano i livelli del farmaco nel sangue</strong>
+            <small>Metabolismo, assorbimento o eliminazione modificati: ${cinetica.length} segnalazion${cinetica.length === 1 ? "e" : "i"}.</small></div></li>`);
+    }
+
+    const protettive = perTipo("protettiva");
+    if (protettive.length) {
+        righe.push(`<li><span>${DDI_TIPO_ICONA.protettiva}</span><div><strong>Riduce un effetto avverso</strong>
+            <small>${protettive.length} segnalazion${protettive.length === 1 ? "e" : "i"}.</small></div></li>`);
+    }
+
+    return `
+        <div class="info-block ddi-esito ddi-riepilogo ${classe}">
+            <h4>${titolo}</h4>
+            <p class="ddi-coppia">${coppia}</p>
+            <ul class="ddi-riepilogo-lista">${righe.join("")}</ul>
+            <p class="ddi-riepilogo-nota">Riepilogo indicativo ricavato dal tipo di effetto descritto: non è una valutazione clinica e non riguarda la compatibilità fisico-chimica in infusione o in siringa.</p>
+        </div>`;
+}
+
 const DDI_AIFA_URL = "https://medicinali.aifa.gov.it/";
 
 function ddiRenderCurate(curate) {
@@ -4242,6 +4328,7 @@ function ddiRenderCurate(curate) {
     const voci = curate.map(v => `
         <li class="ddi-voce ddi-voce-${v.categoria}">
             <span class="ddi-badge">${escapeHtml(v.tipo === "compatibilita" ? "Compatibilità in infusione" : DDI_BADGE[v.categoria])}</span>
+            ${v.tipo === "compatibilita" ? "" : `<span class="ddi-badge ddi-badge-tipo">${DDI_TIPO_ICONA[v.effetto] || ""} ${escapeHtml(DDI_TIPO_BADGE[v.effetto] || "")}</span>`}
             <p>${escapeHtml(v.testo)}</p>
             ${v.monitoraggio ? `<p class="ddi-monitoraggio"><strong>Cosa controllare:</strong> ${escapeHtml(v.monitoraggio)}</p>` : ""}
         </li>`).join("");
@@ -4281,6 +4368,7 @@ function ddiRenderEsito(NI, idx, idA, idB, esito, haCurate) {
     const voci = esito.voci.map(voce => `
         <li class="ddi-voce ddi-voce-${voce.categoria}">
             <span class="ddi-badge">${escapeHtml(DDI_BADGE[voce.categoria])}</span>
+            <span class="ddi-badge ddi-badge-tipo">${DDI_TIPO_ICONA[voce.tipo] || ""} ${escapeHtml(DDI_TIPO_BADGE[voce.tipo] || "")}</span>
             <p>${escapeHtml(voce.testoIt)}</p>
             ${voce.tradotto ? "" : `<p class="ddi-nota-testo">Frase non ancora tradotta: testo originale in inglese.</p>`}
             <details>
@@ -4538,9 +4626,11 @@ async function renderDrugInteractions(selectedItem, data) {
         }
 
         const curate = NI.verificaCurate(idx, rA.id, rB.id);
+        const esitoDb = NI.verificaCoppia(idx, rA.id, rB.id);
         elRisultato.innerHTML =
+            ddiRenderRiepilogo(NI, idx, rA.id, rB.id, curate, esitoDb) +
             ddiRenderCurate(curate) +
-            ddiRenderEsito(NI, idx, rA.id, rB.id, NI.verificaCoppia(idx, rA.id, rB.id), curate.length > 0);
+            ddiRenderEsito(NI, idx, rA.id, rB.id, esitoDb, curate.length > 0);
     }
 
     bottone.addEventListener("click", verifica);

@@ -38,6 +38,36 @@
     const ORDINE_CATEGORIE = { rischio: 0, attenzione: 1, nota: 2 };
 
     /* ---------------------------------------------------------------------
+       TIPO DI EFFETTO (per il riepilogo di compatibilità)
+       Dedotto dal testo della segnalazione (inglese o italiano):
+         antagonismo   = un farmaco riduce o annulla l'effetto dell'altro
+         potenziamento = gli effetti si sommano o si rinforzano (spesso pericoloso)
+         farmacocinetica = cambia livelli, metabolismo, assorbimento, eliminazione
+         protettiva    = riduce un effetto avverso
+    --------------------------------------------------------------------- */
+    const ETICHETTE_TIPO = {
+        potenziamento: "Effetti che si sommano o si potenziano",
+        antagonismo: "Un farmaco riduce o annulla l'effetto dell'altro",
+        farmacocinetica: "Cambiano i livelli del farmaco nel sangue",
+        protettiva: "Riduce un effetto avverso"
+    };
+
+    function classificaTipo(testo, categoria) {
+        const t = String(testo || "").toLowerCase();
+        if (categoria === N) return "protettiva";
+
+        if (/therapeutic efficacy[^.]*decreased|may decrease the [a-z() -]*activities|decrease effectiveness|decrease in the absorption|absorption of [^.]*decreased|bioavailability of [^.]*decreased|serum concentration of [^.]*(decreased|reduced)|lower serum level|reduction in efficacy|loss of efficacy|può (ridurre|diminuire|annullare) l'(effetto|efficacia|azione)|può (ridurre|diminuire) gli effetti|efficacia[^.]*(ridott|inferior)|perdita di efficacia|(efficacia( terapeutica)?|concentrazione sierica|biodisponibilità|assorbimento) di [^.]*può (diminuire|ridurs)|può ridurre l'assorbimento|riduzione dei livelli sierici|biodisponibilità[^.]*ridott|assorbimento[^.]*ridott/.test(t)) {
+            return "antagonismo";
+        }
+
+        if (/metabolism|excretion|absorption|bioavailability|protein binding|serum concentration|eliminazione|metabolismo|concentrazion|assorbimento|biodisponibilit|livelli sierici|legame/.test(t)) {
+            return "farmacocinetica";
+        }
+
+        return "potenziamento";
+    }
+
+    /* ---------------------------------------------------------------------
        MODELLI: [inglese originale, traduzione italiana, categoria]
        {A} e {B} vengono sostituiti con i nomi dei farmaci. Le frasi italiane
        sono scritte in modo da non dipendere dal genere dei nomi.
@@ -920,6 +950,7 @@
                 const m = idx.modelli[im];
                 voci.push({
                     categoria: m.cat,
+                    tipo: classificaTipo(m.en, m.cat),
                     tradotto: m.tradotto,
                     da: x,
                     a: y,
@@ -983,6 +1014,7 @@
                 id: v.id,
                 categoria: v.categoria,
                 tipo: v.tipo,
+                effetto: classificaTipo(v.testo, v.categoria),
                 testo: riempi(v.testo, nomeVisto(idx, x), nomeVisto(idx, y)),
                 monitoraggio: v.monitoraggio
             });
@@ -1090,6 +1122,8 @@
         cerca,
         risolvi,
         verificaCoppia,
+        classificaTipo,
+        ETICHETTE_TIPO,
         nomeVisto,
         nomeCompleto,
         normalizza,

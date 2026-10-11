@@ -3853,3 +3853,44 @@ a.note-category-link-missing {
     background: transparent;
     border: 0;
 }
+
+/* Riepilogo di compatibilità tra due farmaci */
+.ddi-riepilogo-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ddi-riepilogo-lista li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.ddi-riepilogo-lista li > span {
+    flex: 0 0 auto;
+    line-height: 1.4;
+}
+
+.ddi-riepilogo-lista strong {
+    display: block;
+}
+
+.ddi-riepilogo-lista small {
+    display: block;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.ddi-riepilogo-nota {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: .78rem;
+}
+
+.ddi-badge-tipo {
+    margin-left: 6px;
+}
