@@ -12259,6 +12259,62 @@ if (incomingPersonalization) {
     loadState();
 
 }
+
+/* =========================================================
+   AVVISO NOVITÀ: mostrato una sola volta per questa versione
+========================================================= */
+function showWhatsNewNotice() {
+    const noticeKey = "nursing-whats-new-v132-seen";
+    if (localStorage.getItem(noticeKey) === "1") return;
+
+    const modal = document.createElement("div");
+    modal.className = "whats-new-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "whatsNewTitle");
+    modal.innerHTML = `
+        <div class="whats-new-card">
+            <h2 id="whatsNewTitle">Cosa c'è di nuovo?</h2>
+            <ul>
+                <li>Le interazioni farmaci sono state implementate.</li>
+                <li>Ora è possibile creare collegamenti sia tra note sia verso le aree dell'app.</li>
+                <li>È possibile inserire foto nei pazienti, confrontarle e utilizzare un righello virtuale per valutare la possibile evoluzione della guarigione.</li>
+                <li>Si può scrivere in <strong>grassetto</strong>, <em>corsivo</em> o <u>sottolineare</u>.</li>
+                <li>Si possono creare elenchi, liste e tabelle.</li>
+                <li>È possibile contattarmi via e-mail.</li>
+            </ul>
+            <h3>In futuro, forse</h3>
+            <p class="whats-new-note">Funzioni in valutazione, non ancora confermate:</p>
+            <ul>
+                <li>Possibilità di registrare audio.</li>
+                <li>Possibilità di inserire foto nelle note.</li>
+                <li>Possibilità di evidenziare il testo o cambiarne il colore.</li>
+            </ul>
+            <p class="whats-new-footer">Sto pensando anche ad altre funzioni utili per effettuare valutazioni rapide in diversi contesti.</p>
+            <button type="button" class="whats-new-close">Ho capito</button>
+        </div>
+    `;
+
+    const closeNotice = () => {
+        localStorage.setItem(noticeKey, "1");
+        modal.remove();
+    };
+    modal.querySelector(".whats-new-close").addEventListener("click", closeNotice);
+    modal.addEventListener("click", event => {
+        if (event.target === modal) closeNotice();
+    });
+    document.addEventListener("keydown", function closeOnEscape(event) {
+        if (event.key === "Escape" && document.body.contains(modal)) {
+            closeNotice();
+            document.removeEventListener("keydown", closeOnEscape);
+        }
+    });
+    document.body.appendChild(modal);
+    modal.querySelector(".whats-new-close").focus();
+}
+
+showWhatsNewNotice();
+
 window.addEventListener("popstate", () => {
     const viewer = document.getElementById("patientPhotoViewer");
     if (viewer) {
