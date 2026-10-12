@@ -11068,6 +11068,11 @@ async function importShareFile(file) {
         return;
     }
 
+    return importSharePayload(payload);
+}
+
+/* Importa una condivisione completa (note, pazienti e foto) ricevuta da file o in diretta. */
+async function importSharePayload(payload) {
     if (!payload || payload.app !== "Nursing Shot" || payload.type !== "share-file" || !payload.share) {
         window.alert("Questo file non è una condivisione di Nursing Shot.");
         return;
@@ -11149,6 +11154,10 @@ function showShareCenter() {
                 📡 Importa da NFC
             </button>
 
+            <button id="shareCenterDirect" class="settings-action" type="button">
+                📲 Ricevi direttamente (QR, con foto)
+            </button>
+
             <button id="shareCenterFile" class="settings-action" type="button">
                 📁 Importa da file (con foto)
             </button>
@@ -11170,6 +11179,12 @@ function showShareCenter() {
         ?.addEventListener("click", () => {
             close();
             showPersonalizationShareDialog();
+        });
+
+    dialog.querySelector("#shareCenterDirect")
+        ?.addEventListener("click", () => {
+            close();
+            window.DirectShare.receive(importSharePayload);
         });
 
     dialog.querySelector("#shareCenterQr")
@@ -11359,22 +11374,13 @@ function showPersonalizationShareDialog() {
 
         if (!data) return;
 
-        // Foto delle medicazioni: troppo grandi per collegamento, QR o NFC, vanno in un file.
+        // Foto delle medicazioni: non entrano in collegamento, QR o NFC (si inviano in diretta o in un file).
+        let photos = [];
         if (scope === "all" && Array.isArray(data.patients) && data.patients.length && window.PatientPhotos) {
             try {
-                const photos = await window.PatientPhotos.exportRecords(
+                photos = await window.PatientPhotos.exportRecords(
                     data.patients.map(patient => patient.id)
                 );
-
-                if (photos.length && window.confirm(
-                    "Vuoi includere anche le " + photos.length + " foto di medicazione di questi pazienti?\n\n" +
-                    "Con le foto la condivisione diventa un file (non entra in collegamento, QR o NFC) da inviare con l'app che preferisci. " +
-                    "Le foto contengono dati sanitari: condividile solo con chi ne ha titolo."
-                )) {
-                    close();
-                    await sharePersonalizationAsFile(data, photos);
-                    return;
-                }
             } catch (error) {
                 console.error("Foto non incluse:", error);
                 window.alert("Non è stato possibile leggere le foto: la condivisione prosegue senza.");
@@ -11382,11 +11388,11 @@ function showPersonalizationShareDialog() {
         }
 
         close();
-        showShareMethodDialog(type, data);
+        showShareMethodDialog(type, data, photos);
     });
 }
 
-function showShareMethodDialog(type, data) {
+function showShareMethodDialog(type, data, photos = []) {
     document.getElementById("shareMethodDialog")?.remove();
 
     const url = buildShareUrl(type, data);
@@ -11404,6 +11410,20 @@ function showShareMethodDialog(type, data) {
             >×</button>
 
             <h3>📤 Come vuoi condividere?</h3>
+
+            ${photos.length ? `<p class="settings-message share-photo-warning">
+                📷 Ci sono ${photos.length} foto di medicazione. Con collegamento, QR e NFC passano
+                <b>tutti i dati tranne le foto</b> (troppo grandi). Per inviarle usa
+                «Trasferimento diretto» o «File».
+            </p>` : ""}
+
+            <button id="shareMethodDirect" class="settings-action" type="button">
+                📲 Trasferimento diretto (QR)${photos.length ? " — con foto" : ""}
+            </button>
+
+            ${photos.length ? `<button id="shareMethodFile" class="settings-action" type="button">
+                📁 File (con foto)
+            </button>` : ""}
 
             <button id="shareMethodLink" class="settings-action" type="button">
                 🔗 Collegamento
@@ -11429,6 +11449,25 @@ function showShareMethodDialog(type, data) {
     dialog.addEventListener("click", event => {
         if (event.target === dialog) close();
     });
+
+    dialog.querySelector("#shareMethodDirect")
+        ?.addEventListener("click", () => {
+            close();
+            window.DirectShare.send({
+                app: "Nursing Shot",
+                type: "share-file",
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                share: { type, data },
+                photos
+            });
+        });
+
+    dialog.querySelector("#shareMethodFile")
+        ?.addEventListener("click", async () => {
+            close();
+            await sharePersonalizationAsFile(data, photos);
+        });
 
     dialog.querySelector("#shareMethodLink")
         ?.addEventListener("click", async () => {
@@ -11463,7 +11502,7 @@ function showShareMethodDialog(type, data) {
     dialog.querySelector("#shareMethodNfc")
         ?.addEventListener("click", async () => {
             close();
-            await writeGenericNfc(url);
+            await writeGenericNfc(url, photos.length);
         });
 }
 
@@ -11497,7 +11536,7 @@ function showGenericShareQr(url) {
     });
 }
 
-async function writeGenericNfc(url) {
+async function writeGenericNfc(url, photoCount = 0) {
     if (!window.isSecureContext) {
         window.alert(
             "La scrittura NFC richiede una connessione HTTPS."
@@ -11518,7 +11557,7 @@ async function writeGenericNfc(url) {
     if (byteLength > 880) {
         window.alert(
             "La condivisione è troppo grande anche per i tag NFC più capienti (circa 880 byte, es. NTAG216): ora occupa " +
-            byteLength + " byte. Condividi meno note oppure usa il collegamento o il QR."
+            byteLength + " byte. Usa «Trasferimento diretto» (nessun limite di dimensione), il collegamento o il QR, oppure condividi meno dati."
         );
         return;
     }
@@ -11528,7 +11567,8 @@ async function writeGenericNfc(url) {
         : "\n\nOccupa " + byteLength + " byte: entra in un tag NTAG215 o NTAG216.";
 
     if (!window.confirm(
-        "Il collegamento verrà scritto sul tag NFC. Continuare?" + advice
+        "Il collegamento verrà scritto sul tag NFC. Continuare?" + advice +
+        (photoCount ? "\n\n📷 Le " + photoCount + " foto NON sono incluse: con l'NFC non si possono condividere. Per le foto usa «Trasferimento diretto»." : "")
     )) {
         return;
     }

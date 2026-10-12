@@ -4107,3 +4107,8 @@ a.note-category-link-missing {
     background: transparent !important;
     box-shadow: none !important;
 }
+
+/* Trasferimento diretto */
+.direct-share-qr { display: block; width: 100%; max-width: 320px; height: auto; margin: 10px auto; border-radius: 8px; background: #fff; image-rendering: pixelated; }
+.direct-share-bar { width: 100%; height: 10px; }
+.share-photo-warning { text-align: left; }
