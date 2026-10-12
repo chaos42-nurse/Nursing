@@ -8325,6 +8325,18 @@ function setupSettings() {
         if (event.target === panel) panel.hidden = true;
     });
 
+    // Pulsante discreto "salva ordine": visibile solo mentre l'ordine è in modifica.
+    if (orderButton && !document.getElementById("orderDoneButton")) {
+        const done = document.createElement("button");
+        done.id = "orderDoneButton";
+        done.type = "button";
+        done.title = "Salva modifiche ordine";
+        done.setAttribute("aria-label", "Salva modifiche ordine");
+        done.textContent = "✓";
+        done.addEventListener("click", () => orderButton.click());
+        document.body.appendChild(done);
+    }
+
     orderButton?.addEventListener("click", () => {
         orderEditMode = !orderEditMode;
         document.body.classList.toggle("order-editing", orderEditMode);
