@@ -4087,3 +4087,23 @@ a.note-category-link-missing {
 .app-note-editor[hidden] {
     display: none;
 }
+
+/* Note: frecce di riordino visibili solo in "Modifica ordine", come per le aree. */
+.app-note-order-controls {
+    flex-direction: column;
+    gap: 0;
+    margin-right: 4px;
+}
+.app-note-actions .app-note-order-controls .order-button {
+    width: 30px;
+    height: 26px;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.app-note-card .app-note-actions .app-note-order-controls button.order-button {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}

@@ -8344,7 +8344,9 @@ function setupSettings() {
 
         panel.hidden = true;
 
-        if (state) {
+        if (new URLSearchParams(window.location.search).get("appnotes")) {
+            renderAppNotesPage();
+        } else if (state) {
             loadState();
         } else {
             loadCategories();
@@ -8618,8 +8620,10 @@ function renderAppNotesPage() {
                             <div class="app-note-card-header">
                                 <h3>${renderNoteText(note.title || "Nota")}</h3>
                                 <div class="personal-note-actions app-note-actions">
-                                    <button class="app-note-move" type="button" data-app-note-move="up" data-app-note-id="${escapeAttribute(note.id)}" title="Sposta nota in alto" aria-label="Sposta ${escapeAttribute(note.title || "nota")} in alto" ${notes.indexOf(note) === 0 ? "disabled" : ""}>↑</button>
-                                    <button class="app-note-move" type="button" data-app-note-move="down" data-app-note-id="${escapeAttribute(note.id)}" title="Sposta nota in basso" aria-label="Sposta ${escapeAttribute(note.title || "nota")} in basso" ${notes.indexOf(note) === notes.length - 1 ? "disabled" : ""}>↓</button>
+                                    ${orderEditMode ? `<span class="order-controls app-note-order-controls">
+                                        <button class="order-button app-note-move" type="button" data-app-note-move="up" data-app-note-id="${escapeAttribute(note.id)}" title="Sposta nota in alto" aria-label="Sposta ${escapeAttribute(note.title || "nota")} in alto" ${notes.indexOf(note) === 0 ? "disabled" : ""}>↑</button>
+                                        <button class="order-button app-note-move" type="button" data-app-note-move="down" data-app-note-id="${escapeAttribute(note.id)}" title="Sposta nota in basso" aria-label="Sposta ${escapeAttribute(note.title || "nota")} in basso" ${notes.indexOf(note) === notes.length - 1 ? "disabled" : ""}>↓</button>
+                                    </span>` : ""}
                                     <button class="app-note-edit" type="button" data-app-note-edit="${escapeAttribute(note.id)}" title="Modifica nota">✏️</button>
                                     <button class="app-note-delete" type="button" data-app-note-delete="${escapeAttribute(note.id)}" title="Elimina nota">🗑️</button>
                                 </div>
