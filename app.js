@@ -8523,9 +8523,74 @@ function renderContactPage() {
     `;
 }
 
+/* LEGGENDA delle note: per ogni funzione, a sinistra come si scrive (con termini segnaposto
+   come "testo" o "parola"), a destra il risultato vero, reso dallo stesso motore delle note. */
+const NOTE_LEGEND = [
+    {
+        titolo: "✍️ Stile del testo",
+        nota: "Il segno va attaccato al testo, senza spazi. Si possono sommare.",
+        righe: [
+            ["*testo*", "grassetto"],
+            ["/testo/", "corsivo"],
+            ["_testo_", "sottolineato"],
+            ["*/_testo_/*", "tutti e tre insieme"]
+        ]
+    },
+    {
+        titolo: "📋 Elenchi",
+        nota: "A capo con Invio l'elenco continua da solo.",
+        righe: [
+            ["- elemento\n- elemento", "elenco con caselle da spuntare"],
+            ["1. elemento\n2. elemento", "elenco numerato"],
+            ["a. elemento\nb. elemento", "elenco alfabetico"],
+            ["° elemento\n° elemento", "elenco puntato (anche con •)"]
+        ]
+    },
+    {
+        titolo: "🔗 Collegamenti",
+        nota: "Tocca il collegamento per aprirlo.",
+        righe: [
+            ["[[parola]]", "collega le note che contengono la stessa parola"],
+            ["[[@categoria]]", "apre una categoria, scheda o microarea (es. [[@ECG]])"]
+        ]
+    },
+    {
+        titolo: "▦ Tabelle",
+        nota: "Ogni cella tra parentesi quadre; serve uno spazio tra una cella e l'altra.",
+        righe: [
+            ["[A] [B]\n[1] [2]", "tabella (la prima riga è l'intestazione)"]
+        ]
+    }
+];
+
+function renderNoteLegend() {
+    const sezioni = NOTE_LEGEND.map(sezione => `
+        <section class="note-legend-section">
+            <h4>${sezione.titolo}</h4>
+            <p class="note-legend-hint">${escapeHtml(sezione.nota)}</p>
+            ${sezione.righe.map(([scrivi, descrizione]) => {
+                // Gli esempi con [[@categoria]] usano una categoria reale per mostrare il link vero.
+                const esempio = scrivi.replace("[[@categoria]]", "[[@ECG]]");
+                return `
+                <div class="note-legend-row">
+                    <div class="note-legend-write">
+                        <span class="note-legend-label">Scrivi</span>
+                        <code>${escapeHtml(scrivi)}</code>
+                    </div>
+                    <div class="note-legend-result">
+                        <span class="note-legend-label">Ottieni</span>
+                        <div class="note-legend-render">${renderNoteText(esempio, "", "", "legend").replace(/<input /g, "<input disabled ")}</div>
+                        <small>${escapeHtml(descrizione)}</small>
+                    </div>
+                </div>`;
+            }).join("")}
+        </section>`).join("");
+
+    return `<div class="note-legend">${sezioni}</div>`;
+}
+
 function renderAppNotesPage() {
     const notes = getAppNotes();
-    const legendText = "- elenco con caselle\n\n1. elenco numerato\n2. continua automaticamente\n\na. elenco alfabetico\nb. continua automaticamente\n\n° elenco puntato\n• stesso elenco puntato: simbolo equivalente a °\n\n[[collegamento]]\n[[@collegamento categoria]]\n\n[tabella] [esempio]\n[tra parentesi] [serve lo spazio]\n\n*grassetto*\n/corsivo/\n_sottolineato_";
 
     content.innerHTML = `
         <section class="detail-page app-notes-page">
@@ -8571,7 +8636,7 @@ function renderAppNotesPage() {
                 <article class="app-note-card app-note-legend" id="app-note-legend">
                     <details>
                         <summary class="app-note-legend-title">LEGGENDA</summary>
-                        <pre class="app-note-legend-example">${escapeHtml(legendText)}</pre>
+                        ${renderNoteLegend()}
                     </details>
                 </article>
             </div>
