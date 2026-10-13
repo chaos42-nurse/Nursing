@@ -4262,3 +4262,36 @@ body.order-editing #orderDoneButton { display: block; }
 .audio-record-title { width: 100%; box-sizing: border-box; margin: 6px 0; }
 .audio-record-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .audio-record-buttons .settings-action { width: auto; min-width: 110px; }
+
+/* Immagini nelle note */
+.note-image {
+    display: inline-block;
+    max-width: 100%;
+    margin: 4px 6px 4px 0;
+    padding: 0;
+    border: 1px solid var(--border, rgba(255,255,255,.14));
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface-hover, rgba(255,255,255,.06));
+    color: inherit;
+    font: inherit;
+    cursor: zoom-in;
+    vertical-align: top;
+}
+.note-image img { display: block; max-width: 100%; max-height: 120px; width: auto; height: auto; object-fit: cover; }
+.note-image-placeholder { display: block; padding: 10px 14px; font-size: .85rem; opacity: .7; }
+.note-image.is-missing { cursor: default; }
+
+.note-image-viewer {
+    position: fixed; inset: 0; z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, .92);
+}
+.note-image-viewer-stage { width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center; }
+.note-image-viewer-stage img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; }
+.note-image-viewer-stage img.is-zoomed { max-width: none; max-height: none; width: 220%; cursor: zoom-out; }
+.note-image-viewer-close {
+    position: fixed; top: 12px; right: 12px; z-index: 2001;
+    width: 40px; height: 40px; border: 0; border-radius: 50%;
+    background: rgba(255,255,255,.18); color: #fff; font-size: 1.4rem; cursor: pointer;
+}

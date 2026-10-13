@@ -103,7 +103,7 @@
 
     /* ---------- Segnaposto nel testo delle note ---------- */
 
-    const TOKEN = /\[\[audio:([\w-]+)\]\]/g;
+    const TOKEN = /\[\[(?:audio|img):([\w-]+)\]\]/g;
 
     function extractIds(value) {
         const text = typeof value === "string" ? value : JSON.stringify(value || "");
@@ -378,7 +378,125 @@
             '<span class="note-audio-icon">▶</span><span class="note-audio-label">🎙️ Nota vocale</span></button>';
     }
 
+
+    /* ---------- Immagini nelle note ([[img:ID]]) ---------- */
+
+    const IMG_MAX_SIDE = 1024;
+
+    async function saveImage(owner, file) {
+        const photos = global.PatientPhotos;
+        if (!photos || !photos._compressImage) throw new Error("Compressione immagini non disponibile.");
+        const out = await photos._compressImage(file, { maxSide: IMG_MAX_SIDE, quality: 0.7 });
+        const record = {
+            id: "im-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+            owner: String(owner),
+            createdAt: new Date().toISOString(),
+            title: "",
+            duration: 0,
+            width: out.width,
+            height: out.height,
+            mime: out.blob.type || "image/webp",
+            size: out.blob.size,
+            blob: out.blob
+        };
+        try {
+            await tx("readwrite", store => store.put(record));
+        } catch (error) {
+            if (isQuota(error)) throw new Error("Memoria del telefono insufficiente: libera spazio o elimina qualche allegato.");
+            throw error;
+        }
+        return record;
+    }
+
+    /* Apre il selettore (fotocamera o galleria) e salva l'immagine. */
+    function pickAndSaveImage(owner) {
+        return new Promise(resolve => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            let done = false;
+            input.addEventListener("change", async () => {
+                done = true;
+                const file = input.files && input.files[0];
+                if (!file) return resolve(null);
+                try {
+                    resolve(await saveImage(owner, file));
+                } catch (error) {
+                    global.alert(error.message || "Non è stato possibile salvare l'immagine.");
+                    resolve(null);
+                }
+            });
+            input.addEventListener("cancel", () => { if (!done) resolve(null); });
+            input.click();
+        });
+    }
+
+    function renderImageToken(id) {
+        return '<button type="button" class="note-image" data-image-id="' + esc(id) + '" title="Apri immagine" aria-label="Apri immagine">' +
+            '<span class="note-image-placeholder">🖼️</span></button>';
+    }
+
+    const imageUrls = new Map();
+
+    async function hydrateImages(root) {
+        const buttons = (root || document).querySelectorAll(".note-image[data-image-id]:not([data-ready])");
+        for (const button of buttons) {
+            button.dataset.ready = "1";
+            const record = await get(button.dataset.imageId).catch(() => null);
+            if (!record || !String(record.mime).startsWith("image/")) {
+                button.classList.add("is-missing");
+                button.innerHTML = '<span class="note-image-placeholder">🖼️ Immagine non presente su questo dispositivo</span>';
+                continue;
+            }
+            let url = imageUrls.get(record.id);
+            if (!url) { url = URL.createObjectURL(record.blob); imageUrls.set(record.id, url); }
+            button.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Immagine della nota";
+            img.loading = "lazy";
+            button.appendChild(img);
+        }
+    }
+
+    function openImageViewer(button) {
+        const img = button.querySelector("img");
+        if (!img) return;
+        document.getElementById("noteImageViewer")?.remove();
+        const viewer = document.createElement("div");
+        viewer.id = "noteImageViewer";
+        viewer.className = "note-image-viewer";
+        viewer.innerHTML = '<button type="button" class="note-image-viewer-close" aria-label="Chiudi">×</button><div class="note-image-viewer-stage"><img alt="Immagine ingrandita"></div>';
+        const big = viewer.querySelector("img");
+        big.src = img.src;
+        let zoomed = false;
+        big.addEventListener("click", event => {
+            event.stopPropagation();
+            zoomed = !zoomed;
+            big.classList.toggle("is-zoomed", zoomed);
+        });
+        viewer.addEventListener("click", () => viewer.remove());
+        document.body.appendChild(viewer);
+    }
+
+    document.addEventListener("click", event => {
+        const button = event.target.closest(".note-image");
+        if (button && button.dataset.imageId && !button.classList.contains("is-missing")) {
+            event.preventDefault();
+            event.stopPropagation();
+            openImageViewer(button);
+        }
+    }, true);
+
+    let hydrateQueued = false;
+    new MutationObserver(() => {
+        if (hydrateQueued) return;
+        hydrateQueued = true;
+        requestAnimationFrame(() => { hydrateQueued = false; hydrateImages(document); });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+
     global.AudioNotes = {
+        saveImage, pickAndSaveImage, renderImageToken, hydrateImages,
         supported, record, recordAndSave, save, get, list, remove, removeMany, removeOwner, clearAll, rename,
         extractIds, prune, exportByIds, exportByOwners, importRecords, renderToken, formatTime, stopCurrent,
         MAX_SECONDS

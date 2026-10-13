@@ -8758,6 +8758,7 @@ function renderAppNotesPage() {
                 </label>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="appNoteInput">📂 Collega categoria</button>
                 <button class="settings-action note-audio-button" type="button" data-note-audio-target="appNoteInput">🎙️ Aggiungi nota vocale</button>
+                <button class="settings-action note-audio-button" type="button" data-note-image-target="appNoteInput">🖼️ Aggiungi immagine</button>
                 <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="appNoteMessage" class="personal-note-message"></p>
@@ -8783,6 +8784,26 @@ document.addEventListener("click", async event => {
     const before = input.value.slice(0, start);
     const needsBreakBefore = before && !before.endsWith("\n");
     input.setRangeText((needsBreakBefore ? "\n" : "") + token + "\n", start, end, "end");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
+});
+
+/* Sceglie un'immagine e inserisce [[img:ID]] dove si trova il cursore. */
+document.addEventListener("click", async event => {
+    const button = event.target.closest("[data-note-image-target]");
+    if (!button || !window.AudioNotes) return;
+
+    const input = document.getElementById(button.dataset.noteImageTarget);
+    if (!input) return;
+
+    const saved = await window.AudioNotes.pickAndSaveImage("note");
+    if (!saved) return;
+
+    const token = "[[img:" + saved.id + "]]";
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    const before = input.value.slice(0, start);
+    input.setRangeText((before && !before.endsWith("\n") ? "\n" : "") + token + "\n", start, end, "end");
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.focus();
 });
@@ -9098,7 +9119,7 @@ function extractPlaceorders(text) {
             const term = match[1].trim();
 
             // [[@Categoria]] è un collegamento a una categoria, non una parola-chiave tra note.
-            if (term.startsWith("@") || /^audio:[\w-]+$/.test(term)) continue;
+            if (term.startsWith("@") || /^(audio|img):[\w-]+$/.test(term)) continue;
 
             if (
                 term &&
@@ -9456,6 +9477,8 @@ function renderInlineNoteText(text) {
 
         if (/^audio:[\w-]+$/.test(term) && window.AudioNotes) {
             html += window.AudioNotes.renderToken(term.slice(6));
+        } else if (/^img:[\w-]+$/.test(term) && window.AudioNotes) {
+            html += window.AudioNotes.renderImageToken(term.slice(4));
         } else if (term.startsWith("@")) {
             const spec = parseCategoryLinkSpec(term);
             const target = resolveCategoryLink(spec);
@@ -10582,6 +10605,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
                 <button class="settings-action note-audio-button" type="button" data-note-audio-target="personalNoteInput">🎙️ Aggiungi nota vocale</button>
+                <button class="settings-action note-audio-button" type="button" data-note-image-target="personalNoteInput">🖼️ Aggiungi immagine</button>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>
@@ -11199,7 +11223,7 @@ async function importSharePayload(payload) {
     if (!window.confirm(
         "Importare la condivisione" +
         (photos.length ? " con " + photos.length + " foto" : "") +
-        (audioCount ? (photos.length ? " e " : " con ") + audioCount + " note vocali" : "") + "?"
+        (audioCount ? (photos.length ? " e " : " con ") + audioCount + " allegati audio/immagine" : "") + "?"
     )) return;
 
     const ok = importSharedPersonalization(payload.share);
@@ -11605,7 +11629,7 @@ function showShareMethodDialog(type, data, photos = []) {
         if (warning) {
             warning.hidden = false;
             warning.innerHTML += (photos.length ? "<br>" : "") +
-                "🎙️ Ci sono " + audioCount + " note vocali: non passano da collegamento, QR e NFC " +
+                "🎙️ Ci sono " + audioCount + " allegati (note vocali e immagini): non passano da collegamento, QR e NFC " +
                 "(nel testo resta il segnaposto). Per inviarle usa «Trasferimento diretto» o «File».";
         }
         const fileButton = dialog.querySelector("#shareMethodFile");
@@ -11734,7 +11758,7 @@ async function writeGenericNfc(url, photoCount = 0, audioCount = 0) {
     if (!window.confirm(
         "Il collegamento verrà scritto sul tag NFC. Continuare?" + advice +
         (photoCount ? "\n\n📷 Le " + photoCount + " foto NON sono incluse: con l'NFC non si possono condividere. Per le foto usa «Trasferimento diretto»." : "") +
-        (audioCount ? "\n\n🎙️ Le " + audioCount + " note vocali NON sono incluse (nel testo resta solo il segnaposto). Per inviarle usa «Trasferimento diretto»." : "")
+        (audioCount ? "\n\n🎙️ Gli " + audioCount + " allegati (note vocali e immagini) NON sono inclusi (nel testo resta solo il segnaposto). Per inviarle usa «Trasferimento diretto»." : "")
     )) {
         return;
     }
