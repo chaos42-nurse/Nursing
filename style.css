@@ -1,4 +1,4 @@
-/* =========================================================
+/* ==================================================
    RESET
 ========================================================= */
 
@@ -4209,3 +4209,56 @@ body.order-editing #orderDoneButton { display: block; }
         border-radius: 15px;
     }
 }
+=======
+/* Note vocali */
+.note-audio {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    margin: 4px 0;
+    padding: 6px 12px 6px 6px;
+    border: 1px solid var(--border, rgba(255,255,255,.14));
+    border-radius: 999px;
+    background: var(--surface-hover, rgba(255,255,255,.06));
+    color: inherit;
+    font: inherit;
+    font-size: .9rem;
+    text-align: left;
+    cursor: pointer;
+}
+.note-audio-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    font-size: .8rem;
+}
+.note-audio-label { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.note-audio-label small { opacity: .65; font-size: .75rem; }
+.note-audio.is-playing { border-color: var(--accent, #3b82f6); }
+.note-audio.is-missing { opacity: .6; cursor: default; }
+.note-audio-button { margin-top: 8px; }
+
+.patient-audio-section { margin-top: 18px; }
+.patient-audio-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.patient-audio-header .settings-action { width: auto; margin: 0; padding: 8px 14px; }
+.patient-audio-list { display: flex; flex-direction: column; gap: 6px; }
+.patient-audio-item { display: flex; align-items: center; gap: 4px; }
+.patient-audio-item .note-audio { flex: 1; min-width: 0; margin: 0; }
+.patient-audio-rename, .patient-audio-delete {
+    width: 34px; height: 34px; padding: 0; border: 0; border-radius: 8px;
+    background: transparent; font-size: 1rem; cursor: pointer;
+}
+
+.audio-record-card { text-align: center; }
+.audio-record-time { font-size: 2rem; font-variant-numeric: tabular-nums; margin: 8px 0; }
+.audio-record-preview { width: 100%; margin: 8px 0; }
+.audio-record-title { width: 100%; box-sizing: border-box; margin: 6px 0; }
+.audio-record-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.audio-record-buttons .settings-action { width: auto; min-width: 110px; }

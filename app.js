@@ -285,6 +285,15 @@ function renderPatientPhotosPage(patientId) {
 
             <div id="patientPhotoGallery" class="patient-photo-gallery"></div>
 
+            <section class="patient-audio-section">
+                <div class="patient-audio-header">
+                    <strong>🎙️ Note vocali</strong>
+                    <button id="patientAudioAdd" class="settings-action" type="button">🎙️ Registra</button>
+                </div>
+                <p class="settings-message">Restano solo su questo dispositivo. Non dire dati identificativi non necessari.</p>
+                <div id="patientAudioList" class="patient-audio-list"></div>
+            </section>
+
             <div id="patientPhotoCompareBar" class="patient-photo-comparebar" hidden>
                 <span id="patientPhotoCompareText"></span>
                 <button id="patientPhotoCompareGo" type="button" disabled>Confronta</button>
@@ -294,6 +303,66 @@ function renderPatientPhotosPage(patientId) {
     `;
 
     setupPatientPhotosPage(patient);
+    setupPatientAudio(patient);
+}
+
+/* Note vocali del paziente (sezione medicazioni). */
+function setupPatientAudio(patient) {
+    const audio = window.AudioNotes;
+    const list = content.querySelector("#patientAudioList");
+    const addButton = content.querySelector("#patientAudioAdd");
+    if (!list || !addButton) return;
+
+    if (!audio || !audio.supported()) {
+        addButton.disabled = true;
+        list.textContent = "Registrazione non supportata da questo browser.";
+        return;
+    }
+
+    const owner = "patient:" + patient.id;
+
+    const refresh = async () => {
+        let items = [];
+        try { items = await audio.list(owner); } catch (_) {}
+
+        list.innerHTML = items.length ? items.map(item => `
+            <div class="patient-audio-item" data-audio-row="${escapeAttribute(item.id)}">
+                <button type="button" class="note-audio" data-audio-id="${escapeAttribute(item.id)}" title="Riproduci">
+                    <span class="note-audio-icon">▶</span>
+                    <span class="note-audio-label">${escapeHtml(item.title || "Nota vocale")}
+                        <small>${escapeHtml(new Date(item.createdAt).toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" }))} · ${audio.formatTime(item.duration)}</small>
+                    </span>
+                </button>
+                <button type="button" class="patient-audio-rename" data-audio-rename="${escapeAttribute(item.id)}" title="Rinomina" aria-label="Rinomina">✏️</button>
+                <button type="button" class="patient-audio-delete" data-audio-delete="${escapeAttribute(item.id)}" title="Elimina" aria-label="Elimina">🗑️</button>
+            </div>`).join("") : '<p class="settings-message">Nessuna nota vocale.</p>';
+    };
+
+    addButton.addEventListener("click", async () => {
+        const saved = await audio.recordAndSave(owner);
+        if (saved) refresh();
+    });
+
+    list.addEventListener("click", async event => {
+        const del = event.target.closest("[data-audio-delete]");
+        if (del) {
+            if (!window.confirm("Eliminare questa nota vocale?")) return;
+            audio.stopCurrent();
+            await audio.remove(del.dataset.audioDelete);
+            refresh();
+            return;
+        }
+        const ren = event.target.closest("[data-audio-rename]");
+        if (ren) {
+            const record = await audio.get(ren.dataset.audioRename);
+            const title = window.prompt("Titolo della nota vocale:", record?.title || "");
+            if (title === null) return;
+            await audio.rename(ren.dataset.audioRename, title);
+            refresh();
+        }
+    });
+
+    refresh();
 }
 
 function setupPatientPhotosPage(patient) {
@@ -2351,6 +2420,7 @@ function setupPatients() {
 
             // Libera lo spazio delle foto del paziente eliminato.
             window.PatientPhotos?.removeAllForPatient(id);
+            window.AudioNotes?.removeOwner("patient:" + id);
 
             renderPatientsPage();
             return;
@@ -2392,6 +2462,7 @@ function resetAllPersonalization() {
     );
 
     window.PatientPhotos?.clearAll();
+    window.AudioNotes?.clearAll();
 
     applyTheme("dark");
     orderEditMode = false;
@@ -8686,6 +8757,7 @@ function renderAppNotesPage() {
                     </select>
                 </label>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="appNoteInput">📂 Collega categoria</button>
+                <button class="settings-action note-audio-button" type="button" data-note-audio-target="appNoteInput">🎙️ Aggiungi nota vocale</button>
                 <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="appNoteMessage" class="personal-note-message"></p>
@@ -8693,6 +8765,27 @@ function renderAppNotesPage() {
         </section>
     `;
 }
+
+/* Registra una nota vocale e inserisce [[audio:ID]] dove si trova il cursore. */
+document.addEventListener("click", async event => {
+    const button = event.target.closest("[data-note-audio-target]");
+    if (!button || !window.AudioNotes) return;
+
+    const input = document.getElementById(button.dataset.noteAudioTarget);
+    if (!input) return;
+
+    const saved = await window.AudioNotes.recordAndSave("note");
+    if (!saved) return;
+
+    const token = "[[audio:" + saved.id + "]]";
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    const before = input.value.slice(0, start);
+    const needsBreakBefore = before && !before.endsWith("\n");
+    input.setRangeText((needsBreakBefore ? "\n" : "") + token + "\n", start, end, "end");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
+});
 
 function setupAppNotes() {
     document.addEventListener("keydown", event => {
@@ -8836,6 +8929,8 @@ function setupAppNotes() {
         const deleteButton = event.target.closest("[data-app-note-delete]");
         if (deleteButton) {
             const noteId = deleteButton.dataset.appNoteDelete || "";
+            const removedNote = getAppNotes().find(note => String(note.id) === String(noteId));
+            if (removedNote && window.AudioNotes) window.AudioNotes.prune(removedNote.text, "");
             const notes = getAppNotes().filter(note =>
                 String(note.id) !== String(noteId)
             );
@@ -8874,6 +8969,7 @@ function setupAppNotes() {
                 if (note) {
                     note.title =
                         (titleInput?.value || "").trim() || "Nota";
+                    if (window.AudioNotes) window.AudioNotes.prune(note.text, textValue);
                     note.text = textValue;
                     note.updatedAt = now;
                 }
@@ -9002,7 +9098,7 @@ function extractPlaceorders(text) {
             const term = match[1].trim();
 
             // [[@Categoria]] è un collegamento a una categoria, non una parola-chiave tra note.
-            if (term.startsWith("@")) continue;
+            if (term.startsWith("@") || /^audio:[\w-]+$/.test(term)) continue;
 
             if (
                 term &&
@@ -9358,7 +9454,9 @@ function renderInlineNoteText(text) {
 
         const term = String(match[1] || match[2] || "").trim();
 
-        if (term.startsWith("@")) {
+        if (/^audio:[\w-]+$/.test(term) && window.AudioNotes) {
+            html += window.AudioNotes.renderToken(term.slice(6));
+        } else if (term.startsWith("@")) {
             const spec = parseCategoryLinkSpec(term);
             const target = resolveCategoryLink(spec);
 
@@ -10483,6 +10581,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                 </div>
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
+                <button class="settings-action note-audio-button" type="button" data-note-audio-target="personalNoteInput">🎙️ Aggiungi nota vocale</button>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>
@@ -10564,6 +10663,8 @@ function setupPersonalNotes() {
 
         if (deleteButton) {
             const noteId = deleteButton.dataset.noteDelete;
+            const removedPersonal = getNotesForItem(state, item).find(note => note.id === noteId);
+            if (removedPersonal && window.AudioNotes) window.AudioNotes.prune(removedPersonal.text, "");
             const notes = getNotesForItem(state, item)
                 .filter(note => note.id !== noteId);
 
@@ -10605,6 +10706,7 @@ function setupPersonalNotes() {
                     note.title =
                         (titleInput?.value || "").trim() ||
                         "Nota personale";
+                    if (window.AudioNotes) window.AudioNotes.prune(note.text, textValue);
                     note.text = textValue;
                     note.updatedAt = new Date().toISOString();
                 }
@@ -11030,14 +11132,15 @@ function getSelectedNotesFromDialog(dialog) {
 }
 
 /* File di condivisione con le foto: JSON con le immagini in base64. */
-async function sharePersonalizationAsFile(data, photos) {
+async function sharePersonalizationAsFile(data, photos, audios = [], type = "all") {
     const payload = {
         app: "Nursing Shot",
         type: "share-file",
         version: 1,
         exportedAt: new Date().toISOString(),
-        share: { type: "all", data },
-        photos
+        share: { type, data },
+        photos,
+        audios
     };
 
     const stamp = new Date().toISOString().slice(0, 10);
@@ -11091,9 +11194,12 @@ async function importSharePayload(payload) {
     }
 
     const photos = Array.isArray(payload.photos) ? payload.photos : [];
+    const audioCount = Array.isArray(payload.audios) ? payload.audios.length : 0;
 
     if (!window.confirm(
-        "Importare la condivisione" + (photos.length ? " con " + photos.length + " foto" : "") + "?"
+        "Importare la condivisione" +
+        (photos.length ? " con " + photos.length + " foto" : "") +
+        (audioCount ? (photos.length ? " e " : " con ") + audioCount + " note vocali" : "") + "?"
     )) return;
 
     const ok = importSharedPersonalization(payload.share);
@@ -11104,6 +11210,21 @@ async function importSharePayload(payload) {
     }
 
     let summary = "Importazione completata.";
+
+    if (Array.isArray(payload.audios) && payload.audios.length && window.AudioNotes) {
+        const known = new Set(getPatients().map(patient => String(patient.id)));
+        const usableAudios = payload.audios.filter(item =>
+            !String(item.owner || "").startsWith("patient:") ||
+            known.has(String(item.owner).slice(8))
+        );
+        try {
+            const result = await window.AudioNotes.importRecords(usableAudios);
+            summary += " Note vocali aggiunte: " + result.added + ".";
+        } catch (error) {
+            console.error("Importazione audio:", error);
+            summary += " Le note vocali non si sono potute salvare (memoria insufficiente?).";
+        }
+    }
 
     if (photos.length && window.PatientPhotos) {
         // Le foto si importano solo per i pazienti presenti su questo dispositivo.
@@ -11404,6 +11525,19 @@ function showPersonalizationShareDialog() {
     });
 }
 
+/* Note vocali collegate ai dati condivisi: dentro le note ([[audio:ID]]) e quelle dei pazienti. */
+async function collectShareAudios(data) {
+    if (!window.AudioNotes) return [];
+    const ids = window.AudioNotes.extractIds(data);
+    const owners = Array.isArray(data?.patients)
+        ? data.patients.map(patient => "patient:" + patient.id)
+        : [];
+    const byId = new Map();
+    for (const item of await window.AudioNotes.exportByIds(ids)) byId.set(item.id, item);
+    for (const item of await window.AudioNotes.exportByOwners(owners)) byId.set(item.id, item);
+    return [...byId.values()];
+}
+
 function showShareMethodDialog(type, data, photos = []) {
     document.getElementById("shareMethodDialog")?.remove();
 
@@ -11423,19 +11557,19 @@ function showShareMethodDialog(type, data, photos = []) {
 
             <h3>📤 Come vuoi condividere?</h3>
 
-            ${photos.length ? `<p class="settings-message share-photo-warning">
-                📷 Ci sono ${photos.length} foto di medicazione. Con collegamento, QR e NFC passano
+            <p id="shareMediaWarning" class="settings-message share-photo-warning" ${photos.length ? "" : "hidden"}>
+                ${photos.length ? `📷 Ci sono ${photos.length} foto di medicazione. Con collegamento, QR e NFC passano
                 <b>tutti i dati tranne le foto</b> (troppo grandi). Per inviarle usa
-                «Trasferimento diretto» o «File».
-            </p>` : ""}
+                «Trasferimento diretto» o «File».` : ""}
+            </p>
 
             <button id="shareMethodDirect" class="settings-action" type="button">
                 📲 Trasferimento diretto (QR)${photos.length ? " — con foto" : ""}
             </button>
 
-            ${photos.length ? `<button id="shareMethodFile" class="settings-action" type="button">
-                📁 File (con foto)
-            </button>` : ""}
+            <button id="shareMethodFile" class="settings-action" type="button" ${photos.length ? "" : "hidden"}>
+                📁 File (con foto e audio)
+            </button>
 
             <button id="shareMethodLink" class="settings-action" type="button">
                 🔗 Collegamento
@@ -11462,23 +11596,42 @@ function showShareMethodDialog(type, data, photos = []) {
         if (event.target === dialog) close();
     });
 
+    // Note vocali: non entrano in collegamento, QR o NFC. Si contano ora e si inviano in diretta o in file.
+    let audioCount = 0;
+    collectShareAudios(data).then(list => {
+        audioCount = list.length;
+        if (!audioCount) return;
+        const warning = dialog.querySelector("#shareMediaWarning");
+        if (warning) {
+            warning.hidden = false;
+            warning.innerHTML += (photos.length ? "<br>" : "") +
+                "🎙️ Ci sono " + audioCount + " note vocali: non passano da collegamento, QR e NFC " +
+                "(nel testo resta il segnaposto). Per inviarle usa «Trasferimento diretto» o «File».";
+        }
+        const fileButton = dialog.querySelector("#shareMethodFile");
+        if (fileButton) fileButton.hidden = false;
+    }).catch(() => {});
+
     dialog.querySelector("#shareMethodDirect")
-        ?.addEventListener("click", () => {
+        ?.addEventListener("click", async () => {
             close();
+            const audios = await collectShareAudios(data).catch(() => []);
             window.DirectShare.send({
                 app: "Nursing Shot",
                 type: "share-file",
                 version: 1,
                 exportedAt: new Date().toISOString(),
                 share: { type, data },
-                photos
+                photos,
+                audios
             });
         });
 
     dialog.querySelector("#shareMethodFile")
         ?.addEventListener("click", async () => {
             close();
-            await sharePersonalizationAsFile(data, photos);
+            const audios = await collectShareAudios(data).catch(() => []);
+            await sharePersonalizationAsFile(data, photos, audios, type);
         });
 
     dialog.querySelector("#shareMethodLink")
@@ -11514,7 +11667,7 @@ function showShareMethodDialog(type, data, photos = []) {
     dialog.querySelector("#shareMethodNfc")
         ?.addEventListener("click", async () => {
             close();
-            await writeGenericNfc(url, photos.length);
+            await writeGenericNfc(url, photos.length, audioCount);
         });
 }
 
@@ -11548,7 +11701,7 @@ function showGenericShareQr(url) {
     });
 }
 
-async function writeGenericNfc(url, photoCount = 0) {
+async function writeGenericNfc(url, photoCount = 0, audioCount = 0) {
     if (!window.isSecureContext) {
         window.alert(
             "La scrittura NFC richiede una connessione HTTPS."
@@ -11580,7 +11733,8 @@ async function writeGenericNfc(url, photoCount = 0) {
 
     if (!window.confirm(
         "Il collegamento verrà scritto sul tag NFC. Continuare?" + advice +
-        (photoCount ? "\n\n📷 Le " + photoCount + " foto NON sono incluse: con l'NFC non si possono condividere. Per le foto usa «Trasferimento diretto»." : "")
+        (photoCount ? "\n\n📷 Le " + photoCount + " foto NON sono incluse: con l'NFC non si possono condividere. Per le foto usa «Trasferimento diretto»." : "") +
+        (audioCount ? "\n\n🎙️ Le " + audioCount + " note vocali NON sono incluse (nel testo resta solo il segnaposto). Per inviarle usa «Trasferimento diretto»." : "")
     )) {
         return;
     }
