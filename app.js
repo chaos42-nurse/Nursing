@@ -8952,6 +8952,7 @@ function setupAppNotes() {
             const noteId = deleteButton.dataset.appNoteDelete || "";
             const removedNote = getAppNotes().find(note => String(note.id) === String(noteId));
             if (removedNote && window.AudioNotes) window.AudioNotes.prune(removedNote.text, "");
+            if (removedNote) clearChecklistState("app-" + removedNote.id, removedNote.text);
             const notes = getAppNotes().filter(note =>
                 String(note.id) !== String(noteId)
             );
@@ -8991,6 +8992,7 @@ function setupAppNotes() {
                     note.title =
                         (titleInput?.value || "").trim() || "Nota";
                     if (window.AudioNotes) window.AudioNotes.prune(note.text, textValue);
+                    migrateChecklistState("app-" + note.id, note.text, textValue);
                     note.text = textValue;
                     note.updatedAt = now;
                 }
@@ -9637,6 +9639,98 @@ function renderNoteTable(rows) {
         '</tbody></table></div>';
 }
 
+/* ---- Spunte delle liste: chiavi stabili ----
+   La chiave usa testo + n° di occorrenza (non la posizione della riga), così aggiungere,
+   togliere o spostare righe non azzera le altre spunte. */
+const CHECKLIST_LINE = /^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/;
+
+function checklistKeysFor(noteId, text) {
+    const counts = new Map();
+    const items = [];
+    String(text || "").split(/\r?\n/).forEach((line, lineIndex) => {
+        const match = line.match(CHECKLIST_LINE);
+        if (!match) return;
+        const label = match[2];
+        const occurrence = counts.get(label) || 0;
+        counts.set(label, occurrence + 1);
+        items.push({
+            text: label,
+            lineIndex,
+            key: String(noteId) + "::t::" + label + "::" + occurrence,
+            legacyKey: String(noteId) + "::" + lineIndex + "::" + label
+        });
+    });
+    return items;
+}
+
+function readChecklistState() {
+    try {
+        return JSON.parse(localStorage.getItem("nursing-note-checklists") || "{}") || {};
+    } catch (error) {
+        return {};
+    }
+}
+
+/* Modificando una nota, le spunte seguono le voci rimaste uguali; una voce solo
+   riscritta (stessa posizione nel blocco modificato) mantiene la sua spunta. */
+function migrateChecklistState(noteId, oldText, newText) {
+    if (!noteId || oldText === newText) return;
+
+    const oldItems = checklistKeysFor(noteId, oldText);
+    if (!oldItems.length) return;
+    const newItems = checklistKeysFor(noteId, newText);
+    const state = readChecklistState();
+
+    const valueOf = item => {
+        if (Object.prototype.hasOwnProperty.call(state, item.key)) return Boolean(state[item.key]);
+        if (Object.prototype.hasOwnProperty.call(state, item.legacyKey)) return Boolean(state[item.legacyKey]);
+        return undefined;
+    };
+
+    let prefix = 0;
+    while (prefix < oldItems.length && prefix < newItems.length && oldItems[prefix].text === newItems[prefix].text) prefix++;
+    let suffix = 0;
+    while (
+        suffix < oldItems.length - prefix && suffix < newItems.length - prefix &&
+        oldItems[oldItems.length - 1 - suffix].text === newItems[newItems.length - 1 - suffix].text
+    ) suffix++;
+
+    const carried = new Map();
+    const pair = (oldItem, newItem) => {
+        const value = valueOf(oldItem);
+        if (value !== undefined) carried.set(newItem.key, value);
+    };
+
+    for (let i = 0; i < prefix; i++) pair(oldItems[i], newItems[i]);
+    for (let i = 0; i < suffix; i++) pair(oldItems[oldItems.length - 1 - i], newItems[newItems.length - 1 - i]);
+
+    const oldMiddle = oldItems.slice(prefix, oldItems.length - suffix);
+    const newMiddle = newItems.slice(prefix, newItems.length - suffix);
+    // Voci uguali ma spostate dentro il blocco modificato: si abbinano per testo.
+    const usedOld = new Set();
+    newMiddle.forEach(item => {
+        const j = oldMiddle.findIndex((candidate, idx) => !usedOld.has(idx) && candidate.text === item.text);
+        if (j >= 0) { usedOld.add(j); pair(oldMiddle[j], item); }
+    });
+    // Le altre, riscritte, si abbinano per posizione.
+    const leftoverOld = oldMiddle.filter((_, idx) => !usedOld.has(idx));
+    const leftoverNew = newMiddle.filter(item => !carried.has(item.key));
+    leftoverNew.forEach((item, idx) => { if (leftoverOld[idx]) pair(leftoverOld[idx], item); });
+
+    oldItems.forEach(item => { delete state[item.key]; delete state[item.legacyKey]; });
+    carried.forEach((value, key) => { state[key] = value; });
+
+    try {
+        localStorage.setItem("nursing-note-checklists", JSON.stringify(state));
+    } catch (error) {}
+}
+
+function clearChecklistState(noteId, text) {
+    const state = readChecklistState();
+    checklistKeysFor(noteId, text).forEach(item => { delete state[item.key]; delete state[item.legacyKey]; });
+    try { localStorage.setItem("nursing-note-checklists", JSON.stringify(state)); } catch (error) {}
+}
+
 function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
     const source = String(text || "");
     const lines = source.split(/\r?\n/);
@@ -9659,16 +9753,22 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
         }
     }
 
-    const isChecklistLine = line => Boolean(noteId) && /^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/.test(line);
+    const isChecklistLine = line => Boolean(noteId) && CHECKLIST_LINE.test(line);
+    const checklistKeys = noteId
+        ? new Map(checklistKeysFor(noteId, source).map(item => [item.lineIndex, item]))
+        : new Map();
     const getChecklistEntry = (line, lineIndex) => {
-        const match = line.match(/^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/);
+        const match = line.match(CHECKLIST_LINE);
         if (!match) return null;
-        const checklistText = match[2];
-        const key = String(noteId) + "::" + lineIndex + "::" + checklistText;
-        const checked = Object.prototype.hasOwnProperty.call(checklistState, key)
+        const info = checklistKeys.get(lineIndex);
+        const key = info.key;
+        const has = k => Object.prototype.hasOwnProperty.call(checklistState, k);
+        const checked = has(key)
             ? Boolean(checklistState[key])
-            : Boolean(match[1]) && match[1].toLowerCase() === "x";
-        return { text: checklistText, key, checked, index: lineIndex };
+            : has(info.legacyKey)
+                ? Boolean(checklistState[info.legacyKey])
+                : Boolean(match[1]) && match[1].toLowerCase() === "x";
+        return { text: match[2], key, checked, index: lineIndex };
     };
     const renderChecklistEntry = entry =>
         '<label class="note-checklist-item' + (entry.checked ? ' is-checked' : '') + '">' +
@@ -10689,6 +10789,7 @@ function setupPersonalNotes() {
             const noteId = deleteButton.dataset.noteDelete;
             const removedPersonal = getNotesForItem(state, item).find(note => note.id === noteId);
             if (removedPersonal && window.AudioNotes) window.AudioNotes.prune(removedPersonal.text, "");
+            if (removedPersonal) clearChecklistState(removedPersonal.id, removedPersonal.text);
             const notes = getNotesForItem(state, item)
                 .filter(note => note.id !== noteId);
 
@@ -10731,6 +10832,7 @@ function setupPersonalNotes() {
                         (titleInput?.value || "").trim() ||
                         "Nota personale";
                     if (window.AudioNotes) window.AudioNotes.prune(note.text, textValue);
+                    migrateChecklistState(note.id, note.text, textValue);
                     note.text = textValue;
                     note.updatedAt = new Date().toISOString();
                 }

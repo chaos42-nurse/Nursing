@@ -4295,3 +4295,18 @@ body.order-editing #orderDoneButton { display: block; }
     width: 40px; height: 40px; border: 0; border-radius: 50%;
     background: rgba(255,255,255,.18); color: #fff; font-size: 1.4rem; cursor: pointer;
 }
+
+/* Voce spuntata: barrato anche per collegamenti, categorie e termini (inline-block non ereditano la barra). */
+.note-checklist-item.is-checked > span,
+.note-checklist-item.is-checked > span a,
+.note-checklist-item.is-checked > span .note-category-link,
+.note-checklist-item.is-checked > span .personal-note-linked-term {
+    text-decoration: line-through;
+}
+.note-checklist-item.is-checked > span {
+    opacity: 0.68;
+}
+.note-checklist-item.is-checked a.note-category-link {
+    border-color: currentColor;
+    opacity: .75;
+}
