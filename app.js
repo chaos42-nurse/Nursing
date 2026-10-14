@@ -8767,9 +8767,10 @@ function renderAppNotesPage() {
                         <option value="bottom">In fondo</option>
                     </select>
                 </label>
-                <button class="settings-action note-category-button" type="button" data-note-category-picker="appNoteInput">📂 Collega categoria</button>
-                <button class="settings-action note-audio-button" type="button" data-note-audio-target="appNoteInput">🎙️ Aggiungi nota vocale</button>
-                <button class="settings-action note-audio-button" type="button" data-note-image-target="appNoteInput">🖼️ Aggiungi immagine</button>
+                <div class="note-attach-row">
+                    <button class="note-attach-button" type="button" data-note-image-target="appNoteInput" title="Aggiungi immagine" aria-label="Aggiungi immagine">🖼️</button>
+                    <button class="note-attach-button" type="button" data-note-audio-target="appNoteInput" title="Aggiungi nota vocale" aria-label="Aggiungi nota vocale">🎙️</button>
+                </div>
                 <button id="saveAppNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="appNoteMessage" class="personal-note-message"></p>
@@ -9442,8 +9443,7 @@ document.addEventListener("click", event => {
             textarea.setSelectionRange(start + open.length, start + open.length + selected.length);
             textarea.dispatchEvent(new Event("input", { bubbles: true }));
         }
-        existing.remove();
-        return;
+        return;     // la tavolozza resta aperta: evidenziatore e colore del testo si possono sommare
     }
 
     if (existing && !event.target.closest("#noteColorPalette")) existing.remove();
@@ -10790,9 +10790,10 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                     <button type="button" class="note-color-toggle" data-note-color-target="personalNoteInput" title="Evidenziatore e colori" aria-label="Evidenziatore e colori">🖍️</button>
                 </div>
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
-                <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
-                <button class="settings-action note-audio-button" type="button" data-note-audio-target="personalNoteInput">🎙️ Aggiungi nota vocale</button>
-                <button class="settings-action note-audio-button" type="button" data-note-image-target="personalNoteInput">🖼️ Aggiungi immagine</button>
+                <div class="note-attach-row">
+                    <button class="note-attach-button" type="button" data-note-image-target="personalNoteInput" title="Aggiungi immagine" aria-label="Aggiungi immagine">🖼️</button>
+                    <button class="note-attach-button" type="button" data-note-audio-target="personalNoteInput" title="Aggiungi nota vocale" aria-label="Aggiungi nota vocale">🎙️</button>
+                </div>
                 <button id="savePersonalNote" class="settings-action" type="button">💾 Aggiungi nota</button>
                 <button class="settings-action personal-note-cancel" type="button" data-note-new-cancel>Annulla</button>
                 <p id="personalNoteMessage" class="personal-note-message"></p>

@@ -4353,3 +4353,12 @@ mark.note-hl { padding: 0 3px; border-radius: 4px; color: inherit; }
 .note-format-bar .note-color-palette .note-swatch-tc-v { color: var(--tc-v); }
 .note-format-bar .note-color-palette .note-swatch-tc-r { color: var(--tc-r); }
 .note-format-bar .note-color-palette .note-swatch-tc-a { color: var(--tc-a); }
+
+/* Allegati nelle note: due pulsanti piccoli, solo icona (immagine a sinistra, audio a destra). */
+.note-attach-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.note-attach-button {
+    width: 44px; height: 38px; padding: 0;
+    border: 1px solid var(--border, rgba(255,255,255,.18)); border-radius: 10px;
+    background: transparent; color: inherit; font-size: 1.15rem; line-height: 1; cursor: pointer;
+}
+.note-attach-button:hover, .note-attach-button:focus-visible { background: var(--surface-hover); }
