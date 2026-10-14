@@ -4310,3 +4310,46 @@ body.order-editing #orderDoneButton { display: block; }
     border-color: currentColor;
     opacity: .75;
 }
+
+/* Evidenziatore e colore del testo nelle note */
+:root {
+    --hl-g: rgba(250, 204, 21, .42); --hl-v: rgba(63, 185, 80, .40); --hl-r: rgba(248, 81, 73, .40); --hl-a: rgba(88, 166, 255, .40);
+    --tc-g: #e3b341; --tc-v: #56d364; --tc-r: #ff7b72; --tc-a: #79c0ff;
+}
+:root[data-theme="light"] {
+    --hl-g: rgba(250, 204, 21, .55); --hl-v: rgba(46, 160, 67, .30); --hl-r: rgba(248, 81, 73, .30); --hl-a: rgba(9, 105, 218, .24);
+    --tc-g: #9a6700; --tc-v: #1a7f37; --tc-r: #cf222e; --tc-a: #0969da;
+}
+mark.note-hl { padding: 0 3px; border-radius: 4px; color: inherit; }
+.note-hl-g { background: var(--hl-g); } .note-hl-v { background: var(--hl-v); }
+.note-hl-r { background: var(--hl-r); } .note-hl-a { background: var(--hl-a); }
+.note-tc-g { color: var(--tc-g); } .note-tc-v { color: var(--tc-v); }
+.note-tc-r { color: var(--tc-r); } .note-tc-a { color: var(--tc-a); }
+
+.note-format-bar { position: relative; }
+.note-color-palette {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 50;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 10px 12px; border: 1px solid var(--border, rgba(255,255,255,.18)); border-radius: 12px;
+    background: var(--surface, #151b23); box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+.note-color-row { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+.note-color-row > span { min-width: 92px; opacity: .75; }
+.note-swatch {
+    width: 30px; height: 30px; padding: 0; border: 1px solid rgba(255,255,255,.25);
+    border-radius: 50%; font-weight: 700; font-size: .95rem; cursor: pointer; background: transparent;
+}
+.note-swatch-hl-g { background: var(--hl-g); } .note-swatch-hl-v { background: var(--hl-v); }
+.note-swatch-hl-r { background: var(--hl-r); } .note-swatch-hl-a { background: var(--hl-a); }
+.note-swatch-tc-g { color: var(--tc-g); } .note-swatch-tc-v { color: var(--tc-v); }
+.note-swatch-tc-r { color: var(--tc-r); } .note-swatch-tc-a { color: var(--tc-a); }
+
+/* Pallini della tavolozza: specificità più alta del bottone generico della barra. */
+.note-format-bar .note-color-palette .note-swatch-hl-g { background: var(--hl-g); }
+.note-format-bar .note-color-palette .note-swatch-hl-v { background: var(--hl-v); }
+.note-format-bar .note-color-palette .note-swatch-hl-r { background: var(--hl-r); }
+.note-format-bar .note-color-palette .note-swatch-hl-a { background: var(--hl-a); }
+.note-format-bar .note-color-palette .note-swatch-tc-g { color: var(--tc-g); }
+.note-format-bar .note-color-palette .note-swatch-tc-v { color: var(--tc-v); }
+.note-format-bar .note-color-palette .note-swatch-tc-r { color: var(--tc-r); }
+.note-format-bar .note-color-palette .note-swatch-tc-a { color: var(--tc-a); }

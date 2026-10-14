@@ -8622,6 +8622,16 @@ const NOTE_LEGEND = [
         ]
     },
     {
+        titolo: "🖍️ Colori",
+        nota: "Evidenziatore con =…= e colore del testo con ~…~. Lettera dopo il segno: g giallo, v verde, r rosso, a azzurro.",
+        righe: [
+            ["=testo=", "evidenziato (giallo)"],
+            ["=v:testo= =r:testo= =a:testo=", "evidenziatore verde, rosso, azzurro"],
+            ["~testo~ ~v:testo~ ~a:testo~", "testo colorato (rosso, verde, azzurro)"],
+            ["=r:*urgente*=", "si somma agli altri stili"]
+        ]
+    },
+    {
         titolo: "📋 Elenchi",
         nota: "A capo con Invio l'elenco continua da solo.",
         righe: [
@@ -8741,6 +8751,7 @@ function renderAppNotesPage() {
                     <button type="button" data-note-format="*" data-note-format-target="appNoteInput" title="Grassetto: *testo*"><b>G</b></button>
                     <button type="button" data-note-format="/" data-note-format-target="appNoteInput" title="Corsivo: /testo/"><i>C</i></button>
                     <button type="button" data-note-format="_" data-note-format-target="appNoteInput" title="Sottolineato: _testo_"><u>S</u></button>
+                    <button type="button" class="note-color-toggle" data-note-color-target="appNoteInput" title="Evidenziatore e colori" aria-label="Evidenziatore e colori">🖍️</button>
                 </div>
                 <textarea
                     id="appNoteInput"
@@ -9409,6 +9420,52 @@ document.addEventListener("click", event => {
 
 
 
+
+/* Tavolozza: evidenziatore e colore del testo, inseriti attorno alla selezione. */
+document.addEventListener("click", event => {
+    const toggle = event.target.closest("[data-note-color-target]");
+    const existing = document.getElementById("noteColorPalette");
+
+    const swatch = event.target.closest("[data-note-color-mark]");
+    if (swatch && existing) {
+        const textarea = document.getElementById(existing.dataset.target);
+        if (textarea) {
+            const mark = swatch.dataset.noteColorMark;       // "=" oppure "~"
+            const letter = swatch.dataset.noteColorLetter;
+            const isDefault = (mark === "=" && letter === "g") || (mark === "~" && letter === "r");
+            const open = mark + (isDefault ? "" : letter + ":");
+            const start = textarea.selectionStart ?? textarea.value.length;
+            const end = textarea.selectionEnd ?? start;
+            const selected = textarea.value.slice(start, end);
+            textarea.value = textarea.value.slice(0, start) + open + selected + mark + textarea.value.slice(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + open.length, start + open.length + selected.length);
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        existing.remove();
+        return;
+    }
+
+    if (existing && !event.target.closest("#noteColorPalette")) existing.remove();
+    if (!toggle || existing) return;
+
+    const names = { g: "giallo", v: "verde", r: "rosso", a: "azzurro" };
+    const row = (mark, label, cls, content) =>
+        '<div class="note-color-row"><span>' + label + '</span>' +
+        NOTE_COLOR_LETTERS.map(letter =>
+            '<button type="button" class="' + cls + " " + cls + "-" + letter + '" data-note-color-mark="' + mark +
+            '" data-note-color-letter="' + letter + '" title="' + names[letter] + '" aria-label="' + names[letter] + '">' + content + '</button>'
+        ).join("") + '</div>';
+
+    const palette = document.createElement("div");
+    palette.id = "noteColorPalette";
+    palette.className = "note-color-palette";
+    palette.dataset.target = toggle.dataset.noteColorTarget;
+    palette.innerHTML = row("=", "Evidenzia", "note-swatch note-swatch-hl", "") + row("~", "Colora testo", "note-swatch note-swatch-tc", "A");
+    toggle.closest(".note-format-bar").appendChild(palette);
+    event.stopPropagation();
+});
+
 /* =========================================================
    FORMATTAZIONE NELLE NOTE
    Un carattere per stile: asterisco = grassetto, barra = corsivo, trattino basso = sottolineato.
@@ -9420,6 +9477,19 @@ const NOTE_FORMAT_TOKENS = {
     i: ["\uE002", "\uE003", "<em>", "</em>"],
     u: ["\uE004", "\uE005", "<u>", "</u>"]
 };
+
+// Evidenziatore (=testo=) e colore del testo (~testo~): g giallo, v verde, r rosso, a azzurro.
+const NOTE_COLOR_LETTERS = ["g", "v", "r", "a"];
+NOTE_COLOR_LETTERS.forEach((letter, i) => {
+    NOTE_FORMAT_TOKENS["h" + letter] = [
+        String.fromCharCode(0xE020 + i * 2), String.fromCharCode(0xE021 + i * 2),
+        '<mark class="note-hl note-hl-' + letter + '">', "</mark>"
+    ];
+    NOTE_FORMAT_TOKENS["t" + letter] = [
+        String.fromCharCode(0xE030 + i * 2), String.fromCharCode(0xE031 + i * 2),
+        '<span class="note-tc note-tc-' + letter + '">', "</span>"
+    ];
+});
 
 function markNoteFormatting(source) {
     // I collegamenti [[...]] e <placeorder> vengono messi da parte: dentro non si formatta.
@@ -9446,11 +9516,27 @@ function markNoteFormatting(source) {
         wrap(new RegExp("(?<![" + wordChar + m + "])" + m + "(?=[^\\s" + m + "])([^\n" + m + "]*?[^\\s" + m + "])" + m + "(?![" + wordChar + m + "])", "gu"), [kind]);
     };
 
+    // =testo= evidenzia (giallo); =v:testo= =r:testo= =a:testo= altri colori.
+    // ~testo~ colora le lettere (rosso); ~v:testo~ ~a:testo~ altri colori. Il segno non sta dentro una parola.
+    const colored = (mark, prefix, defaultLetter) => {
+        const wordChar = "\\p{L}\\p{N}";
+        const pattern = new RegExp(
+            "(?<![" + wordChar + mark + "])" + mark + "(?:([gvra]):)?(?=[^\\s" + mark + "])([^\n" + mark + "]*?[^\\s" + mark + "])" + mark + "(?![" + wordChar + mark + "])",
+            "gu"
+        );
+        text = text.replace(pattern, (all, letter, inner) => {
+            const kind = prefix + (letter || defaultLetter);
+            return NOTE_FORMAT_TOKENS[kind][0] + inner + NOTE_FORMAT_TOKENS[kind][1];
+        });
+    };
+
     wrap(/\*\*(?=[^\s*])([^\n]*?[^\s*])\*\*/g, ["b"]);
     wrap(/__(?=[^\s_])([^\n]*?[^\s_])__/g, ["u"]);
     single("*", "b");
     single("/", "i");
     single("_", "u");
+    colored("=", "h", "g");
+    colored("~", "t", "r");
 
     return text.replace(/\uE010(\d+)\uE011/g, (all, index) => saved[Number(index)]);
 }
@@ -10701,6 +10787,7 @@ function renderPersonalNotesPage(stateId, itemId, data, title) {
                     <button type="button" data-note-format="*" data-note-format-target="personalNoteInput" title="Grassetto: *testo*"><b>G</b></button>
                     <button type="button" data-note-format="/" data-note-format-target="personalNoteInput" title="Corsivo: /testo/"><i>C</i></button>
                     <button type="button" data-note-format="_" data-note-format-target="personalNoteInput" title="Sottolineato: _testo_"><u>S</u></button>
+                    <button type="button" class="note-color-toggle" data-note-color-target="personalNoteInput" title="Evidenziatore e colori" aria-label="Evidenziatore e colori">🖍️</button>
                 </div>
                 <textarea id="personalNoteInput" class="personal-note-input" placeholder="Scrivi la nota... Per collegarla ad altre note usa: [[parola]]; per una categoria: [[@ECG]]" rows="7"></textarea>
                 <button class="settings-action note-category-button" type="button" data-note-category-picker="personalNoteInput">📂 Collega categoria</button>
