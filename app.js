@@ -9434,13 +9434,46 @@ document.addEventListener("click", event => {
             const mark = swatch.dataset.noteColorMark;       // "=" oppure "~"
             const letter = swatch.dataset.noteColorLetter;
             const isDefault = (mark === "=" && letter === "g") || (mark === "~" && letter === "r");
+            const defaultLetter = mark === "=" ? "g" : "r";
             const open = mark + (isDefault ? "" : letter + ":");
             const start = textarea.selectionStart ?? textarea.value.length;
             const end = textarea.selectionEnd ?? start;
-            const selected = textarea.value.slice(start, end);
-            textarea.value = textarea.value.slice(0, start) + open + selected + mark + textarea.value.slice(end);
+            const value = textarea.value;
+
+            // Se la selezione sta già dentro un colore dello stesso tipo, lo si cambia (o si toglie
+            // toccando lo stesso colore) invece di annidarne un altro.
+            const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+            let lineEnd = value.indexOf("\n", end);
+            if (lineEnd < 0) lineEnd = value.length;
+            const escMark = mark.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const spanRe = new RegExp(escMark + "(?:([gvra]):)?([^\\n" + escMark + "]+?)" + escMark, "g");
+            const line = value.slice(lineStart, lineEnd);
+            let span = null;
+            let m;
+            while ((m = spanRe.exec(line)) !== null) {
+                const spanStart = lineStart + m.index;
+                const spanEnd = spanStart + m[0].length;
+                if (start >= spanStart && end <= spanEnd) {
+                    span = { from: spanStart, to: spanEnd, letter: m[1] || defaultLetter, inner: m[2] };
+                    break;
+                }
+            }
+
+            let replacement, innerStart, innerLength;
+            if (span) {
+                const same = span.letter === letter;
+                replacement = same ? span.inner : open + span.inner + mark;
+                innerStart = span.from + (same ? 0 : open.length);
+                innerLength = span.inner.length;
+                textarea.value = value.slice(0, span.from) + replacement + value.slice(span.to);
+            } else {
+                const selected = value.slice(start, end);
+                textarea.value = value.slice(0, start) + open + selected + mark + value.slice(end);
+                innerStart = start + open.length;
+                innerLength = selected.length;
+            }
             textarea.focus();
-            textarea.setSelectionRange(start + open.length, start + open.length + selected.length);
+            textarea.setSelectionRange(innerStart, innerStart + innerLength);
             textarea.dispatchEvent(new Event("input", { bubbles: true }));
         }
         return;     // la tavolozza resta aperta: evidenziatore e colore del testo si possono sommare
