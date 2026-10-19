@@ -4163,77 +4163,43 @@ function renderDrugClassCategory(item, data) {
 
 let aifaActiveIngredientIndex = null;
 
-// Dizionario delle sottoclassi terapeutiche specifiche per i farmaci più diffusi
-const sottoclassiSpecificheATC = {
-    'M01A': { id: 'fans', nome: 'FANS / Antinfiammatori' },
-    'J01C': { id: 'antibiotici', nome: 'Antibiotici (Penicilline/Beta-lattamici)' },
-    'J01D': { id: 'antibiotici', nome: 'Antibiotici (Cefalosporine)' },
-    'J01F': { id: 'antibiotici', nome: 'Antibiotici (Macrolidi)' },
-    'J01G': { id: 'antibiotici', nome: 'Antibiotici (Aminoglicosidi)' },
-    'N02A': { id: 'oppioidi', nome: 'Oppioidi' },
-    'N03A': { id: 'antiepilettici', nome: 'Antiepilettici' },
-    'N05A': { id: 'neurolettici', nome: 'Neurolettici (Antipsicotici)' },
-    'C07A': { id: 'beta-bloccanti', nome: 'Beta-bloccanti' },
-    'C08C': { id: 'calcio-antagonisti', nome: 'Calcio-antagonisti' },
-    'C09A': { id: 'ace-inibitori', nome: 'ACE-inibitori' },
-    'C09C': { id: 'sartani', nome: 'Sartani (ARB)' },
-    'R03A': { id: 'broncodilatatori', nome: 'Broncodilatatori' },
-    'H02A': { id: 'corticosteroidi', nome: 'Corticosteroidi sistemici' },
-    'D07A': { id: 'corticosteroidi', nome: 'Corticosteroidi dermatologici' },
-    'B01A': { id: 'antiaggreganti', nome: 'Antiaggreganti / Anticoagulanti' },
-    'B02A': { id: 'emostatici', nome: 'Emostatici' },
-    'J05A': { id: 'antivirali', nome: 'Antivirali' },
-    'A10B': { id: 'ipoglicemizzanti-orali', nome: 'Ipoglicemizzanti orali' },
-    'M05B': { id: 'metabolismo-osseo', nome: 'Farmaci per il metabolismo osseo' },
-    'N06A': { id: 'antidepressivi', nome: 'Antidepressivi' }
-};
+// Tabella ATC -> classe (src/data/atc-classi.json), la stessa usata dallo smistamento automatico.
+// Vince il prefisso ATC più lungo; le classi sono quelle reali dell'app (data/farmaci.json).
+let atcClassTable = null;
 
-// Dizionario di fallback basato sulle macro-aree (se non c'è una sottoclasse mappata sopra)
-const macroClassiATC = {
-    'A': { id: 'gastrointestinali-metabolismo', nome: 'Apparato Gastrointestinale e Metabolismo' },
-    'B': { id: 'sangue-emopoietici', nome: 'Sangue ed Organi Emopoietici' },
-    'C': { id: 'sistema-cardiovascolare', nome: 'Sistema Cardiovascolare' },
-    'D': { id: 'dermatologici', nome: 'Dermatologici' },
-    'G': { id: 'genito-urinario-ormoni', nome: 'Sistema Genito-Urinario ed Ormoni Sessuali' },
-    'H': { id: 'preparati-ormonali', nome: 'Preparati Ormonali Sistemici' },
-    'J': { id: 'antinfettivi-sistemici', nome: 'Antinfettivi per Uso Sistemico' },
-    'L': { id: 'antineoplastici-immunomodulatori', nome: 'Agenti Antineoplastici ed Immunomodulatori' },
-    'M': { id: 'sistema-muscolo-scheletrico', nome: 'Sistema Muscolo-Scheletrico' },
-    'N': { id: 'sistema-nervoso', nome: 'Sistema Nervoso' },
-    'R': { id: 'sistema-respiratorio', nome: 'Sistema Respiratorio' },
-    'S': { id: 'organi-di-senso', nome: 'Organi di Senso' },
-    'V': { id: 'vari', nome: 'Vari' }
-};
+async function loadAtcClassTable() {
+    if (atcClassTable) return atcClassTable;
+    try {
+        const response = await fetch("./src/data/atc-classi.json");
+        if (!response.ok) throw new Error("Tabella ATC non disponibile");
+        const data = await response.json();
+        atcClassTable = {
+            regole: (data.regole || []).slice().sort((a, b) => b.atc.length - a.atc.length),
+            classi: data.classi || {},
+            eccezioni: data.eccezioni || {}
+        };
+    } catch (error) {
+        atcClassTable = { regole: [], classi: {}, eccezioni: {} };
+    }
+    return atcClassTable;
+}
 
-// Funzione intelligente che effettua lo smistamento a due livelli (Sottoclasse -> Macroarea)
-function mappaEUnisciClassiATC(listaGrezza) {
+// Completa le voci senza classe usando la tabella (le voci già smistate non cambiano).
+function mappaEUnisciClassiATC(listaGrezza, table) {
+    const tabella = table || atcClassTable || { regole: [], classi: {}, eccezioni: {} };
+
     return listaGrezza.map(farmaco => {
         const cNome = String(farmaco.classeNome || "").trim().toLowerCase();
-        
-        if (cNome.includes("aifa") || !farmaco.classeId) {
-            const atcCompleto = farmaco.atc ? farmaco.atc.trim().toUpperCase() : "";
-            
-            // 1. Prova prima a cercare nei primi 4 caratteri (es. "M01A") per trovare la sottoclasse esatta come i FANS
-            const prefisso4 = atcCompleto.substring(0, 4);
-            if (sottoclassiSpecificheATC[prefisso4]) {
-                return {
-                    ...farmaco,
-                    classeId: sottoclassiSpecificheATC[prefisso4].id,
-                    classeNome: sottoclassiSpecificheATC[prefisso4].nome
-                };
-            }
-            
-            // 2. Se non la trova, ripiega sulla macro-area generale (la prima lettera, es. "M")
-            const primaLetteraATC = atcCompleto.charAt(0) || 'V';
-            const classeReale = macroClassiATC[primaLetteraATC] || { id: 'altro', nome: 'Altre classi terapeutiche' };
-            
-            return {
-                ...farmaco,
-                classeId: classeReale.id,
-                classeNome: classeReale.nome
-            };
-        }
-        return farmaco;
+        if (!(cNome.includes("aifa") || !farmaco.classeId)) return farmaco;
+
+        const chiave = normalizeDrugSearchText(farmaco.principioAttivo);
+        const eccezione = tabella.eccezioni[chiave];
+        const atc = String(farmaco.atc || "").trim().toUpperCase();
+        const regola = tabella.regole.find(r => atc.startsWith(r.atc));
+        const classeId = eccezione || (regola && regola.id);
+
+        if (!classeId || !tabella.classi[classeId]) return farmaco;
+        return { ...farmaco, classeId, classeNome: tabella.classi[classeId] };
     });
 }
 
@@ -4242,7 +4208,7 @@ async function loadAifaActiveIngredientIndex() {
     const response = await fetch("./src/data/aifa-principi-attivi.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Indice AIFA non disponibile");
     const rawData = await response.json();
-    aifaActiveIngredientIndex = mappaEUnisciClassiATC(rawData); 
+    aifaActiveIngredientIndex = mappaEUnisciClassiATC(rawData, await loadAtcClassTable());
     return aifaActiveIngredientIndex;
 }
 
@@ -4260,7 +4226,7 @@ async function loadDrugActiveIngredientIndex() {
     if (!response.ok) throw new Error("Indice AIFA non disponibile");
 
     const rawData = await response.json();
-    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData);
+    drugActiveIngredientIndex = mappaEUnisciClassiATC(rawData, await loadAtcClassTable());
     return drugActiveIngredientIndex;
 }
 

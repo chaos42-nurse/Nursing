@@ -1,4 +1,4 @@
-const CACHE_NAME = "nursing-v139";
+const CACHE_NAME = "nursing-v140";
 
 const PATIENT_PHOTO_CACHE = "nursing-patient-photos-v1";
 
@@ -6,12 +6,12 @@ const CORE_FILES = [
     "./",
     "./index.html",
     "./style.css",
-    "./app.js?v=139",
+    "./app.js?v=140",
     "./js/interazioni.js?v=105",
     "./js/patient-photos.js?v=105",
-    "./js/audio-notes.js?v=139",
-    "./js/qrcode.js?v=139",
-    "./js/direct-share.js?v=139",
+    "./js/audio-notes.js?v=140",
+    "./js/qrcode.js?v=140",
+    "./js/direct-share.js?v=140",
     "./manifest.json",
     "./icon-192.png",
     "./icon-512.png",
@@ -22,6 +22,7 @@ const CORE_FILES = [
     "./data/emergenze.json",
     "./data/version.json",
     "./src/data/aifa-principi-attivi.json",
+    "./src/data/atc-classi.json",
     "./data/db_drug_interactions.csv.zip",
     "./data/alias-farmaci.json",
     "./data/interazioni-curate.json"

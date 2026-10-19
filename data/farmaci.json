@@ -444,6 +444,26 @@
               }
             },
             {
+              "id": "anti-dipendenza",
+              "title": "Anti-dipendenza",
+              "type": "drug",
+              "content": {
+                "class": "Farmaci anti-dipendenza",
+                "effects": [
+                  "Riduzione del desiderio e dei sintomi di astinenza da sostanze (es. nicotina, alcol, oppioidi)"
+                ],
+                "indications": [
+                  "Esempi: Vareniclina, Naltrexone"
+                ],
+                "monitoring": [
+                  "Umore e comportamento (valutare idee suicidarie)",
+                  "Nausea e disturbi del sonno",
+                  "Funzione epatica quando indicata",
+                  "Aderenza al percorso di supporto"
+                ]
+              }
+            },
+            {
               "id": "fans",
               "title": "Antidolorifici (FANS)",
               "type": "drug",

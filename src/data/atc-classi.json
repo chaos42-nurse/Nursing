@@ -1,0 +1,704 @@
+{
+ "descrizione": "Prefisso ATC -> classe farmacologica (vince il prefisso più lungo). 'eccezioni' forza la classe per nome (nome normalizzato: minuscolo, solo lettere e cifre). Gli id sono quelli di data/farmaci.json.",
+ "regole": [
+  {
+   "atc": "A02AA",
+   "id": "antiacidi"
+  },
+  {
+   "atc": "A02AB",
+   "id": "antiacidi"
+  },
+  {
+   "atc": "A02AD",
+   "id": "antiacidi"
+  },
+  {
+   "atc": "A02BA",
+   "id": "antigistaminici-h2"
+  },
+  {
+   "atc": "A02BC",
+   "id": "ipp"
+  },
+  {
+   "atc": "A02BX",
+   "id": "protettori-mucosa"
+  },
+  {
+   "atc": "A03A",
+   "id": "antispastici"
+  },
+  {
+   "atc": "A03B",
+   "id": "antispastici"
+  },
+  {
+   "atc": "A03BA",
+   "id": "antidoti"
+  },
+  {
+   "atc": "A03F",
+   "id": "procinetici"
+  },
+  {
+   "atc": "A04A",
+   "id": "antiemetici"
+  },
+  {
+   "atc": "A05",
+   "id": "gastrointestinali-altri"
+  },
+  {
+   "atc": "A06",
+   "id": "lassativi"
+  },
+  {
+   "atc": "A07",
+   "id": "antidiarroici"
+  },
+  {
+   "atc": "A09",
+   "id": "enzimi-digestivi"
+  },
+  {
+   "atc": "A10A",
+   "id": "insuline"
+  },
+  {
+   "atc": "A10B",
+   "id": "ipoglicemizzanti-orali"
+  },
+  {
+   "atc": "A10X",
+   "id": "ipoglicemizzanti-orali"
+  },
+  {
+   "atc": "A11",
+   "id": "vitamine"
+  },
+  {
+   "atc": "A12",
+   "id": "minerali-elettroliti"
+  },
+  {
+   "atc": "A16",
+   "id": "farmaci-metabolici"
+  },
+  {
+   "atc": "B01A",
+   "id": "anticoagulanti"
+  },
+  {
+   "atc": "B01AC",
+   "id": "antiaggreganti"
+  },
+  {
+   "atc": "B01AD",
+   "id": "trombolitici"
+  },
+  {
+   "atc": "B02A",
+   "id": "antifibrinolitici"
+  },
+  {
+   "atc": "B02B",
+   "id": "emostatici"
+  },
+  {
+   "atc": "B03A",
+   "id": "antianemici"
+  },
+  {
+   "atc": "B03B",
+   "id": "antianemici"
+  },
+  {
+   "atc": "B03X",
+   "id": "stimolanti-emopoiesi"
+  },
+  {
+   "atc": "B05A",
+   "id": "colloidi"
+  },
+  {
+   "atc": "B05B",
+   "id": "cristalloidi"
+  },
+  {
+   "atc": "B05X",
+   "id": "minerali-elettroliti"
+  },
+  {
+   "atc": "C01A",
+   "id": "antiaritmici"
+  },
+  {
+   "atc": "C01B",
+   "id": "antiaritmici"
+  },
+  {
+   "atc": "C01C",
+   "id": "antipertensivi"
+  },
+  {
+   "atc": "C01D",
+   "id": "antianginosi"
+  },
+  {
+   "atc": "C01E",
+   "id": "antianginosi"
+  },
+  {
+   "atc": "C02",
+   "id": "antipertensivi"
+  },
+  {
+   "atc": "C02A",
+   "id": "antipertensivi-centrali"
+  },
+  {
+   "atc": "C02C",
+   "id": "antiadrenergici"
+  },
+  {
+   "atc": "C03",
+   "id": "diuretici"
+  },
+  {
+   "atc": "C04",
+   "id": "vasodilatatori"
+  },
+  {
+   "atc": "C05",
+   "id": "vasodilatatori"
+  },
+  {
+   "atc": "C07",
+   "id": "beta-bloccanti"
+  },
+  {
+   "atc": "C08",
+   "id": "calcio-antagonisti"
+  },
+  {
+   "atc": "C09A",
+   "id": "ace-inibitori"
+  },
+  {
+   "atc": "C09B",
+   "id": "ace-inibitori"
+  },
+  {
+   "atc": "C09C",
+   "id": "sartani"
+  },
+  {
+   "atc": "C09D",
+   "id": "sartani"
+  },
+  {
+   "atc": "C09X",
+   "id": "sartani"
+  },
+  {
+   "atc": "C10",
+   "id": "ipolipemizzanti"
+  },
+  {
+   "atc": "C10AA",
+   "id": "statine"
+  },
+  {
+   "atc": "C10B",
+   "id": "statine"
+  },
+  {
+   "atc": "D01",
+   "id": "antifungini"
+  },
+  {
+   "atc": "D06",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D07",
+   "id": "corticosteroidi"
+  },
+  {
+   "atc": "D10",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D11",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D05",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D02",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D03",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D04",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "D08",
+   "id": "antisettici-disinfettanti"
+  },
+  {
+   "atc": "G02CB",
+   "id": "ormoni-ipofisari"
+  },
+  {
+   "atc": "G03A",
+   "id": "contraccettivi-ormonali"
+  },
+  {
+   "atc": "G03",
+   "id": "ormoni-sessuali"
+  },
+  {
+   "atc": "G03H",
+   "id": "antiandrogeni"
+  },
+  {
+   "atc": "G03XC",
+   "id": "antiosteoporotici"
+  },
+  {
+   "atc": "G04B",
+   "id": "urologici"
+  },
+  {
+   "atc": "G04C",
+   "id": "urologici"
+  },
+  {
+   "atc": "G04CA",
+   "id": "alfa-bloccanti"
+  },
+  {
+   "atc": "G04CB",
+   "id": "urologici"
+  },
+  {
+   "atc": "H01",
+   "id": "ormoni-ipofisari"
+  },
+  {
+   "atc": "H02",
+   "id": "corticosteroidi"
+  },
+  {
+   "atc": "H03",
+   "id": "ormoni-tiroidei"
+  },
+  {
+   "atc": "H03B",
+   "id": "farmaci-tiroidei-antitiroidei"
+  },
+  {
+   "atc": "H05A",
+   "id": "antiosteoporotici"
+  },
+  {
+   "atc": "H05B",
+   "id": "metabolismo-osseo"
+  },
+  {
+   "atc": "J01",
+   "id": "antibiotici"
+  },
+  {
+   "atc": "J02",
+   "id": "antifungini"
+  },
+  {
+   "atc": "J04",
+   "id": "antitubercolari"
+  },
+  {
+   "atc": "J05",
+   "id": "antivirali"
+  },
+  {
+   "atc": "J05AR",
+   "id": "antiretrovirali"
+  },
+  {
+   "atc": "J06",
+   "id": "immunoglobuline"
+  },
+  {
+   "atc": "L01",
+   "id": "chemioterapici-antineoplastici"
+  },
+  {
+   "atc": "L02",
+   "id": "chemioterapici-antineoplastici"
+  },
+  {
+   "atc": "L03",
+   "id": "immunomodulanti"
+  },
+  {
+   "atc": "L04",
+   "id": "immunosoppressori"
+  },
+  {
+   "atc": "L04AB",
+   "id": "biologici"
+  },
+  {
+   "atc": "L04AC",
+   "id": "biologici"
+  },
+  {
+   "atc": "M01A",
+   "id": "fans"
+  },
+  {
+   "atc": "M01C",
+   "id": "antireumatici"
+  },
+  {
+   "atc": "M02",
+   "id": "antiinfiammatori-altri"
+  },
+  {
+   "atc": "M03",
+   "id": "miorilassanti"
+  },
+  {
+   "atc": "M04",
+   "id": "antigottosi"
+  },
+  {
+   "atc": "M05",
+   "id": "metabolismo-osseo"
+  },
+  {
+   "atc": "M05B",
+   "id": "bisfosfonati"
+  },
+  {
+   "atc": "N01",
+   "id": "anestetici"
+  },
+  {
+   "atc": "N01B",
+   "id": "anestetici-locali"
+  },
+  {
+   "atc": "N02A",
+   "id": "oppioidi"
+  },
+  {
+   "atc": "N02B",
+   "id": "antidolorifici-non-fans"
+  },
+  {
+   "atc": "N02C",
+   "id": "antimigraine"
+  },
+  {
+   "atc": "N03",
+   "id": "antiepilettici"
+  },
+  {
+   "atc": "N04",
+   "id": "anti-parkinson"
+  },
+  {
+   "atc": "N05A",
+   "id": "neurolettici"
+  },
+  {
+   "atc": "N05B",
+   "id": "benzodiazepine"
+  },
+  {
+   "atc": "N05C",
+   "id": "benzodiazepine"
+  },
+  {
+   "atc": "N06A",
+   "id": "antidepressivi-ssri"
+  },
+  {
+   "atc": "N06D",
+   "id": "neurologici"
+  },
+  {
+   "atc": "N07A",
+   "id": "anticolinesterasici"
+  },
+  {
+   "atc": "N07B",
+   "id": "anti-dipendenza"
+  },
+  {
+   "atc": "N07C",
+   "id": "neurologici"
+  },
+  {
+   "atc": "N07X",
+   "id": "neurologici"
+  },
+  {
+   "atc": "P01",
+   "id": "antiprotozoari"
+  },
+  {
+   "atc": "P02",
+   "id": "antiparassitari"
+  },
+  {
+   "atc": "P03",
+   "id": "antiparassitari"
+  },
+  {
+   "atc": "R01",
+   "id": "decongestionanti"
+  },
+  {
+   "atc": "R02",
+   "id": "otorinolaringoiatria"
+  },
+  {
+   "atc": "R03",
+   "id": "broncodilatatori"
+  },
+  {
+   "atc": "R03DC",
+   "id": "broncocostrittori"
+  },
+  {
+   "atc": "R05",
+   "id": "antitussivi"
+  },
+  {
+   "atc": "R05C",
+   "id": "mucolitici"
+  },
+  {
+   "atc": "R06",
+   "id": "antistaminici"
+  },
+  {
+   "atc": "S01",
+   "id": "oftalmologici"
+  },
+  {
+   "atc": "S02",
+   "id": "otologici"
+  },
+  {
+   "atc": "S03",
+   "id": "oftalmologici"
+  },
+  {
+   "atc": "V03",
+   "id": "antidoti"
+  },
+  {
+   "atc": "V07",
+   "id": "antidoti"
+  },
+  {
+   "atc": "A",
+   "id": "apparato-gastrointestinale-digestione"
+  },
+  {
+   "atc": "B",
+   "id": "sistema-ematologico"
+  },
+  {
+   "atc": "C",
+   "id": "sistema-cardiovascolare"
+  },
+  {
+   "atc": "D",
+   "id": "dermatologici"
+  },
+  {
+   "atc": "G",
+   "id": "apparato-genitourinario"
+  },
+  {
+   "atc": "H",
+   "id": "sistema-endocrino-metabolico"
+  },
+  {
+   "atc": "M",
+   "id": "apparato-muscoloscheletrico"
+  },
+  {
+   "atc": "N",
+   "id": "sistema-nervoso"
+  },
+  {
+   "atc": "R",
+   "id": "sistema-respiratorio"
+  },
+  {
+   "atc": "S",
+   "id": "oftalmologici"
+  },
+  {
+   "atc": "P",
+   "id": "antiparassitari"
+  },
+  {
+   "atc": "L02BB",
+   "id": "antiandrogeni"
+  },
+  {
+   "atc": "N02BF",
+   "id": "antiepilettici"
+  }
+ ],
+ "eccezioni": {
+  "adrenalina": "farmaci-urgenza",
+  "atropina": "farmaci-urgenza",
+  "acidoacetilsalicilico": "antiaggreganti",
+  "amlodipina": "calcio-antagonisti",
+  "bisoprololo": "beta-bloccanti",
+  "idroclorotiazide": "diuretici",
+  "betametasone": "corticosteroidi",
+  "calcipotriolobetametasone": "corticosteroidi",
+  "metoclopramide": "antiemetici",
+  "doxazosin": "alfa-bloccanti"
+ },
+ "classi": {
+  "ace-inibitori": "ACE-inibitori",
+  "alfa-bloccanti": "Alfa-bloccanti",
+  "antiinfiammatori-altri": "Altri antinfiammatori",
+  "antipertensivi": "Altri antipertensivi",
+  "coagulazione-altri": "Altri farmaci della coagulazione",
+  "gastrointestinali-altri": "Altri farmaci gastrointestinali",
+  "neurologici": "Altri farmaci neurologici",
+  "antidolorifici-non-fans": "Analgesici non FANS",
+  "anestesia-terapia-dolore": "Anestesia e terapia del dolore",
+  "anestetici": "Anestetici",
+  "anestetici-locali": "Anestetici locali",
+  "antiacidi": "Antiacidi",
+  "antiadrenergici": "Antiadrenergici",
+  "antiaggreganti": "Antiaggreganti",
+  "antiemorragici": "Antiaggreganti ed emostatici",
+  "antiandrogeni": "Antiandrogeni",
+  "antianemici": "Antianemici",
+  "antianginosi": "Antianginosi",
+  "antiaritmici": "Antiaritmici",
+  "antibiotici": "Antibiotici",
+  "anticoagulanti": "Anticoagulanti",
+  "anticolinergici": "Anticolinergici",
+  "anticolinesterasici": "Anticolinesterasici",
+  "antidepressivi-ssri": "Antidepressivi SSRI",
+  "antidiarroici": "Antidiarroici",
+  "anti-dipendenza": "Anti-dipendenza",
+  "fans": "Antidolorifici (FANS)",
+  "antidoti": "Antidoti",
+  "antiemetici": "Antiemetici",
+  "antiepilettici": "Antiepilettici",
+  "antifibrinolitici": "Antifibrinolitici",
+  "antifungini": "Antifungini",
+  "antigottosi": "Antigottosi",
+  "antimigraine": "Antimigraine",
+  "antimuscarinici": "Antimuscarinici",
+  "antiparassitari": "Antiparassitari",
+  "antipertensivi-centrali": "Antipertensivi ad azione centrale",
+  "antiprotozoari": "Antiprotozoari",
+  "antiretrovirali": "Antiretrovirali",
+  "antireumatici": "Antireumatici modificanti la malattia",
+  "antisettici-disinfettanti": "Antisettici e disinfettanti",
+  "antispastici": "Antispastici",
+  "antistaminici": "Antistaminici",
+  "antigistaminici-h2": "Antistaminici H2",
+  "farmaci-tiroidei-antitiroidei": "Antitiroidei",
+  "antitrombotici": "Antitrombotici",
+  "antitubercolari": "Antitubercolari",
+  "antitussivi": "Antitussivi",
+  "antivirali": "Antivirali",
+  "apparato-gastrointestinale-digestione": "Apparato gastrointestinale e digestione",
+  "apparato-genitourinario": "Apparato genito-urinario",
+  "apparato-muscoloscheletrico": "Apparato muscoloscheletrico",
+  "beta-bloccanti": "Beta-bloccanti",
+  "bisfosfonati": "Bisfosfonati",
+  "broncodilatatori": "Broncodilatatori",
+  "calcio-antagonisti": "Calcio-antagonisti",
+  "chelanti": "Chelanti",
+  "chemioterapici-antineoplastici": "Chemioterapici antineoplastici",
+  "colloidi": "Colloidi",
+  "contraccettivi-ormonali": "Contraccettivi ormonali",
+  "corticosteroidi": "Corticosteroidi",
+  "decongestionanti": "Decongestionanti",
+  "dermatologia": "Dermatologia",
+  "diuretici": "Diuretici",
+  "emostatici": "Emostatici",
+  "enzimi-digestivi": "Enzimi digestivi",
+  "enzimi": "Enzimi e sostituti enzimatici",
+  "anti-parkinson": "Farmaci anti-Parkinson",
+  "antiosteoporotici": "Farmaci antiosteoporotici",
+  "biologici": "Farmaci biologici (anticorpi monoclonali)",
+  "farmaci-urgenza": "Farmaci d'urgenza",
+  "farmaci-metabolici": "Farmaci del metabolismo",
+  "urogenitali": "Farmaci dell'apparato urogenitale",
+  "dermatologici": "Farmaci dermatologici",
+  "emopoietici": "Farmaci emopoietici",
+  "oftalmologici": "Farmaci oftalmologici",
+  "ostetrici-ginecologici": "Farmaci ostetrici e ginecologici",
+  "otologici": "Farmaci otologici",
+  "broncocostrittori": "Farmaci respiratori diversi dai broncodilatatori",
+  "urologici": "Farmaci urologici",
+  "fattori-coagulazione": "Fattori della coagulazione",
+  "gastroprotettori": "Gastroprotettori",
+  "immunoglobuline": "Immunoglobuline",
+  "immunomodulanti": "Immunomodulanti",
+  "immunosoppressori": "Immunosoppressori",
+  "ipp": "Inibitori pompa protonica (IPP)",
+  "insuline": "Insuline",
+  "ipoglicemizzanti-orali": "Ipoglicemizzanti orali",
+  "ipolipemizzanti": "Ipolipemizzanti",
+  "lassativi": "Lassativi",
+  "metabolismo-osseo": "Metabolismo osseo",
+  "minerali-elettroliti": "Minerali ed elettroliti",
+  "miorilassanti": "Miorilassanti",
+  "mucolitici": "Mucolitici",
+  "neurolettici": "Neurolettici (antipsicotici)",
+  "antianginosi-nitrati": "Nitrati antianginosi",
+  "nutrizione-soluzioni-infusione": "Nutrizione e soluzioni per infusione",
+  "oftalmologia": "Oftalmologia",
+  "oncologia": "Oncologia",
+  "oppioidi": "Oppioidi",
+  "ormoni-ipofisari": "Ormoni ipofisari",
+  "ormoni-sessuali": "Ormoni sessuali",
+  "ormoni-tiroidei": "Ormoni tiroidei",
+  "otorinolaringoiatria": "Otorinolaringoiatria",
+  "procinetici": "Procinetici",
+  "protettori-mucosa": "Protettori della mucosa gastrointestinale",
+  "benzodiazepine": "Psicofarmaci (benzodiazepine)",
+  "sartani": "Sartani (ARB)",
+  "sistema-cardiovascolare": "Sistema cardiovascolare",
+  "sistema-ematologico": "Sistema ematologico",
+  "sistema-endocrino-metabolico": "Sistema endocrino e metabolismo",
+  "sistema-linfatico-immunitario": "Sistema linfatico e immunitario",
+  "sistema-nervoso": "Sistema nervoso",
+  "sistema-respiratorio": "Sistema respiratorio",
+  "cristalloidi": "Soluzioni cristalloidi",
+  "statine": "Statine",
+  "stimolanti-emopoiesi": "Stimolanti dell'emopoiesi",
+  "urgenza-rianimazione": "Terapia d'urgenza e rianimazione",
+  "trombolitici": "Trombolitici",
+  "vasodilatatori": "Vasodilatatori",
+  "vitamine": "Vitamine"
+ }
+}
