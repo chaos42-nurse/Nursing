@@ -4241,24 +4241,88 @@ function drugSearchScore(query, name) {
 async function renderDrugSearch() {
     content.innerHTML = `
         <section class="detail-page">
-            ${detailHeader("Cerca principi attivi", window.__currentData)}
+            ${detailHeader("Cerca", window.__currentData)}
             <div class="detail-content">
                 <div class="info-block">
-                    <input id="drugActiveSearchInput" class="personal-note-title-input" type="search" placeholder="Cerca un principio attivo..." autocomplete="off">
-                    <p class="personal-note-message">La ricerca collega il principio attivo alla classe farmacologica.</p>
+                    <input id="drugActiveSearchInput" class="personal-note-title-input" type="search" placeholder="Cerca una classe o un principio attivo..." autocomplete="off">
+                    <p class="personal-note-message">Cerca per nome della classe farmacologica o per principio attivo.</p>
                 </div>
                 <div id="drugActiveSearchResults" class="item-list"></div>
             </div>
         </section>
     `;
-    const input=document.getElementById("drugActiveSearchInput"), results=document.getElementById("drugActiveSearchResults");
+    const input = document.getElementById("drugActiveSearchInput");
+    const results = document.getElementById("drugActiveSearchResults");
+    let classIndexPromise = null;
+
+    async function loadDrugClassSearchIndex() {
+        if (!classIndexPromise) {
+            classIndexPromise = fetch("./data/farmaci.json")
+                .then(response => {
+                    if (!response.ok) throw new Error("Catalogo delle classi non disponibile");
+                    return response.json();
+                })
+                .then(data => {
+                    const section = (data.sections || []).find(item =>
+                        normalizeDrugSearchText(item.title) === normalizeDrugSearchText("Classi farmacologiche")
+                    );
+                    const root = (section?.items || []).find(item =>
+                        normalizeDrugSearchText(item.title) === normalizeDrugSearchText("Classi farmacologiche")
+                    );
+                    const classes = [];
+                    const visit = items => {
+                        for (const item of (Array.isArray(items) ? items : [])) {
+                            if (!item || typeof item !== "object") continue;
+                            if (item.id && item.title && item.id !== "classi-farmacologiche" &&
+                                (item.type === "drug" || item.content?.class)) {
+                                classes.push({ id: item.id, title: item.title });
+                            }
+                            visit(item.items);
+                        }
+                    };
+                    visit(root?.items || []);
+                    return classes;
+                });
+        }
+        return classIndexPromise;
+    }
+
     input?.addEventListener("input", async () => {
-        const query=input.value.trim();
-        if(!query){results.innerHTML="";return;}
-        try{
-            const matches=(await loadDrugActiveIngredientIndex()).map(entry=>({...entry,score:drugSearchScore(query,entry.principioAttivo)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.principioAttivo.localeCompare(b.principioAttivo,"it")).slice(0,20);
-            results.innerHTML=matches.length?matches.map(entry=>`<a class="content-button" href="?state=farmaci&item=${encodeURIComponent(entry.classeId)}"><span><strong>${escapeHtml(entry.principioAttivo)}</strong><small> → ${escapeHtml(entry.classeNome)}</small></span></a>`).join(""):"<div class=\"personal-note-empty\">Nessun principio attivo trovato.</div>";
-        }catch(error){console.error(error);results.innerHTML="<div class=\"personal-note-empty\">Indice dei principi attivi non disponibile.</div>";}
+        const query = input.value.trim();
+        if (!query) {
+            results.innerHTML = "";
+            return;
+        }
+        try {
+            const [activeIngredients, classes] = await Promise.all([
+                loadDrugActiveIngredientIndex(),
+                loadDrugClassSearchIndex()
+            ]);
+            const classMatches = classes
+                .map(entry => ({ ...entry, score: drugSearchScore(query, entry.title) }))
+                .filter(entry => entry.score > 0)
+                .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, "it-IT"))
+                .slice(0, 12);
+            const ingredientMatches = activeIngredients
+                .map(entry => ({ ...entry, score: drugSearchScore(query, entry.principioAttivo) }))
+                .filter(entry => entry.score > 0)
+                .sort((a, b) => b.score - a.score || a.principioAttivo.localeCompare(b.principioAttivo, "it-IT"))
+                .slice(0, 20);
+
+            const classHtml = classMatches.length
+                ? `<div class="personal-note-message"><strong>Classi farmacologiche</strong></div>` +
+                  classMatches.map(entry => `<a class="content-button" href="?state=farmaci&item=${encodeURIComponent(entry.id)}"><span><strong>${escapeHtml(entry.title)}</strong><small>Classe farmacologica</small></span></a>`).join("")
+                : "";
+            const ingredientHtml = ingredientMatches.length
+                ? `<div class="personal-note-message"><strong>Principi attivi</strong></div>` +
+                  ingredientMatches.map(entry => `<a class="content-button" href="?state=farmaci&item=${encodeURIComponent(entry.classeId || "")}"><span><strong>${escapeHtml(entry.principioAttivo)}</strong><small> → ${escapeHtml(entry.classeNome || "Classe non assegnata")}</small></span></a>`).join("")
+                : "";
+            results.innerHTML = classHtml + ingredientHtml ||
+                "<div class=\"personal-note-empty\">Nessuna classe o principio attivo trovato.</div>";
+        } catch (error) {
+            console.error(error);
+            results.innerHTML = "<div class=\"personal-note-empty\">Archivio di ricerca non disponibile.</div>";
+        }
     });
 }
 /* =========================================================================
