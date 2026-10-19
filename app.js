@@ -3967,7 +3967,16 @@ function renderDrugClassCategory(item, data) {
         if (!container) return;
 
         const updatedAt = versionData?.last_updated;
+        const checkedAt = versionData?.last_checked || updatedAt;
         let formattedDate = "non disponibile";
+        let formattedChecked = "non disponibile";
+        const formatDay = value => {
+            const day = new Date(value);
+            return Number.isNaN(day.getTime())
+                ? "non disponibile"
+                : day.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" });
+        };
+        if (checkedAt) formattedChecked = formatDay(checkedAt);
 
         if (updatedAt) {
             const date = new Date(updatedAt);
@@ -3982,7 +3991,8 @@ function renderDrugClassCategory(item, data) {
 
         container.innerHTML =
             `<strong>📚 Catalogo farmaci</strong>` +
-            `<span>Ultimo aggiornamento: ${formattedDate}</span>` +
+            `<span>Ultimo controllo: ${formattedChecked}</span>` +
+            `<span>Ultimo aggiornamento dei dati: ${formattedDate}</span>` +
             `<span>Fonte: <a href="https://www.aifa.gov.it/liste-dei-farmaci" target="_blank" rel="noopener noreferrer">AIFA — Anagrafica dei farmaci</a></span>`;
     }
 
@@ -3995,7 +4005,7 @@ function renderDrugClassCategory(item, data) {
 
             <div id="drugCatalogInfo" class="drug-catalog-info">
                 <strong>📚 Catalogo farmaci</strong>
-                <span>Ultimo aggiornamento: caricamento...</span>
+                <span>Ultimo controllo: caricamento...</span>
                 <span>Fonte: <a href="https://www.aifa.gov.it/liste-dei-farmaci" target="_blank" rel="noopener noreferrer">AIFA — Anagrafica dei farmaci</a></span>
             </div>
 
@@ -12683,13 +12693,8 @@ function showWhatsNewNotice() {
                 <li>Si può scrivere in <strong>grassetto</strong>, <em>corsivo</em> o <u>sottolineare</u>.</li>
                 <li>Si possono creare elenchi, liste e tabelle.</li>
                 <li>È possibile contattarmi via e-mail.</li>
-            </ul>
-            <h3>In futuro, forse</h3>
-            <p class="whats-new-note">Funzioni in valutazione, non ancora confermate:</p>
-            <ul>
-                <li>Possibilità di registrare audio.</li>
-                <li>Possibilità di inserire foto nelle note.</li>
-                <li>Possibilità di evidenziare il testo o cambiarne il colore.</li>
+                <li>Nelle note si possono registrare audio e inserire immagini.</li>
+                <li>Il testo si può evidenziare o colorare.</li>
             </ul>
             <p class="whats-new-footer">Sto pensando anche ad altre funzioni utili per effettuare valutazioni rapide in diversi contesti.</p>
             <button type="button" class="whats-new-close">Ho capito</button>

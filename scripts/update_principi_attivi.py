@@ -203,19 +203,23 @@ def main():
         log(f"Indice classi: aggiunti {added_index} principi attivi (farmaci.json: {added_farmaci}).")
         changed = True
 
+    now = datetime.now()
+    version = load_json(VERSION_PATH, {})
+    version.update({"source": "AIFA", "file": "src/data/farmaci.csv", "last_checked": now.strftime("%Y-%m-%d")})
     if changed:
-        now = datetime.now()
         with open(UPDATE_PATH, "w", encoding="utf-8") as handle:
             handle.write(now.strftime("%d/%m/%Y"))
-        version = load_json(VERSION_PATH, {})
-        version.update({"version": int(now.strftime("%Y%m%d")), "last_updated": now.strftime("%Y-%m-%d"), "source": "AIFA", "file": "src/data/farmaci.csv"})
-        save_json(VERSION_PATH, version, 2)
+        version.update({"version": int(now.strftime("%Y%m%d")), "last_updated": now.strftime("%Y-%m-%d")})
+    save_json(VERSION_PATH, version, 2)
 
-        with open(os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "aggiornamento-aifa.txt"), "w", encoding="utf-8") as handle:
-            handle.write("Nuovi principi attivi AIFA: " + (", ".join(fresh) if fresh else "nessuno (indice completato)") + "\n")
+    with open(os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "aggiornamento-aifa.txt"), "w", encoding="utf-8") as handle:
+        handle.write("nuovi principi attivi: " + (", ".join(fresh) if fresh else "nessuno") + "\n")
+
+    # Il controllo è sempre registrato (version.json cambia ogni volta): si salva e si ripubblica.
+    changed = True
 
     write_output("changed", "true" if changed else "false")
-    log("Fatto." if changed else "Nessuna modifica.")
+    log("Fatto.")
 
 
 if __name__ == "__main__":
