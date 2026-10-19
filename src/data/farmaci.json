@@ -1374,6 +1374,12 @@
     "atc": "L04AA06"
   },
   {
+    "principioAttivo": "Midazolam",
+    "classeId": "benzodiazepine",
+    "classeNome": "Benzodiazepine / Ansiolitici",
+    "atc": "N05CD08"
+  },
+  {
     "principioAttivo": "Miglustat",
     "classeId": "",
     "classeNome": "Catalogo AIFA",
@@ -1752,6 +1758,12 @@
     "atc": "C09AA05"
   },
   {
+    "principioAttivo": "Ramipril/Amlodipina",
+    "classeId": "ace-inibitori",
+    "classeNome": "ACE-inibitori",
+    "atc": "C09BB07"
+  },
+  {
     "principioAttivo": "Ramipril + Amlodipina + Idroclorotiazide",
     "classeId": "ace-inibitori",
     "classeNome": "ACE-inibitori",
@@ -1768,12 +1780,6 @@
     "classeId": "ace-inibitori",
     "classeNome": "ACE-inibitori",
     "atc": "C09BA05"
-  },
-  {
-    "principioAttivo": "Ramipril/Amlodipina",
-    "classeId": "ace-inibitori",
-    "classeNome": "ACE-inibitori",
-    "atc": "C09BB07"
   },
   {
     "principioAttivo": "Ranolazina",
@@ -1836,12 +1842,6 @@
     "atc": "C10AA07"
   },
   {
-    "principioAttivo": "Rosuvastatina (sale di calcio) + Amlodipina",
-    "classeId": "statine",
-    "classeNome": "Statine",
-    "atc": "C10BX09"
-  },
-  {
     "principioAttivo": "Rosuvastatina + Acido Acetilsalicilico",
     "classeId": "antiaggreganti",
     "classeNome": "Antiaggreganti",
@@ -1852,6 +1852,12 @@
     "classeId": "statine",
     "classeNome": "Statine",
     "atc": "C10BA06"
+  },
+  {
+    "principioAttivo": "Rosuvastatina (sale di calcio) + Amlodipina",
+    "classeId": "statine",
+    "classeNome": "Statine",
+    "atc": "C10BX09"
   },
   {
     "principioAttivo": "Rotigotina",
@@ -2194,6 +2200,12 @@
     "classeId": "",
     "classeNome": "Catalogo AIFA",
     "atc": "G04BE09"
+  },
+  {
+    "principioAttivo": "Vareniclina",
+    "classeId": "",
+    "classeNome": "Catalogo AIFA",
+    "atc": "N07BA03"
   },
   {
     "principioAttivo": "Venlafaxina",
