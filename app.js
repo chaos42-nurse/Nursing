@@ -4090,33 +4090,59 @@ function renderDrugClassCategory(item, data) {
                     !classifiedNames.has(normalizeDrugSearchText(entry.principioAttivo))
                 );
 
-                const combined = [...matches, ...filteredAifaMatches]
+                const classMatches = classes
+                    .map(entry => ({
+                        id: entry.id,
+                        title: entry.title,
+                        score: drugSearchScore(query, entry.title)
+                    }))
+                    .filter(entry => entry.score > 0)
+                    .map(entry => ({ ...entry, tipo: "classe" }));
+
+                const ingredientMatches = [...matches, ...filteredAifaMatches]
+                    .map(entry => ({ ...entry, tipo: "principio" }));
+
+                const combined = [...classMatches, ...ingredientMatches]
                     .sort((a, b) =>
                         b.score - a.score ||
-                        a.principioAttivo.localeCompare(b.principioAttivo, "it-IT")
+                        (a.tipo === b.tipo ? 0 : a.tipo === "classe" ? -1 : 1) ||
+                        (a.title || a.principioAttivo).localeCompare(
+                            b.title || b.principioAttivo, "it-IT"
+                        )
                     )
                     .slice(0, 20);
 
                 suggestions.innerHTML = combined.length
-                    ? combined.map(entry => entry.classeId
+                    ? combined.map(entry => entry.tipo === "classe"
                         ? `
                         <button
                             type="button"
                             class="patient-search-suggestion"
-                            data-drug-class-id="${entry.classeId}"
+                            data-drug-class-id="${entry.id}"
                         >
-                            <strong>${escapeHtml(entry.principioAttivo)}</strong>
-                            <span>${escapeHtml(entry.classeNome)}</span>
+                            <strong>${escapeHtml(entry.title)}</strong>
+                            <span>Classe farmacologica</span>
                         </button>
                         `
-                        : `
-                        <div class="patient-search-suggestion">
-                            <strong>${escapeHtml(entry.principioAttivo)}</strong>
-                            <span>Catalogo AIFA</span>
-                        </div>
-                        `
+                        : entry.classeId
+                            ? `
+                            <button
+                                type="button"
+                                class="patient-search-suggestion"
+                                data-drug-class-id="${entry.classeId}"
+                            >
+                                <strong>${escapeHtml(entry.principioAttivo)}</strong>
+                                <span>${escapeHtml(entry.classeNome)}</span>
+                            </button>
+                            `
+                            : `
+                            <div class="patient-search-suggestion">
+                                <strong>${escapeHtml(entry.principioAttivo)}</strong>
+                                <span>Catalogo AIFA</span>
+                            </div>
+                            `
                     ).join("")
-                    : '<div class="personal-note-empty">Nessun principio attivo trovato.</div>';
+                    : '<div class="personal-note-empty">Nessun principio attivo o classe farmacologica trovati.</div>';
 
                 suggestions.hidden = false;
             })
