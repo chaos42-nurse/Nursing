@@ -1,9 +1,16 @@
-name: Aggiornamento Mensile Database AIFA
+name: Aggiornamento mensile principi attivi AIFA
 
+# Il 16 di ogni mese controlla il CSV dell'AIFA (https://www.aifa.gov.it/liste-dei-farmaci).
+# Se ci sono nuovi principi attivi, sostituisce src/data/farmaci.csv con il file scaricato,
+# aggiorna l'indice delle classi farmacologiche e ripubblica l'app.
 on:
   schedule:
-    - cron: '0 0 1 * *' # Parte da solo il 1° giorno di ogni mese alle 00:00
-  workflow_dispatch: # Ti permette di avviarlo a mano quando vuoi
+    - cron: '0 6 16 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   update-data:
@@ -17,19 +24,28 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Elabora e formatta il database dei farmaci
-        run: |
-          # Avvia lo script per correggere le chiavi in italiano e smistare le classi
-          node smista-farmaci.js
-          
-          # Crea il file per aggiornare la data nella PWA
-          date +"%d/%m/%Y" > src/data/ultimo-aggiornamento.txt
+      - name: Configura Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
 
-      - name: Salva le modifiche nel repository
+      - name: Scarica il CSV AIFA e cerca nuovi principi attivi
+        id: aifa
+        run: python3 scripts/update_principi_attivi.py
+
+      - name: Smista le nuove voci nelle classi farmacologiche (per codice ATC)
+        if: steps.aifa.outputs.changed == 'true'
+        run: node src/data/smista-farmaci.js
+
+      - name: Salva le modifiche nel repository e ripubblica l'app
+        if: steps.aifa.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git config --global user.name "AIFA Update Bot"
-          git config --global user.email "bot@github.com"
-          git add src/data/
-          git commit -m "Auto-aggiornamento mensile e smistamento classi farmaci JSON" || exit 0
+          git config user.name "AIFA Update Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add src/data data/version.json
+          git commit -m "Aggiornamento mensile AIFA: $(cat "$RUNNER_TEMP/aggiornamento-aifa.txt")" || exit 0
           git push
-
+          # I push fatti con il token del workflow non avviano altri workflow: la pubblicazione si lancia a mano.
+          gh workflow run deploy.yml --ref "${{ github.ref_name }}"

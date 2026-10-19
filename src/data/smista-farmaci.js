@@ -1,7 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const PERCORSO_FILE = path.join(__dirname, 'src/data/farmaci.json');
+// File da smistare: [percorso, rientro del JSON (null = compatto)]
+const FILE_DA_SMISTARE = [
+  [path.join(__dirname, 'farmaci.json'), 2],
+  [path.join(__dirname, 'aifa-principi-attivi.json'), null]
+];
 
 // Mappatura precisa basata sul codice ATC dell'AIFA e sulle categorie della tua PWA
 function ottieniDatiClasse(codiceATC, principio) {
@@ -62,34 +66,37 @@ function ottieniDatiClasse(codiceATC, principio) {
   return null;
 }
 
+function smistaFile(percorso, rientro) {
+  if (!fs.existsSync(percorso)) {
+    throw new Error(`File non esistente in: ${percorso}`);
+  }
+
+  const farmaci = JSON.parse(fs.readFileSync(percorso, 'utf8'));
+  let contatoreAggiornati = 0;
+
+  const farmaciAggiornati = farmaci.map(farmaco => {
+    // Modifica sia i vuoti sia chi ha "Catalogo AIFA" generico
+    if (!farmaco.classeId || farmaco.classeId === "" || farmaco.classeNome === "Catalogo AIFA") {
+      const nuovaClasse = ottieniDatiClasse(farmaco.atc, farmaco.principioAttivo);
+      if (nuovaClasse) {
+        farmaco.classeId = nuovaClasse.id;
+        farmaco.classeNome = nuovaClasse.nome;
+        contatoreAggiornati++;
+      }
+    }
+    return farmaco;
+  });
+
+  fs.writeFileSync(percorso, JSON.stringify(farmaciAggiornati, null, rientro || undefined) + (rientro ? '\n' : ''), 'utf8');
+  console.log(`✅ ${path.basename(percorso)}: smistati ${contatoreAggiornati} farmaci.`);
+}
+
 function aggiornaDatabase() {
   try {
-    if (!fs.existsSync(PERCORSO_FILE)) {
-      throw new Error(`File non esistente in: ${PERCORSO_FILE}`);
-    }
-
-    const datiGrezzi = fs.readFileSync(PERCORSO_FILE, 'utf8');
-    const farmaci = JSON.parse(datiGrezzi);
-
-    let contatoreAggiornati = 0;
-
-    const farmaciAggiornati = farmaci.map(farmaco => {
-      // Modifica sia i vuoti sia chi ha "Catalogo AIFA" generico
-      if (!farmaco.classeId || farmaco.classeId === "" || farmaco.classeNome === "Catalogo AIFA") {
-        const nuovaClasse = ottieniDatiClasse(farmaco.atc, farmaco.principioAttivo);
-        if (nuovaClasse) {
-          farmaco.classeId = nuovaClasse.id;
-          farmaco.classeNome = nuovaClasse.nome;
-          contatoreAggiornati++;
-        }
-      }
-      return farmaco;
-    });
-
-    fs.writeFileSync(PERCORSO_FILE, JSON.stringify(farmaciAggiornati, null, 2), 'utf8');
-    console.log(`✅ Database elaborato! Smistati correttamente ${contatoreAggiornati} farmaci.`);
+    FILE_DA_SMISTARE.forEach(([percorso, rientro]) => smistaFile(percorso, rientro));
   } catch (errore) {
     console.error(`❌ Errore durante lo smistamento:`, errore.message);
+    process.exitCode = 1;
   }
 }
 
