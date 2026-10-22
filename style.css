@@ -755,6 +755,21 @@ section h2 {
     font-weight: 700;
 }
 
+.drug-table-drug a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.drug-table-drug a:hover {
+    text-decoration: underline;
+}
+
+.drug-table-class {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+}
+
 .info-block-divider {
     width: 100%;
     border: 0;

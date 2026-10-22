@@ -204,6 +204,111 @@
               }
             },
             {
+              "id": "antagonisti",
+              "title": "Antagonisti",
+              "type": "drug",
+              "content": {
+                "class": "Antagonisti",
+                "effects": [
+                  "Bloccano o contrastano l'azione chimica di un determinato composto, legandosi allo stesso recettore o alla sostanza stessa, e ne annullano gli effetti."
+                ],
+                "monitoring": [
+                  "Stato di coscienza e funzione respiratoria",
+                  "Parametri vitali",
+                  "Ricomparsa degli effetti se l'emivita del composto supera quella dell'antagonista",
+                  "Segni di astinenza nei pazienti dipendenti (es. naloxone, naltrexone)"
+                ],
+                "table": {
+                  "title": "Antagonisti per composto",
+                  "headers": [
+                    "Composto",
+                    "Farmaco antagonista",
+                    "Azione"
+                  ],
+                  "rows": [
+                    {
+                      "compound": "Oppioidi (morfina, fentanil, ossicodone)",
+                      "drug": "Naloxone",
+                      "atc": "V03AB15",
+                      "action": "Antagonista competitivo dei recettori μ: inverte depressione respiratoria e sedazione."
+                    },
+                    {
+                      "compound": "Benzodiazepine (diazepam, midazolam)",
+                      "drug": "Flumazenil",
+                      "atc": "V03AB25",
+                      "action": "Antagonista competitivo al sito delle benzodiazepine sul recettore GABA-A."
+                    },
+                    {
+                      "compound": "Eparina",
+                      "drug": "Protamina",
+                      "atc": "V03AB14",
+                      "action": "Si lega all'eparina formando un complesso inattivo."
+                    },
+                    {
+                      "compound": "Warfarin (antagonisti della vitamina K)",
+                      "drug": "Fitomenadione (vitamina K)",
+                      "atc": "B02BA01",
+                      "action": "Ripristina la sintesi epatica dei fattori II, VII, IX e X."
+                    },
+                    {
+                      "compound": "Dabigatran",
+                      "drug": "Idarucizumab",
+                      "atc": "V03AB37",
+                      "action": "Anticorpo monoclonale che lega il dabigatran e ne annulla l'effetto anticoagulante."
+                    },
+                    {
+                      "compound": "Miorilassanti non depolarizzanti (rocuronio, vecuronio)",
+                      "drug": "Sugammadex",
+                      "atc": "V03AB35",
+                      "action": "Incapsula il miorilassante e ne annulla il blocco neuromuscolare."
+                    },
+                    {
+                      "compound": "Inibitori delle colinesterasi, organofosfati",
+                      "drug": "Atropina",
+                      "atc": "A03BA01",
+                      "action": "Antagonista muscarinico: contrasta gli effetti colinergici (bradicardia, ipersecrezioni)."
+                    },
+                    {
+                      "compound": "Metanolo, glicole etilenico",
+                      "drug": "Fomepizolo",
+                      "atc": "V03AB34",
+                      "action": "Inibisce l'alcol deidrogenasi e impedisce la formazione dei metaboliti tossici."
+                    },
+                    {
+                      "compound": "Paracetamolo (sovradosaggio)",
+                      "drug": "Acetilcisteina",
+                      "atc": "V03AB23",
+                      "action": "Ripristina il glutatione e neutralizza il metabolita tossico (NAPQI)."
+                    },
+                    {
+                      "compound": "Oppioidi, alcol etilico (dipendenza)",
+                      "drug": "Naltrexone",
+                      "atc": "N07BB04",
+                      "action": "Antagonista dei recettori oppioidi: blocca gli effetti degli oppioidi e riduce il craving per l'alcol."
+                    },
+                    {
+                      "compound": "Ferro (intossicazione)",
+                      "drug": "Deferoxamina",
+                      "atc": "V03AC01",
+                      "action": "Chelante: lega il ferro formando un complesso eliminabile con le urine."
+                    },
+                    {
+                      "compound": "Metotrexato",
+                      "drug": "Calcio folinato",
+                      "atc": "V03AF03",
+                      "action": "Aggira il blocco della diidrofolato reduttasi e ripristina la disponibilità di folati."
+                    },
+                    {
+                      "compound": "Monossido di carbonio",
+                      "drug": "Ossigeno",
+                      "atc": "V03AN01",
+                      "action": "Compete con il CO per il legame all'emoglobina e accelera l'eliminazione della carbossiemoglobina."
+                    }
+                  ]
+                }
+              }
+            },
+            {
               "id": "antiacidi",
               "title": "Antiacidi",
               "type": "drug",
