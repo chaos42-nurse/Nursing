@@ -5278,6 +5278,10 @@ function renderDrug(item, data) {
                     drug.effects
                 )}
 
+                ${renderDrugTable(
+                    drug.table
+                )}
+
                 ${renderListField(
                     "Monitoraggio",
                     drug.monitoring
@@ -5298,6 +5302,166 @@ function renderDrug(item, data) {
         </section>
 
     `;
+
+    if (drug.table) {
+        linkDrugTableToCurrentClasses(item.id, data.id);
+    }
+
+}
+
+
+/* =========================================================
+   TABELLA FARMACI DI UNA CLASSE (es. Antagonisti)
+   I nomi dei farmaci puntano alla classe che hanno già nel
+   resto dell'app (indice AIFA, eccezioni e codice ATC), mai
+   alla classe che contiene la tabella.
+========================================================= */
+
+function renderDrugTable(table) {
+
+    const rows =
+        Array.isArray(table?.rows)
+            ? table.rows
+            : [];
+
+    if (!rows.length) {
+
+        return "";
+
+    }
+
+    const headers =
+        Array.isArray(table.headers)
+            ? table.headers
+            : [];
+
+    return `
+
+        <article class="info-block info-block-table">
+
+            ${table.title ? `<h3>${escapeHtml(table.title)}</h3>` : ""}
+
+            <div class="info-table-wrapper">
+
+                <table>
+
+                    ${headers.length ? `
+                        <thead>
+                            <tr>
+                                ${headers.map(header => `<th>${escapeHtml(header)}</th>`).join("")}
+                            </tr>
+                        </thead>
+                    ` : ""}
+
+                    <tbody>
+
+                        ${rows.map(row => `
+                            <tr>
+                                <td>${escapeHtml(row.compound)}</td>
+                                <td>
+                                    <span class="drug-table-drug"
+                                        data-drug-name="${escapeAttribute(row.drug)}"
+                                        data-drug-atc="${escapeAttribute(row.atc || "")}">${escapeHtml(row.drug)}</span>
+                                </td>
+                                <td>${escapeHtml(row.action)}</td>
+                            </tr>
+                        `).join("")}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+async function resolveCurrentDrugClass(name, atc, excludedClassId) {
+
+    const key =
+        normalizeDrugSearchText(name);
+
+    const [index, table] = await Promise.all([
+        loadDrugActiveIngredientIndex().catch(() => []),
+        loadAtcClassTable()
+    ]);
+
+    const indexed =
+        index.find(entry =>
+            normalizeDrugSearchText(entry.principioAttivo) === key &&
+            entry.classeId &&
+            entry.classeId !== excludedClassId
+        );
+
+    if (indexed) {
+
+        return {
+            id: indexed.classeId,
+            name: indexed.classeNome
+        };
+
+    }
+
+    const code =
+        String(atc || "").trim().toUpperCase();
+
+    const rule =
+        code
+            ? table.regole.find(r => code.startsWith(r.atc))
+            : null;
+
+    const classId =
+        table.eccezioni[key] ||
+        (rule && rule.id);
+
+    if (!classId || classId === excludedClassId || !table.classi[classId]) {
+
+        return null;
+
+    }
+
+    return {
+        id: classId,
+        name: table.classi[classId]
+    };
+
+}
+
+async function linkDrugTableToCurrentClasses(currentClassId, stateId) {
+
+    const cells =
+        Array.from(document.querySelectorAll(".drug-table-drug"));
+
+    await Promise.all(cells.map(async cell => {
+
+        try {
+
+            const target =
+                await resolveCurrentDrugClass(
+                    cell.dataset.drugName,
+                    cell.dataset.drugAtc,
+                    currentClassId
+                );
+
+            if (!target || !document.body.contains(cell)) return;
+
+            cell.innerHTML = `
+                <a href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(target.id)}">
+                    <strong>${escapeHtml(cell.dataset.drugName)}</strong>
+                </a>
+                <small class="drug-table-class">→ ${escapeHtml(target.name)}</small>
+            `;
+
+        } catch (error) {
+
+            /* In caso di errore il nome resta semplice testo. */
+
+        }
+
+    }));
 
 }
 
