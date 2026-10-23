@@ -2726,8 +2726,13 @@ section h2 {
     padding: 9px 10px;
     border: 1px solid var(--border);
     text-align: left;
-    vertical-align: middle;
+    vertical-align: middle !important;
     line-height: 1.45;
+}
+
+/* Forza l'allineamento verticale del contenuto anche in presenza di stili generali. */
+.personal-note-table tbody td {
+    vertical-align: middle !important;
 }
 
 .personal-note-table .note-table-checklist-row {
