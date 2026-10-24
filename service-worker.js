@@ -1,14 +1,15 @@
-const CACHE_NAME = "nursing-v145";
+const CACHE_NAME = "nursing-v146";
 
 const PATIENT_PHOTO_CACHE = "nursing-patient-photos-v1";
 
 const CORE_FILES = [
     "./",
     "./index.html",
-    "./style.css?v=145",
-    "./app.js?v=144",
-    "./js/interazioni.js?v=105",
-    "./js/patient-photos.js?v=105",
+    "./style.css?v=146",
+    "./app.js?v=146",
+    "./js/terapia-paziente.js?v=146",
+    "./js/interazioni.js?v=124",
+    "./js/patient-photos.js?v=124",
     "./js/audio-notes.js?v=140",
     "./js/qrcode.js?v=140",
     "./js/direct-share.js?v=140",

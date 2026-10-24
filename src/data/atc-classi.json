@@ -47,7 +47,7 @@
   },
   {
    "atc": "A05",
-   "id": "gastrointestinali-altri"
+   "id": "apparato-gastrointestinale-digestione"
   },
   {
    "atc": "A06",
@@ -115,7 +115,7 @@
   },
   {
    "atc": "B03X",
-   "id": "stimolanti-emopoiesi"
+   "id": "antianemici"
   },
   {
    "atc": "B05A",
@@ -155,11 +155,11 @@
   },
   {
    "atc": "C02A",
-   "id": "antipertensivi-centrali"
+   "id": "antipertensivi"
   },
   {
    "atc": "C02C",
-   "id": "antiadrenergici"
+   "id": "antipertensivi"
   },
   {
    "atc": "C03",
@@ -259,7 +259,7 @@
   },
   {
    "atc": "G03A",
-   "id": "contraccettivi-ormonali"
+   "id": "ormoni-sessuali"
   },
   {
    "atc": "G03",
@@ -311,7 +311,7 @@
   },
   {
    "atc": "H05B",
-   "id": "metabolismo-osseo"
+   "id": "antiosteoporotici"
   },
   {
    "atc": "J01",
@@ -371,7 +371,7 @@
   },
   {
    "atc": "M02",
-   "id": "antiinfiammatori-altri"
+   "id": "fans"
   },
   {
    "atc": "M03",
@@ -383,7 +383,7 @@
   },
   {
    "atc": "M05",
-   "id": "metabolismo-osseo"
+   "id": "antiosteoporotici"
   },
   {
    "atc": "M05B",
@@ -435,7 +435,7 @@
   },
   {
    "atc": "N06D",
-   "id": "neurologici"
+   "id": "sistema-nervoso"
   },
   {
    "atc": "N07A",
@@ -447,15 +447,15 @@
   },
   {
    "atc": "N07C",
-   "id": "neurologici"
+   "id": "sistema-nervoso"
   },
   {
    "atc": "N07X",
-   "id": "neurologici"
+   "id": "sistema-nervoso"
   },
   {
    "atc": "P01",
-   "id": "antiprotozoari"
+   "id": "antiparassitari"
   },
   {
    "atc": "P02",
@@ -499,7 +499,7 @@
   },
   {
    "atc": "S02",
-   "id": "otologici"
+   "id": "otorinolaringoiatria"
   },
   {
    "atc": "S03",
@@ -581,31 +581,24 @@
  "classi": {
   "ace-inibitori": "ACE-inibitori",
   "alfa-bloccanti": "Alfa-bloccanti",
-  "antiinfiammatori-altri": "Altri antinfiammatori",
-  "antipertensivi": "Altri antipertensivi",
-  "coagulazione-altri": "Altri farmaci della coagulazione",
-  "gastrointestinali-altri": "Altri farmaci gastrointestinali",
-  "neurologici": "Altri farmaci neurologici",
+  "antipertensivi": "Altri antipertensivi (centrali, antiadrenergici)",
   "antidolorifici-non-fans": "Analgesici non FANS",
-  "anestesia-terapia-dolore": "Anestesia e terapia del dolore",
   "anestetici": "Anestetici",
   "anestetici-locali": "Anestetici locali",
   "antiacidi": "Antiacidi",
-  "antiadrenergici": "Antiadrenergici",
   "antiaggreganti": "Antiaggreganti",
-  "antiemorragici": "Antiaggreganti ed emostatici",
   "antiandrogeni": "Antiandrogeni",
-  "antianemici": "Antianemici",
-  "antianginosi": "Antianginosi",
+  "antianemici": "Antianemici ed emopoietici",
+  "antianginosi": "Antianginosi (nitrati e altri)",
   "antiaritmici": "Antiaritmici",
   "antibiotici": "Antibiotici",
-  "anticoagulanti": "Anticoagulanti",
-  "anticolinergici": "Anticolinergici",
+  "anticoagulanti": "Anticoagulanti e antitrombotici",
+  "anticolinergici": "Anticolinergici e antimuscarinici",
   "anticolinesterasici": "Anticolinesterasici",
   "antidepressivi-ssri": "Antidepressivi SSRI",
   "antidiarroici": "Antidiarroici",
   "anti-dipendenza": "Anti-dipendenza",
-  "fans": "Antidolorifici (FANS)",
+  "fans": "Antidolorifici (FANS) e altri antinfiammatori",
   "antidoti": "Antidoti",
   "antiemetici": "Antiemetici",
   "antiepilettici": "Antiepilettici",
@@ -613,24 +606,20 @@
   "antifungini": "Antifungini",
   "antigottosi": "Antigottosi",
   "antimigraine": "Antimigraine",
-  "antimuscarinici": "Antimuscarinici",
-  "antiparassitari": "Antiparassitari",
-  "antipertensivi-centrali": "Antipertensivi ad azione centrale",
-  "antiprotozoari": "Antiprotozoari",
+  "antiparassitari": "Antiparassitari e antiprotozoari",
   "antiretrovirali": "Antiretrovirali",
   "antireumatici": "Antireumatici modificanti la malattia",
   "antisettici-disinfettanti": "Antisettici e disinfettanti",
   "antispastici": "Antispastici",
   "antistaminici": "Antistaminici",
-  "antigistaminici-h2": "Antistaminici H2",
+  "antigistaminici-h2": "Antistaminici H2 (gastrici)",
   "farmaci-tiroidei-antitiroidei": "Antitiroidei",
-  "antitrombotici": "Antitrombotici",
   "antitubercolari": "Antitubercolari",
   "antitussivi": "Antitussivi",
   "antivirali": "Antivirali",
-  "apparato-gastrointestinale-digestione": "Apparato gastrointestinale e digestione",
-  "apparato-genitourinario": "Apparato genito-urinario",
-  "apparato-muscoloscheletrico": "Apparato muscoloscheletrico",
+  "apparato-gastrointestinale-digestione": "Altri farmaci gastrointestinali",
+  "apparato-genitourinario": "Altri farmaci genito-urinari",
+  "apparato-muscoloscheletrico": "Altri farmaci muscoloscheletrici",
   "beta-bloccanti": "Beta-bloccanti",
   "bisfosfonati": "Bisfosfonati",
   "broncodilatatori": "Broncodilatatori",
@@ -638,29 +627,21 @@
   "chelanti": "Chelanti",
   "chemioterapici-antineoplastici": "Chemioterapici antineoplastici",
   "colloidi": "Colloidi",
-  "contraccettivi-ormonali": "Contraccettivi ormonali",
   "corticosteroidi": "Corticosteroidi",
   "decongestionanti": "Decongestionanti",
-  "dermatologia": "Dermatologia",
   "diuretici": "Diuretici",
-  "emostatici": "Emostatici",
-  "enzimi-digestivi": "Enzimi digestivi",
-  "enzimi": "Enzimi e sostituti enzimatici",
+  "emostatici": "Emostatici e fattori della coagulazione",
+  "enzimi-digestivi": "Enzimi digestivi e sostituti enzimatici",
   "anti-parkinson": "Farmaci anti-Parkinson",
-  "antiosteoporotici": "Farmaci antiosteoporotici",
+  "antiosteoporotici": "Metabolismo osseo e antiosteoporotici",
   "biologici": "Farmaci biologici (anticorpi monoclonali)",
-  "farmaci-urgenza": "Farmaci d'urgenza",
+  "farmaci-urgenza": "Farmaci d'urgenza e rianimazione",
   "farmaci-metabolici": "Farmaci del metabolismo",
-  "urogenitali": "Farmaci dell'apparato urogenitale",
   "dermatologici": "Farmaci dermatologici",
-  "emopoietici": "Farmaci emopoietici",
   "oftalmologici": "Farmaci oftalmologici",
   "ostetrici-ginecologici": "Farmaci ostetrici e ginecologici",
-  "otologici": "Farmaci otologici",
   "broncocostrittori": "Farmaci respiratori diversi dai broncodilatatori",
-  "urologici": "Farmaci urologici",
-  "fattori-coagulazione": "Fattori della coagulazione",
-  "gastroprotettori": "Gastroprotettori",
+  "urologici": "Farmaci urologici e urogenitali",
   "immunoglobuline": "Immunoglobuline",
   "immunomodulanti": "Immunomodulanti",
   "immunosoppressori": "Immunosoppressori",
@@ -669,34 +650,27 @@
   "ipoglicemizzanti-orali": "Ipoglicemizzanti orali",
   "ipolipemizzanti": "Ipolipemizzanti",
   "lassativi": "Lassativi",
-  "metabolismo-osseo": "Metabolismo osseo",
   "minerali-elettroliti": "Minerali ed elettroliti",
   "miorilassanti": "Miorilassanti",
-  "mucolitici": "Mucolitici",
+  "mucolitici": "Mucolitici e fluimolitici",
   "neurolettici": "Neurolettici (antipsicotici)",
-  "antianginosi-nitrati": "Nitrati antianginosi",
-  "nutrizione-soluzioni-infusione": "Nutrizione e soluzioni per infusione",
-  "oftalmologia": "Oftalmologia",
-  "oncologia": "Oncologia",
   "oppioidi": "Oppioidi",
   "ormoni-ipofisari": "Ormoni ipofisari",
-  "ormoni-sessuali": "Ormoni sessuali",
+  "ormoni-sessuali": "Ormoni sessuali e contraccettivi ormonali",
   "ormoni-tiroidei": "Ormoni tiroidei",
-  "otorinolaringoiatria": "Otorinolaringoiatria",
+  "otorinolaringoiatria": "Otorinolaringoiatria e farmaci otologici",
   "procinetici": "Procinetici",
-  "protettori-mucosa": "Protettori della mucosa gastrointestinale",
+  "protettori-mucosa": "Protettori della mucosa e gastroprotettori",
   "benzodiazepine": "Psicofarmaci (benzodiazepine)",
   "sartani": "Sartani (ARB)",
-  "sistema-cardiovascolare": "Sistema cardiovascolare",
-  "sistema-ematologico": "Sistema ematologico",
-  "sistema-endocrino-metabolico": "Sistema endocrino e metabolismo",
-  "sistema-linfatico-immunitario": "Sistema linfatico e immunitario",
-  "sistema-nervoso": "Sistema nervoso",
-  "sistema-respiratorio": "Sistema respiratorio",
-  "cristalloidi": "Soluzioni cristalloidi",
+  "sistema-cardiovascolare": "Altri farmaci cardiovascolari",
+  "sistema-ematologico": "Altri farmaci ematologici",
+  "sistema-endocrino-metabolico": "Altri farmaci endocrini e metabolici",
+  "sistema-linfatico-immunitario": "Altri farmaci del sistema immunitario",
+  "sistema-nervoso": "Altri farmaci del sistema nervoso",
+  "sistema-respiratorio": "Altri farmaci respiratori",
+  "cristalloidi": "Cristalloidi e soluzioni per infusione",
   "statine": "Statine",
-  "stimolanti-emopoiesi": "Stimolanti dell'emopoiesi",
-  "urgenza-rianimazione": "Terapia d'urgenza e rianimazione",
   "trombolitici": "Trombolitici",
   "vasodilatatori": "Vasodilatatori",
   "vitamine": "Vitamine"

@@ -1971,6 +1971,7 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
                         ${renderPatientField("Allergie", selectedPatient.allergies)}
                         ${renderPatientField("Pz. diabetico", selectedPatient.diabetic ? "Sì" : "No")}
                         ${renderPatientField("Farmaci", selectedPatient.medications)}
+                        ${renderPatientTherapyCheck(selectedPatient)}
                         ${renderPatientField("Note", selectedPatient.notes)}
 
                         <div class="patient-pv-section">
@@ -2068,12 +2069,175 @@ function renderPatientsPage(selectedPatientId = "", editMode = false, newPatient
     setupPatientOrderControls();
     refreshOrderControls();
 
+    if (selectedPatient && !editMode && !newPatientMode) {
+        initPatientTherapyCheck(selectedPatient);
+    }
+
     const newPatientButton = document.getElementById("newPatientButton");
     newPatientButton?.addEventListener("click", () => {
         window.__newPatientPvDraft = [];
         renderPatientsPage("", false, true);
     });
 }
+/* =========================================================
+   CONTROLLO DELLA TERAPIA DEL PAZIENTE
+   Allergie collegate alle classi di farmaci e interazioni
+   tra i farmaci in terapia (js/terapia-paziente.js).
+========================================================= */
+
+function renderPatientTherapyCheck(patient) {
+    if (!String(patient?.medications || "").trim()) return "";
+
+    return `
+        <div class="patient-therapy-check" id="patientTherapyCheck">
+            <h4>💊 Controllo della terapia</h4>
+            <div id="patientAllergyAlerts" class="patient-therapy-box">Controllo allergie in corso…</div>
+            <button id="patientCheckInteractions" class="settings-action" type="button">
+                ⚡ Controlla le interazioni tra i farmaci
+            </button>
+            <div id="patientInteractionResult"></div>
+        </div>
+    `;
+}
+
+let therapyAliasIndexPromise = null;
+
+function loadTherapyAliasIndex() {
+    if (!therapyAliasIndexPromise) {
+        therapyAliasIndexPromise = fetch("./data/alias-farmaci.json")
+            .then(response => response.ok ? response.json() : null)
+            .then(data => window.NursingTerapia.creaIndiceAlias(data))
+            .catch(() => new Map());
+    }
+    return therapyAliasIndexPromise;
+}
+
+function renderPatientAllergyAlerts(result, patient) {
+    const hasAllergies = String(patient.allergies || "").trim();
+
+    if (!hasAllergies) {
+        return `<p class="patient-therapy-note">Nessuna allergia registrata nella scheda: il controllo allergie non è stato eseguito. Verifica sempre l'anamnesi allergica.</p>`;
+    }
+
+    const alerts = result.avvisi.map(alert => `
+        <li class="patient-therapy-alert patient-therapy-alert-${alert.tipo}">
+            <strong>${escapeHtml(alert.farmaco)}</strong>
+            <span>Allergia registrata: <em>${escapeHtml(alert.allergia)}</em></span>
+            <small>${alert.tipo === "stesso"
+                ? "Stesso principio attivo dell'allergia dichiarata."
+                : `Stessa classe (${escapeHtml(alert.gruppo)}): possibile reattività crociata, da valutare con il medico.`}</small>
+        </li>`).join("");
+
+    const header = result.avvisi.length
+        ? `<p class="patient-therapy-title patient-therapy-title-alert">⛔ ${result.avvisi.length} possibil${result.avvisi.length === 1 ? "e conflitto" : "i conflitti"} tra allergie e terapia</p><ul class="patient-therapy-list">${alerts}</ul>`
+        : `<p class="patient-therapy-title">✓ Nessun collegamento trovato tra le allergie registrate e i farmaci in terapia</p>`;
+
+    const notLinked = result.nonCollegate.length
+        ? `<p class="patient-therapy-note">Voci di allergia non confrontate con i farmaci (non sono classi o principi attivi noti all'app): ${result.nonCollegate.map(escapeHtml).join(", ")}.</p>`
+        : "";
+
+    return `${header}${notLinked}
+        <p class="patient-therapy-note">Controllo indicativo, basato sul testo scritto nei campi Allergie e Farmaci: non sostituisce l'anamnesi allergica né la valutazione del medico. L'assenza di avvisi non garantisce che la terapia sia sicura.</p>`;
+}
+
+function renderPatientInteractionResult(NI, idx, result) {
+    const summary = `
+        <p class="patient-therapy-title">${result.coppie.length
+            ? `⚠️ ${result.coppie.length} associazion${result.coppie.length === 1 ? "e" : "i"} con segnalazioni su ${result.nCoppie} controllate`
+            : `✓ Nessuna segnalazione tra i ${result.riconosciuti.length} farmaci riconosciuti`}</p>
+        <p class="patient-therapy-note">Farmaci riconosciuti: ${result.riconosciuti.length
+            ? result.riconosciuti.map(escapeHtml).join(", ")
+            : "nessuno"}.</p>`;
+
+    const pairs = result.coppie.map(pair => `
+        <details class="patient-therapy-pair patient-therapy-pair-${pair.categoria}" ${pair.categoria === "rischio" ? "open" : ""}>
+            <summary>
+                <span class="ddi-badge">${escapeHtml(DDI_BADGE[pair.categoria] || "Possibile")}</span>
+                ${escapeHtml(pair.nomeA)} + ${escapeHtml(pair.nomeB)}
+            </summary>
+            ${ddiRenderRiepilogo(NI, idx, pair.a, pair.b, pair.curate, pair.esito)}
+            ${ddiRenderCurate(pair.curate)}
+            ${pair.esito.esito === "nessuna" ? "" : ddiRenderEsito(NI, idx, pair.a, pair.b, pair.esito, pair.curate.length > 0)}
+        </details>`).join("");
+
+    const unknown = result.nonRiconosciuti.length
+        ? `<div class="patient-therapy-box">
+            <p class="patient-therapy-title">Non controllati: nome non riconosciuto</p>
+            <ul class="patient-therapy-list">${result.nonRiconosciuti.map(item => `
+                <li><strong>${escapeHtml(item.voce)}</strong>${item.suggerimenti.length
+                    ? `<small>Forse intendevi: ${item.suggerimenti.map(escapeHtml).join(", ")}. Correggi il nome nella scheda e ripeti il controllo.</small>`
+                    : `<small>Controlla l'ortografia o usa il principio attivo; puoi verificare la coppia a mano nella sezione Interazioni.</small>`}</li>`).join("")}</ul>
+        </div>`
+        : "";
+
+    return `${summary}${pairs}${unknown}
+        <p class="patient-therapy-note"><strong>L'assenza di una segnalazione non vuol dire che l'associazione sia sicura.</strong> Il database è incompleto e non riguarda la compatibilità fisico-chimica in infusione. Controlla sempre RCP, protocollo di reparto o farmacista.</p>`;
+}
+
+async function initPatientTherapyCheck(patient) {
+    const alertsBox = document.getElementById("patientAllergyAlerts");
+    const button = document.getElementById("patientCheckInteractions");
+    const resultBox = document.getElementById("patientInteractionResult");
+    if (!alertsBox || !button || !resultBox) return;
+
+    const TP = window.NursingTerapia;
+    const NI = window.NursingInterazioni;
+    if (!TP) {
+        alertsBox.textContent = "Controllo della terapia non disponibile.";
+        button.disabled = true;
+        return;
+    }
+
+    try {
+        const [alias, aifaList] = await Promise.all([
+            loadTherapyAliasIndex(),
+            loadDrugActiveIngredientIndex().catch(() => [])
+        ]);
+        if (!document.body.contains(alertsBox)) return;
+
+        const result = TP.controllaAllergie({
+            allergie: patient.allergies,
+            farmaci: patient.medications,
+            alias,
+            aifa: TP.creaIndiceAifa(aifaList)
+        });
+        alertsBox.innerHTML = renderPatientAllergyAlerts(result, patient);
+    } catch (error) {
+        console.error("Controllo allergie non riuscito:", error);
+        alertsBox.textContent = "Controllo allergie non riuscito.";
+    }
+
+    if (!NI) {
+        button.disabled = true;
+        resultBox.textContent = "Modulo interazioni non caricato.";
+        return;
+    }
+
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        resultBox.innerHTML = `<p class="patient-therapy-note">Caricamento dell'archivio interazioni…</p>`;
+
+        try {
+            const idx = await NI.carica({
+                onStato: message => {
+                    if (document.body.contains(resultBox)) {
+                        resultBox.innerHTML = `<p class="patient-therapy-note">${escapeHtml(message)}</p>`;
+                    }
+                }
+            });
+            if (!document.body.contains(resultBox)) return;
+            resultBox.innerHTML = renderPatientInteractionResult(NI, idx, TP.controllaInterazioni(NI, idx, patient.medications));
+        } catch (error) {
+            console.error("Controllo interazioni non riuscito:", error);
+            if (document.body.contains(resultBox)) {
+                resultBox.innerHTML = `<p class="patient-therapy-note">Archivio interazioni non disponibile: ${escapeHtml(error?.message || String(error))}</p>`;
+            }
+        } finally {
+            button.disabled = false;
+        }
+    });
+}
+
 function setupPatients() {
     document.addEventListener("click", event => {
         const diabeticButton = event.target.closest("[data-diabetic-choice]");
@@ -3925,6 +4089,18 @@ function findItem(data, itemId) {
                 return currentItem;
             }
 
+            /*
+             * Vecchio id di una classe unita a un'altra
+             * (link salvati, note personali).
+             */
+            if (
+                typeof currentItem === "object" &&
+                Array.isArray(currentItem.aliasIds) &&
+                currentItem.aliasIds.includes(itemId)
+            ) {
+                return currentItem;
+            }
+
             if (
                 typeof currentItem === "object" &&
                 Array.isArray(currentItem.items)
@@ -3953,6 +4129,58 @@ function findItem(data, itemId) {
     }
 
     return null;
+}
+
+/* =========================================================
+   ELENCO CLASSI RAGGRUPPATE PER MACRO-AREA
+========================================================= */
+
+function readOpenDrugAreas() {
+    try {
+        const saved = JSON.parse(sessionStorage.getItem("nursing-drug-areas-open") || "[]");
+        return new Set(Array.isArray(saved) ? saved : []);
+    } catch (_) {
+        return new Set();
+    }
+}
+
+function renderDrugClassGroups(root, stateId, populatedIds) {
+    const link = currentItem => `
+        <a class="content-button" href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(currentItem.id)}">
+            <span>${escapeHtml(currentItem.title)}</span>
+        </a>`;
+
+    const visible = (Array.isArray(root.items) ? root.items : [])
+        .filter(currentItem => !currentItem.fallback || (populatedIds && populatedIds.has(currentItem.id)));
+
+    const areas = Array.isArray(root.areas) ? root.areas : [];
+    if (!areas.length) return visible.map(link).join("");
+
+    const opened = readOpenDrugAreas();
+    const known = new Set(areas.map(area => area.id));
+    const groups = areas.map(area => ({ ...area, classes: visible.filter(c => c.area === area.id) }));
+    const others = visible.filter(c => !known.has(c.area));
+    if (others.length) groups.push({ id: "altro", icon: "💊", title: "Altre classi", classes: others });
+
+    return groups
+        .filter(group => group.classes.length)
+        .map(group => {
+            /* "Altri farmaci ..." in fondo al gruppo, il resto in ordine alfabetico */
+            const sorted = group.classes.slice().sort((a, b) =>
+                (a.fallback ? 1 : 0) - (b.fallback ? 1 : 0) ||
+                a.title.localeCompare(b.title, "it-IT"));
+            return `
+                <details class="drug-area" data-area="${escapeAttribute(group.id)}" ${opened.has(group.id) ? "open" : ""}>
+                    <summary>
+                        <span class="drug-area-title">${escapeHtml(group.icon || "")} ${escapeHtml(group.title)}</span>
+                        <span class="drug-area-count">${sorted.length}</span>
+                    </summary>
+                    <div class="drug-area-items">
+                        ${sorted.map(link).join("")}
+                    </div>
+                </details>`;
+        })
+        .join("");
 }
 
 /* =========================================================
@@ -4014,17 +4242,35 @@ function renderDrugClassCategory(item, data) {
             <div id="drugClassSearchSuggestions" class="patient-search-suggestions" hidden></div>
 
             <div class="detail-content">
-                <div class="item-list" id="drugClassList">
-                    ${classes.map(currentItem => `
-                        <a class="content-button" href="?state=${encodeURIComponent(data.id)}&item=${encodeURIComponent(currentItem.id)}">
-                            <span>${escapeHtml(currentItem.title)}</span>
-                            
-                        </a>
-                    `).join("")}
+                <div class="item-list drug-area-list" id="drugClassList">
+                    ${renderDrugClassGroups(item, data.id, null)}
                 </div>
             </div>
         </section>
     `;
+
+    /* Le classi "Altri farmaci ..." compaiono solo quando contengono principi attivi. */
+    if (classes.some(currentItem => currentItem.fallback)) {
+        loadDrugActiveIngredientIndex()
+            .then(index => {
+                const populated = new Set(index.map(entry => entry.classeId).filter(Boolean));
+                const box = document.getElementById("drugClassList");
+                if (!box || !classes.some(currentItem => currentItem.fallback && populated.has(currentItem.id))) return;
+                box.innerHTML = renderDrugClassGroups(item, data.id, populated);
+            })
+            .catch(() => {});
+    }
+
+    document.getElementById("drugClassList")?.addEventListener("toggle", event => {
+        const details = event.target;
+        if (!details?.dataset?.area) return;
+        const opened = readOpenDrugAreas();
+        if (details.open) opened.add(details.dataset.area);
+        else opened.delete(details.dataset.area);
+        try {
+            sessionStorage.setItem("nursing-drug-areas-open", JSON.stringify([...opened]));
+        } catch (_) { /* facoltativo */ }
+    }, true);
 
     fetch("./data/version.json", { cache: "no-store" })
         .then(response => {
@@ -4094,7 +4340,7 @@ function renderDrugClassCategory(item, data) {
                     .map(entry => ({
                         id: entry.id,
                         title: entry.title,
-                        score: drugSearchScore(query, entry.title)
+                        score: classSearchScore(query, entry)
                     }))
                     .filter(entry => entry.score > 0)
                     .map(entry => ({ ...entry, tipo: "classe" }));
@@ -4256,6 +4502,15 @@ async function loadDrugActiveIngredientIndex() {
     return drugActiveIngredientIndex;
 }
 
+function classSearchScore(query, entry) {
+    /* Titolo attuale e vecchi nomi delle classi unite (es. "Antitrombotici"). */
+    return Math.max(
+        drugSearchScore(query, entry.title),
+        ...(Array.isArray(entry.aliasTitles) ? entry.aliasTitles : []).map(name => drugSearchScore(query, name)),
+        0
+    );
+}
+
 function drugSearchScore(query, name) {
     const q = normalizeDrugSearchText(query), n = normalizeDrugSearchText(name);
     if (!q || !n) return 0;
@@ -4301,7 +4556,7 @@ async function renderDrugSearch() {
                             if (!item || typeof item !== "object") continue;
                             if (item.id && item.title && item.id !== "classi-farmacologiche" &&
                                 (item.type === "drug" || item.content?.class)) {
-                                classes.push({ id: item.id, title: item.title });
+                                classes.push({ id: item.id, title: item.title, aliasTitles: item.aliasTitles || [] });
                             }
                             visit(item.items);
                         }
@@ -4325,7 +4580,7 @@ async function renderDrugSearch() {
                 loadDrugClassSearchIndex()
             ]);
             const classMatches = classes
-                .map(entry => ({ ...entry, score: drugSearchScore(query, entry.title) }))
+                .map(entry => ({ ...entry, score: classSearchScore(query, entry) }))
                 .filter(entry => entry.score > 0)
                 .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, "it-IT"))
                 .slice(0, 12);
@@ -4844,6 +5099,24 @@ function loadItem(data) {
     }
 
 
+    /*
+     * Link a una classe unita ad un'altra: porta all'id attuale,
+     * cosi' le note personali usano sempre la stessa chiave.
+     */
+    if (
+        typeof selectedItem === "object" &&
+        selectedItem.id &&
+        selectedItem.id !== item &&
+        Array.isArray(selectedItem.aliasIds) &&
+        selectedItem.aliasIds.includes(item)
+    ) {
+        const canonicalUrl = new URL(window.location.href);
+        canonicalUrl.searchParams.set("item", selectedItem.id);
+        window.location.replace(canonicalUrl.toString());
+        return;
+    }
+
+
     window.__currentData = data;
     window.__currentItemTitle =
         typeof selectedItem === "string"
@@ -5283,8 +5556,8 @@ function renderDrug(item, data) {
                 )}
 
                 ${renderListField(
-                    "Monitoraggio",
-                    drug.monitoring
+                    "Controindicazioni",
+                    drug.contraindications
                 )}
 
                 ${renderListField(
@@ -5292,10 +5565,32 @@ function renderDrug(item, data) {
                     drug.adverseEffects
                 )}
 
+                ${renderListField(
+                    "Vie di somministrazione",
+                    drug.routes
+                )}
+
+                ${renderListField(
+                    "Monitoraggio",
+                    drug.monitoring
+                )}
+
+                ${renderListField(
+                    "Avvertenze infermieristiche",
+                    drug.nursingNotes
+                )}
+
                 ${renderField(
                     "Note",
                     drug.notes
                 )}
+
+                <article class="info-block info-block-note drug-disclaimer">
+                    <strong>Uso didattico</strong>
+                    <p>Informazioni generali sulla classe: per dosi, diluizioni e compatibilità
+                    verifica sempre la scheda tecnica (RCP) del singolo farmaco e il protocollo
+                    della tua struttura.</p>
+                </article>
 
             </div>
 
@@ -9324,6 +9619,50 @@ function savePersonalNotes(notes) {
 
 function getPersonalNoteKey(stateId, itemId) {
     return (stateId || "") + "::" + (itemId || "");
+}
+
+/*
+ * Quando due classi farmacologiche vengono unite, le note personali scritte
+ * sulla vecchia classe passano a quella che resta (campo "aliasIds").
+ */
+function migratePersonalNotesForMergedClasses(data) {
+    try {
+        const stateId = data?.id || "farmaci";
+        const notes = getPersonalNotes();
+        let changed = false;
+
+        const visit = items => {
+            for (const current of (Array.isArray(items) ? items : [])) {
+                if (!current || typeof current !== "object") continue;
+
+                for (const oldId of (Array.isArray(current.aliasIds) ? current.aliasIds : [])) {
+                    const oldKey = getPersonalNoteKey(stateId, oldId);
+                    const oldNotes = notes[oldKey];
+                    if (!oldNotes || !oldNotes.length) continue;
+
+                    const newKey = getPersonalNoteKey(stateId, current.id);
+                    const taken = new Set((notes[newKey] || []).map(note => note.id));
+                    const moved = oldNotes.map(note => {
+                        let noteId = note.id;
+                        while (taken.has(noteId)) noteId += "-m";
+                        taken.add(noteId);
+                        return { ...note, id: noteId };
+                    });
+                    notes[newKey] = (notes[newKey] || []).concat(moved);
+                    delete notes[oldKey];
+                    changed = true;
+                }
+
+                visit(current.items);
+            }
+        };
+
+        for (const section of (data?.sections || [])) visit(section.items);
+
+        if (changed) savePersonalNotes(notes);
+    } catch (error) {
+        console.warn("Migrazione note classi unite non riuscita:", error);
+    }
 }
 
 function getNotesForItem(stateId, itemId) {
@@ -13485,6 +13824,13 @@ function escapeAttribute(value) {
 /* =========================================================
    SERVICE WORKER
 ========================================================= */
+
+window.addEventListener("load", () => {
+    fetch("./data/farmaci.json")
+        .then(response => response.ok ? response.json() : null)
+        .then(data => { if (data) migratePersonalNotesForMergedClasses(data); })
+        .catch(() => {});
+});
 
 if ("serviceWorker" in navigator) {
 
