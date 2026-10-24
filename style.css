@@ -4432,3 +4432,91 @@ mark.note-hl { padding: 0 3px; border-radius: 4px; color: inherit; }
     gap: 8px;
     padding: 0 10px 12px;
 }
+
+/* Controllo della terapia nella scheda paziente */
+.patient-therapy-check {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+}
+
+.patient-therapy-check h4 {
+    margin: 0;
+}
+
+.patient-therapy-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.patient-therapy-title {
+    margin: 0;
+    font-weight: 700;
+}
+
+.patient-therapy-title-alert {
+    color: var(--danger);
+}
+
+.patient-therapy-note {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.patient-therapy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.patient-therapy-list li,
+.patient-therapy-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface-elevated);
+}
+
+.patient-therapy-alert-stesso {
+    border-color: var(--danger);
+}
+
+.patient-therapy-list small {
+    color: var(--text-secondary);
+}
+
+.patient-therapy-pair {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    overflow: hidden;
+}
+
+.patient-therapy-pair-rischio {
+    border-color: var(--danger);
+}
+
+.patient-therapy-pair > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.patient-therapy-pair > .info-block {
+    margin: 0 10px 10px;
+}
