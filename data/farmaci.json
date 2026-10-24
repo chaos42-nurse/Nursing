@@ -112,6 +112,27 @@
                   "Ipotensione ortostatica",
                   "Stato di coscienza e risposta clinica",
                   "stato cardiovascolare e segni di ipotensione o bradicardia."
+                ],
+                "contraindications": [
+                  "Gravidanza (ambrisentan, bosentan: teratogeni)",
+                  "Insufficienza epatica grave (bosentan)",
+                  "Moxonidina: bradicardia grave, blocco AV, scompenso grave",
+                  "Ipotensione marcata"
+                ],
+                "adverseEffects": [
+                  "Ipotensione e vertigini",
+                  "Secchezza delle fauci e sonnolenza (antipertensivi centrali)",
+                  "Edemi e cefalea",
+                  "Ambrisentan e bosentan: aumento delle transaminasi, anemia, ritenzione idrica"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Controllare la PA anche in ortostatismo",
+                  "Antagonisti dell'endotelina: test di gravidanza e controlli epatici secondo programma",
+                  "Non sospendere bruscamente i farmaci ad azione centrale (rialzo pressorio di rimbalzo)",
+                  "Il gruppo è eterogeneo: verificare la scheda del singolo principio attivo"
                 ]
               },
               "aliasIds": [
@@ -368,6 +389,28 @@
                   "PA e FC",
                   "FR e SpO₂ quando pertinenti",
                   "Intensità del dolore e risposta clinica"
+                ],
+                "contraindications": [
+                  "Dipendono dal farmaco e dalla tecnica: valutazione anestesiologica preoperatoria",
+                  "Ipertermia maligna in anamnesi personale o familiare (anestetici inalatori e succinilcolina)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Depressione respiratoria e cardiocircolatoria",
+                  "Ipotensione e bradicardia",
+                  "Nausea e vomito postoperatori",
+                  "Delirium del risveglio",
+                  "Ipertermia maligna (rara ma grave)"
+                ],
+                "routes": [
+                  "Endovenosa",
+                  "Inalatoria"
+                ],
+                "nursingNotes": [
+                  "Uso in ambiente attrezzato, con personale formato e monitoraggio continuo (ECG, PA, SpO2, capnografia)",
+                  "Controllare il digiuno preoperatorio e le allergie",
+                  "Nel risveglio: vie aeree, coscienza, parametri vitali, dolore, nausea",
+                  "Propofol: asettica rigorosa, la soluzione favorisce la crescita batterica"
                 ]
               },
               "aliasIds": [
@@ -568,6 +611,25 @@
                   "Nausea e disturbi del sonno",
                   "Funzione epatica quando indicata",
                   "Aderenza al percorso di supporto"
+                ],
+                "contraindications": [
+                  "Naltrexone: uso di oppioidi in atto, insufficienza epatica acuta",
+                  "Vareniclina e citisina: ipersensibilità; cautela in malattie psichiatriche, gravidanza e insufficienza renale",
+                  "Disulfiram (se prescritto): cardiopatie gravi e assunzione di alcol"
+                ],
+                "adverseEffects": [
+                  "Nausea, cefalea, insonnia e sogni vividi (vareniclina)",
+                  "Naltrexone: nausea, cefalea, ansia, aumento delle transaminasi; astinenza acuta se assunto con oppioidi in circolo",
+                  "Alterazioni dell'umore da segnalare"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Chiedere e segnalare cambiamenti di umore, ideazione suicidaria e agitazione",
+                  "Naltrexone: informare che blocca l'effetto degli analgesici oppioidi (avvisare in caso di interventi o dolore acuto)",
+                  "Vareniclina: assumere dopo i pasti con acqua",
+                  "Abbinare sempre il supporto motivazionale e il percorso del servizio specialistico"
                 ]
               },
               "area": "nervoso"
@@ -657,6 +719,26 @@
                 ],
                 "monitoring": [
                   "Risposta clinica ed eventuali effetti endocrini o metabolici rilevanti."
+                ],
+                "contraindications": [
+                  "Gravidanza",
+                  "Insufficienza epatica grave",
+                  "Ciproterone: eventi tromboembolici, tumori epatici, meningioma",
+                  "Bicalutamide: ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Vampate di calore, ginecomastia e dolore mammario (bicalutamide)",
+                  "Epatotossicità",
+                  "Ciproterone: astenia, depressione, rischio tromboembolico, meningioma",
+                  "Riduzione della libido"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Controllare le transaminasi secondo programma",
+                  "Segnalare ittero, urine scure, gamba gonfia o dolore toracico",
+                  "Prestare attenzione all'umore"
                 ]
               },
               "area": "immunita-oncologia"
@@ -1384,6 +1466,27 @@
                 "monitoring": [
                   "Intensità e frequenza della cefalea",
                   "nausea e risposta clinica."
+                ],
+                "contraindications": [
+                  "Triptani: cardiopatia ischemica, ictus o TIA pregressi, ipertensione non controllata, emicrania emiplegica o basilare",
+                  "Associazione con ergotamina o altri triptani entro poche ore",
+                  "Associazione con IMAO (alcuni triptani)"
+                ],
+                "adverseEffects": [
+                  "Senso di oppressione al torace, al collo o alla mandibola",
+                  "Formicolii, vampate, sonnolenza",
+                  "Aumento della PA",
+                  "Cefalea da uso eccessivo di analgesici"
+                ],
+                "routes": [
+                  "Orale",
+                  "Sottocutanea",
+                  "Intranasale"
+                ],
+                "nursingNotes": [
+                  "Assumere all'inizio dell'attacco, rispettando dose massima giornaliera e intervallo tra le dosi",
+                  "Dolore toracico persistente: chiamare subito il medico",
+                  "Tenere un diario delle crisi e dei farmaci assunti"
                 ]
               },
               "area": "nervoso"
@@ -1405,6 +1508,27 @@
                   "Tollerabilità",
                   "Segni e sintomi dell'infezione",
                   "Funzione epatica quando pertinente"
+                ],
+                "contraindications": [
+                  "Metronidazolo: ipersensibilità; evitare l'alcol durante e dopo il trattamento; prudenza in epilessia e malattie neurologiche",
+                  "Idrossiclorochina: retinopatia, ipersensibilità, QT lungo",
+                  "Gravidanza: valutazione del medico"
+                ],
+                "adverseEffects": [
+                  "Nausea, sapore metallico, urine scure (metronidazolo)",
+                  "Neuropatia periferica e disturbi neurologici con trattamenti prolungati (metronidazolo)",
+                  "Idrossiclorochina: disturbi visivi, aritmie, ipoglicemia, eruzioni cutanee"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (metronidazolo)",
+                  "Topica",
+                  "Vaginale"
+                ],
+                "nursingNotes": [
+                  "Metronidazolo: avvertire di evitare l'alcol (reazione tipo disulfiram) e di completare la terapia",
+                  "Idrossiclorochina: visita oculistica periodica e ECG se indicato",
+                  "Igiene e trattamento dei contatti, secondo il tipo di infestazione o infezione"
                 ]
               },
               "aliasIds": [
@@ -1429,6 +1553,28 @@
                   "Funzione epatica",
                   "Funzione renale quando pertinente",
                   "Tollerabilità"
+                ],
+                "contraindications": [
+                  "Dipendono dal farmaco: numerose interazioni farmacologiche (CYP450)",
+                  "Abacavir: test per HLA-B*5701 prima di iniziare",
+                  "Insufficienza epatica o renale grave per alcuni principi attivi"
+                ],
+                "adverseEffects": [
+                  "Nausea, diarrea, cefalea, astenia",
+                  "Reazioni di ipersensibilità (abacavir)",
+                  "Alterazioni di glicemia e lipidi",
+                  "Epatotossicità e nefrotossicità",
+                  "Sindrome da ricostituzione immunitaria nei primi mesi"
+                ],
+                "routes": [
+                  "Orale",
+                  "Iniettabile a lunga durata (alcuni regimi)"
+                ],
+                "nursingNotes": [
+                  "L'aderenza rigorosa agli orari è essenziale: la mancata assunzione favorisce le resistenze",
+                  "Verificare sempre le interazioni prima di aggiungere farmaci, integratori o erbe (iperico)",
+                  "Controlli periodici di carica virale, CD4, funzione renale ed epatica",
+                  "Riservatezza dei dati"
                 ]
               },
               "area": "infezioni"
@@ -1447,6 +1593,30 @@
                   "Emocromo quando indicato",
                   "Funzione epatica",
                   "Segni di infezione"
+                ],
+                "contraindications": [
+                  "Infezioni attive gravi",
+                  "Gravidanza (metotrexato, leflunomide)",
+                  "Insufficienza epatica o renale grave",
+                  "Vaccini vivi durante la terapia immunosoppressiva"
+                ],
+                "adverseEffects": [
+                  "Infezioni",
+                  "Mielosoppressione",
+                  "Epatotossicità",
+                  "Nausea, stomatite (metotrexato)",
+                  "Alterazioni cutanee e polmonari"
+                ],
+                "routes": [
+                  "Orale",
+                  "Sottocutanea",
+                  "Intramuscolare"
+                ],
+                "nursingNotes": [
+                  "Metotrexato: di solito dose settimanale, non giornaliera (errore di somministrazione grave); verificare giorno e dose",
+                  "Controllare emocromo e funzione epatica e renale secondo programma",
+                  "Segnalare febbre, mal di gola, ulcere orali, tosse nuova",
+                  "Il beneficio compare dopo settimane o mesi"
                 ]
               },
               "area": "dolore"
@@ -1465,6 +1635,28 @@
                   "Condizioni dell'area trattata",
                   "Segni di irritazione o reazione locale",
                   "Risposta al trattamento"
+                ],
+                "contraindications": [
+                  "Ipersensibilità al principio attivo",
+                  "Clorexidina: non usare su membrane timpaniche perforate, nell'occhio, sulle meningi",
+                  "Iodopovidone: ipertiroidismo, allergia allo iodio; cautela nei neonati e in gravidanza",
+                  "Alcol: non su ferite aperte o mucose"
+                ],
+                "adverseEffects": [
+                  "Irritazione e dermatite da contatto",
+                  "Reazioni allergiche",
+                  "Iodopovidone: assorbimento di iodio su aree estese",
+                  "Ustioni chimiche con ristagno sotto il campo operatorio"
+                ],
+                "routes": [
+                  "Topica",
+                  "Cutanea e delle mucose secondo prodotto"
+                ],
+                "nursingNotes": [
+                  "Rispettare concentrazione e tempo di contatto: la cute deve asciugare prima del campo o dell'iniezione",
+                  "Non mescolare prodotti diversi",
+                  "Antisettici per cute e mucose, disinfettanti per strumenti e superfici: non scambiarli",
+                  "Controllare la data di apertura e scadenza dei flaconi"
                 ]
               },
               "area": "infezioni"
@@ -1482,6 +1674,30 @@
                 "monitoring": [
                   "Dolore/spasmi",
                   "motilità interessata e possibili effetti indesiderati."
+                ],
+                "contraindications": [
+                  "Glaucoma ad angolo chiuso",
+                  "Ritenzione urinaria",
+                  "Ileo paralitico, megacolon",
+                  "Miastenia gravis",
+                  "Tachicardia (butilscopolamina ev: cautela)"
+                ],
+                "adverseEffects": [
+                  "Secchezza delle fauci",
+                  "Tachicardia",
+                  "Stipsi e ritenzione urinaria",
+                  "Visione offuscata"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intramuscolare",
+                  "Endovenosa lenta",
+                  "Rettale"
+                ],
+                "nursingNotes": [
+                  "Dolore addominale intenso o persistente non va solo mascherato: avvisare il medico",
+                  "Osservare diuresi e alvo",
+                  "Ev lenta con monitoraggio di FC"
                 ]
               },
               "area": "gastrointestinale"
@@ -1539,6 +1755,24 @@
                   "Risposta clinica",
                   "Funzione renale quando indicata",
                   "Tollerabilità"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Insufficienza renale: dose ridotta"
+                ],
+                "adverseEffects": [
+                  "Cefalea, vertigini, stipsi o diarrea",
+                  "Confusione negli anziani e nei pazienti con insufficienza renale",
+                  "Interazioni (cimetidina)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Dose adattata alla funzione renale",
+                  "Ev: infusione lenta secondo scheda tecnica",
+                  "Osservare lo stato mentale nell'anziano"
                 ]
               },
               "area": "gastrointestinale"
@@ -1593,6 +1827,30 @@
                   "Funzione epatica",
                   "Funzione renale quando pertinente",
                   "Risposta clinica"
+                ],
+                "contraindications": [
+                  "Epatopatia grave",
+                  "Isoniazide: epatite pregressa da isoniazide, neuropatia",
+                  "Etambutolo: neurite ottica",
+                  "Rifampicina: ittero; interazioni con anticoagulanti e contraccettivi"
+                ],
+                "adverseEffects": [
+                  "Epatotossicità (isoniazide, rifampicina, pirazinamide)",
+                  "Neuropatia periferica (isoniazide)",
+                  "Neurite ottica (etambutolo): disturbi della visione dei colori",
+                  "Urine e secrezioni rosso-arancio (rifampicina)",
+                  "Iperuricemia (pirazinamide)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (alcuni principi attivi)"
+                ],
+                "nursingNotes": [
+                  "Terapia lunga e a più farmaci: l'aderenza è fondamentale (valutare la terapia direttamente osservata)",
+                  "Controllare transaminasi e segni di epatite (ittero, nausea, urine scure)",
+                  "Piridossina insieme a isoniazide, se prescritta",
+                  "Visita oculistica e valutazione della vista con etambutolo",
+                  "Misure di isolamento e di protezione secondo protocollo"
                 ]
               },
               "area": "infezioni"
@@ -1610,6 +1868,26 @@
                 "monitoring": [
                   "Frequenza della tosse",
                   "caratteristiche delle secrezioni e funzione respiratoria."
+                ],
+                "contraindications": [
+                  "Tosse produttiva (non sopprimere)",
+                  "Insufficienza respiratoria e asma",
+                  "Codeina e destrometorfano: bambini piccoli; associazione con IMAO"
+                ],
+                "adverseEffects": [
+                  "Sonnolenza",
+                  "Stipsi (codeina)",
+                  "Nausea",
+                  "Depressione respiratoria (oppioidi)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Rettale"
+                ],
+                "nursingNotes": [
+                  "Valutare il tipo di tosse (secca o produttiva) e la causa",
+                  "Non associare ai mucolitici",
+                  "Avvertire della sonnolenza"
                 ]
               },
               "area": "respiratorio"
@@ -1835,6 +2113,27 @@
                   "Funzione renale",
                   "Elettroliti quando pertinenti",
                   "Tollerabilità"
+                ],
+                "contraindications": [
+                  "Dipendono dal chelante: anuria o insufficienza renale grave (alcuni)",
+                  "Ipersensibilità",
+                  "Gravidanza (valutazione del medico)"
+                ],
+                "adverseEffects": [
+                  "Disturbi gastrointestinali",
+                  "Ipocalcemia e perdita di altri minerali",
+                  "Nefrotossicità",
+                  "Reazioni infusionali e ipotensione se infusi troppo rapidamente (deferoxamina)"
+                ],
+                "routes": [
+                  "Endovenosa",
+                  "Sottocutanea",
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Deferoxamina: infusione lenta; controllare udito e vista nei trattamenti prolungati",
+                  "Controllare funzione renale ed elettroliti",
+                  "Raccogliere la diuresi quando richiesto; le urine possono cambiare colore"
                 ]
               },
               "area": "emergenza"
@@ -1913,6 +2212,26 @@
                 "monitoring": [
                   "PA",
                   "Segni di sovraccarico"
+                ],
+                "contraindications": [
+                  "Sovraccarico circolatorio e scompenso cardiaco grave",
+                  "Anemia grave (non sostituisce il sangue)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Reazioni allergiche o anafilattoidi",
+                  "Febbre e brividi",
+                  "Sovraccarico di volume e edema polmonare",
+                  "Ipotensione se infusi troppo rapidamente"
+                ],
+                "routes": [
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Registrare numero di lotto (emoderivati) e rispettare la tracciabilità",
+                  "Controllare aspetto della soluzione e integrità del flacone",
+                  "Velocità secondo prescrizione, monitorando PA, FR e segni di sovraccarico",
+                  "Albumina: non diluire con acqua sterile per preparazioni (rischio di emolisi)"
                 ]
               },
               "area": "liquidi"
@@ -2032,6 +2351,27 @@
                 "monitoring": [
                   "PA",
                   "FC e risposta dei sintomi congestizi."
+                ],
+                "contraindications": [
+                  "Glaucoma ad angolo chiuso",
+                  "Ipertensione grave e cardiopatie (decongestionanti per via orale)",
+                  "Associazione con IMAO",
+                  "Bambini piccoli (secondo prodotto)"
+                ],
+                "adverseEffects": [
+                  "Rinite da rimbalzo (rhinitis medicamentosa) con uso prolungato",
+                  "Secchezza e irritazione nasale",
+                  "Tachicardia e aumento della PA (assorbimento sistemico)",
+                  "Insonnia e agitazione"
+                ],
+                "routes": [
+                  "Nasale (spray, gocce)",
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Uso breve, di solito non oltre 3-5 giorni",
+                  "Ipertesi: preferire lavaggi nasali con soluzione fisiologica salvo indicazione del medico",
+                  "Insegnare la tecnica dello spray"
                 ]
               },
               "area": "respiratorio"
@@ -2156,6 +2496,23 @@
                   "Risposta clinica",
                   "Parametri laboratoristici pertinenti",
                   "Tollerabilità"
+                ],
+                "contraindications": [
+                  "Pancreatite acuta nella fase iniziale",
+                  "Ipersensibilità alle proteine suine"
+                ],
+                "adverseEffects": [
+                  "Disturbi gastrointestinali, dolore addominale",
+                  "Stipsi o diarrea",
+                  "Alte dosi: colonopatia fibrosante, iperuricemia"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Assumere durante i pasti, deglutendo le capsule intere (o miscelando i granuli con cibo acido non caldo)",
+                  "Non frantumare le formulazioni gastroresistenti",
+                  "Adeguare la dose al contenuto di grassi del pasto"
                 ]
               },
               "aliasIds": [
@@ -2224,6 +2581,29 @@
                 "monitoring": [
                   "Segni di infezione",
                   "Reazioni da infusione"
+                ],
+                "contraindications": [
+                  "Infezioni attive gravi, tubercolosi attiva o latente non trattata",
+                  "Vaccini vivi",
+                  "Scompenso cardiaco grave (anti-TNF)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Reazioni infusionali o nel sito di iniezione",
+                  "Maggior rischio di infezioni",
+                  "Reazioni allergiche fino all'anafilassi",
+                  "Riattivazione di tubercolosi o epatite B",
+                  "Possibili alterazioni ematologiche ed epatiche"
+                ],
+                "routes": [
+                  "Endovenosa (infusione)",
+                  "Sottocutanea"
+                ],
+                "nursingNotes": [
+                  "Prima di iniziare: screening per tubercolosi ed epatiti, aggiornamento delle vaccinazioni",
+                  "Infusione con premedicazione secondo protocollo, velocità graduale e monitoraggio dei parametri vitali",
+                  "Conservare in frigorifero e rispettare la catena del freddo",
+                  "Segnalare febbre e sintomi di infezione"
                 ]
               },
               "area": "immunita-oncologia"
@@ -2315,6 +2695,27 @@
                   "Segni di irritazione o reazione locale",
                   "Estensione e caratteristiche della lesione",
                   "Risposta clinica"
+                ],
+                "contraindications": [
+                  "Isotretinoina e acitretina: gravidanza (teratogene, programma di prevenzione)",
+                  "Corticosteroidi topici: infezioni cutanee non trattate",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Secchezza, irritazione e desquamazione",
+                  "Fotosensibilità (retinoidi)",
+                  "Atrofia cutanea con steroidi topici potenti e uso prolungato",
+                  "Isotretinoina e acitretina: alterazioni di lipidi ed enzimi epatici, secchezza delle mucose"
+                ],
+                "routes": [
+                  "Topica",
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Applicare su cute pulita, in strato sottile, con guanti se indicato",
+                  "Fotoprotezione durante la terapia",
+                  "Retinoidi orali: test di gravidanza e controlli ematici secondo programma",
+                  "Osservare e descrivere le lesioni nel tempo"
                 ]
               },
               "aliasIds": [
@@ -2344,6 +2745,27 @@
                   "Dolore oculare",
                   "Segni di irritazione o infiammazione",
                   "Risposta clinica"
+                ],
+                "contraindications": [
+                  "Beta-bloccanti oculari: asma, BPCO grave, bradicardia, blocco AV",
+                  "Ipersensibilità",
+                  "Lenti a contatto: seguire la scheda tecnica del prodotto"
+                ],
+                "adverseEffects": [
+                  "Bruciore, arrossamento, visione offuscata temporanea",
+                  "Colliri beta-bloccanti: effetti sistemici (bradicardia, broncospasmo)",
+                  "Analoghi delle prostaglandine: iperpigmentazione dell'iride e ciglia più lunghe",
+                  "Midriatici: fotofobia, rialzo pressorio oculare"
+                ],
+                "routes": [
+                  "Topica oculare (collirio, gel, unguento)",
+                  "Intravitreale (medico specialista)"
+                ],
+                "nursingNotes": [
+                  "Lavare le mani, non toccare l'occhio con il contagocce, comprimere il dotto lacrimale 1-2 minuti per ridurre l'assorbimento sistemico",
+                  "Più colliri: distanziare di almeno 5 minuti; unguenti per ultimi",
+                  "Annotare la data di apertura (di norma validità 28 giorni)",
+                  "Dolore oculare intenso o calo della vista: avvisare subito"
                 ]
               },
               "aliasIds": [
@@ -2368,6 +2790,28 @@
                   "Parametri clinici pertinenti",
                   "Segni e sintomi riferiti",
                   "Parametri laboratoristici quando indicati"
+                ],
+                "contraindications": [
+                  "Dipendono dal farmaco: ossitocina e prostaglandine hanno controindicazioni ostetriche specifiche",
+                  "Metilergometrina: ipertensione, preeclampsia",
+                  "Gravidanza: valutazione del medico per ogni altro farmaco"
+                ],
+                "adverseEffects": [
+                  "Ossitocina: iperstimolazione uterina, ipotensione, intossicazione da acqua",
+                  "Prostaglandine: tachisistolia, nausea, febbre",
+                  "Metilergometrina: aumento della PA, vasocostrizione"
+                ],
+                "routes": [
+                  "Endovenosa",
+                  "Intramuscolare",
+                  "Vaginale",
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Farmaci ad alto rischio: doppio controllo di dose e velocità, pompa",
+                  "Monitoraggio cardiotocografico e delle contrazioni durante il travaglio",
+                  "Controllare PA, tono uterino e perdite ematiche nel post-partum",
+                  "Attenersi al protocollo ostetrico del reparto"
                 ]
               },
               "area": "organi"
@@ -2386,6 +2830,22 @@
                   "FR",
                   "SpO₂",
                   "rumori respiratori e andamento dei sintomi."
+                ],
+                "contraindications": [
+                  "Montelukast: ipersensibilità; cautela in pazienti con disturbi psichiatrici"
+                ],
+                "adverseEffects": [
+                  "Cefalea, dolore addominale",
+                  "Disturbi neuropsichiatrici: insonnia, irritabilità, depressione, incubi",
+                  "Reazioni allergiche"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Non serve per le crisi acute: per l'attacco servono i broncodilatatori rapidi",
+                  "Assunzione serale per l'asma, secondo prescrizione",
+                  "Segnalare cambiamenti di umore o di comportamento"
                 ]
               },
               "area": "respiratorio"
@@ -2407,6 +2867,26 @@
                   "Risposta clinica",
                   "Sintomi urinari o genitali",
                   "Funzione d'organo pertinente"
+                ],
+                "contraindications": [
+                  "Inibitori della PDE5: associazione con nitrati, ipotensione grave, recente ictus o infarto",
+                  "Finasteride e dutasteride: gravidanza (le donne in età fertile non devono maneggiare compresse rotte)",
+                  "Antimuscarinici (ossibutinina, solifenacina): ritenzione urinaria, glaucoma ad angolo chiuso, ileo"
+                ],
+                "adverseEffects": [
+                  "Antimuscarinici: secchezza delle fauci, stipsi, ritenzione urinaria, confusione negli anziani",
+                  "Inibitori della PDE5: cefalea, rossore, ipotensione, dispepsia, priapismo",
+                  "Inibitori della 5-alfa-reduttasi: riduzione della libido e disfunzione erettile"
+                ],
+                "routes": [
+                  "Orale",
+                  "Transdermica (ossibutinina)"
+                ],
+                "nursingNotes": [
+                  "Valutare diuresi e svuotamento vescicale (residuo post-minzionale se indicato)",
+                  "Evitare i nitrati con gli inibitori della PDE5",
+                  "Anziani: osservare confusione e rischio di cadute con gli antimuscarinici",
+                  "Erezione dolorosa di oltre 4 ore: urgenza"
                 ]
               },
               "aliasIds": [
@@ -2431,6 +2911,28 @@
                   "Segni di infezione",
                   "Parametri clinici pertinenti",
                   "Tollerabilità"
+                ],
+                "contraindications": [
+                  "Deficit selettivo di IgA con anticorpi anti-IgA",
+                  "Ipersensibilità alle immunoglobuline",
+                  "Alcune preparazioni: iperprolinemia"
+                ],
+                "adverseEffects": [
+                  "Reazioni infusionali: cefalea, brividi, febbre, nausea",
+                  "Ipotensione",
+                  "Reazioni anafilattoidi",
+                  "Rare: trombosi, meningite asettica, insufficienza renale, emolisi"
+                ],
+                "routes": [
+                  "Endovenosa",
+                  "Sottocutanea",
+                  "Intramuscolare"
+                ],
+                "nursingNotes": [
+                  "Emoderivato: registrare il numero di lotto e la tracciabilità",
+                  "Iniziare lentamente e aumentare la velocità secondo scheda, monitorando i parametri vitali",
+                  "Buona idratazione prima dell'infusione, soprattutto nei pazienti a rischio renale",
+                  "Tenere pronti presidi e farmaci per la reazione allergica"
                 ]
               },
               "area": "immunita-oncologia"
@@ -2632,6 +3134,25 @@
                   "Profilo lipidico e",
                   "quando appropriato",
                   "funzione epatica e sintomi muscolari."
+                ],
+                "contraindications": [
+                  "Fibrati: insufficienza epatica o renale grave, colelitiasi",
+                  "Fibrati con statine: rischio muscolare (gemfibrozil: controindicato)",
+                  "Gravidanza e allattamento (fibrati)"
+                ],
+                "adverseEffects": [
+                  "Disturbi gastrointestinali",
+                  "Mialgia e miopatia (fibrati)",
+                  "Aumento delle transaminasi",
+                  "Litiasi biliare"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Segnalare dolori o debolezza muscolare e urine scure",
+                  "Controllo periodico di lipidi, transaminasi e creatinina",
+                  "Associare la dieta e l'attività fisica"
                 ]
               },
               "area": "cardiovascolare"
@@ -2693,6 +3214,30 @@
                   "Dolore o altri sintomi muscoloscheletrici",
                   "Calcemia e altri parametri minerali quando indicati",
                   "Dolore osseo e risposta clinica"
+                ],
+                "contraindications": [
+                  "Ipocalcemia non corretta",
+                  "Teriparatide: ipercalcemia, malattia di Paget, precedente radioterapia scheletrica",
+                  "Raloxifene: tromboembolismo venoso, gravidanza",
+                  "Cinacalcet: ipocalcemia"
+                ],
+                "adverseEffects": [
+                  "Dolore osseo e muscolare",
+                  "Ipocalcemia o ipercalcemia",
+                  "Raloxifene: vampate, crampi, tromboembolismo",
+                  "Cinacalcet: nausea e vomito",
+                  "Teriparatide: vertigini, crampi"
+                ],
+                "routes": [
+                  "Orale",
+                  "Sottocutanea",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Controllare calcemia, vitamina D e funzione renale",
+                  "Raloxifene: segnalare gamba gonfia o dispnea",
+                  "Teriparatide: ruotare le sedi di iniezione e usare in posizione seduta o sdraiata la prima volta (rischio di vertigini)",
+                  "Prevenzione delle cadute"
                 ]
               },
               "aliasIds": [
@@ -2756,6 +3301,27 @@
                 "monitoring": [
                   "Stato neurologico",
                   "forza muscolare e funzione respiratoria quando rilevante."
+                ],
+                "contraindications": [
+                  "Baclofene: epilessia non controllata, ulcera peptica attiva; sospensione graduale",
+                  "Miorilassanti ad azione periferica (blocco neuromuscolare): solo con ventilazione assistita disponibile",
+                  "Miastenia gravis"
+                ],
+                "adverseEffects": [
+                  "Sonnolenza, debolezza muscolare, vertigini",
+                  "Nausea, ipotensione",
+                  "Baclofene: sindrome da sospensione brusca (convulsioni, allucinazioni, rigidità)",
+                  "Blocco neuromuscolare: paralisi respiratoria"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intratecale (baclofene con pompa)",
+                  "Endovenosa (blocco neuromuscolare, solo anestesia e terapia intensiva)"
+                ],
+                "nursingNotes": [
+                  "Prevenire le cadute e valutare la sedazione",
+                  "Non sospendere bruscamente il baclofene",
+                  "Blocco neuromuscolare: ventilazione, sedazione e analgesia obbligatorie; sono farmaci ad alto rischio, con doppio controllo"
                 ]
               },
               "area": "nervoso"
@@ -2920,6 +3486,29 @@
                   "Segni e sintomi clinici",
                   "Bilancio idrico quando pertinente",
                   "Risposta clinica"
+                ],
+                "contraindications": [
+                  "Desmopressina: iponatriemia, scompenso cardiaco, insufficienza renale moderata o grave",
+                  "Cabergolina: valvulopatia, ipertensione non controllata, fibrosi",
+                  "Octreotide e lanreotide: ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Desmopressina: iponatriemia e ritenzione idrica, cefalea",
+                  "Cabergolina: nausea, ipotensione ortostatica, vertigini",
+                  "Octreotide e lanreotide: disturbi gastrointestinali, colelitiasi, alterazioni della glicemia"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intranasale",
+                  "Sottocutanea",
+                  "Intramuscolare",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Desmopressina: restrizione dei liquidi, controllo di sodio e peso",
+                  "Rilevare diuresi nelle 24 ore nel diabete insipido",
+                  "Octreotide e lanreotide: controllare la glicemia",
+                  "Cabergolina: prima dose a letto, alzarsi lentamente"
                 ]
               },
               "area": "endocrino"
@@ -2939,6 +3528,29 @@
                   "Risposta clinica e parametri endocrini pertinenti quando indicati.",
                   "Tollerabilità",
                   "eventuali effetti cardiovascolari e sintomi riferiti."
+                ],
+                "contraindications": [
+                  "Estrogeni e contraccettivi combinati: tromboembolismo venoso o arterioso, tumori estrogeno-dipendenti, emicrania con aura, sanguinamenti non diagnosticati, epatopatia grave, fumo oltre i 35 anni",
+                  "Gravidanza (la maggior parte delle terapie)"
+                ],
+                "adverseEffects": [
+                  "Nausea, mastodinia, cefalea",
+                  "Spotting e variazioni del ciclo",
+                  "Aumento della PA",
+                  "Rischio tromboembolico",
+                  "Ritenzione di liquidi e aumento di peso"
+                ],
+                "routes": [
+                  "Orale",
+                  "Transdermica",
+                  "Vaginale",
+                  "Intramuscolare",
+                  "Impianto sottocutaneo"
+                ],
+                "nursingNotes": [
+                  "Controllare PA e anamnesi trombotica; fumo e obesità aumentano il rischio",
+                  "Segnalare gamba gonfia e dolente, dolore toracico, dispnea o cefalea improvvisa e intensa",
+                  "Contraccettivi: istruire su assunzione costante, dimenticanze e interazioni (antiepilettici, rifampicina, iperico)"
                 ]
               },
               "aliasIds": [
@@ -2999,6 +3611,28 @@
                   "Risposta clinica",
                   "Dolore e secrezioni",
                   "Segni di irritazione o reazione locale"
+                ],
+                "contraindications": [
+                  "Gocce auricolari: perforazione timpanica (salvo prodotti indicati)",
+                  "Colluttori e spray: ipersensibilità",
+                  "Decongestionanti: vedere la scheda dedicata"
+                ],
+                "adverseEffects": [
+                  "Irritazione locale",
+                  "Alterazione del gusto",
+                  "Candidosi orale (steroidi)",
+                  "Vertigini con alcune gocce auricolari non a temperatura corporea"
+                ],
+                "routes": [
+                  "Nasale",
+                  "Auricolare",
+                  "Orofaringea",
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Gocce auricolari: portarle a temperatura corporea e mantenere la testa inclinata 2-5 minuti",
+                  "Spray nasale: testa leggermente inclinata e getto verso l'esterno del setto",
+                  "Dolore, secrezione purulenta o calo dell'udito: avvisare il medico"
                 ]
               },
               "aliasIds": [
@@ -3057,6 +3691,24 @@
                 ],
                 "monitoring": [
                   "Sintomi gastrointestinali e risposta clinica."
+                ],
+                "contraindications": [
+                  "Sucralfato: insufficienza renale grave (contiene alluminio)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Stipsi",
+                  "Secchezza della bocca",
+                  "Nausea",
+                  "Riduce l'assorbimento di altri farmaci"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Sucralfato: assumere a stomaco vuoto, 1 ora prima dei pasti",
+                  "Distanziare di almeno 2 ore da altri farmaci (fluorochinoloni, levotiroxina, tetracicline, digossina)",
+                  "Nei pazienti con sondino: usare la formulazione adatta"
                 ]
               },
               "aliasIds": [
@@ -3252,6 +3904,28 @@
                   "PA",
                   "FC",
                   "sintomi di ipotensione e risposta clinica."
+                ],
+                "contraindications": [
+                  "Ipotensione marcata e shock",
+                  "Stenosi aortica grave (cautela)",
+                  "Associazione con inibitori della PDE5 (nitrati)",
+                  "Dipendono dal principio attivo"
+                ],
+                "adverseEffects": [
+                  "Cefalea, rossore al volto",
+                  "Ipotensione e vertigini",
+                  "Tachicardia riflessa",
+                  "Edemi"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa",
+                  "Topica"
+                ],
+                "nursingNotes": [
+                  "Controllare PA e FC prima e dopo la somministrazione",
+                  "Alzarsi lentamente e prevenire le cadute",
+                  "Ev: pompa, velocità secondo prescrizione e monitoraggio continuo"
                 ]
               },
               "area": "cardiovascolare"
@@ -3270,6 +3944,26 @@
                   "Parametri laboratoristici pertinenti quando indicati",
                   "Segni di carenza o eccesso",
                   "Risposta clinica"
+                ],
+                "contraindications": [
+                  "Vitamina D e derivati: ipercalcemia, ipervitaminosi D, calcolosi renale",
+                  "Vitamina K: ipersensibilità",
+                  "Vitamina B12 e folati: ipersensibilità; folati da usare con cautela prima di escludere carenza di B12"
+                ],
+                "adverseEffects": [
+                  "Ipercalcemia con eccesso di vitamina D (nausea, sete, poliuria, confusione)",
+                  "Reazioni allergiche (soprattutto per via parenterale)",
+                  "Disturbi gastrointestinali"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intramuscolare",
+                  "Endovenosa lenta (alcune)"
+                ],
+                "nursingNotes": [
+                  "Vitamina D: controllare calcemia e funzione renale nei trattamenti prolungati",
+                  "Vitamine liposolubili si assumono con pasti contenenti grassi",
+                  "Vitamina K ev: solo lenta e con osservazione per il rischio di reazione anafilattoide"
                 ]
               },
               "area": "endocrino"
