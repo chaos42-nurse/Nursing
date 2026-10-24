@@ -10273,10 +10273,26 @@ function parseNoteTableRowFromLines(lines, startIndex) {
     return null;
 }
 
-function renderNoteTableCell(cell) {
+function renderNoteTableCell(cell, noteId = "", rowIndex = 0, columnIndex = 0) {
     const lines = String(cell ?? "").split(/\r?\n/);
     let html = "";
     let bulletItems = [];
+    const checklistState = readChecklistState();
+    const occurrences = new Map();
+
+    const renderTableChecklistItem = (label, explicitChecked) => {
+        const occurrence = occurrences.get(label) || 0;
+        occurrences.set(label, occurrence + 1);
+        const key = String(noteId) + "::table::" + rowIndex + "::" + columnIndex + "::" + label + "::" + occurrence;
+        const checked = Object.prototype.hasOwnProperty.call(checklistState, key)
+            ? Boolean(checklistState[key])
+            : Boolean(explicitChecked);
+        return '<label class="note-checklist-item note-table-checklist-item' +
+            (checked ? ' is-checked' : '') + '">' +
+            '<input type="checkbox" class="note-checklist-checkbox" data-note-checklist-key="' +
+            escapeAttribute(key) + '"' + (checked ? ' checked' : '') + '>' +
+            '<span>' + renderInlineNoteText(label) + '</span></label>';
+    };
 
     const flushBullets = () => {
         if (!bulletItems.length) return;
@@ -10287,6 +10303,15 @@ function renderNoteTableCell(cell) {
     };
 
     lines.forEach(line => {
+        const checklist = line.match(/^\s*-\s+(?:\[([ xX])\]\s+)?(.+)$/);
+        if (checklist && noteId) {
+            flushBullets();
+            html += '<div class="note-table-checklist-row">' +
+                renderTableChecklistItem(checklist[2], checklist[1] && checklist[1].toLowerCase() === "x") +
+                '</div>';
+            return;
+        }
+
         const bullet = line.match(/^\s*-\s+(.+)$/);
         if (bullet) {
             bulletItems.push(bullet[1]);
@@ -10305,7 +10330,7 @@ function renderNoteTableCell(cell) {
     return html;
 }
 
-function renderNoteTable(rows) {
+function renderNoteTable(rows, noteId = "") {
     if (!Array.isArray(rows) || rows.length < 2) return "";
 
     const columnCount = rows[0].length;
@@ -10316,12 +10341,12 @@ function renderNoteTable(rows) {
 
     return '<div class="personal-note-table-wrapper"><table class="personal-note-table">' +
         '<thead><tr>' +
-        rows[0].map(cell => '<th>' + renderNoteTableCell(cell) + '</th>').join("") +
+        rows[0].map((cell, columnIndex) => '<th>' + renderNoteTableCell(cell, noteId, 0, columnIndex) + '</th>').join("") +
         '</tr></thead>' +
         '<tbody>' +
-        rows.slice(1).map(row =>
+        rows.slice(1).map((row, rowOffset) =>
             '<tr>' +
-            row.map(cell => '<td>' + renderNoteTableCell(cell) + '</td>').join("") +
+            row.map((cell, columnIndex) => '<td>' + renderNoteTableCell(cell, noteId, rowOffset + 1, columnIndex) + '</td>').join("") +
             '</tr>'
         ).join("") +
         '</tbody></table></div>';
@@ -10528,7 +10553,7 @@ function renderNoteText(text, stateId = "", itemId = "", noteId = "") {
                 nextIndex = parsedRow.nextIndex;
             }
             if (tableRows.length >= 2) {
-                html += renderNoteTable(tableRows);
+                html += renderNoteTable(tableRows, noteId);
                 if (nextIndex < lines.length) html += "<br>";
                 index = nextIndex;
                 continue;

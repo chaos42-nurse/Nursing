@@ -2726,8 +2726,28 @@ section h2 {
     padding: 9px 10px;
     border: 1px solid var(--border);
     text-align: left;
-    vertical-align: top;
+    vertical-align: middle !important;
     line-height: 1.45;
+}
+
+/* Forza l'allineamento verticale del contenuto anche in presenza di stili generali. */
+.personal-note-table tbody td {
+    vertical-align: middle !important;
+}
+
+.personal-note-table .note-table-checklist-row {
+    margin: 2px 0;
+}
+
+.personal-note-table .note-table-checklist-item {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 7px;
+    max-width: 100%;
+}
+
+.personal-note-table .note-table-checklist-item .note-checklist-checkbox {
+    margin-top: 2px;
 }
 
 .personal-note-table th {
