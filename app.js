@@ -3925,6 +3925,18 @@ function findItem(data, itemId) {
                 return currentItem;
             }
 
+            /*
+             * Vecchio id di una classe unita a un'altra
+             * (link salvati, note personali).
+             */
+            if (
+                typeof currentItem === "object" &&
+                Array.isArray(currentItem.aliasIds) &&
+                currentItem.aliasIds.includes(itemId)
+            ) {
+                return currentItem;
+            }
+
             if (
                 typeof currentItem === "object" &&
                 Array.isArray(currentItem.items)
@@ -3953,6 +3965,58 @@ function findItem(data, itemId) {
     }
 
     return null;
+}
+
+/* =========================================================
+   ELENCO CLASSI RAGGRUPPATE PER MACRO-AREA
+========================================================= */
+
+function readOpenDrugAreas() {
+    try {
+        const saved = JSON.parse(sessionStorage.getItem("nursing-drug-areas-open") || "[]");
+        return new Set(Array.isArray(saved) ? saved : []);
+    } catch (_) {
+        return new Set();
+    }
+}
+
+function renderDrugClassGroups(root, stateId, populatedIds) {
+    const link = currentItem => `
+        <a class="content-button" href="?state=${encodeURIComponent(stateId)}&item=${encodeURIComponent(currentItem.id)}">
+            <span>${escapeHtml(currentItem.title)}</span>
+        </a>`;
+
+    const visible = (Array.isArray(root.items) ? root.items : [])
+        .filter(currentItem => !currentItem.fallback || (populatedIds && populatedIds.has(currentItem.id)));
+
+    const areas = Array.isArray(root.areas) ? root.areas : [];
+    if (!areas.length) return visible.map(link).join("");
+
+    const opened = readOpenDrugAreas();
+    const known = new Set(areas.map(area => area.id));
+    const groups = areas.map(area => ({ ...area, classes: visible.filter(c => c.area === area.id) }));
+    const others = visible.filter(c => !known.has(c.area));
+    if (others.length) groups.push({ id: "altro", icon: "💊", title: "Altre classi", classes: others });
+
+    return groups
+        .filter(group => group.classes.length)
+        .map(group => {
+            /* "Altri farmaci ..." in fondo al gruppo, il resto in ordine alfabetico */
+            const sorted = group.classes.slice().sort((a, b) =>
+                (a.fallback ? 1 : 0) - (b.fallback ? 1 : 0) ||
+                a.title.localeCompare(b.title, "it-IT"));
+            return `
+                <details class="drug-area" data-area="${escapeAttribute(group.id)}" ${opened.has(group.id) ? "open" : ""}>
+                    <summary>
+                        <span class="drug-area-title">${escapeHtml(group.icon || "")} ${escapeHtml(group.title)}</span>
+                        <span class="drug-area-count">${sorted.length}</span>
+                    </summary>
+                    <div class="drug-area-items">
+                        ${sorted.map(link).join("")}
+                    </div>
+                </details>`;
+        })
+        .join("");
 }
 
 /* =========================================================
@@ -4014,17 +4078,35 @@ function renderDrugClassCategory(item, data) {
             <div id="drugClassSearchSuggestions" class="patient-search-suggestions" hidden></div>
 
             <div class="detail-content">
-                <div class="item-list" id="drugClassList">
-                    ${classes.map(currentItem => `
-                        <a class="content-button" href="?state=${encodeURIComponent(data.id)}&item=${encodeURIComponent(currentItem.id)}">
-                            <span>${escapeHtml(currentItem.title)}</span>
-                            
-                        </a>
-                    `).join("")}
+                <div class="item-list drug-area-list" id="drugClassList">
+                    ${renderDrugClassGroups(item, data.id, null)}
                 </div>
             </div>
         </section>
     `;
+
+    /* Le classi "Altri farmaci ..." compaiono solo quando contengono principi attivi. */
+    if (classes.some(currentItem => currentItem.fallback)) {
+        loadDrugActiveIngredientIndex()
+            .then(index => {
+                const populated = new Set(index.map(entry => entry.classeId).filter(Boolean));
+                const box = document.getElementById("drugClassList");
+                if (!box || !classes.some(currentItem => currentItem.fallback && populated.has(currentItem.id))) return;
+                box.innerHTML = renderDrugClassGroups(item, data.id, populated);
+            })
+            .catch(() => {});
+    }
+
+    document.getElementById("drugClassList")?.addEventListener("toggle", event => {
+        const details = event.target;
+        if (!details?.dataset?.area) return;
+        const opened = readOpenDrugAreas();
+        if (details.open) opened.add(details.dataset.area);
+        else opened.delete(details.dataset.area);
+        try {
+            sessionStorage.setItem("nursing-drug-areas-open", JSON.stringify([...opened]));
+        } catch (_) { /* facoltativo */ }
+    }, true);
 
     fetch("./data/version.json", { cache: "no-store" })
         .then(response => {
@@ -4841,6 +4923,24 @@ function loadItem(data) {
 
         return;
 
+    }
+
+
+    /*
+     * Link a una classe unita ad un'altra: porta all'id attuale,
+     * cosi' le note personali usano sempre la stessa chiave.
+     */
+    if (
+        typeof selectedItem === "object" &&
+        selectedItem.id &&
+        selectedItem.id !== item &&
+        Array.isArray(selectedItem.aliasIds) &&
+        selectedItem.aliasIds.includes(item)
+    ) {
+        const canonicalUrl = new URL(window.location.href);
+        canonicalUrl.searchParams.set("item", selectedItem.id);
+        window.location.replace(canonicalUrl.toString());
+        return;
     }
 
 
@@ -9326,6 +9426,50 @@ function getPersonalNoteKey(stateId, itemId) {
     return (stateId || "") + "::" + (itemId || "");
 }
 
+/*
+ * Quando due classi farmacologiche vengono unite, le note personali scritte
+ * sulla vecchia classe passano a quella che resta (campo "aliasIds").
+ */
+function migratePersonalNotesForMergedClasses(data) {
+    try {
+        const stateId = data?.id || "farmaci";
+        const notes = getPersonalNotes();
+        let changed = false;
+
+        const visit = items => {
+            for (const current of (Array.isArray(items) ? items : [])) {
+                if (!current || typeof current !== "object") continue;
+
+                for (const oldId of (Array.isArray(current.aliasIds) ? current.aliasIds : [])) {
+                    const oldKey = getPersonalNoteKey(stateId, oldId);
+                    const oldNotes = notes[oldKey];
+                    if (!oldNotes || !oldNotes.length) continue;
+
+                    const newKey = getPersonalNoteKey(stateId, current.id);
+                    const taken = new Set((notes[newKey] || []).map(note => note.id));
+                    const moved = oldNotes.map(note => {
+                        let noteId = note.id;
+                        while (taken.has(noteId)) noteId += "-m";
+                        taken.add(noteId);
+                        return { ...note, id: noteId };
+                    });
+                    notes[newKey] = (notes[newKey] || []).concat(moved);
+                    delete notes[oldKey];
+                    changed = true;
+                }
+
+                visit(current.items);
+            }
+        };
+
+        for (const section of (data?.sections || [])) visit(section.items);
+
+        if (changed) savePersonalNotes(notes);
+    } catch (error) {
+        console.warn("Migrazione note classi unite non riuscita:", error);
+    }
+}
+
 function getNotesForItem(stateId, itemId) {
     const notes = getPersonalNotes();
     return notes[getPersonalNoteKey(stateId, itemId)] || [];
@@ -13460,6 +13604,13 @@ function escapeAttribute(value) {
 /* =========================================================
    SERVICE WORKER
 ========================================================= */
+
+window.addEventListener("load", () => {
+    fetch("./data/farmaci.json")
+        .then(response => response.ok ? response.json() : null)
+        .then(data => { if (data) migratePersonalNotesForMergedClasses(data); })
+        .catch(() => {});
+});
 
 if ("serviceWorker" in navigator) {
 

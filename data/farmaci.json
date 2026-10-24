@@ -30,7 +30,8 @@
                   "Potassio",
                   "Tosse"
                 ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "alfa-bloccanti",
@@ -47,92 +48,215 @@
                   "Sintomi di ipotensione ortostatica",
                   "Risposta clinica"
                 ]
-              }
-            },
-            {
-              "id": "antiinfiammatori-altri",
-              "title": "Altri antinfiammatori",
-              "type": "drug",
-              "content": {
-                "class": "Altri antinfiammatori",
-                "indications": [],
-                "effects": [
-                  "Riduzione della risposta infiammatoria attraverso meccanismi diversi dai FANS."
-                ],
-                "monitoring": [
-                  "Segni e sintomi dell'infiammazione",
-                  "Temperatura quando pertinente",
-                  "Risposta clinica e tollerabilità"
-                ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "antipertensivi",
-              "title": "Altri antipertensivi",
+              "title": "Altri antipertensivi (centrali, antiadrenergici)",
               "type": "drug",
               "content": {
-                "class": "Altri antipertensivi",
+                "class": "Altri antipertensivi (centrali, antiadrenergici)",
                 "indications": [],
                 "effects": [
-                  "Riduzione della pressione arteriosa attraverso diversi meccanismi farmacologici."
+                  "Riduzione della pressione arteriosa attraverso diversi meccanismi farmacologici.",
+                  "Riduzione del tono simpatico centrale con diminuzione della pressione arteriosa.",
+                  "Riduzione degli effetti della stimolazione adrenergica."
                 ],
                 "monitoring": [
                   "PA",
                   "FC",
-                  "sintomi di ipotensione e risposta clinica."
+                  "sintomi di ipotensione e risposta clinica.",
+                  "Ipotensione ortostatica",
+                  "Stato di coscienza e risposta clinica",
+                  "stato cardiovascolare e segni di ipotensione o bradicardia."
                 ]
-              }
+              },
+              "aliasIds": [
+                "antipertensivi-centrali",
+                "antiadrenergici"
+              ],
+              "area": "cardiovascolare"
             },
             {
-              "id": "coagulazione-altri",
-              "title": "Altri farmaci della coagulazione",
+              "id": "sistema-cardiovascolare",
+              "title": "Altri farmaci cardiovascolari",
               "type": "drug",
               "content": {
-                "class": "Altri farmaci della coagulazione",
-                "indications": [],
+                "class": "Altri farmaci cardiovascolari",
                 "effects": [
-                  "Modulazione della coagulazione o dell'emostasi attraverso meccanismi diversi dalle classi principali."
+                  "Interventi farmacologici rivolti a pressione arteriosa, ritmo cardiaco, perfusione, contrattilità e circolazione."
                 ],
                 "monitoring": [
-                  "Segni di sanguinamento o trombosi",
-                  "Emocromo",
-                  "Parametri della coagulazione quando indicati"
+                  "PA",
+                  "FC",
+                  "Ritmo/ECG quando indicato",
+                  "Segni e sintomi cardiovascolari"
                 ]
-              }
+              },
+              "fallback": true,
+              "area": "cardiovascolare"
             },
             {
-              "id": "gastrointestinali-altri",
+              "id": "sistema-linfatico-immunitario",
+              "title": "Altri farmaci del sistema immunitario",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci del sistema immunitario",
+                "effects": [
+                  "Modulazione o sostituzione della risposta immunitaria e trattamento delle condizioni che coinvolgono il sistema linfatico e immunitario."
+                ],
+                "monitoring": [
+                  "Segni di infezione",
+                  "Emocromo quando indicato",
+                  "Parametri immunologici pertinenti",
+                  "Risposta clinica e tollerabilità"
+                ]
+              },
+              "fallback": true,
+              "area": "immunita-oncologia"
+            },
+            {
+              "id": "sistema-nervoso",
+              "title": "Altri farmaci del sistema nervoso",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci del sistema nervoso",
+                "effects": [
+                  "Modulazione dell'attività del sistema nervoso centrale o periferico per il controllo di funzioni neurologiche e sintomi.",
+                  "Modulazione di specifici processi neurologici non compresi nelle altre classi."
+                ],
+                "monitoring": [
+                  "Stato neurologico",
+                  "Stato di coscienza quando pertinente",
+                  "Funzione motoria e sensitiva quando pertinente",
+                  "Risposta clinica",
+                  "Funzione motoria o sensitiva quando pertinente"
+                ]
+              },
+              "aliasIds": [
+                "neurologici"
+              ],
+              "fallback": true,
+              "area": "nervoso"
+            },
+            {
+              "id": "sistema-ematologico",
+              "title": "Altri farmaci ematologici",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci ematologici",
+                "effects": [
+                  "Interventi farmacologici rivolti a eritropoiesi, emostasi, coagulazione e principali alterazioni delle cellule e dei componenti del sangue."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Parametri della coagulazione quando indicati",
+                  "Segni di sanguinamento o trombosi",
+                  "Risposta clinica"
+                ]
+              },
+              "fallback": true,
+              "area": "sangue"
+            },
+            {
+              "id": "sistema-endocrino-metabolico",
+              "title": "Altri farmaci endocrini e metabolici",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci endocrini e metabolici",
+                "effects": [
+                  "Regolazione ormonale e dei principali processi metabolici, inclusi glucosio, lipidi, elettroliti e metabolismo energetico."
+                ],
+                "monitoring": [
+                  "Parametri metabolici pertinenti",
+                  "Glicemia quando indicata",
+                  "Elettroliti",
+                  "Parametri endocrini pertinenti"
+                ]
+              },
+              "fallback": true,
+              "area": "endocrino"
+            },
+            {
+              "id": "apparato-gastrointestinale-digestione",
               "title": "Altri farmaci gastrointestinali",
               "type": "drug",
               "content": {
                 "class": "Altri farmaci gastrointestinali",
-                "indications": [],
                 "effects": [
+                  "Funzioni terapeutiche rivolte a secrezione gastrica, motilità, digestione, assorbimento e protezione dell'apparato gastrointestinale.",
                   "Modulazione di funzioni gastrointestinali non comprese nelle altre classi."
                 ],
                 "monitoring": [
                   "Sintomi gastrointestinali",
                   "Alvo",
+                  "Idratazione e bilancio idrico quando pertinenti",
                   "Risposta clinica"
                 ]
-              }
+              },
+              "aliasIds": [
+                "gastrointestinali-altri"
+              ],
+              "fallback": true,
+              "area": "gastrointestinale"
             },
             {
-              "id": "neurologici",
-              "title": "Altri farmaci neurologici",
+              "id": "apparato-genitourinario",
+              "title": "Altri farmaci genito-urinari",
               "type": "drug",
               "content": {
-                "class": "Altri farmaci neurologici",
-                "indications": [],
+                "class": "Altri farmaci genito-urinari",
                 "effects": [
-                  "Modulazione di specifici processi neurologici non compresi nelle altre classi."
+                  "Interventi rivolti a funzione renale, vie urinarie e apparato riproduttivo."
                 ],
                 "monitoring": [
-                  "Stato neurologico",
-                  "Funzione motoria o sensitiva quando pertinente",
+                  "Diuresi",
+                  "Funzione renale",
+                  "Sintomi urinari o genitali",
                   "Risposta clinica"
                 ]
-              }
+              },
+              "fallback": true,
+              "area": "organi"
+            },
+            {
+              "id": "apparato-muscoloscheletrico",
+              "title": "Altri farmaci muscoloscheletrici",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci muscoloscheletrici",
+                "effects": [
+                  "Interventi rivolti a dolore, infiammazione, metabolismo osseo e funzione muscolare e articolare."
+                ],
+                "monitoring": [
+                  "Dolore",
+                  "Mobilità e funzione articolare",
+                  "Segni di infiammazione",
+                  "Parametri pertinenti al trattamento"
+                ]
+              },
+              "fallback": true,
+              "area": "dolore"
+            },
+            {
+              "id": "sistema-respiratorio",
+              "title": "Altri farmaci respiratori",
+              "type": "drug",
+              "content": {
+                "class": "Altri farmaci respiratori",
+                "effects": [
+                  "Modulazione del tono bronchiale, dell'infiammazione delle vie aeree, delle secrezioni e di altri processi respiratori."
+                ],
+                "monitoring": [
+                  "FR",
+                  "SpO₂",
+                  "Rumori respiratori e sintomi",
+                  "Risposta clinica"
+                ]
+              },
+              "fallback": true,
+              "area": "respiratorio"
             },
             {
               "id": "antidolorifici-non-fans",
@@ -149,24 +273,8 @@
                   "Stato di coscienza quando pertinente",
                   "Risposta clinica e tollerabilità"
                 ]
-              }
-            },
-            {
-              "id": "anestesia-terapia-dolore",
-              "title": "Anestesia e terapia del dolore",
-              "type": "drug",
-              "content": {
-                "class": "Anestesia e terapia del dolore",
-                "effects": [
-                  "Riduzione della sensibilità, della coscienza o della percezione del dolore mediante specifiche strategie farmacologiche."
-                ],
-                "monitoring": [
-                  "Stato di coscienza",
-                  "PA e FC",
-                  "FR e SpO₂ quando pertinenti",
-                  "Intensità del dolore e risposta clinica"
-                ]
-              }
+              },
+              "area": "dolore"
             },
             {
               "id": "anestetici",
@@ -176,15 +284,23 @@
                 "class": "Anestetici",
                 "indications": [],
                 "effects": [
-                  "Riduzione o perdita reversibile della sensibilità e, secondo il tipo, della coscienza."
+                  "Riduzione o perdita reversibile della sensibilità e, secondo il tipo, della coscienza.",
+                  "Riduzione della sensibilità, della coscienza o della percezione del dolore mediante specifiche strategie farmacologiche."
                 ],
                 "monitoring": [
                   "Stato di coscienza",
                   "PA",
                   "FC",
-                  "FR e SpO₂."
+                  "FR e SpO₂.",
+                  "PA e FC",
+                  "FR e SpO₂ quando pertinenti",
+                  "Intensità del dolore e risposta clinica"
                 ]
-              }
+              },
+              "aliasIds": [
+                "anestesia-terapia-dolore"
+              ],
+              "area": "nervoso"
             },
             {
               "id": "anestetici-locali",
@@ -201,7 +317,8 @@
                   "Parametri vitali quando pertinenti",
                   "Segni di reazione locale o sistemica"
                 ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "antagonisti",
@@ -306,247 +423,8 @@
                     }
                   ]
                 }
-              }
-            },
-            {
-              "id": "antiacidi",
-              "title": "Antiacidi",
-              "type": "drug",
-              "content": {
-                "class": "Antiacidi",
-                "indications": [],
-                "effects": [
-                  "Neutralizzazione o riduzione dell'acidità gastrica."
-                ],
-                "monitoring": [
-                  "Sintomi gastrointestinali e risposta clinica; eventuali alterazioni dell'alvo."
-                ]
-              }
-            },
-            {
-              "id": "antiadrenergici",
-              "title": "Antiadrenergici",
-              "type": "drug",
-              "content": {
-                "class": "Antiadrenergici",
-                "indications": [],
-                "effects": [
-                  "Riduzione degli effetti della stimolazione adrenergica."
-                ],
-                "monitoring": [
-                  "PA",
-                  "FC",
-                  "stato cardiovascolare e segni di ipotensione o bradicardia."
-                ]
-              }
-            },
-            {
-              "id": "antiaggreganti",
-              "title": "Antiaggreganti",
-              "type": "drug",
-              "content": {
-                "class": "Antiaggreganti",
-                "effects": [
-                  "Inibizione dell'aggregazione piastrinica"
-                ],
-                "indications": [
-                  "Esempi: Acido acetilsalicilico, Clopidogrel"
-                ],
-                "monitoring": [
-                  "Segni di sanguinamento",
-                  "Emocromo"
-                ]
-              }
-            },
-            {
-              "id": "antiemorragici",
-              "title": "Antiaggreganti ed emostatici",
-              "type": "drug",
-              "content": {
-                "class": "Antiaggreganti ed emostatici",
-                "indications": [],
-                "effects": [
-                  "Riduzione o controllo del sanguinamento attraverso meccanismi che favoriscono l'emostasi."
-                ],
-                "monitoring": [
-                  "Entità del sanguinamento",
-                  "parametri vitali ed emocromo quando indicato."
-                ]
-              }
-            },
-            {
-              "id": "antiandrogeni",
-              "title": "Antiandrogeni",
-              "type": "drug",
-              "content": {
-                "class": "Antiandrogeni",
-                "indications": [],
-                "effects": [
-                  "Riduzione degli effetti degli androgeni sui tessuti bersaglio."
-                ],
-                "monitoring": [
-                  "Risposta clinica ed eventuali effetti endocrini o metabolici rilevanti."
-                ]
-              }
-            },
-            {
-              "id": "antianemici",
-              "title": "Antianemici",
-              "type": "drug",
-              "content": {
-                "class": "Antianemici",
-                "indications": [],
-                "effects": [
-                  "Correzione o prevenzione dell'anemia attraverso il supporto alla produzione dei globuli rossi o la disponibilità di nutrienti necessari."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Parametri marziali o vitaminici quando indicati",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "antianginosi",
-              "title": "Antianginosi",
-              "type": "drug",
-              "content": {
-                "class": "Antianginosi",
-                "indications": [],
-                "effects": [
-                  "Riduzione della richiesta di ossigeno miocardico e/o miglioramento della perfusione coronarica."
-                ],
-                "monitoring": [
-                  "Dolore toracico",
-                  "PA",
-                  "FC e tolleranza al trattamento."
-                ]
-              }
-            },
-            {
-              "id": "antiaritmici",
-              "title": "Antiaritmici",
-              "type": "drug",
-              "content": {
-                "class": "Antiaritmici",
-                "indications": [],
-                "effects": [
-                  "Modulazione dell'attività elettrica cardiaca per favorire il controllo del ritmo."
-                ],
-                "monitoring": [
-                  "FC",
-                  "ritmo/ECG quando indicato",
-                  "PA e comparsa di nuovi sintomi."
-                ]
-              }
-            },
-            {
-              "id": "antibiotici",
-              "title": "Antibiotici",
-              "type": "drug",
-              "content": {
-                "class": "Antibatterici",
-                "effects": [
-                  "Inibizione o distruzione dei batteri"
-                ],
-                "indications": [
-                  "Esempi: Amoxicillina, Ceftriaxone, Azitromicina"
-                ],
-                "monitoring": [
-                  "Reazioni allergiche",
-                  "Temperatura",
-                  "Funzione renale"
-                ]
-              }
-            },
-            {
-              "id": "anticoagulanti",
-              "title": "Anticoagulanti",
-              "type": "drug",
-              "content": {
-                "class": "Anticoagulanti",
-                "effects": [
-                  "Inibizione della cascata della coagulazione"
-                ],
-                "indications": [
-                  "Esempi: Warfarin, Eparina, Apixaban"
-                ],
-                "monitoring": [
-                  "INR (warfarin)",
-                  "aPTT (eparina)",
-                  "Segni di emorragia"
-                ]
-              }
-            },
-            {
-              "id": "anticolinergici",
-              "title": "Anticolinergici",
-              "type": "drug",
-              "content": {
-                "class": "Anticolinergici",
-                "effects": [
-                  "Riduzione degli effetti dell'acetilcolina sui recettori colinergici, con modulazione delle secrezioni e/o della muscolatura liscia."
-                ],
-                "monitoring": [
-                  "FC",
-                  "Stato mentale quando pertinente",
-                  "Alvo e diuresi",
-                  "Secchezza delle mucose e risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "anticolinesterasici",
-              "title": "Anticolinesterasici",
-              "type": "drug",
-              "content": {
-                "class": "Anticolinesterasici",
-                "effects": [
-                  "Inibizione dell'acetilcolinesterasi con aumento della disponibilità di acetilcolina."
-                ],
-                "monitoring": [
-                  "FC",
-                  "Stato neurologico",
-                  "Funzione respiratoria quando pertinente",
-                  "Secrezioni e risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "antidepressivi-ssri",
-              "title": "Antidepressivi SSRI",
-              "type": "drug",
-              "content": {
-                "class": "Antidepressivi SSRI",
-                "effects": [
-                  "Inibizione della ricaptazione della serotonina"
-                ],
-                "indications": [
-                  "Esempi: Sertralina, Fluoxetina, Citalopram"
-                ],
-                "monitoring": [
-                  "Umore",
-                  "Effetti gastrointestinali"
-                ]
-              }
-            },
-            {
-              "id": "antidiarroici",
-              "title": "Antidiarroici",
-              "type": "drug",
-              "content": {
-                "class": "Antidiarroici",
-                "effects": [
-                  "Riduzione della motilità intestinale"
-                ],
-                "indications": [
-                  "Esempio: Loperamide"
-                ],
-                "monitoring": [
-                  "Numero delle scariche",
-                  "Segni di disidratazione"
-                ]
-              }
+              },
+              "area": "emergenza"
             },
             {
               "id": "anti-dipendenza",
@@ -566,16 +444,271 @@
                   "Funzione epatica quando indicata",
                   "Aderenza al percorso di supporto"
                 ]
-              }
+              },
+              "area": "nervoso"
+            },
+            {
+              "id": "antiacidi",
+              "title": "Antiacidi",
+              "type": "drug",
+              "content": {
+                "class": "Antiacidi",
+                "indications": [],
+                "effects": [
+                  "Neutralizzazione o riduzione dell'acidità gastrica."
+                ],
+                "monitoring": [
+                  "Sintomi gastrointestinali e risposta clinica; eventuali alterazioni dell'alvo."
+                ]
+              },
+              "area": "gastrointestinale"
+            },
+            {
+              "id": "antiaggreganti",
+              "title": "Antiaggreganti",
+              "type": "drug",
+              "content": {
+                "class": "Antiaggreganti",
+                "effects": [
+                  "Inibizione dell'aggregazione piastrinica"
+                ],
+                "indications": [
+                  "Esempi: Acido acetilsalicilico, Clopidogrel"
+                ],
+                "monitoring": [
+                  "Segni di sanguinamento",
+                  "Emocromo"
+                ]
+              },
+              "area": "sangue"
+            },
+            {
+              "id": "antiandrogeni",
+              "title": "Antiandrogeni",
+              "type": "drug",
+              "content": {
+                "class": "Antiandrogeni",
+                "indications": [],
+                "effects": [
+                  "Riduzione degli effetti degli androgeni sui tessuti bersaglio."
+                ],
+                "monitoring": [
+                  "Risposta clinica ed eventuali effetti endocrini o metabolici rilevanti."
+                ]
+              },
+              "area": "immunita-oncologia"
+            },
+            {
+              "id": "antianemici",
+              "title": "Antianemici ed emopoietici",
+              "type": "drug",
+              "content": {
+                "class": "Antianemici ed emopoietici",
+                "indications": [],
+                "effects": [
+                  "Correzione o prevenzione dell'anemia attraverso il supporto alla produzione dei globuli rossi o la disponibilità di nutrienti necessari.",
+                  "Stimolazione o supporto della produzione delle cellule ematiche.",
+                  "Stimolazione della produzione di specifiche linee cellulari ematiche."
+                ],
+                "monitoring": [
+                  "Emocromo",
+                  "Parametri marziali o vitaminici quando indicati",
+                  "Risposta clinica",
+                  "Risposta ematologica",
+                  "Parametri pertinenti alla specifica terapia",
+                  "Parametri marziali quando pertinenti",
+                  "Segni di eventi trombotici quando rilevanti"
+                ]
+              },
+              "aliasIds": [
+                "emopoietici",
+                "stimolanti-emopoiesi"
+              ],
+              "area": "sangue"
+            },
+            {
+              "id": "antianginosi",
+              "title": "Antianginosi (nitrati e altri)",
+              "type": "drug",
+              "content": {
+                "class": "Antianginosi (nitrati e altri)",
+                "indications": [],
+                "effects": [
+                  "Riduzione della richiesta di ossigeno miocardico e/o miglioramento della perfusione coronarica.",
+                  "Vasodilatazione con riduzione del precarico e della richiesta miocardica di ossigeno."
+                ],
+                "monitoring": [
+                  "Dolore toracico",
+                  "PA",
+                  "FC e tolleranza al trattamento.",
+                  "FC",
+                  "Sintomi di ipotensione"
+                ]
+              },
+              "aliasIds": [
+                "antianginosi-nitrati"
+              ],
+              "area": "cardiovascolare"
+            },
+            {
+              "id": "antiaritmici",
+              "title": "Antiaritmici",
+              "type": "drug",
+              "content": {
+                "class": "Antiaritmici",
+                "indications": [],
+                "effects": [
+                  "Modulazione dell'attività elettrica cardiaca per favorire il controllo del ritmo."
+                ],
+                "monitoring": [
+                  "FC",
+                  "ritmo/ECG quando indicato",
+                  "PA e comparsa di nuovi sintomi."
+                ]
+              },
+              "area": "cardiovascolare"
+            },
+            {
+              "id": "antibiotici",
+              "title": "Antibiotici",
+              "type": "drug",
+              "content": {
+                "class": "Antibatterici",
+                "effects": [
+                  "Inibizione o distruzione dei batteri"
+                ],
+                "indications": [
+                  "Esempi: Amoxicillina, Ceftriaxone, Azitromicina"
+                ],
+                "monitoring": [
+                  "Reazioni allergiche",
+                  "Temperatura",
+                  "Funzione renale"
+                ]
+              },
+              "area": "infezioni"
+            },
+            {
+              "id": "anticoagulanti",
+              "title": "Anticoagulanti e antitrombotici",
+              "type": "drug",
+              "content": {
+                "class": "Anticoagulanti e antitrombotici",
+                "effects": [
+                  "Inibizione della cascata della coagulazione",
+                  "Modulazione della coagulazione o dell'emostasi attraverso meccanismi diversi dalle classi principali.",
+                  "Riduzione della formazione o della progressione dei trombi attraverso la modulazione della coagulazione o dell'aggregazione piastrinica."
+                ],
+                "indications": [
+                  "Esempi: Warfarin, Eparina, Apixaban"
+                ],
+                "monitoring": [
+                  "INR (warfarin)",
+                  "aPTT (eparina)",
+                  "Segni di emorragia",
+                  "Segni di sanguinamento o trombosi",
+                  "Emocromo",
+                  "Parametri della coagulazione quando indicati",
+                  "Segni di sanguinamento",
+                  "Segni di trombosi"
+                ]
+              },
+              "aliasIds": [
+                "coagulazione-altri",
+                "antitrombotici"
+              ],
+              "area": "sangue"
+            },
+            {
+              "id": "anticolinergici",
+              "title": "Anticolinergici e antimuscarinici",
+              "type": "drug",
+              "content": {
+                "class": "Anticolinergici e antimuscarinici",
+                "effects": [
+                  "Riduzione degli effetti dell'acetilcolina sui recettori colinergici, con modulazione delle secrezioni e/o della muscolatura liscia.",
+                  "Blocco dei recettori muscarinici con riduzione dell'attività parasimpatica."
+                ],
+                "monitoring": [
+                  "FC",
+                  "Stato mentale quando pertinente",
+                  "Alvo e diuresi",
+                  "Secchezza delle mucose e risposta clinica",
+                  "Diuresi",
+                  "Alvo",
+                  "Stato mentale e tollerabilità"
+                ]
+              },
+              "aliasIds": [
+                "antimuscarinici"
+              ],
+              "area": "nervoso"
+            },
+            {
+              "id": "anticolinesterasici",
+              "title": "Anticolinesterasici",
+              "type": "drug",
+              "content": {
+                "class": "Anticolinesterasici",
+                "effects": [
+                  "Inibizione dell'acetilcolinesterasi con aumento della disponibilità di acetilcolina."
+                ],
+                "monitoring": [
+                  "FC",
+                  "Stato neurologico",
+                  "Funzione respiratoria quando pertinente",
+                  "Secrezioni e risposta clinica"
+                ]
+              },
+              "area": "nervoso"
+            },
+            {
+              "id": "antidepressivi-ssri",
+              "title": "Antidepressivi SSRI",
+              "type": "drug",
+              "content": {
+                "class": "Antidepressivi SSRI",
+                "effects": [
+                  "Inibizione della ricaptazione della serotonina"
+                ],
+                "indications": [
+                  "Esempi: Sertralina, Fluoxetina, Citalopram"
+                ],
+                "monitoring": [
+                  "Umore",
+                  "Effetti gastrointestinali"
+                ]
+              },
+              "area": "nervoso"
+            },
+            {
+              "id": "antidiarroici",
+              "title": "Antidiarroici",
+              "type": "drug",
+              "content": {
+                "class": "Antidiarroici",
+                "effects": [
+                  "Riduzione della motilità intestinale"
+                ],
+                "indications": [
+                  "Esempio: Loperamide"
+                ],
+                "monitoring": [
+                  "Numero delle scariche",
+                  "Segni di disidratazione"
+                ]
+              },
+              "area": "gastrointestinale"
             },
             {
               "id": "fans",
-              "title": "Antidolorifici (FANS)",
+              "title": "Antidolorifici (FANS) e altri antinfiammatori",
               "type": "drug",
               "content": {
-                "class": "FANS",
+                "class": "Antidolorifici (FANS) e altri antinfiammatori",
                 "effects": [
-                  "Inibizione della COX con effetto analgesico e antinfiammatorio"
+                  "Inibizione della COX con effetto analgesico e antinfiammatorio",
+                  "Riduzione della risposta infiammatoria attraverso meccanismi diversi dai FANS."
                 ],
                 "indications": [
                   "Esempi: Ibuprofene, Ketoprofene, Naprossene"
@@ -583,9 +716,16 @@
                 "monitoring": [
                   "Dolore",
                   "Funzione renale",
-                  "Segni di sanguinamento gastrointestinale"
+                  "Segni di sanguinamento gastrointestinale",
+                  "Segni e sintomi dell'infiammazione",
+                  "Temperatura quando pertinente",
+                  "Risposta clinica e tollerabilità"
                 ]
-              }
+              },
+              "aliasIds": [
+                "antiinfiammatori-altri"
+              ],
+              "area": "dolore"
             },
             {
               "id": "antidoti",
@@ -601,7 +741,8 @@
                   "Stato neurologico",
                   "parametri vitali e risposta clinica."
                 ]
-              }
+              },
+              "area": "emergenza"
             },
             {
               "id": "antiemetici",
@@ -619,7 +760,8 @@
                   "Numero degli episodi emetici",
                   "Idratazione"
                 ]
-              }
+              },
+              "area": "gastrointestinale"
             },
             {
               "id": "antiepilettici",
@@ -637,7 +779,8 @@
                   "Stato neurologico",
                   "Livelli plasmatici quando indicato"
                 ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "antifibrinolitici",
@@ -654,7 +797,8 @@
                   "Funzione renale quando pertinente",
                   "Segni di eventi trombotici"
                 ]
-              }
+              },
+              "area": "sangue"
             },
             {
               "id": "antifungini",
@@ -672,7 +816,8 @@
                   "Funzione epatica",
                   "Funzione renale"
                 ]
-              }
+              },
+              "area": "infezioni"
             },
             {
               "id": "antigottosi",
@@ -688,7 +833,8 @@
                   "Dolore e segni articolari",
                   "funzione renale e tollerabilità."
                 ]
-              }
+              },
+              "area": "dolore"
             },
             {
               "id": "antimigraine",
@@ -704,75 +850,32 @@
                   "Intensità e frequenza della cefalea",
                   "nausea e risposta clinica."
                 ]
-              }
-            },
-            {
-              "id": "antimuscarinici",
-              "title": "Antimuscarinici",
-              "type": "drug",
-              "content": {
-                "class": "Antimuscarinici",
-                "effects": [
-                  "Blocco dei recettori muscarinici con riduzione dell'attività parasimpatica."
-                ],
-                "monitoring": [
-                  "FC",
-                  "Diuresi",
-                  "Alvo",
-                  "Stato mentale e tollerabilità"
-                ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "antiparassitari",
-              "title": "Antiparassitari",
+              "title": "Antiparassitari e antiprotozoari",
               "type": "drug",
               "content": {
-                "class": "Antiparassitari",
+                "class": "Antiparassitari e antiprotozoari",
                 "indications": [],
                 "effects": [
-                  "Eliminazione o inibizione di parassiti responsabili dell'infestazione."
+                  "Eliminazione o inibizione di parassiti responsabili dell'infestazione.",
+                  "Inibizione o eliminazione di protozoi responsabili di infezioni."
                 ],
                 "monitoring": [
                   "Segni e sintomi dell'infestazione",
                   "Risposta clinica",
-                  "Tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "antipertensivi-centrali",
-              "title": "Antipertensivi ad azione centrale",
-              "type": "drug",
-              "content": {
-                "class": "Antipertensivi ad azione centrale",
-                "effects": [
-                  "Riduzione del tono simpatico centrale con diminuzione della pressione arteriosa."
-                ],
-                "monitoring": [
-                  "PA",
-                  "FC",
-                  "Ipotensione ortostatica",
-                  "Stato di coscienza e risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "antiprotozoari",
-              "title": "Antiprotozoari",
-              "type": "drug",
-              "content": {
-                "class": "Antiprotozoari",
-                "effects": [
-                  "Inibizione o eliminazione di protozoi responsabili di infezioni."
-                ],
-                "monitoring": [
+                  "Tollerabilità",
                   "Segni e sintomi dell'infezione",
-                  "Funzione epatica quando pertinente",
-                  "Risposta clinica",
-                  "Tollerabilità"
+                  "Funzione epatica quando pertinente"
                 ]
-              }
+              },
+              "aliasIds": [
+                "antiprotozoari"
+              ],
+              "area": "infezioni"
             },
             {
               "id": "antiretrovirali",
@@ -789,7 +892,8 @@
                   "Funzione renale quando pertinente",
                   "Tollerabilità"
                 ]
-              }
+              },
+              "area": "infezioni"
             },
             {
               "id": "antireumatici",
@@ -806,7 +910,8 @@
                   "Funzione epatica",
                   "Segni di infezione"
                 ]
-              }
+              },
+              "area": "dolore"
             },
             {
               "id": "antisettici-disinfettanti",
@@ -823,7 +928,8 @@
                   "Segni di irritazione o reazione locale",
                   "Risposta al trattamento"
                 ]
-              }
+              },
+              "area": "infezioni"
             },
             {
               "id": "antispastici",
@@ -839,7 +945,8 @@
                   "Dolore/spasmi",
                   "motilità interessata e possibili effetti indesiderati."
                 ]
-              }
+              },
+              "area": "gastrointestinale"
             },
             {
               "id": "antistaminici",
@@ -857,7 +964,8 @@
                   "Sedazione",
                   "Stato di vigilanza"
                 ]
-              }
+              },
+              "area": "immunita-oncologia"
             },
             {
               "id": "antigistaminici-h2",
@@ -874,7 +982,8 @@
                   "Funzione renale quando indicata",
                   "Tollerabilità"
                 ]
-              }
+              },
+              "area": "gastrointestinale"
             },
             {
               "id": "farmaci-tiroidei-antitiroidei",
@@ -891,24 +1000,8 @@
                   "Segni clinici di alterata funzione tiroidea",
                   "Emocromo o funzione epatica quando indicati"
                 ]
-              }
-            },
-            {
-              "id": "antitrombotici",
-              "title": "Antitrombotici",
-              "type": "drug",
-              "content": {
-                "class": "Antitrombotici",
-                "effects": [
-                  "Riduzione della formazione o della progressione dei trombi attraverso la modulazione della coagulazione o dell'aggregazione piastrinica."
-                ],
-                "monitoring": [
-                  "Segni di sanguinamento",
-                  "Segni di trombosi",
-                  "Emocromo",
-                  "Parametri della coagulazione quando indicati"
-                ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "antitubercolari",
@@ -925,7 +1018,8 @@
                   "Funzione renale quando pertinente",
                   "Risposta clinica"
                 ]
-              }
+              },
+              "area": "infezioni"
             },
             {
               "id": "antitussivi",
@@ -941,7 +1035,8 @@
                   "Frequenza della tosse",
                   "caratteristiche delle secrezioni e funzione respiratoria."
                 ]
-              }
+              },
+              "area": "respiratorio"
             },
             {
               "id": "antivirali",
@@ -959,58 +1054,8 @@
                   "Funzione renale",
                   "Miglioramento clinico"
                 ]
-              }
-            },
-            {
-              "id": "apparato-gastrointestinale-digestione",
-              "title": "Apparato gastrointestinale e digestione",
-              "type": "drug",
-              "content": {
-                "class": "Apparato gastrointestinale e digestione",
-                "effects": [
-                  "Funzioni terapeutiche rivolte a secrezione gastrica, motilità, digestione, assorbimento e protezione dell'apparato gastrointestinale."
-                ],
-                "monitoring": [
-                  "Sintomi gastrointestinali",
-                  "Alvo",
-                  "Idratazione e bilancio idrico quando pertinenti",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "apparato-genitourinario",
-              "title": "Apparato genito-urinario",
-              "type": "drug",
-              "content": {
-                "class": "Apparato genito-urinario",
-                "effects": [
-                  "Interventi rivolti a funzione renale, vie urinarie e apparato riproduttivo."
-                ],
-                "monitoring": [
-                  "Diuresi",
-                  "Funzione renale",
-                  "Sintomi urinari o genitali",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "apparato-muscoloscheletrico",
-              "title": "Apparato muscoloscheletrico",
-              "type": "drug",
-              "content": {
-                "class": "Apparato muscoloscheletrico",
-                "effects": [
-                  "Interventi rivolti a dolore, infiammazione, metabolismo osseo e funzione muscolare e articolare."
-                ],
-                "monitoring": [
-                  "Dolore",
-                  "Mobilità e funzione articolare",
-                  "Segni di infiammazione",
-                  "Parametri pertinenti al trattamento"
-                ]
-              }
+              },
+              "area": "infezioni"
             },
             {
               "id": "beta-bloccanti",
@@ -1030,7 +1075,8 @@
                   "Bradicardia",
                   "Glicemia"
                 ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "bisfosfonati",
@@ -1046,7 +1092,8 @@
                   "Calcemia quando indicata",
                   "funzione renale e tollerabilità."
                 ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "broncodilatatori",
@@ -1065,7 +1112,8 @@
                   "SpO₂",
                   "Broncospasmo"
                 ]
-              }
+              },
+              "area": "respiratorio"
             },
             {
               "id": "calcio-antagonisti",
@@ -1084,7 +1132,8 @@
                   "FC",
                   "Edema periferico"
                 ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "chelanti",
@@ -1101,7 +1150,8 @@
                   "Elettroliti quando pertinenti",
                   "Tollerabilità"
                 ]
-              }
+              },
+              "area": "emergenza"
             },
             {
               "id": "chemioterapici-antineoplastici",
@@ -1110,7 +1160,8 @@
               "content": {
                 "class": "Chemioterapici antineoplastici",
                 "effects": [
-                  "Inibizione della proliferazione cellulare tumorale"
+                  "Inibizione della proliferazione cellulare tumorale",
+                  "Trattamenti farmacologici diretti alle cellule tumorali o alla modulazione dei processi biologici coinvolti nelle neoplasie."
                 ],
                 "indications": [
                   "Esempi: Cisplatino, Ciclofosfamide, Doxorubicina"
@@ -1118,9 +1169,16 @@
                 "monitoring": [
                   "Emocromo",
                   "Nausea",
-                  "Funzione renale"
+                  "Funzione renale",
+                  "Funzione epatica e renale quando pertinenti",
+                  "Segni di tossicità",
+                  "Risposta clinica e tollerabilità"
                 ]
-              }
+              },
+              "aliasIds": [
+                "oncologia"
+              ],
+              "area": "immunita-oncologia"
             },
             {
               "id": "colloidi",
@@ -1138,23 +1196,8 @@
                   "PA",
                   "Segni di sovraccarico"
                 ]
-              }
-            },
-            {
-              "id": "contraccettivi-ormonali",
-              "title": "Contraccettivi ormonali",
-              "type": "drug",
-              "content": {
-                "class": "Contraccettivi ormonali",
-                "indications": [],
-                "effects": [
-                  "Modulazione dell'attività ormonale riproduttiva per prevenire l'ovulazione e/o modificare il tratto riproduttivo."
-                ],
-                "monitoring": [
-                  "Tollerabilità",
-                  "eventuali effetti cardiovascolari e sintomi riferiti."
-                ]
-              }
+              },
+              "area": "liquidi"
             },
             {
               "id": "corticosteroidi",
@@ -1173,7 +1216,34 @@
                   "PA",
                   "Segni di infezione"
                 ]
-              }
+              },
+              "area": "endocrino"
+            },
+            {
+              "id": "cristalloidi",
+              "title": "Cristalloidi e soluzioni per infusione",
+              "type": "drug",
+              "content": {
+                "class": "Cristalloidi e soluzioni per infusione",
+                "effects": [
+                  "Ripristino del volume intravascolare",
+                  "Supporto nutrizionale e reintegro di liquidi, elettroliti o altri componenti necessari al mantenimento dell'omeostasi."
+                ],
+                "indications": [
+                  "Esempi: NaCl 0,9%, Ringer lattato"
+                ],
+                "monitoring": [
+                  "PA",
+                  "Bilancio idrico",
+                  "Elettroliti",
+                  "Glicemia quando pertinente",
+                  "Stato nutrizionale e parametri vitali"
+                ]
+              },
+              "aliasIds": [
+                "nutrizione-soluzioni-infusione"
+              ],
+              "area": "liquidi"
             },
             {
               "id": "decongestionanti",
@@ -1189,24 +1259,8 @@
                   "PA",
                   "FC e risposta dei sintomi congestizi."
                 ]
-              }
-            },
-            {
-              "id": "dermatologia",
-              "title": "Dermatologia",
-              "type": "drug",
-              "content": {
-                "class": "Dermatologia",
-                "effects": [
-                  "Trattamento farmacologico delle condizioni della cute e degli annessi cutanei."
-                ],
-                "monitoring": [
-                  "Condizioni della cute",
-                  "Segni di irritazione o reazione locale",
-                  "Estensione e caratteristiche della lesione",
-                  "Risposta clinica"
-                ]
-              }
+              },
+              "area": "respiratorio"
             },
             {
               "id": "diuretici",
@@ -1226,59 +1280,63 @@
                   "Bilancio idrico",
                   "Elettroliti"
                 ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "emostatici",
-              "title": "Emostatici",
+              "title": "Emostatici e fattori della coagulazione",
               "type": "drug",
               "content": {
-                "class": "Emostatici",
+                "class": "Emostatici e fattori della coagulazione",
                 "effects": [
-                  "Favoriscono la stabilizzazione del coagulo"
+                  "Favoriscono la stabilizzazione del coagulo",
+                  "Riduzione o controllo del sanguinamento attraverso meccanismi che favoriscono l'emostasi.",
+                  "Sostituzione o integrazione di componenti della cascata coagulativa per favorire l'emostasi."
                 ],
                 "indications": [
                   "Esempio: Acido tranexamico"
                 ],
                 "monitoring": [
                   "Valutazione del sanguinamento",
-                  "Funzione renale"
+                  "Funzione renale",
+                  "Entità del sanguinamento",
+                  "parametri vitali ed emocromo quando indicato.",
+                  "Segni di sanguinamento",
+                  "Emocromo",
+                  "Parametri della coagulazione",
+                  "Segni di eventi trombotici"
                 ]
-              }
+              },
+              "aliasIds": [
+                "antiemorragici",
+                "fattori-coagulazione"
+              ],
+              "area": "sangue"
             },
             {
               "id": "enzimi-digestivi",
-              "title": "Enzimi digestivi",
+              "title": "Enzimi digestivi e sostituti enzimatici",
               "type": "drug",
               "content": {
-                "class": "Enzimi digestivi",
+                "class": "Enzimi digestivi e sostituti enzimatici",
                 "effects": [
-                  "Sostituzione o integrazione di enzimi necessari alla digestione."
+                  "Sostituzione o integrazione di enzimi necessari alla digestione.",
+                  "Sostituzione o integrazione di attività enzimatiche carenti o modulazione di specifici processi enzimatici."
                 ],
                 "monitoring": [
                   "Sintomi gastrointestinali",
                   "Alvo",
                   "Stato nutrizionale quando pertinente",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "enzimi",
-              "title": "Enzimi e sostituti enzimatici",
-              "type": "drug",
-              "content": {
-                "class": "Enzimi e sostituti enzimatici",
-                "indications": [],
-                "effects": [
-                  "Sostituzione o integrazione di attività enzimatiche carenti o modulazione di specifici processi enzimatici."
-                ],
-                "monitoring": [
                   "Risposta clinica",
                   "Parametri laboratoristici pertinenti",
                   "Tollerabilità"
                 ]
-              }
+              },
+              "aliasIds": [
+                "enzimi"
+              ],
+              "area": "gastrointestinale"
             },
             {
               "id": "anti-parkinson",
@@ -1296,24 +1354,8 @@
                   "Pressione ortostatica",
                   "Controllo dei sintomi motori"
                 ]
-              }
-            },
-            {
-              "id": "antiosteoporotici",
-              "title": "Farmaci antiosteoporotici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci antiosteoporotici",
-                "indications": [],
-                "effects": [
-                  "Riduzione della perdita di massa ossea e/o aumento della resistenza scheletrica."
-                ],
-                "monitoring": [
-                  "Calcemia quando indicata",
-                  "Funzione renale",
-                  "Dolore o altri sintomi muscoloscheletrici"
-                ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "biologici",
@@ -1331,24 +1373,34 @@
                   "Segni di infezione",
                   "Reazioni da infusione"
                 ]
-              }
+              },
+              "area": "immunita-oncologia"
             },
             {
               "id": "farmaci-urgenza",
-              "title": "Farmaci d'urgenza",
+              "title": "Farmaci d'urgenza e rianimazione",
               "type": "drug",
               "content": {
-                "class": "Farmaci d'urgenza",
+                "class": "Farmaci d'urgenza e rianimazione",
                 "effects": [
-                  "Stabilizzazione delle funzioni vitali"
+                  "Stabilizzazione delle funzioni vitali",
+                  "Farmaci utilizzati per il trattamento rapido di alterazioni acute delle funzioni vitali e delle emergenze cliniche."
                 ],
                 "indications": [
                   "Esempi: Adrenalina, Atropina, Naloxone, Flumazenil, Glucagone"
                 ],
                 "monitoring": [
-                  "Monitoraggio continuo dei parametri vitali"
+                  "Monitoraggio continuo dei parametri vitali",
+                  "Parametri vitali",
+                  "Stato di coscienza",
+                  "ECG quando indicato",
+                  "Risposta clinica immediata"
                 ]
-              }
+              },
+              "aliasIds": [
+                "urgenza-rianimazione"
+              ],
+              "area": "emergenza"
             },
             {
               "id": "farmaci-metabolici",
@@ -1365,24 +1417,8 @@
                   "Funzione d'organo quando indicata",
                   "Risposta clinica"
                 ]
-              }
-            },
-            {
-              "id": "urogenitali",
-              "title": "Farmaci dell'apparato urogenitale",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci dell'apparato urogenitale",
-                "indications": [],
-                "effects": [
-                  "Trattamento o modulazione di funzioni e condizioni dell'apparato urogenitale."
-                ],
-                "monitoring": [
-                  "Sintomi urinari o genitali",
-                  "Funzione d'organo pertinente",
-                  "Risposta clinica"
-                ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "dermatologici",
@@ -1392,31 +1428,23 @@
                 "class": "Farmaci dermatologici",
                 "indications": [],
                 "effects": [
-                  "Trattamento o modulazione di condizioni della cute e degli annessi."
+                  "Trattamento o modulazione di condizioni della cute e degli annessi.",
+                  "Trattamento farmacologico delle condizioni della cute e degli annessi cutanei."
                 ],
                 "monitoring": [
                   "Aspetto e sintomi delle lesioni cutanee",
                   "Estensione dell'area interessata",
-                  "Reazioni locali"
+                  "Reazioni locali",
+                  "Condizioni della cute",
+                  "Segni di irritazione o reazione locale",
+                  "Estensione e caratteristiche della lesione",
+                  "Risposta clinica"
                 ]
-              }
-            },
-            {
-              "id": "emopoietici",
-              "title": "Farmaci emopoietici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci emopoietici",
-                "indications": [],
-                "effects": [
-                  "Stimolazione o supporto della produzione delle cellule ematiche."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Risposta ematologica",
-                  "Parametri pertinenti alla specifica terapia"
-                ]
-              }
+              },
+              "aliasIds": [
+                "dermatologia"
+              ],
+              "area": "organi"
             },
             {
               "id": "oftalmologici",
@@ -1426,14 +1454,23 @@
                 "class": "Farmaci oftalmologici",
                 "indications": [],
                 "effects": [
-                  "Trattamento o modulazione di condizioni dell'occhio e degli annessi oculari."
+                  "Trattamento o modulazione di condizioni dell'occhio e degli annessi oculari.",
+                  "Interventi farmacologici rivolti a patologie e disturbi dell'occhio e della funzione visiva."
                 ],
                 "monitoring": [
                   "Sintomi oculari",
                   "Acuità o funzione visiva quando pertinente",
-                  "Segni di irritazione o reazione locale"
+                  "Segni di irritazione o reazione locale",
+                  "Acuità e funzione visiva quando pertinenti",
+                  "Dolore oculare",
+                  "Segni di irritazione o infiammazione",
+                  "Risposta clinica"
                 ]
-              }
+              },
+              "aliasIds": [
+                "oftalmologia"
+              ],
+              "area": "organi"
             },
             {
               "id": "ostetrici-ginecologici",
@@ -1450,24 +1487,8 @@
                   "Segni e sintomi riferiti",
                   "Parametri laboratoristici quando indicati"
                 ]
-              }
-            },
-            {
-              "id": "otologici",
-              "title": "Farmaci otologici",
-              "type": "drug",
-              "content": {
-                "class": "Farmaci otologici",
-                "indications": [],
-                "effects": [
-                  "Trattamento di condizioni dell'orecchio e del condotto uditivo."
-                ],
-                "monitoring": [
-                  "Dolore e secrezioni",
-                  "Udito quando pertinente",
-                  "Segni di irritazione o reazione locale"
-                ]
-              }
+              },
+              "area": "organi"
             },
             {
               "id": "broncocostrittori",
@@ -1484,56 +1505,32 @@
                   "SpO₂",
                   "rumori respiratori e andamento dei sintomi."
                 ]
-              }
+              },
+              "area": "respiratorio"
             },
             {
               "id": "urologici",
-              "title": "Farmaci urologici",
+              "title": "Farmaci urologici e urogenitali",
               "type": "drug",
               "content": {
-                "class": "Farmaci urologici",
+                "class": "Farmaci urologici e urogenitali",
                 "indications": [],
                 "effects": [
-                  "Modulazione della funzione delle vie urinarie e/o della prostata, secondo la classe."
+                  "Modulazione della funzione delle vie urinarie e/o della prostata, secondo la classe.",
+                  "Trattamento o modulazione di funzioni e condizioni dell'apparato urogenitale."
                 ],
                 "monitoring": [
                   "Diuresi e sintomi urinari",
                   "Funzione renale quando indicata",
-                  "Risposta clinica"
+                  "Risposta clinica",
+                  "Sintomi urinari o genitali",
+                  "Funzione d'organo pertinente"
                 ]
-              }
-            },
-            {
-              "id": "fattori-coagulazione",
-              "title": "Fattori della coagulazione",
-              "type": "drug",
-              "content": {
-                "class": "Fattori della coagulazione",
-                "effects": [
-                  "Sostituzione o integrazione di componenti della cascata coagulativa per favorire l'emostasi."
-                ],
-                "monitoring": [
-                  "Segni di sanguinamento",
-                  "Emocromo",
-                  "Parametri della coagulazione",
-                  "Segni di eventi trombotici"
-                ]
-              }
-            },
-            {
-              "id": "gastroprotettori",
-              "title": "Gastroprotettori",
-              "type": "drug",
-              "content": {
-                "class": "Gastroprotettori",
-                "indications": [],
-                "effects": [
-                  "Riduzione dell'aggressione della mucosa gastrointestinale e/o della secrezione acida, secondo la classe."
-                ],
-                "monitoring": [
-                  "Sintomi gastrointestinali e risposta clinica."
-                ]
-              }
+              },
+              "aliasIds": [
+                "urogenitali"
+              ],
+              "area": "organi"
             },
             {
               "id": "immunoglobuline",
@@ -1550,7 +1547,8 @@
                   "Parametri clinici pertinenti",
                   "Tollerabilità"
                 ]
-              }
+              },
+              "area": "immunita-oncologia"
             },
             {
               "id": "immunomodulanti",
@@ -1567,7 +1565,8 @@
                   "Emocromo quando indicato",
                   "Risposta clinica e tollerabilità"
                 ]
-              }
+              },
+              "area": "immunita-oncologia"
             },
             {
               "id": "immunosoppressori",
@@ -1585,7 +1584,8 @@
                   "Segni di infezione",
                   "Funzione renale"
                 ]
-              }
+              },
+              "area": "immunita-oncologia"
             },
             {
               "id": "ipp",
@@ -1603,7 +1603,8 @@
                   "Sintomi gastrointestinali",
                   "Funzione renale in caso di uso prolungato"
                 ]
-              }
+              },
+              "area": "gastrointestinale"
             },
             {
               "id": "insuline",
@@ -1621,7 +1622,8 @@
                   "Glicemia capillare",
                   "Segni di ipoglicemia"
                 ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "ipoglicemizzanti-orali",
@@ -1640,7 +1642,8 @@
                   "Funzione renale",
                   "Rischio di ipoglicemia"
                 ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "ipolipemizzanti",
@@ -1657,7 +1660,8 @@
                   "quando appropriato",
                   "funzione epatica e sintomi muscolari."
                 ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "lassativi",
@@ -1675,24 +1679,32 @@
                   "Alvo",
                   "Bilancio idrico"
                 ]
-              }
+              },
+              "area": "gastrointestinale"
             },
             {
-              "id": "metabolismo-osseo",
-              "title": "Metabolismo osseo",
+              "id": "antiosteoporotici",
+              "title": "Metabolismo osseo e antiosteoporotici",
               "type": "drug",
               "content": {
-                "class": "Metabolismo osseo",
+                "class": "Metabolismo osseo e antiosteoporotici",
                 "indications": [],
                 "effects": [
+                  "Riduzione della perdita di massa ossea e/o aumento della resistenza scheletrica.",
                   "Regolazione del rimodellamento e della mineralizzazione ossea."
                 ],
                 "monitoring": [
-                  "Calcemia e altri parametri minerali quando indicati",
+                  "Calcemia quando indicata",
                   "Funzione renale",
+                  "Dolore o altri sintomi muscoloscheletrici",
+                  "Calcemia e altri parametri minerali quando indicati",
                   "Dolore osseo e risposta clinica"
                 ]
-              }
+              },
+              "aliasIds": [
+                "metabolismo-osseo"
+              ],
+              "area": "endocrino"
             },
             {
               "id": "minerali-elettroliti",
@@ -1709,7 +1721,8 @@
                   "Funzione renale",
                   "Bilancio idrico"
                 ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "miorilassanti",
@@ -1725,7 +1738,8 @@
                   "Stato neurologico",
                   "forza muscolare e funzione respiratoria quando rilevante."
                 ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "mucolitici",
@@ -1743,7 +1757,8 @@
                   "Valutazione delle secrezioni",
                   "Efficacia della tosse"
                 ]
-              }
+              },
+              "area": "respiratorio"
             },
             {
               "id": "neurolettici",
@@ -1761,75 +1776,8 @@
                   "QT",
                   "Effetti extrapiramidali"
                 ]
-              }
-            },
-            {
-              "id": "antianginosi-nitrati",
-              "title": "Nitrati antianginosi",
-              "type": "drug",
-              "content": {
-                "class": "Nitrati antianginosi",
-                "effects": [
-                  "Vasodilatazione con riduzione del precarico e della richiesta miocardica di ossigeno."
-                ],
-                "monitoring": [
-                  "Dolore toracico",
-                  "PA",
-                  "FC",
-                  "Sintomi di ipotensione"
-                ]
-              }
-            },
-            {
-              "id": "nutrizione-soluzioni-infusione",
-              "title": "Nutrizione e soluzioni per infusione",
-              "type": "drug",
-              "content": {
-                "class": "Nutrizione e soluzioni per infusione",
-                "effects": [
-                  "Supporto nutrizionale e reintegro di liquidi, elettroliti o altri componenti necessari al mantenimento dell'omeostasi."
-                ],
-                "monitoring": [
-                  "Bilancio idrico",
-                  "Elettroliti",
-                  "Glicemia quando pertinente",
-                  "Stato nutrizionale e parametri vitali"
-                ]
-              }
-            },
-            {
-              "id": "oftalmologia",
-              "title": "Oftalmologia",
-              "type": "drug",
-              "content": {
-                "class": "Oftalmologia",
-                "effects": [
-                  "Interventi farmacologici rivolti a patologie e disturbi dell'occhio e della funzione visiva."
-                ],
-                "monitoring": [
-                  "Acuità e funzione visiva quando pertinenti",
-                  "Dolore oculare",
-                  "Segni di irritazione o infiammazione",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "oncologia",
-              "title": "Oncologia",
-              "type": "drug",
-              "content": {
-                "class": "Oncologia",
-                "effects": [
-                  "Trattamenti farmacologici diretti alle cellule tumorali o alla modulazione dei processi biologici coinvolti nelle neoplasie."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Funzione epatica e renale quando pertinenti",
-                  "Segni di tossicità",
-                  "Risposta clinica e tollerabilità"
-                ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "oppioidi",
@@ -1849,7 +1797,8 @@
                   "SpO₂",
                   "Alvo"
                 ]
-              }
+              },
+              "area": "dolore"
             },
             {
               "id": "ormoni-ipofisari",
@@ -1866,22 +1815,30 @@
                   "Bilancio idrico quando pertinente",
                   "Risposta clinica"
                 ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "ormoni-sessuali",
-              "title": "Ormoni sessuali",
+              "title": "Ormoni sessuali e contraccettivi ormonali",
               "type": "drug",
               "content": {
-                "class": "Ormoni sessuali",
+                "class": "Ormoni sessuali e contraccettivi ormonali",
                 "indications": [],
                 "effects": [
-                  "Sostituzione o modulazione degli effetti degli ormoni sessuali."
+                  "Sostituzione o modulazione degli effetti degli ormoni sessuali.",
+                  "Modulazione dell'attività ormonale riproduttiva per prevenire l'ovulazione e/o modificare il tratto riproduttivo."
                 ],
                 "monitoring": [
-                  "Risposta clinica e parametri endocrini pertinenti quando indicati."
+                  "Risposta clinica e parametri endocrini pertinenti quando indicati.",
+                  "Tollerabilità",
+                  "eventuali effetti cardiovascolari e sintomi riferiti."
                 ]
-              }
+              },
+              "aliasIds": [
+                "contraccettivi-ormonali"
+              ],
+              "area": "endocrino"
             },
             {
               "id": "ormoni-tiroidei",
@@ -1896,24 +1853,32 @@
                 "monitoring": [
                   "Sintomi clinici e parametri tiroidei secondo prescrizione."
                 ]
-              }
+              },
+              "area": "endocrino"
             },
             {
               "id": "otorinolaringoiatria",
-              "title": "Otorinolaringoiatria",
+              "title": "Otorinolaringoiatria e farmaci otologici",
               "type": "drug",
               "content": {
-                "class": "Otorinolaringoiatria",
+                "class": "Otorinolaringoiatria e farmaci otologici",
                 "effects": [
-                  "Interventi farmacologici rivolti a patologie dell'orecchio, naso, seni paranasali, faringe e laringe."
+                  "Interventi farmacologici rivolti a patologie dell'orecchio, naso, seni paranasali, faringe e laringe.",
+                  "Trattamento di condizioni dell'orecchio e del condotto uditivo."
                 ],
                 "monitoring": [
                   "Sintomi locali",
                   "Udito quando pertinente",
                   "Secrezioni e segni di infezione",
-                  "Risposta clinica"
+                  "Risposta clinica",
+                  "Dolore e secrezioni",
+                  "Segni di irritazione o reazione locale"
                 ]
-              }
+              },
+              "aliasIds": [
+                "otologici"
+              ],
+              "area": "respiratorio"
             },
             {
               "id": "procinetici",
@@ -1929,22 +1894,28 @@
                   "Sintomi gastrointestinali",
                   "alvo e tollerabilità."
                 ]
-              }
+              },
+              "area": "gastrointestinale"
             },
             {
               "id": "protettori-mucosa",
-              "title": "Protettori della mucosa gastrointestinale",
+              "title": "Protettori della mucosa e gastroprotettori",
               "type": "drug",
               "content": {
-                "class": "Protettori della mucosa gastrointestinale",
+                "class": "Protettori della mucosa e gastroprotettori",
                 "indications": [],
                 "effects": [
-                  "Protezione della mucosa gastrointestinale da agenti irritanti o dall'acidità."
+                  "Protezione della mucosa gastrointestinale da agenti irritanti o dall'acidità.",
+                  "Riduzione dell'aggressione della mucosa gastrointestinale e/o della secrezione acida, secondo la classe."
                 ],
                 "monitoring": [
                   "Sintomi gastrointestinali e risposta clinica."
                 ]
-              }
+              },
+              "aliasIds": [
+                "gastroprotettori"
+              ],
+              "area": "gastrointestinale"
             },
             {
               "id": "benzodiazepine",
@@ -1963,7 +1934,8 @@
                   "FR",
                   "Rischio di cadute"
                 ]
-              }
+              },
+              "area": "nervoso"
             },
             {
               "id": "sartani",
@@ -1982,128 +1954,8 @@
                   "Funzione renale",
                   "Potassio"
                 ]
-              }
-            },
-            {
-              "id": "sistema-cardiovascolare",
-              "title": "Sistema cardiovascolare",
-              "type": "drug",
-              "content": {
-                "class": "Sistema cardiovascolare",
-                "effects": [
-                  "Interventi farmacologici rivolti a pressione arteriosa, ritmo cardiaco, perfusione, contrattilità e circolazione."
-                ],
-                "monitoring": [
-                  "PA",
-                  "FC",
-                  "Ritmo/ECG quando indicato",
-                  "Segni e sintomi cardiovascolari"
-                ]
-              }
-            },
-            {
-              "id": "sistema-ematologico",
-              "title": "Sistema ematologico",
-              "type": "drug",
-              "content": {
-                "class": "Sistema ematologico",
-                "effects": [
-                  "Interventi farmacologici rivolti a eritropoiesi, emostasi, coagulazione e principali alterazioni delle cellule e dei componenti del sangue."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Parametri della coagulazione quando indicati",
-                  "Segni di sanguinamento o trombosi",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "sistema-endocrino-metabolico",
-              "title": "Sistema endocrino e metabolismo",
-              "type": "drug",
-              "content": {
-                "class": "Sistema endocrino e metabolismo",
-                "effects": [
-                  "Regolazione ormonale e dei principali processi metabolici, inclusi glucosio, lipidi, elettroliti e metabolismo energetico."
-                ],
-                "monitoring": [
-                  "Parametri metabolici pertinenti",
-                  "Glicemia quando indicata",
-                  "Elettroliti",
-                  "Parametri endocrini pertinenti"
-                ]
-              }
-            },
-            {
-              "id": "sistema-linfatico-immunitario",
-              "title": "Sistema linfatico e immunitario",
-              "type": "drug",
-              "content": {
-                "class": "Sistema linfatico e immunitario",
-                "effects": [
-                  "Modulazione o sostituzione della risposta immunitaria e trattamento delle condizioni che coinvolgono il sistema linfatico e immunitario."
-                ],
-                "monitoring": [
-                  "Segni di infezione",
-                  "Emocromo quando indicato",
-                  "Parametri immunologici pertinenti",
-                  "Risposta clinica e tollerabilità"
-                ]
-              }
-            },
-            {
-              "id": "sistema-nervoso",
-              "title": "Sistema nervoso",
-              "type": "drug",
-              "content": {
-                "class": "Sistema nervoso",
-                "effects": [
-                  "Modulazione dell'attività del sistema nervoso centrale o periferico per il controllo di funzioni neurologiche e sintomi."
-                ],
-                "monitoring": [
-                  "Stato neurologico",
-                  "Stato di coscienza quando pertinente",
-                  "Funzione motoria e sensitiva quando pertinente",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "sistema-respiratorio",
-              "title": "Sistema respiratorio",
-              "type": "drug",
-              "content": {
-                "class": "Sistema respiratorio",
-                "effects": [
-                  "Modulazione del tono bronchiale, dell'infiammazione delle vie aeree, delle secrezioni e di altri processi respiratori."
-                ],
-                "monitoring": [
-                  "FR",
-                  "SpO₂",
-                  "Rumori respiratori e sintomi",
-                  "Risposta clinica"
-                ]
-              }
-            },
-            {
-              "id": "cristalloidi",
-              "title": "Soluzioni cristalloidi",
-              "type": "drug",
-              "content": {
-                "class": "Soluzioni cristalloidi",
-                "effects": [
-                  "Ripristino del volume intravascolare"
-                ],
-                "indications": [
-                  "Esempi: NaCl 0,9%, Ringer lattato"
-                ],
-                "monitoring": [
-                  "PA",
-                  "Bilancio idrico",
-                  "Elettroliti"
-                ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "statine",
@@ -2122,41 +1974,8 @@
                   "CPK",
                   "Segni di miopatia"
                 ]
-              }
-            },
-            {
-              "id": "stimolanti-emopoiesi",
-              "title": "Stimolanti dell'emopoiesi",
-              "type": "drug",
-              "content": {
-                "class": "Stimolanti dell'emopoiesi",
-                "effects": [
-                  "Stimolazione della produzione di specifiche linee cellulari ematiche."
-                ],
-                "monitoring": [
-                  "Emocromo",
-                  "Risposta ematologica",
-                  "Parametri marziali quando pertinenti",
-                  "Segni di eventi trombotici quando rilevanti"
-                ]
-              }
-            },
-            {
-              "id": "urgenza-rianimazione",
-              "title": "Terapia d'urgenza e rianimazione",
-              "type": "drug",
-              "content": {
-                "class": "Terapia d'urgenza e rianimazione",
-                "effects": [
-                  "Farmaci utilizzati per il trattamento rapido di alterazioni acute delle funzioni vitali e delle emergenze cliniche."
-                ],
-                "monitoring": [
-                  "Parametri vitali",
-                  "Stato di coscienza",
-                  "ECG quando indicato",
-                  "Risposta clinica immediata"
-                ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "trombolitici",
@@ -2175,7 +1994,8 @@
                   "Stato neurologico",
                   "PA"
                 ]
-              }
+              },
+              "area": "sangue"
             },
             {
               "id": "vasodilatatori",
@@ -2192,7 +2012,8 @@
                   "FC",
                   "sintomi di ipotensione e risposta clinica."
                 ]
-              }
+              },
+              "area": "cardiovascolare"
             },
             {
               "id": "vitamine",
@@ -2209,7 +2030,70 @@
                   "Segni di carenza o eccesso",
                   "Risposta clinica"
                 ]
-              }
+              },
+              "area": "endocrino"
+            }
+          ],
+          "areas": [
+            {
+              "id": "cardiovascolare",
+              "icon": "🫀",
+              "title": "Cardiovascolare"
+            },
+            {
+              "id": "sangue",
+              "icon": "🩸",
+              "title": "Sangue e coagulazione"
+            },
+            {
+              "id": "nervoso",
+              "icon": "🧠",
+              "title": "Sistema nervoso e psiche"
+            },
+            {
+              "id": "dolore",
+              "icon": "🩹",
+              "title": "Dolore e infiammazione"
+            },
+            {
+              "id": "respiratorio",
+              "icon": "🫁",
+              "title": "Respiratorio e vie aeree"
+            },
+            {
+              "id": "gastrointestinale",
+              "icon": "🍽️",
+              "title": "Gastrointestinale"
+            },
+            {
+              "id": "endocrino",
+              "icon": "⚗️",
+              "title": "Endocrino e metabolismo"
+            },
+            {
+              "id": "infezioni",
+              "icon": "🦠",
+              "title": "Infezioni"
+            },
+            {
+              "id": "immunita-oncologia",
+              "icon": "🛡️",
+              "title": "Immunità, allergie e oncologia"
+            },
+            {
+              "id": "emergenza",
+              "icon": "🚨",
+              "title": "Emergenza, antidoti e antagonisti"
+            },
+            {
+              "id": "liquidi",
+              "icon": "💧",
+              "title": "Liquidi e soluzioni infusionali"
+            },
+            {
+              "id": "organi",
+              "icon": "👁️",
+              "title": "Urogenitale, cute e organi di senso"
             }
           ]
         }

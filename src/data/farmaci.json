@@ -8,7 +8,7 @@
   {
     "principioAttivo": "Aceclofenac",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AB16"
   },
   {
@@ -50,7 +50,7 @@
   {
     "principioAttivo": "Acido folico",
     "classeId": "antianemici",
-    "classeNome": "Antianemici",
+    "classeNome": "Antianemici ed emopoietici",
     "atc": "B03BB01"
   },
   {
@@ -67,7 +67,7 @@
   },
   {
     "principioAttivo": "Acido ursodesossicolico",
-    "classeId": "gastrointestinali-altri",
+    "classeId": "apparato-gastrointestinale-digestione",
     "classeNome": "Altri farmaci gastrointestinali",
     "atc": "A05AA02"
   },
@@ -92,7 +92,7 @@
   {
     "principioAttivo": "Adrenalina",
     "classeId": "farmaci-urgenza",
-    "classeNome": "Farmaci d'urgenza",
+    "classeNome": "Farmaci d'urgenza e rianimazione",
     "atc": "C01CA24"
   },
   {
@@ -128,7 +128,7 @@
   {
     "principioAttivo": "Ambrisentan",
     "classeId": "antipertensivi",
-    "classeNome": "Altri antipertensivi",
+    "classeNome": "Altri antipertensivi (centrali, antiadrenergici)",
     "atc": "C02KX02"
   },
   {
@@ -236,7 +236,7 @@
   {
     "principioAttivo": "Atropina",
     "classeId": "farmaci-urgenza",
-    "classeNome": "Farmaci d'urgenza",
+    "classeNome": "Farmaci d'urgenza e rianimazione",
     "atc": "A03BA01"
   },
   {
@@ -332,7 +332,7 @@
   {
     "principioAttivo": "Bosentan",
     "classeId": "antipertensivi",
-    "classeNome": "Altri antipertensivi",
+    "classeNome": "Altri antipertensivi (centrali, antiadrenergici)",
     "atc": "C02KX01"
   },
   {
@@ -536,7 +536,7 @@
   {
     "principioAttivo": "Celecoxib",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AH01"
   },
   {
@@ -553,8 +553,8 @@
   },
   {
     "principioAttivo": "Cinacalcet",
-    "classeId": "metabolismo-osseo",
-    "classeNome": "Metabolismo osseo",
+    "classeId": "antiosteoporotici",
+    "classeNome": "Metabolismo osseo e antiosteoporotici",
     "atc": "H05BX01"
   },
   {
@@ -614,7 +614,7 @@
   {
     "principioAttivo": "Dabigatran",
     "classeId": "anticoagulanti",
-    "classeNome": "Anticoagulanti",
+    "classeNome": "Anticoagulanti e antitrombotici",
     "atc": "B01AE07"
   },
   {
@@ -662,7 +662,7 @@
   {
     "principioAttivo": "Dienogest",
     "classeId": "ormoni-sessuali",
-    "classeNome": "Ormoni sessuali",
+    "classeNome": "Ormoni sessuali e contraccettivi ormonali",
     "atc": "G03DB08"
   },
   {
@@ -679,8 +679,8 @@
   },
   {
     "principioAttivo": "Donepezil",
-    "classeId": "neurologici",
-    "classeNome": "Altri farmaci neurologici",
+    "classeId": "sistema-nervoso",
+    "classeNome": "Altri farmaci del sistema nervoso",
     "atc": "N06DA02"
   },
   {
@@ -722,7 +722,7 @@
   {
     "principioAttivo": "Dutasteride",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04CB02"
   },
   {
@@ -764,7 +764,7 @@
   {
     "principioAttivo": "Eparina sodica",
     "classeId": "anticoagulanti",
-    "classeNome": "Anticoagulanti",
+    "classeNome": "Anticoagulanti e antitrombotici",
     "atc": "B01AB01"
   },
   {
@@ -794,19 +794,19 @@
   {
     "principioAttivo": "Estradiolo",
     "classeId": "ormoni-sessuali",
-    "classeNome": "Ormoni sessuali",
+    "classeNome": "Ormoni sessuali e contraccettivi ormonali",
     "atc": "G03CA03"
   },
   {
     "principioAttivo": "Estradiolo + Drospirenone",
     "classeId": "ormoni-sessuali",
-    "classeNome": "Ormoni sessuali",
+    "classeNome": "Ormoni sessuali e contraccettivi ormonali",
     "atc": "G03FA17"
   },
   {
     "principioAttivo": "Etoricoxib",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AH05"
   },
   {
@@ -878,7 +878,7 @@
   {
     "principioAttivo": "Ferroso gluconato",
     "classeId": "antianemici",
-    "classeNome": "Antianemici",
+    "classeNome": "Antianemici ed emopoietici",
     "atc": "B03AA03"
   },
   {
@@ -890,7 +890,7 @@
   {
     "principioAttivo": "Finasteride",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04CB01"
   },
   {
@@ -979,8 +979,8 @@
   },
   {
     "principioAttivo": "Galantamina",
-    "classeId": "neurologici",
-    "classeNome": "Altri farmaci neurologici",
+    "classeId": "sistema-nervoso",
+    "classeNome": "Altri farmaci del sistema nervoso",
     "atc": "N06DA04"
   },
   {
@@ -1016,7 +1016,7 @@
   {
     "principioAttivo": "Glucosio",
     "classeId": "cristalloidi",
-    "classeNome": "Soluzioni cristalloidi",
+    "classeNome": "Cristalloidi e soluzioni per infusione",
     "atc": "B05BA03"
   },
   {
@@ -1028,7 +1028,7 @@
   {
     "principioAttivo": "Ibuprofene",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AE01"
   },
   {
@@ -1045,8 +1045,8 @@
   },
   {
     "principioAttivo": "Idrossiclorochina",
-    "classeId": "antiprotozoari",
-    "classeNome": "Antiprotozoari",
+    "classeId": "antiparassitari",
+    "classeNome": "Antiparassitari e antiprotozoari",
     "atc": "P01BA02"
   },
   {
@@ -1088,7 +1088,7 @@
   {
     "principioAttivo": "Isosorbide mononitrato",
     "classeId": "antianginosi",
-    "classeNome": "Antianginosi",
+    "classeNome": "Antianginosi (nitrati e altri)",
     "atc": "C01DA14"
   },
   {
@@ -1106,19 +1106,19 @@
   {
     "principioAttivo": "Ivabradina",
     "classeId": "antianginosi",
-    "classeNome": "Antianginosi",
+    "classeNome": "Antianginosi (nitrati e altri)",
     "atc": "C01EB17"
   },
   {
     "principioAttivo": "Ketoprofene",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AE03"
   },
   {
     "principioAttivo": "Ketorolac",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AB15"
   },
   {
@@ -1310,13 +1310,13 @@
   {
     "principioAttivo": "Meloxicam",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AC06"
   },
   {
     "principioAttivo": "Memantina",
-    "classeId": "neurologici",
-    "classeNome": "Altri farmaci neurologici",
+    "classeId": "sistema-nervoso",
+    "classeNome": "Altri farmaci del sistema nervoso",
     "atc": "N06DX01"
   },
   {
@@ -1363,8 +1363,8 @@
   },
   {
     "principioAttivo": "Metronidazolo",
-    "classeId": "antiprotozoari",
-    "classeNome": "Antiprotozoari",
+    "classeId": "antiparassitari",
+    "classeNome": "Antiparassitari e antiprotozoari",
     "atc": "P01AB01"
   },
   {
@@ -1411,8 +1411,8 @@
   },
   {
     "principioAttivo": "Moxonidina",
-    "classeId": "antipertensivi-centrali",
-    "classeNome": "Antipertensivi ad azione centrale",
+    "classeId": "antipertensivi",
+    "classeNome": "Altri antipertensivi (centrali, antiadrenergici)",
     "atc": "C02AC05"
   },
   {
@@ -1424,7 +1424,7 @@
   {
     "principioAttivo": "Naprossene",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AE02"
   },
   {
@@ -1454,7 +1454,7 @@
   {
     "principioAttivo": "Nimesulide",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AX17"
   },
   {
@@ -1472,7 +1472,7 @@
   {
     "principioAttivo": "Nitroglicerina",
     "classeId": "antianginosi",
-    "classeNome": "Antianginosi",
+    "classeNome": "Antianginosi (nitrati e altri)",
     "atc": "C01DA02"
   },
   {
@@ -1538,7 +1538,7 @@
   {
     "principioAttivo": "Ossibutinina cloridrato",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04BD04"
   },
   {
@@ -1579,8 +1579,8 @@
   },
   {
     "principioAttivo": "Paracalcitolo",
-    "classeId": "metabolismo-osseo",
-    "classeNome": "Metabolismo osseo",
+    "classeId": "antiosteoporotici",
+    "classeNome": "Metabolismo osseo e antiosteoporotici",
     "atc": "H05BX02"
   },
   {
@@ -1664,7 +1664,7 @@
   {
     "principioAttivo": "Piroxicam",
     "classeId": "fans",
-    "classeNome": "Antidolorifici (FANS)",
+    "classeNome": "Antidolorifici (FANS) e altri antinfiammatori",
     "atc": "M01AC01"
   },
   {
@@ -1712,7 +1712,7 @@
   {
     "principioAttivo": "Progesterone",
     "classeId": "ormoni-sessuali",
-    "classeNome": "Ormoni sessuali",
+    "classeNome": "Ormoni sessuali e contraccettivi ormonali",
     "atc": "G03DA04"
   },
   {
@@ -1748,7 +1748,7 @@
   {
     "principioAttivo": "Raloxifene",
     "classeId": "antiosteoporotici",
-    "classeNome": "Farmaci antiosteoporotici",
+    "classeNome": "Metabolismo osseo e antiosteoporotici",
     "atc": "G03XC01"
   },
   {
@@ -1784,7 +1784,7 @@
   {
     "principioAttivo": "Ranolazina",
     "classeId": "antianginosi",
-    "classeNome": "Antianginosi",
+    "classeNome": "Antianginosi (nitrati e altri)",
     "atc": "C01EB18"
   },
   {
@@ -1801,8 +1801,8 @@
   },
   {
     "principioAttivo": "Riluzolo",
-    "classeId": "neurologici",
-    "classeNome": "Altri farmaci neurologici",
+    "classeId": "sistema-nervoso",
+    "classeNome": "Altri farmaci del sistema nervoso",
     "atc": "N07XX02"
   },
   {
@@ -1814,13 +1814,13 @@
   {
     "principioAttivo": "Rivaroxaban",
     "classeId": "anticoagulanti",
-    "classeNome": "Anticoagulanti",
+    "classeNome": "Anticoagulanti e antitrombotici",
     "atc": "B01AF01"
   },
   {
     "principioAttivo": "Rivastigmina",
-    "classeId": "neurologici",
-    "classeNome": "Altri farmaci neurologici",
+    "classeId": "sistema-nervoso",
+    "classeNome": "Altri farmaci del sistema nervoso",
     "atc": "N06DA03"
   },
   {
@@ -1922,7 +1922,7 @@
   {
     "principioAttivo": "Sildenafil",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04BE03"
   },
   {
@@ -1952,7 +1952,7 @@
   {
     "principioAttivo": "Sodio cloruro",
     "classeId": "cristalloidi",
-    "classeNome": "Soluzioni cristalloidi",
+    "classeNome": "Cristalloidi e soluzioni per infusione",
     "atc": "B05BB01"
   },
   {
@@ -1976,7 +1976,7 @@
   {
     "principioAttivo": "Solifenacina",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04BD08"
   },
   {
@@ -1994,7 +1994,7 @@
   {
     "principioAttivo": "Sucralfato",
     "classeId": "protettori-mucosa",
-    "classeNome": "Protettori della mucosa gastrointestinale",
+    "classeNome": "Protettori della mucosa e gastroprotettori",
     "atc": "A02BX02"
   },
   {
@@ -2012,7 +2012,7 @@
   {
     "principioAttivo": "Tadalafil",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04BE08"
   },
   {
@@ -2084,19 +2084,19 @@
   {
     "principioAttivo": "Teriparatide",
     "classeId": "antiosteoporotici",
-    "classeNome": "Farmaci antiosteoporotici",
+    "classeNome": "Metabolismo osseo e antiosteoporotici",
     "atc": "H05AA02"
   },
   {
     "principioAttivo": "Tetrabenazina",
-    "classeId": "neurologici",
-    "classeNome": "Altri farmaci neurologici",
+    "classeId": "sistema-nervoso",
+    "classeNome": "Altri farmaci del sistema nervoso",
     "atc": "N07XX06"
   },
   {
     "principioAttivo": "Tibolone",
     "classeId": "ormoni-sessuali",
-    "classeNome": "Ormoni sessuali",
+    "classeNome": "Ormoni sessuali e contraccettivi ormonali",
     "atc": "G03CX01"
   },
   {
@@ -2198,7 +2198,7 @@
   {
     "principioAttivo": "Vardenafil",
     "classeId": "urologici",
-    "classeNome": "Farmaci urologici",
+    "classeNome": "Farmaci urologici e urogenitali",
     "atc": "G04BE09"
   },
   {
