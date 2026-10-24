@@ -4176,7 +4176,7 @@ function renderDrugClassCategory(item, data) {
                     .map(entry => ({
                         id: entry.id,
                         title: entry.title,
-                        score: drugSearchScore(query, entry.title)
+                        score: classSearchScore(query, entry)
                     }))
                     .filter(entry => entry.score > 0)
                     .map(entry => ({ ...entry, tipo: "classe" }));
@@ -4338,6 +4338,15 @@ async function loadDrugActiveIngredientIndex() {
     return drugActiveIngredientIndex;
 }
 
+function classSearchScore(query, entry) {
+    /* Titolo attuale e vecchi nomi delle classi unite (es. "Antitrombotici"). */
+    return Math.max(
+        drugSearchScore(query, entry.title),
+        ...(Array.isArray(entry.aliasTitles) ? entry.aliasTitles : []).map(name => drugSearchScore(query, name)),
+        0
+    );
+}
+
 function drugSearchScore(query, name) {
     const q = normalizeDrugSearchText(query), n = normalizeDrugSearchText(name);
     if (!q || !n) return 0;
@@ -4383,7 +4392,7 @@ async function renderDrugSearch() {
                             if (!item || typeof item !== "object") continue;
                             if (item.id && item.title && item.id !== "classi-farmacologiche" &&
                                 (item.type === "drug" || item.content?.class)) {
-                                classes.push({ id: item.id, title: item.title });
+                                classes.push({ id: item.id, title: item.title, aliasTitles: item.aliasTitles || [] });
                             }
                             visit(item.items);
                         }
@@ -4407,7 +4416,7 @@ async function renderDrugSearch() {
                 loadDrugClassSearchIndex()
             ]);
             const classMatches = classes
-                .map(entry => ({ ...entry, score: drugSearchScore(query, entry.title) }))
+                .map(entry => ({ ...entry, score: classSearchScore(query, entry) }))
                 .filter(entry => entry.score > 0)
                 .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, "it-IT"))
                 .slice(0, 12);
@@ -5383,8 +5392,8 @@ function renderDrug(item, data) {
                 )}
 
                 ${renderListField(
-                    "Monitoraggio",
-                    drug.monitoring
+                    "Controindicazioni",
+                    drug.contraindications
                 )}
 
                 ${renderListField(
@@ -5392,10 +5401,32 @@ function renderDrug(item, data) {
                     drug.adverseEffects
                 )}
 
+                ${renderListField(
+                    "Vie di somministrazione",
+                    drug.routes
+                )}
+
+                ${renderListField(
+                    "Monitoraggio",
+                    drug.monitoring
+                )}
+
+                ${renderListField(
+                    "Avvertenze infermieristiche",
+                    drug.nursingNotes
+                )}
+
                 ${renderField(
                     "Note",
                     drug.notes
                 )}
+
+                <article class="info-block info-block-note drug-disclaimer">
+                    <strong>Uso didattico</strong>
+                    <p>Informazioni generali sulla classe: per dosi, diluizioni e compatibilità
+                    verifica sempre la scheda tecnica (RCP) del singolo farmaco e il protocollo
+                    della tua struttura.</p>
+                </article>
 
             </div>
 

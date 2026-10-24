@@ -29,6 +29,30 @@
                   "Creatinina",
                   "Potassio",
                   "Tosse"
+                ],
+                "contraindications": [
+                  "Angioedema pregresso (anche ereditario o da ACE-inibitori)",
+                  "Gravidanza",
+                  "Stenosi bilaterale delle arterie renali",
+                  "Iperkaliemia grave",
+                  "Associazione con sacubitril/valsartan (rispettare l'intervallo di 36 ore)"
+                ],
+                "adverseEffects": [
+                  "Tosse secca persistente",
+                  "Ipotensione, soprattutto alla prima dose",
+                  "Iperkaliemia",
+                  "Peggioramento della funzione renale",
+                  "Angioedema (raro ma grave)"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Alla prima dose controllare la PA e tenere il paziente seduto o sdraiato",
+                  "Controllare potassio e creatinina nei primi giorni e dopo ogni cambio di dose",
+                  "Segnalare subito gonfiore di labbra, lingua o volto",
+                  "Evitare integratori di potassio e FANS se non indicati dal medico",
+                  "In caso di vomito, diarrea o disidratazione avvisare il medico (rischio di insufficienza renale)"
                 ]
               },
               "area": "cardiovascolare"
@@ -47,6 +71,24 @@
                   "FC",
                   "Sintomi di ipotensione ortostatica",
                   "Risposta clinica"
+                ],
+                "contraindications": [
+                  "Ipotensione ortostatica o sincopi pregresse",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Ipotensione ortostatica (soprattutto alla prima dose)",
+                  "Vertigini e astenia",
+                  "Congestione nasale",
+                  "Sindrome dell'iride flaccida durante la chirurgia della cataratta (avvisare l'oculista)"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Prima dose di sera o a letto",
+                  "Far alzare lentamente il paziente (rischio di cadute)",
+                  "Controllare la PA anche in ortostatismo"
                 ]
               },
               "area": "cardiovascolare"
@@ -76,7 +118,11 @@
                 "antipertensivi-centrali",
                 "antiadrenergici"
               ],
-              "area": "cardiovascolare"
+              "area": "cardiovascolare",
+              "aliasTitles": [
+                "Antipertensivi ad azione centrale",
+                "Antiadrenergici"
+              ]
             },
             {
               "id": "sistema-cardiovascolare",
@@ -138,7 +184,10 @@
                 "neurologici"
               ],
               "fallback": true,
-              "area": "nervoso"
+              "area": "nervoso",
+              "aliasTitles": [
+                "Altri farmaci neurologici"
+              ]
             },
             {
               "id": "sistema-ematologico",
@@ -199,7 +248,10 @@
                 "gastrointestinali-altri"
               ],
               "fallback": true,
-              "area": "gastrointestinale"
+              "area": "gastrointestinale",
+              "aliasTitles": [
+                "Altri farmaci gastrointestinali"
+              ]
             },
             {
               "id": "apparato-genitourinario",
@@ -272,6 +324,27 @@
                   "Intensità del dolore",
                   "Stato di coscienza quando pertinente",
                   "Risposta clinica e tollerabilità"
+                ],
+                "contraindications": [
+                  "Insufficienza epatica grave",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Ben tollerato alle dosi terapeutiche",
+                  "Epatotossicità in caso di sovradosaggio",
+                  "Rare reazioni cutanee gravi"
+                ],
+                "routes": [
+                  "Orale",
+                  "Rettale",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Rispettare dose massima giornaliera e intervallo tra le dosi",
+                  "Verificare altre fonti di paracetamolo (associazioni con codeina, antinfluenzali)",
+                  "Dose ridotta se peso basso, epatopatia, malnutrizione o alcolismo cronico",
+                  "Infusione ev: in circa 15 minuti",
+                  "Antidoto del sovradosaggio: acetilcisteina"
                 ]
               },
               "area": "dolore"
@@ -300,7 +373,10 @@
               "aliasIds": [
                 "anestesia-terapia-dolore"
               ],
-              "area": "nervoso"
+              "area": "nervoso",
+              "aliasTitles": [
+                "Anestesia e terapia del dolore"
+              ]
             },
             {
               "id": "anestetici-locali",
@@ -316,6 +392,29 @@
                   "Sensibilità e funzione della zona trattata",
                   "Parametri vitali quando pertinenti",
                   "Segni di reazione locale o sistemica"
+                ],
+                "contraindications": [
+                  "Ipersensibilità (rara per le amidi, più frequente per gli esteri)",
+                  "Iniezione intravascolare accidentale",
+                  "Soluzioni con adrenalina nelle estremità (dita) e nei pazienti con grave ipertensione o aritmie"
+                ],
+                "adverseEffects": [
+                  "Locali: dolore, ematoma",
+                  "Tossicità sistemica: formicolio perorale, sapore metallico, tinnito, confusione, convulsioni, aritmie e arresto cardiaco",
+                  "Metemoglobinemia (prilocaina, benzocaina)"
+                ],
+                "routes": [
+                  "Infiltrazione",
+                  "Topica",
+                  "Blocco nervoso",
+                  "Epidurale e spinale"
+                ],
+                "nursingNotes": [
+                  "Aspirare prima di iniettare per escludere la via intravascolare",
+                  "Rispettare la dose massima in mg per kg (più alta se con adrenalina)",
+                  "Controllare allergie e se la soluzione contiene adrenalina",
+                  "Riconoscere i primi segni di tossicità (parestesie perorali, sapore metallico) e fermare l'iniezione",
+                  "Nei blocchi regionali tenere pronti presidi per la rianimazione ed emulsione lipidica"
                 ]
               },
               "area": "nervoso"
@@ -422,7 +521,33 @@
                       "action": "Compete con il CO per il legame all'emoglobina e accelera l'eliminazione della carbossiemoglobina."
                     }
                   ]
-                }
+                },
+                "contraindications": [
+                  "Ipersensibilità all'antagonista",
+                  "Flumazenil: epilessia o uso cronico di benzodiazepine (rischio di convulsioni)",
+                  "Naltrexone: assunzione di oppioidi in atto"
+                ],
+                "adverseEffects": [
+                  "Naloxone e naltrexone: sindrome da astinenza acuta nei pazienti dipendenti",
+                  "Flumazenil: convulsioni nei pazienti dipendenti o epilettici",
+                  "Protamina: ipotensione, bradicardia e reazioni anafilattiche se iniettata troppo rapidamente",
+                  "Sugammadex: bradicardia e reazioni allergiche",
+                  "Fitomenadione ev: reazioni anafilattoidi se troppo rapido"
+                ],
+                "routes": [
+                  "Endovenosa",
+                  "Intramuscolare",
+                  "Sottocutanea",
+                  "Orale (naltrexone)",
+                  "Inalatoria (ossigeno)"
+                ],
+                "nursingNotes": [
+                  "Titolare l'antagonista fino alla risposta clinica (evita risvegli bruschi e astinenza)",
+                  "L'antagonista dura spesso meno del composto: osservare a lungo e ripetere la dose se i sintomi ricompaiono",
+                  "Ev lenta secondo scheda tecnica e protocollo",
+                  "Controllare FR, SpO2, stato di coscienza, FC e PA",
+                  "Segnalare e documentare orario, dose e risposta"
+                ]
               },
               "area": "emergenza"
             },
@@ -459,6 +584,23 @@
                 ],
                 "monitoring": [
                   "Sintomi gastrointestinali e risposta clinica; eventuali alterazioni dell'alvo."
+                ],
+                "contraindications": [
+                  "Insufficienza renale grave (sali di alluminio e magnesio)",
+                  "Ipofosfatemia",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Stipsi (alluminio)",
+                  "Diarrea (magnesio)",
+                  "Alterazioni degli elettroliti con uso prolungato"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Distanziare di 2 ore da altri farmaci (levotiroxina, fluorochinoloni, tetracicline, ferro)",
+                  "Somministrare dopo i pasti o come prescritto"
                 ]
               },
               "area": "gastrointestinale"
@@ -478,6 +620,27 @@
                 "monitoring": [
                   "Segni di sanguinamento",
                   "Emocromo"
+                ],
+                "contraindications": [
+                  "Sanguinamento attivo, ulcera peptica attiva",
+                  "Emorragia intracranica",
+                  "Trombocitopenia grave",
+                  "Acido acetilsalicilico: allergia ai salicilati o asma indotta da FANS; sindrome di Reye nei minori di 16 anni"
+                ],
+                "adverseEffects": [
+                  "Sanguinamenti, soprattutto gastrointestinali",
+                  "Dispepsia e ulcera",
+                  "Ecchimosi",
+                  "Ticagrelor: dispnea"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (cangrelor, tirofiban) in emodinamica"
+                ],
+                "nursingNotes": [
+                  "Non sospendere senza indicazione del medico (soprattutto con stent coronarici: rischio di trombosi)",
+                  "Segnalare melena, ematemesi, epistassi prolungata",
+                  "Preparati gastroresistenti: non frantumare"
                 ]
               },
               "area": "sangue"
@@ -518,13 +681,36 @@
                   "Parametri pertinenti alla specifica terapia",
                   "Parametri marziali quando pertinenti",
                   "Segni di eventi trombotici quando rilevanti"
+                ],
+                "contraindications": [
+                  "Ferro: emocromatosi o sovraccarico di ferro; anemie non da carenza di ferro",
+                  "Ferro ev: ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Ferro orale: stipsi, nausea, dolore addominale, feci scure",
+                  "Ferro ev: reazioni infusionali o anafilattoidi, ipotensione, ipofosfatemia, colorazione cutanea da stravaso",
+                  "Vitamina B12 e folati: rari"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (ferro)",
+                  "Intramuscolare (vitamina B12)"
+                ],
+                "nursingNotes": [
+                  "Ferro orale: informare sulle feci scure; evitare tè, caffè, latte e antiacidi vicino alla dose",
+                  "Ferro ev: osservare il paziente per circa 30 minuti dopo l'infusione e prevenire lo stravaso",
+                  "Controllare emocromo, ferritina e saturazione della transferrina"
                 ]
               },
               "aliasIds": [
                 "emopoietici",
                 "stimolanti-emopoiesi"
               ],
-              "area": "sangue"
+              "area": "sangue",
+              "aliasTitles": [
+                "Farmaci emopoietici",
+                "Stimolanti dell'emopoiesi"
+              ]
             },
             {
               "id": "antianginosi",
@@ -543,12 +729,40 @@
                   "FC e tolleranza al trattamento.",
                   "FC",
                   "Sintomi di ipotensione"
+                ],
+                "contraindications": [
+                  "Associazione dei nitrati con inibitori della PDE5 (sildenafil, tadalafil): ipotensione grave",
+                  "Ipotensione marcata e shock",
+                  "Infarto del ventricolo destro",
+                  "Cardiomiopatia ostruttiva",
+                  "Ipertensione endocranica (nitrati)"
+                ],
+                "adverseEffects": [
+                  "Cefalea",
+                  "Rossore e vertigini",
+                  "Ipotensione e tachicardia riflessa",
+                  "Tolleranza con uso continuo dei nitrati"
+                ],
+                "routes": [
+                  "Sublinguale (compresse, spray)",
+                  "Transdermica (cerotto)",
+                  "Orale",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Somministrare con il paziente seduto o sdraiato e controllare la PA",
+                  "Dolore toracico che non passa: avvisare subito il medico ed eseguire ECG",
+                  "Cerotti: ruotare la sede e rispettare l'intervallo libero prescritto (evita la tolleranza)",
+                  "Nitroglicerina ev: usare i set indicati dalla scheda tecnica (può essere adsorbita dal PVC)"
                 ]
               },
               "aliasIds": [
                 "antianginosi-nitrati"
               ],
-              "area": "cardiovascolare"
+              "area": "cardiovascolare",
+              "aliasTitles": [
+                "Nitrati antianginosi"
+              ]
             },
             {
               "id": "antiaritmici",
@@ -564,6 +778,28 @@
                   "FC",
                   "ritmo/ECG quando indicato",
                   "PA e comparsa di nuovi sintomi."
+                ],
+                "contraindications": [
+                  "Bradicardia sinusale e blocco AV senza pacemaker",
+                  "QT lungo",
+                  "Amiodarone: disfunzione tiroidea, ipersensibilità allo iodio, gravidanza",
+                  "Scompenso grave per alcuni principi attivi"
+                ],
+                "adverseEffects": [
+                  "Bradicardia e ipotensione (soprattutto ev)",
+                  "Proaritmia e allungamento del QT",
+                  "Amiodarone, uso cronico: disfunzioni tiroidee, tossicità polmonare ed epatica, fotosensibilità, depositi corneali",
+                  "Flebite con infusioni periferiche concentrate"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa con monitoraggio ECG continuo"
+                ],
+                "nursingNotes": [
+                  "Monitoraggio continuo di ECG e PA durante la somministrazione ev",
+                  "Amiodarone ev: diluire come da scheda tecnica (generalmente glucosio 5%) e controllare il sito di infusione",
+                  "Verificare potassio e magnesio: ipokaliemia e ipomagnesiemia aumentano il rischio di aritmie",
+                  "Verificare le interazioni (molti farmaci allungano il QT)"
                 ]
               },
               "area": "cardiovascolare"
@@ -584,6 +820,36 @@
                   "Reazioni allergiche",
                   "Temperatura",
                   "Funzione renale"
+                ],
+                "contraindications": [
+                  "Allergia nota alla classe: chiedere sempre l'anamnesi allergica (penicilline e cefalosporine possono avere reattività crociata)",
+                  "Fluorochinoloni: pregressa tendinopatia",
+                  "Aminoglicosidi: miastenia gravis",
+                  "Tetraciclina: gravidanza e bambini piccoli",
+                  "Macrolidi: QT lungo"
+                ],
+                "adverseEffects": [
+                  "Nausea e diarrea, candidosi",
+                  "Reazioni allergiche fino all'anafilassi",
+                  "Colite da Clostridioides difficile",
+                  "Nefrotossicità e ototossicità (aminoglicosidi, vancomicina)",
+                  "Tendinopatia (fluorochinoloni)",
+                  "Vancomicina infusa troppo rapidamente: arrossamento e ipotensione",
+                  "Flebite"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intramuscolare",
+                  "Endovenosa",
+                  "Topica"
+                ],
+                "nursingNotes": [
+                  "Prima della dose chiedere le allergie; se previsto, eseguire le colture prima di iniziare",
+                  "Rispettare orari e durata; non sospendere di propria iniziativa",
+                  "Ev: velocità e diluizione secondo scheda tecnica (vancomicina non più rapidamente di 10 mg al minuto)",
+                  "Osservare il paziente nei primi 15-30 minuti per reazioni allergiche",
+                  "Livelli plasmatici (vancomicina, aminoglicosidi) e funzione renale secondo protocollo",
+                  "Segnalare diarrea persistente ed eruzioni cutanee"
                 ]
               },
               "area": "infezioni"
@@ -611,13 +877,44 @@
                   "Parametri della coagulazione quando indicati",
                   "Segni di sanguinamento",
                   "Segni di trombosi"
+                ],
+                "contraindications": [
+                  "Sanguinamento attivo",
+                  "Emorragia intracranica recente",
+                  "Trombocitopenia grave; anamnesi di trombocitopenia da eparina (HIT) per le eparine",
+                  "Insufficienza epatica o renale grave (secondo il principio attivo)",
+                  "Warfarin: gravidanza; protesi valvolari meccaniche (non usare i DOAC)"
+                ],
+                "adverseEffects": [
+                  "Emorragie visibili e occulte, ecchimosi, anemia",
+                  "Trombocitopenia da eparina (HIT)",
+                  "Osteoporosi con eparina prolungata",
+                  "Necrosi cutanea da warfarin (rara)"
+                ],
+                "routes": [
+                  "Sottocutanea (eparine a basso peso molecolare, fondaparinux)",
+                  "Endovenosa (eparina non frazionata)",
+                  "Orale (warfarin, DOAC)"
+                ],
+                "nursingNotes": [
+                  "Prima della dose verificare farmaco, dose e ultimo esame (INR per warfarin, aPTT o anti-Xa per eparina)",
+                  "Eparina ev: pompa dedicata e doppio controllo della dose",
+                  "EBPM: iniettare nel sottocute dell'addome, non espellere la bolla d'aria della siringa preriempita, non massaggiare, ruotare le sedi",
+                  "Evitare le iniezioni intramuscolari",
+                  "Segnalare melena, ematuria, epistassi prolungata, cefalea improvvisa",
+                  "Warfarin: alimentazione stabile per vitamina K (verdure a foglia verde) e attenzione a FANS e antibiotici",
+                  "Antagonisti: protamina (eparina), vitamina K (warfarin), idarucizumab (dabigatran)"
                 ]
               },
               "aliasIds": [
                 "coagulazione-altri",
                 "antitrombotici"
               ],
-              "area": "sangue"
+              "area": "sangue",
+              "aliasTitles": [
+                "Altri farmaci della coagulazione",
+                "Antitrombotici"
+              ]
             },
             {
               "id": "anticolinergici",
@@ -637,12 +934,43 @@
                   "Diuresi",
                   "Alvo",
                   "Stato mentale e tollerabilità"
+                ],
+                "contraindications": [
+                  "Glaucoma ad angolo chiuso",
+                  "Ritenzione urinaria",
+                  "Ileo paralitico o ostruzione intestinale",
+                  "Miastenia gravis",
+                  "Tachiaritmie"
+                ],
+                "adverseEffects": [
+                  "Secchezza delle fauci",
+                  "Stipsi",
+                  "Ritenzione urinaria",
+                  "Tachicardia",
+                  "Visione offuscata",
+                  "Confusione e delirium negli anziani",
+                  "Ipertermia"
+                ],
+                "routes": [
+                  "Orale",
+                  "Inalatoria",
+                  "Parenterale (atropina, scopolamina)",
+                  "Transdermica (scopolamina)"
+                ],
+                "nursingNotes": [
+                  "Valutare diuresi e alvo",
+                  "Anziani: attenzione a cadute e confusione",
+                  "Cura del cavo orale e idratazione",
+                  "Gli effetti si sommano a quelli di altri farmaci anticolinergici (antistaminici sedativi, antidepressivi triciclici)"
                 ]
               },
               "aliasIds": [
                 "antimuscarinici"
               ],
-              "area": "nervoso"
+              "area": "nervoso",
+              "aliasTitles": [
+                "Antimuscarinici"
+              ]
             },
             {
               "id": "anticolinesterasici",
@@ -658,6 +986,24 @@
                   "Stato neurologico",
                   "Funzione respiratoria quando pertinente",
                   "Secrezioni e risposta clinica"
+                ],
+                "contraindications": [
+                  "Ostruzione meccanica intestinale o urinaria",
+                  "Asma grave",
+                  "Bradicardia e blocco AV"
+                ],
+                "adverseEffects": [
+                  "Eccesso colinergico: bradicardia, ipersalivazione, nausea, vomito, diarrea, crampi addominali, miosi, broncospasmo, sudorazione",
+                  "Crisi colinergica nel sovradosaggio"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intramuscolare, sottocutanea, endovenosa (neostigmina)"
+                ],
+                "nursingNotes": [
+                  "Controllare FC prima e dopo la dose; atropina disponibile come antagonista",
+                  "Miastenia: rispettare orari rigorosi, di solito prima dei pasti",
+                  "Distinguere crisi colinergica da crisi miastenica e avvisare il medico"
                 ]
               },
               "area": "nervoso"
@@ -677,6 +1023,30 @@
                 "monitoring": [
                   "Umore",
                   "Effetti gastrointestinali"
+                ],
+                "contraindications": [
+                  "Associazione con IMAO (rischio di sindrome serotoninergica; rispettare l'intervallo di sospensione)",
+                  "Ipersensibilità",
+                  "Citalopram ed escitalopram: QT lungo congenito"
+                ],
+                "adverseEffects": [
+                  "Nausea, diarrea, cefalea",
+                  "Insonnia o sonnolenza",
+                  "Disfunzioni sessuali",
+                  "Iponatriemia (anziani)",
+                  "Maggior rischio di sanguinamento con FANS e anticoagulanti",
+                  "Sindrome serotoninergica: agitazione, tremore, febbre, diarrea, tachicardia",
+                  "Ideazione suicidaria nelle prime settimane, soprattutto nei giovani"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "L'effetto compare dopo 2-4 settimane",
+                  "Osservare umore e idee suicidarie, soprattutto all'inizio o dopo variazioni di dose",
+                  "Non sospendere bruscamente (sindrome da sospensione)",
+                  "Anziani: controllare il sodio in caso di confusione o cadute",
+                  "Attenzione alle associazioni con tramadolo, triptani e linezolid"
                 ]
               },
               "area": "nervoso"
@@ -696,6 +1066,24 @@
                 "monitoring": [
                   "Numero delle scariche",
                   "Segni di disidratazione"
+                ],
+                "contraindications": [
+                  "Diarrea con sangue o febbre alta",
+                  "Colite pseudomembranosa e megacolon tossico",
+                  "Ileo"
+                ],
+                "adverseEffects": [
+                  "Stipsi e meteorismo",
+                  "Ileo",
+                  "Loperamide ad alte dosi: aritmie (QT)"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Priorità alla reidratazione",
+                  "Registrare frequenza e caratteristiche delle scariche e segni di disidratazione",
+                  "Nei sospetti di diarrea infettiva non somministrare senza indicazione del medico"
                 ]
               },
               "area": "gastrointestinale"
@@ -720,12 +1108,42 @@
                   "Segni e sintomi dell'infiammazione",
                   "Temperatura quando pertinente",
                   "Risposta clinica e tollerabilità"
+                ],
+                "contraindications": [
+                  "Ulcera peptica attiva o sanguinamento gastrointestinale",
+                  "Insufficienza renale o cardiaca grave",
+                  "Ultimo trimestre di gravidanza",
+                  "Asma o allergia ai FANS",
+                  "Periodo immediatamente successivo a bypass coronarico"
+                ],
+                "adverseEffects": [
+                  "Gastrite, ulcera e sanguinamento",
+                  "Peggioramento della funzione renale",
+                  "Ritenzione idrica e aumento della PA",
+                  "Broncospasmo e reazioni allergiche",
+                  "Rischio cardiovascolare con dosi elevate o uso prolungato"
+                ],
+                "routes": [
+                  "Orale",
+                  "Rettale",
+                  "Intramuscolare ed endovenosa (ad esempio ketorolac, diclofenac)",
+                  "Topica"
+                ],
+                "nursingNotes": [
+                  "Somministrare a stomaco pieno, salvo diversa indicazione",
+                  "Non associare due FANS",
+                  "Attenzione negli anziani, nei disidratati e in chi assume anticoagulanti, ACE-inibitori o diuretici",
+                  "Segnalare melena o dolore epigastrico",
+                  "Ketorolac: durata del trattamento molto limitata, secondo scheda tecnica"
                 ]
               },
               "aliasIds": [
                 "antiinfiammatori-altri"
               ],
-              "area": "dolore"
+              "area": "dolore",
+              "aliasTitles": [
+                "Altri antinfiammatori"
+              ]
             },
             {
               "id": "antidoti",
@@ -740,6 +1158,24 @@
                 "monitoring": [
                   "Stato neurologico",
                   "parametri vitali e risposta clinica."
+                ],
+                "contraindications": [
+                  "Dipendono dall'antidoto: in pericolo di vita il beneficio supera spesso il rischio, ma verificare allergie e controindicazioni specifiche"
+                ],
+                "adverseEffects": [
+                  "Dipendono dall'antidoto: ad esempio astinenza acuta da naloxone, reazioni anafilattoidi da acetilcisteina ev e da sieri"
+                ],
+                "routes": [
+                  "Endovenosa",
+                  "Intramuscolare",
+                  "Orale",
+                  "Inalatoria (ossigeno)"
+                ],
+                "nursingNotes": [
+                  "Identificare la sostanza, la dose, la via e il tempo trascorso dall'esposizione",
+                  "Contattare il Centro Antiveleni per le indicazioni",
+                  "L'effetto dell'antidoto può durare meno di quello del tossico: osservare a lungo e ripetere la valutazione",
+                  "Documentare orari, dosi e risposta"
                 ]
               },
               "area": "emergenza"
@@ -759,6 +1195,26 @@
                 "monitoring": [
                   "Numero degli episodi emetici",
                   "Idratazione"
+                ],
+                "contraindications": [
+                  "Ondansetron: QT lungo congenito, associazione con apomorfina",
+                  "Metoclopramide: sanguinamento, ostruzione o perforazione gastrointestinale, feocromocitoma, epilessia, morbo di Parkinson"
+                ],
+                "adverseEffects": [
+                  "Ondansetron: stipsi, cefalea, allungamento del QT",
+                  "Metoclopramide: sintomi extrapiramidali, acatisia, sonnolenza"
+                ],
+                "routes": [
+                  "Orale e orodispersibile",
+                  "Endovenosa",
+                  "Intramuscolare",
+                  "Rettale",
+                  "Transdermica"
+                ],
+                "nursingNotes": [
+                  "Metoclopramide ev: iniezione lenta (almeno 3 minuti); durata limitata del trattamento",
+                  "Ondansetron: se rischio di QT lungo controllare ECG, potassio e magnesio",
+                  "Valutare la causa del vomito (occlusione, ipertensione endocranica) e registrare idratazione e perdite"
                 ]
               },
               "area": "gastrointestinale"
@@ -778,6 +1234,30 @@
                 "monitoring": [
                   "Stato neurologico",
                   "Livelli plasmatici quando indicato"
+                ],
+                "contraindications": [
+                  "Carbamazepina: blocco AV",
+                  "Valproato: epatopatia grave, gravidanza (rischio teratogeno)",
+                  "Porfiria (alcuni principi attivi)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Sonnolenza, vertigini, atassia, diplopia, nausea",
+                  "Eruzioni cutanee, anche gravi (Stevens-Johnson con carbamazepina, lamotrigina, fenitoina)",
+                  "Alterazioni di funzione epatica ed emocromo",
+                  "Fenitoina: ipertrofia gengivale; ipotensione e aritmie se ev troppo rapida",
+                  "Valproato: tremore, aumento di peso"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (fenitoina, levetiracetam, valproato, fenobarbital)"
+                ],
+                "nursingNotes": [
+                  "Non sospendere bruscamente (rischio di crisi); orari regolari",
+                  "Fenitoina ev: velocità massima da scheda tecnica, monitoraggio ECG e PA, diluire solo in sodio cloruro 0,9% (precipita in glucosata), vena ampia per rischio di necrosi da stravaso",
+                  "Segnalare subito eruzioni cutanee",
+                  "Livelli plasmatici (fenitoina, carbamazepina, valproato) secondo il medico",
+                  "Precauzioni per le crisi: proteggere da cadute, posizione di sicurezza"
                 ]
               },
               "area": "nervoso"
@@ -796,6 +1276,24 @@
                   "Emocromo quando indicato",
                   "Funzione renale quando pertinente",
                   "Segni di eventi trombotici"
+                ],
+                "contraindications": [
+                  "Tromboembolismo in atto",
+                  "Insufficienza renale grave (ridurre la dose)"
+                ],
+                "adverseEffects": [
+                  "Nausea e vomito",
+                  "Ipotensione con iniezione rapida",
+                  "Eventi trombotici"
+                ],
+                "routes": [
+                  "Endovenosa lenta",
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Iniezione ev lenta",
+                  "Osservare segni di trombosi",
+                  "Controllare la diuresi"
                 ]
               },
               "area": "sangue"
@@ -815,6 +1313,28 @@
                 "monitoring": [
                   "Funzione epatica",
                   "Funzione renale"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Azoli: insufficienza epatica grave e associazioni che allungano il QT",
+                  "Fluconazolo ad alte dosi: gravidanza"
+                ],
+                "adverseEffects": [
+                  "Nausea e aumento delle transaminasi",
+                  "Eruzioni cutanee",
+                  "Amfotericina B: reazioni infusionali (febbre, brividi), nefrotossicità, ipokaliemia",
+                  "Azoli: numerose interazioni (CYP450) e allungamento del QT"
+                ],
+                "routes": [
+                  "Orale",
+                  "Topica",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Controllare funzione epatica e renale",
+                  "Amfotericina: controllare potassio e magnesio; premedicazione secondo prescrizione",
+                  "Amfotericina liposomiale e convenzionale hanno dosi molto diverse: non scambiarle",
+                  "Verificare le interazioni farmacologiche"
                 ]
               },
               "area": "infezioni"
@@ -832,6 +1352,21 @@
                 "monitoring": [
                   "Dolore e segni articolari",
                   "funzione renale e tollerabilità."
+                ],
+                "contraindications": [
+                  "Allopurinolo: non iniziare durante un attacco acuto; ipersensibilità",
+                  "Colchicina: insufficienza renale o epatica grave, associazione con inibitori potenti del CYP3A4"
+                ],
+                "adverseEffects": [
+                  "Allopurinolo: eruzioni cutanee, anche gravi",
+                  "Colchicina: nausea, vomito, diarrea (segni di tossicità), mielosoppressione"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Allopurinolo: idratazione abbondante, salvo restrizioni, e segnalare eruzioni cutanee",
+                  "Colchicina: rispettare la dose massima e segnalare la diarrea"
                 ]
               },
               "area": "dolore"
@@ -875,7 +1410,10 @@
               "aliasIds": [
                 "antiprotozoari"
               ],
-              "area": "infezioni"
+              "area": "infezioni",
+              "aliasTitles": [
+                "Antiprotozoari"
+              ]
             },
             {
               "id": "antiretrovirali",
@@ -963,16 +1501,36 @@
                 "monitoring": [
                   "Sedazione",
                   "Stato di vigilanza"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Prima generazione: glaucoma ad angolo chiuso, ritenzione urinaria, ostruzione piloro-duodenale"
+                ],
+                "adverseEffects": [
+                  "Sonnolenza (prima generazione)",
+                  "Secchezza delle fauci",
+                  "Ritenzione urinaria e stipsi",
+                  "Confusione negli anziani"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intramuscolare ed endovenosa",
+                  "Topica"
+                ],
+                "nursingNotes": [
+                  "Avvertire della sonnolenza (guida, rischio di cadute) ed evitare alcol e altri sedativi",
+                  "Anziani: di norma si preferiscono i non sedativi, su indicazione medica",
+                  "In anafilassi gli antistaminici non sostituiscono l'adrenalina"
                 ]
               },
               "area": "immunita-oncologia"
             },
             {
               "id": "antigistaminici-h2",
-              "title": "Antistaminici H2",
+              "title": "Antistaminici H2 (gastrici)",
               "type": "drug",
               "content": {
-                "class": "Antistaminici H2",
+                "class": "Antistaminici H2 (gastrici)",
                 "effects": [
                   "Riduzione della secrezione acida gastrica attraverso il blocco dei recettori H2 dell'istamina."
                 ],
@@ -999,6 +1557,24 @@
                   "FC e sintomi cardiovascolari quando pertinenti",
                   "Segni clinici di alterata funzione tiroidea",
                   "Emocromo o funzione epatica quando indicati"
+                ],
+                "contraindications": [
+                  "Agranulocitosi o grave leucopenia pregressa da tionamidi",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Eruzione cutanea e prurito",
+                  "Agranulocitosi (rara ma grave)",
+                  "Epatotossicità (soprattutto propiltiouracile)",
+                  "Artralgie"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Segnalare subito febbre, mal di gola o ulcere orali: possibile agranulocitosi, serve un emocromo",
+                  "Controllare transaminasi, FC e peso",
+                  "Monitorare la funzione tiroidea secondo il medico"
                 ]
               },
               "area": "endocrino"
@@ -1053,6 +1629,28 @@
                 "monitoring": [
                   "Funzione renale",
                   "Miglioramento clinico"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Ganciclovir: neutropenia o piastrinopenia grave"
+                ],
+                "adverseEffects": [
+                  "Nausea e cefalea",
+                  "Aciclovir ev: nefrotossicità e cristalluria",
+                  "Ganciclovir: mielosoppressione",
+                  "Neurotossicità ad alte dosi"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa",
+                  "Topica"
+                ],
+                "nursingNotes": [
+                  "Garantire un'idratazione adeguata",
+                  "Aciclovir ev: infusione lenta (di solito in 1 ora)",
+                  "Dose adattata alla funzione renale",
+                  "Controllare emocromo e creatinina",
+                  "Ganciclovir: manipolare come farmaco citotossico"
                 ]
               },
               "area": "infezioni"
@@ -1074,6 +1672,29 @@
                   "PA",
                   "Bradicardia",
                   "Glicemia"
+                ],
+                "contraindications": [
+                  "Bradicardia grave e blocco AV di grado II-III",
+                  "Asma grave o broncospasmo (per i non cardioselettivi)",
+                  "Shock cardiogeno e scompenso acuto",
+                  "Ipotensione grave"
+                ],
+                "adverseEffects": [
+                  "Bradicardia e ipotensione",
+                  "Astenia",
+                  "Broncospasmo",
+                  "Mani e piedi freddi",
+                  "Può mascherare i sintomi dell'ipoglicemia (tremore, tachicardia)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (ad esempio metoprololo, esmololo) con monitoraggio"
+                ],
+                "nursingNotes": [
+                  "Misurare FC e PA prima di somministrare",
+                  "Se la FC o la PA sono sotto i limiti indicati dal medico (di solito FC inferiore a 50-60 bpm) non somministrare e avvisare",
+                  "Non sospendere bruscamente: rischio di angina e tachicardia da rimbalzo",
+                  "Nel paziente diabetico controllare la glicemia: i segni dell'ipoglicemia possono essere attenuati"
                 ]
               },
               "area": "cardiovascolare"
@@ -1091,6 +1712,27 @@
                 "monitoring": [
                   "Calcemia quando indicata",
                   "funzione renale e tollerabilità."
+                ],
+                "contraindications": [
+                  "Ipocalcemia non corretta",
+                  "Insufficienza renale grave",
+                  "Anomalie dell'esofago e impossibilità a stare seduti o in piedi per 30 minuti (forme orali)"
+                ],
+                "adverseEffects": [
+                  "Esofagite e ulcere esofagee (orali)",
+                  "Dolori muscoloscheletrici",
+                  "Ipocalcemia",
+                  "Osteonecrosi della mandibola (rara)",
+                  "Reazione di fase acuta con febbre e mialgie dopo infusione ev"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Orali: al mattino a digiuno con un bicchiere pieno d'acqua, restare in posizione eretta per 30 minuti e attendere prima di cibo e altri farmaci",
+                  "Controllare calcemia e vitamina D",
+                  "Prima di iniziare è utile una visita odontoiatrica"
                 ]
               },
               "area": "endocrino"
@@ -1111,6 +1753,31 @@
                   "FR",
                   "SpO₂",
                   "Broncospasmo"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Beta-2 agonisti: cautela in tachiaritmie e tireotossicosi",
+                  "Anticolinergici inalatori: cautela in glaucoma ad angolo chiuso e ritenzione urinaria"
+                ],
+                "adverseEffects": [
+                  "Tremore e tachicardia",
+                  "Palpitazioni e cefalea",
+                  "Ipokaliemia con dosi elevate di beta-2 agonisti",
+                  "Secchezza delle fauci (anticolinergici)",
+                  "Teofillina: nausea, aritmie e convulsioni con livelli elevati"
+                ],
+                "routes": [
+                  "Inalatoria (spray con distanziatore, polvere, nebulizzatore)",
+                  "Orale",
+                  "Endovenosa (aminofillina)"
+                ],
+                "nursingNotes": [
+                  "Verificare la tecnica inalatoria e l'uso del distanziatore",
+                  "Monitorare FR, SpO2, rumori respiratori e FC prima e dopo",
+                  "Se il broncodilatatore al bisogno serve sempre più spesso avvisare il medico",
+                  "Dopo l'uso di inalatori con corticosteroide sciacquare la bocca",
+                  "Nebulizzazione in BPCO ipercapnica: usare ossigeno o aria come prescritto",
+                  "Aminofillina ev: infusione lenta e livelli plasmatici"
                 ]
               },
               "area": "respiratorio"
@@ -1131,6 +1798,25 @@
                   "PA",
                   "FC",
                   "Edema periferico"
+                ],
+                "contraindications": [
+                  "Shock cardiogeno e stenosi aortica grave",
+                  "Verapamil e diltiazem: scompenso con ridotta frazione di eiezione, bradicardia, blocco AV",
+                  "Verapamil e diltiazem per via endovenosa: non associare a beta-bloccanti ev"
+                ],
+                "adverseEffects": [
+                  "Edemi malleolari, cefalea, rossore (diidropiridine: amlodipina, nifedipina)",
+                  "Stipsi, bradicardia, blocco AV (verapamil, diltiazem)",
+                  "Ipotensione"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (diltiazem, nicardipina) solo con monitoraggio ECG e PA"
+                ],
+                "nursingNotes": [
+                  "Controllare PA e FC prima della dose",
+                  "Valutare gli edemi declivi",
+                  "Alcuni principi attivi interagiscono con il succo di pompelmo: verificare la scheda tecnica"
                 ]
               },
               "area": "cardiovascolare"
@@ -1173,12 +1859,44 @@
                   "Funzione epatica e renale quando pertinenti",
                   "Segni di tossicità",
                   "Risposta clinica e tollerabilità"
+                ],
+                "contraindications": [
+                  "Gravidanza (la maggior parte dei farmaci)",
+                  "Mielosoppressione grave",
+                  "Infezioni gravi attive",
+                  "Controindicazioni specifiche per ogni farmaco: consultare il protocollo"
+                ],
+                "adverseEffects": [
+                  "Mielosoppressione (neutropenia, anemia, piastrinopenia)",
+                  "Nausea e vomito, mucosite, diarrea",
+                  "Alopecia",
+                  "Neuropatia",
+                  "Cardiotossicità (antracicline) e nefrotossicità (cisplatino)",
+                  "Reazioni infusionali",
+                  "Stravaso con necrosi (farmaci vescicanti)"
+                ],
+                "routes": [
+                  "Endovenosa (infusione)",
+                  "Orale",
+                  "Sottocutanea",
+                  "Intratecale (solo farmaci specifici)",
+                  "Intravescicale"
+                ],
+                "nursingNotes": [
+                  "Preparazione e somministrazione solo da personale formato, con DPI e circuiti chiusi secondo normativa",
+                  "Doppio controllo di paziente, farmaco e protocollo",
+                  "Verificare il ritorno venoso e il sito: dolore, bruciore o gonfiore possono indicare stravaso; interrompere e seguire la procedura",
+                  "Liquidi biologici dopo la terapia e rifiuti trattati come citotossici",
+                  "Febbre nel paziente neutropenico: emergenza"
                 ]
               },
               "aliasIds": [
                 "oncologia"
               ],
-              "area": "immunita-oncologia"
+              "area": "immunita-oncologia",
+              "aliasTitles": [
+                "Oncologia"
+              ]
             },
             {
               "id": "colloidi",
@@ -1215,6 +1933,35 @@
                   "Glicemia",
                   "PA",
                   "Segni di infezione"
+                ],
+                "contraindications": [
+                  "Infezioni sistemiche non trattate (controindicazione relativa)",
+                  "Vaccini vivi a dosi immunosoppressive",
+                  "Ipersensibilità",
+                  "Cautela: diabete, ulcera peptica, osteoporosi, ipertensione, disturbi psichiatrici"
+                ],
+                "adverseEffects": [
+                  "Iperglicemia",
+                  "Ritenzione idrica e ipertensione",
+                  "Ipokaliemia",
+                  "Gastrite e ulcera",
+                  "Insonnia e alterazioni dell'umore",
+                  "Maggior rischio di infezioni (possono mascherare la febbre)",
+                  "Uso prolungato: osteoporosi, fragilità cutanea, soppressione surrenalica"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa",
+                  "Intramuscolare",
+                  "Inalatoria",
+                  "Topica",
+                  "Intra-articolare"
+                ],
+                "nursingNotes": [
+                  "Somministrare al mattino, con il cibo",
+                  "Controllare glicemia (anche nei non diabetici), PA, peso ed elettroliti",
+                  "Non sospendere bruscamente dopo un uso prolungato (insufficienza surrenalica)",
+                  "Inalatori: sciacquare la bocca dopo l'uso (candidosi)"
                 ]
               },
               "area": "endocrino"
@@ -1238,12 +1985,39 @@
                   "Elettroliti",
                   "Glicemia quando pertinente",
                   "Stato nutrizionale e parametri vitali"
+                ],
+                "contraindications": [
+                  "Sovraccarico di liquidi e scompenso cardiaco non compensato",
+                  "Iponatriemia grave con soluzioni ipotoniche",
+                  "Ringer lattato: iperkaliemia, acidosi lattica, insufficienza epatica grave",
+                  "Glucosata 5%: iperglicemia e ipertensione endocranica"
+                ],
+                "adverseEffects": [
+                  "Sovraccarico idrico (edemi, dispnea)",
+                  "Alterazioni degli elettroliti",
+                  "Acidosi ipercloremica con grandi volumi di sodio cloruro 0,9%",
+                  "Iperglicemia (glucosio)",
+                  "Flebite"
+                ],
+                "routes": [
+                  "Endovenosa periferica o centrale",
+                  "Sottocutanea (ipodermoclisi, soluzioni adatte)"
+                ],
+                "nursingNotes": [
+                  "Verificare soluzione, volume, velocità e scadenza; usare pompa o regolatore di flusso",
+                  "Bilancio idrico, peso, diuresi e PA",
+                  "Osservare segni di sovraccarico (edemi, rantoli, dispnea)",
+                  "Controllare il sito di infusione (flebite, infiltrazione)",
+                  "Aggiungere farmaci solo dopo aver verificato la compatibilità"
                 ]
               },
               "aliasIds": [
                 "nutrizione-soluzioni-infusione"
               ],
-              "area": "liquidi"
+              "area": "liquidi",
+              "aliasTitles": [
+                "Nutrizione e soluzioni per infusione"
+              ]
             },
             {
               "id": "decongestionanti",
@@ -1279,6 +2053,32 @@
                   "Peso",
                   "Bilancio idrico",
                   "Elettroliti"
+                ],
+                "contraindications": [
+                  "Anuria",
+                  "Ipovolemia o disidratazione grave",
+                  "Ipokaliemia o iponatriemia grave (ansa e tiazidici)",
+                  "Iperkaliemia (risparmiatori di potassio)",
+                  "Ipersensibilità ai sulfamidici (tiazidici, furosemide)"
+                ],
+                "adverseEffects": [
+                  "Ipokaliemia e iponatriemia",
+                  "Ipotensione e disidratazione",
+                  "Aumento di creatinina",
+                  "Iperuricemia e gotta",
+                  "Ototossicità con furosemide ev rapida",
+                  "Iperkaliemia (spironolattone)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (furosemide)"
+                ],
+                "nursingNotes": [
+                  "Pesare il paziente ogni giorno e registrare bilancio idrico e diuresi",
+                  "Controllare PA, sodio, potassio e creatinina",
+                  "Somministrare di mattina per evitare la nicturia",
+                  "Furosemide ev: infusione lenta, entro la velocità massima indicata in scheda tecnica",
+                  "Osservare edemi, sete, mucose secche e vertigini"
                 ]
               },
               "area": "cardiovascolare"
@@ -1306,13 +2106,38 @@
                   "Emocromo",
                   "Parametri della coagulazione",
                   "Segni di eventi trombotici"
+                ],
+                "contraindications": [
+                  "Tromboembolismo venoso o arterioso in atto",
+                  "Storia di convulsioni (acido tranexamico ad alte dosi)",
+                  "Insufficienza renale grave: ridurre la dose"
+                ],
+                "adverseEffects": [
+                  "Nausea, vomito, diarrea",
+                  "Ipotensione se iniettato troppo rapidamente",
+                  "Convulsioni (dosi elevate)",
+                  "Eventi trombotici"
+                ],
+                "routes": [
+                  "Endovenosa lenta",
+                  "Orale",
+                  "Topica (collutorio, garze)"
+                ],
+                "nursingNotes": [
+                  "Acido tranexamico ev: iniezione lenta (circa 1 mL al minuto)",
+                  "Osservare segni di trombosi: gamba gonfia e dolente, dispnea, dolore toracico",
+                  "Nel trauma emorragico il farmaco è più efficace se dato precocemente (entro 3 ore)"
                 ]
               },
               "aliasIds": [
                 "antiemorragici",
                 "fattori-coagulazione"
               ],
-              "area": "sangue"
+              "area": "sangue",
+              "aliasTitles": [
+                "Antiaggreganti ed emostatici",
+                "Fattori della coagulazione"
+              ]
             },
             {
               "id": "enzimi-digestivi",
@@ -1336,7 +2161,10 @@
               "aliasIds": [
                 "enzimi"
               ],
-              "area": "gastrointestinale"
+              "area": "gastrointestinale",
+              "aliasTitles": [
+                "Enzimi e sostituti enzimatici"
+              ]
             },
             {
               "id": "anti-parkinson",
@@ -1353,6 +2181,30 @@
                 "monitoring": [
                   "Pressione ortostatica",
                   "Controllo dei sintomi motori"
+                ],
+                "contraindications": [
+                  "Glaucoma ad angolo chiuso (levodopa)",
+                  "Melanoma sospetto",
+                  "Associazione con IMAO non selettivi",
+                  "Psicosi grave"
+                ],
+                "adverseEffects": [
+                  "Nausea",
+                  "Ipotensione ortostatica",
+                  "Discinesie",
+                  "Allucinazioni e confusione",
+                  "Fluttuazioni on-off"
+                ],
+                "routes": [
+                  "Orale",
+                  "Transdermica (rotigotina)",
+                  "Sottocutanea (apomorfina)"
+                ],
+                "nursingNotes": [
+                  "Rispettare gli orari esatti: ritardi peggiorano rigidità e deglutizione",
+                  "Non sospendere bruscamente (rischio di sindrome maligna da sospensione)",
+                  "Controllare la PA in ortostatismo e prevenire le cadute",
+                  "Non frantumare le formulazioni a rilascio prolungato"
                 ]
               },
               "area": "nervoso"
@@ -1395,12 +2247,36 @@
                   "Stato di coscienza",
                   "ECG quando indicato",
                   "Risposta clinica immediata"
+                ],
+                "contraindications": [
+                  "In pericolo di vita immediato non esistono di norma controindicazioni assolute: valutare il rapporto rischio-beneficio",
+                  "Verificare sempre allergie e farmaco prima della somministrazione"
+                ],
+                "adverseEffects": [
+                  "Adrenalina: tachicardia, ipertensione, aritmie, ansia, tremore, ischemia miocardica",
+                  "Atropina: tachicardia, secchezza delle fauci, ritenzione urinaria, midriasi, delirium",
+                  "Glucagone: nausea e vomito"
+                ],
+                "routes": [
+                  "Endovenosa o intraossea (preferite in emergenza)",
+                  "Intramuscolare (adrenalina in anafilassi, coscia anterolaterale)",
+                  "Sublinguale o intranasale (alcuni principi attivi)"
+                ],
+                "nursingNotes": [
+                  "Conoscere concentrazioni e diluizioni (adrenalina 1 mg/mL per via im; 0,1 mg/mL per via ev): rischio di errore elevato",
+                  "Doppio controllo ad alta voce quando possibile",
+                  "Dopo ogni farmaco ev in arresto, lavare la via con soluzione fisiologica",
+                  "Documentare orari e dosi",
+                  "Controllare a intervalli regolari il carrello dell'emergenza (scadenze, completezza)"
                 ]
               },
               "aliasIds": [
                 "urgenza-rianimazione"
               ],
-              "area": "emergenza"
+              "area": "emergenza",
+              "aliasTitles": [
+                "Terapia d'urgenza e rianimazione"
+              ]
             },
             {
               "id": "farmaci-metabolici",
@@ -1444,7 +2320,10 @@
               "aliasIds": [
                 "dermatologia"
               ],
-              "area": "organi"
+              "area": "organi",
+              "aliasTitles": [
+                "Dermatologia"
+              ]
             },
             {
               "id": "oftalmologici",
@@ -1470,7 +2349,10 @@
               "aliasIds": [
                 "oftalmologia"
               ],
-              "area": "organi"
+              "area": "organi",
+              "aliasTitles": [
+                "Oftalmologia"
+              ]
             },
             {
               "id": "ostetrici-ginecologici",
@@ -1530,7 +2412,10 @@
               "aliasIds": [
                 "urogenitali"
               ],
-              "area": "organi"
+              "area": "organi",
+              "aliasTitles": [
+                "Farmaci dell'apparato urogenitale"
+              ]
             },
             {
               "id": "immunoglobuline",
@@ -1583,6 +2468,31 @@
                 "monitoring": [
                   "Segni di infezione",
                   "Funzione renale"
+                ],
+                "contraindications": [
+                  "Infezioni attive gravi",
+                  "Vaccini vivi",
+                  "Gravidanza (micofenolato, metotrexato)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Infezioni e mielosoppressione",
+                  "Nefrotossicità (ciclosporina, tacrolimus)",
+                  "Ipertensione e tremore",
+                  "Epatotossicità (metotrexato, azatioprina)",
+                  "Tumori cutanei e linfomi nel lungo termine"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa",
+                  "Sottocutanea"
+                ],
+                "nursingNotes": [
+                  "Prevenzione delle infezioni: igiene delle mani e, se indicato, isolamento protettivo",
+                  "Controllare emocromo, funzione renale ed epatica e livelli plasmatici (ciclosporina, tacrolimus)",
+                  "Evitare succo di pompelmo con ciclosporina e tacrolimus",
+                  "Somministrare sempre alla stessa ora e con lo stesso rapporto con i pasti",
+                  "Metotrexato: manipolare come farmaco citotossico"
                 ]
               },
               "area": "immunita-oncologia"
@@ -1602,6 +2512,23 @@
                 "monitoring": [
                   "Sintomi gastrointestinali",
                   "Funzione renale in caso di uso prolungato"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Associazione con nelfinavir e rilpivirina"
+                ],
+                "adverseEffects": [
+                  "Cefalea, diarrea, dolore addominale",
+                  "Uso prolungato: ipomagnesiemia, carenza di vitamina B12, rischio di fratture, infezioni enteriche (C. difficile)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Somministrare 30-60 minuti prima dei pasti, di solito prima di colazione",
+                  "Non frantumare capsule e compresse gastroresistenti; per sondino seguire le indicazioni del prodotto",
+                  "Rivalutare nel tempo la reale necessità del trattamento"
                 ]
               },
               "area": "gastrointestinale"
@@ -1621,6 +2548,32 @@
                 "monitoring": [
                   "Glicemia capillare",
                   "Segni di ipoglicemia"
+                ],
+                "contraindications": [
+                  "Ipoglicemia in atto",
+                  "Ipersensibilità ai componenti"
+                ],
+                "adverseEffects": [
+                  "Ipoglicemia (effetto più frequente)",
+                  "Lipodistrofia o lipoipertrofia nelle sedi di iniezione",
+                  "Aumento di peso",
+                  "Ipokaliemia (insulina ev)",
+                  "Reazioni locali"
+                ],
+                "routes": [
+                  "Sottocutanea (penna, siringa)",
+                  "Endovenosa (solo insulina rapida/regolare, in pompa o infusione sotto controllo)",
+                  "Microinfusore"
+                ],
+                "nursingNotes": [
+                  "Farmaco ad alto rischio: doppio controllo del tipo e della dose",
+                  "Controllare la glicemia prima della somministrazione",
+                  "Misurare in unità, non in mL; usare le siringhe da insulina corrette",
+                  "Ruotare le sedi e non iniettare nelle zone con lipodistrofia",
+                  "Rapida: somministrare in relazione al pasto, secondo prescrizione",
+                  "Riconoscere l'ipoglicemia (sudorazione, tremore, confusione) e seguire il protocollo (glucosio, glucagone)",
+                  "Insulina ev: controlli glicemici ravvicinati e potassio",
+                  "Rispettare i tempi di conservazione in uso indicati dalla scheda tecnica"
                 ]
               },
               "area": "endocrino"
@@ -1641,6 +2594,26 @@
                   "Glicemia",
                   "Funzione renale",
                   "Rischio di ipoglicemia"
+                ],
+                "contraindications": [
+                  "Metformina: insufficienza renale grave, acidosi lattica, insufficienza epatica, disidratazione o sepsi; sospensione in caso di mezzo di contrasto iodato o intervento",
+                  "Sulfoniluree: diabete di tipo 1, chetoacidosi, insufficienza renale o epatica grave",
+                  "SGLT2-inibitori: chetoacidosi"
+                ],
+                "adverseEffects": [
+                  "Metformina: disturbi gastrointestinali, raramente acidosi lattica",
+                  "Sulfoniluree: ipoglicemia, aumento di peso",
+                  "SGLT2-inibitori: infezioni genitali e urinarie, disidratazione, chetoacidosi euglicemica",
+                  "DPP-4 inibitori: raramente pancreatite"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Metformina: durante o subito dopo i pasti",
+                  "Sulfoniluree: attenzione all'ipoglicemia in anziani e digiuno",
+                  "SGLT2-inibitori: idratazione e igiene dei genitali; la sospensione prima di interventi è decisa dal medico",
+                  "Controllare glicemia e funzione renale secondo indicazione"
                 ]
               },
               "area": "endocrino"
@@ -1678,6 +2651,27 @@
                 "monitoring": [
                   "Alvo",
                   "Bilancio idrico"
+                ],
+                "contraindications": [
+                  "Occlusione o subocclusione intestinale",
+                  "Megacolon tossico e malattia infiammatoria intestinale acuta",
+                  "Dolore addominale non diagnosticato"
+                ],
+                "adverseEffects": [
+                  "Crampi e diarrea",
+                  "Meteorismo",
+                  "Disidratazione e ipokaliemia con abuso",
+                  "Dipendenza dai lassativi stimolanti"
+                ],
+                "routes": [
+                  "Orale",
+                  "Rettale (supposte, clisteri)"
+                ],
+                "nursingNotes": [
+                  "Valutare alvo e consistenza delle feci prima di somministrare",
+                  "Escludere segni di occlusione (distensione, vomito, assenza di gas)",
+                  "Macrogol e lassativi di massa richiedono liquidi adeguati",
+                  "Clisteri: prudenza nel paziente neutropenico o con sospetta perforazione"
                 ]
               },
               "area": "gastrointestinale"
@@ -1704,7 +2698,10 @@
               "aliasIds": [
                 "metabolismo-osseo"
               ],
-              "area": "endocrino"
+              "area": "endocrino",
+              "aliasTitles": [
+                "Metabolismo osseo"
+              ]
             },
             {
               "id": "minerali-elettroliti",
@@ -1720,6 +2717,28 @@
                   "Elettroliti sierici",
                   "Funzione renale",
                   "Bilancio idrico"
+                ],
+                "contraindications": [
+                  "Potassio: iperkaliemia, insufficienza renale grave, anuria",
+                  "Magnesio: ipermagnesiemia, blocco AV",
+                  "Calcio: ipercalcemia, associazione con digossina (cautela)"
+                ],
+                "adverseEffects": [
+                  "Potassio: dolore e flebite, aritmie e arresto cardiaco se infuso troppo rapidamente o concentrato",
+                  "Cloruro di calcio: necrosi tissutale da stravaso",
+                  "Magnesio: ipotensione, perdita dei riflessi tendinei, depressione respiratoria nel sovradosaggio"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa"
+                ],
+                "nursingNotes": [
+                  "Potassio cloruro concentrato: mai in bolo; diluire e infondere con pompa",
+                  "Velocità di norma non oltre 10 mEq all'ora per via periferica (secondo il protocollo locale); più rapida solo con monitoraggio ECG e accesso centrale",
+                  "Farmaci ad alto rischio: doppio controllo e conservazione separata",
+                  "Controllare potassiemia prima e dopo l'infusione",
+                  "Magnesio: controllare riflessi, FR e PA",
+                  "Cloruro di calcio: preferire una vena ampia o centrale"
                 ]
               },
               "area": "endocrino"
@@ -1743,10 +2762,10 @@
             },
             {
               "id": "mucolitici",
-              "title": "Mucolitici",
+              "title": "Mucolitici e fluimolitici",
               "type": "drug",
               "content": {
-                "class": "Mucolitici",
+                "class": "Mucolitici e fluimolitici",
                 "effects": [
                   "Fluidificazione delle secrezioni bronchiali"
                 ],
@@ -1756,9 +2775,32 @@
                 "monitoring": [
                   "Valutazione delle secrezioni",
                   "Efficacia della tosse"
+                ],
+                "contraindications": [
+                  "Ipersensibilità",
+                  "Ulcera peptica attiva (cautela con acetilcisteina orale)"
+                ],
+                "adverseEffects": [
+                  "Nausea, vomito, pirosi",
+                  "Broncospasmo (soprattutto per aerosol nell'asmatico)",
+                  "Reazioni anafilattoidi con acetilcisteina ev"
+                ],
+                "routes": [
+                  "Orale",
+                  "Aerosol",
+                  "Endovenosa (acetilcisteina come antidoto)"
+                ],
+                "nursingNotes": [
+                  "Favorire idratazione, mobilizzazione ed espettorazione",
+                  "Non associare ad antitussivi che sopprimono la tosse",
+                  "Aerosol nell'asmatico: osservare un eventuale broncospasmo"
                 ]
               },
-              "area": "respiratorio"
+              "area": "respiratorio",
+              "aliasTitles": [
+                "Fluimolitici",
+                "Fluidificanti delle secrezioni"
+              ]
             },
             {
               "id": "neurolettici",
@@ -1775,6 +2817,34 @@
                 "monitoring": [
                   "QT",
                   "Effetti extrapiramidali"
+                ],
+                "contraindications": [
+                  "Coma e depressione grave del sistema nervoso centrale",
+                  "Sindrome del QT lungo congenito",
+                  "Demenza dell'anziano: aumento della mortalità, uso solo se indicato",
+                  "Morbo di Parkinson (cautela)",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Sintomi extrapiramidali: acatisia, distonia acuta, parkinsonismo",
+                  "Discinesia tardiva",
+                  "Sedazione e ipotensione ortostatica",
+                  "Allungamento del QT",
+                  "Aumento di peso, alterazioni di glicemia e lipidi",
+                  "Iperprolattinemia",
+                  "Sindrome neurolettica maligna (febbre, rigidità, alterazione della coscienza): emergenza"
+                ],
+                "routes": [
+                  "Orale",
+                  "Intramuscolare (anche depot a lunga durata)",
+                  "Endovenosa (alcuni principi attivi)"
+                ],
+                "nursingNotes": [
+                  "Controllare PA (anche in ortostatismo), FC e, se indicato, ECG per il QT",
+                  "Monitorare glicemia e peso nel tempo",
+                  "Febbre, rigidità, sudorazione e tachicardia: chiamare subito il medico",
+                  "Depot: iniezione im profonda secondo scheda tecnica",
+                  "Prevenire cadute e valutare la sedazione"
                 ]
               },
               "area": "nervoso"
@@ -1796,6 +2866,42 @@
                   "Stato di coscienza",
                   "SpO₂",
                   "Alvo"
+                ],
+                "contraindications": [
+                  "Depressione respiratoria grave",
+                  "Ileo paralitico",
+                  "Asma acuto grave",
+                  "Associazione con IMAO (meperidina, tramadolo)",
+                  "Cautela nel trauma cranico con ipertensione endocranica"
+                ],
+                "adverseEffects": [
+                  "Depressione respiratoria",
+                  "Sedazione",
+                  "Nausea e vomito",
+                  "Stipsi (quasi costante)",
+                  "Prurito",
+                  "Ritenzione urinaria",
+                  "Ipotensione",
+                  "Delirium",
+                  "Tolleranza e dipendenza"
+                ],
+                "routes": [
+                  "Orale",
+                  "Transdermica",
+                  "Sottocutanea",
+                  "Endovenosa",
+                  "Intramuscolare",
+                  "Epidurale e intratecale",
+                  "Transmucosa"
+                ],
+                "nursingNotes": [
+                  "Valutare dolore, frequenza respiratoria, SpO2 e livello di sedazione prima e dopo la dose",
+                  "Con FR bassa (di solito inferiore a 10 al minuto) o sedazione marcata non somministrare e avvisare il medico",
+                  "Naloxone disponibile; somministrazione ev lenta",
+                  "Prevedere un lassativo preventivo",
+                  "Cerotti: cute integra e non lesa, evitare fonti di calore (coperte elettriche, febbre alta aumentano l'assorbimento)",
+                  "Registro degli stupefacenti e doppio controllo secondo normativa",
+                  "Prevenire le cadute"
                 ]
               },
               "area": "dolore"
@@ -1838,7 +2944,10 @@
               "aliasIds": [
                 "contraccettivi-ormonali"
               ],
-              "area": "endocrino"
+              "area": "endocrino",
+              "aliasTitles": [
+                "Contraccettivi ormonali"
+              ]
             },
             {
               "id": "ormoni-tiroidei",
@@ -1852,6 +2961,23 @@
                 ],
                 "monitoring": [
                   "Sintomi clinici e parametri tiroidei secondo prescrizione."
+                ],
+                "contraindications": [
+                  "Ipertiroidismo non trattato",
+                  "Insufficienza surrenalica non corretta",
+                  "Infarto miocardico acuto recente (cautela)"
+                ],
+                "adverseEffects": [
+                  "Da eccesso di dose: tachicardia, palpitazioni, tremore, insonnia, sudorazione, calo ponderale",
+                  "Peggioramento di angina e aritmie"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Al mattino a digiuno, 30-60 minuti prima della colazione, con acqua",
+                  "Distanziare di almeno 4 ore da calcio, ferro, antiacidi e sucralfato",
+                  "Controllare FC e sintomi di ipertiroidismo; TSH secondo il medico"
                 ]
               },
               "area": "endocrino"
@@ -1878,7 +3004,10 @@
               "aliasIds": [
                 "otologici"
               ],
-              "area": "respiratorio"
+              "area": "respiratorio",
+              "aliasTitles": [
+                "Farmaci otologici"
+              ]
             },
             {
               "id": "procinetici",
@@ -1893,6 +3022,24 @@
                 "monitoring": [
                   "Sintomi gastrointestinali",
                   "alvo e tollerabilità."
+                ],
+                "contraindications": [
+                  "Ostruzione, perforazione o emorragia gastrointestinale",
+                  "Feocromocitoma",
+                  "Domperidone: QT lungo e associazioni che lo allungano"
+                ],
+                "adverseEffects": [
+                  "Sintomi extrapiramidali (metoclopramide)",
+                  "Sonnolenza",
+                  "Allungamento del QT (domperidone)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Endovenosa (metoclopramide)"
+                ],
+                "nursingNotes": [
+                  "Somministrare 15-30 minuti prima dei pasti",
+                  "Trattamento di breve durata, secondo prescrizione"
                 ]
               },
               "area": "gastrointestinale"
@@ -1915,7 +3062,10 @@
               "aliasIds": [
                 "gastroprotettori"
               ],
-              "area": "gastrointestinale"
+              "area": "gastrointestinale",
+              "aliasTitles": [
+                "Gastroprotettori"
+              ]
             },
             {
               "id": "benzodiazepine",
@@ -1933,6 +3083,36 @@
                   "Stato di coscienza",
                   "FR",
                   "Rischio di cadute"
+                ],
+                "contraindications": [
+                  "Insufficienza respiratoria grave",
+                  "Sindrome delle apnee notturne",
+                  "Miastenia gravis",
+                  "Insufficienza epatica grave",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Sedazione e sonnolenza",
+                  "Confusione, atassia e cadute (anziani)",
+                  "Amnesia",
+                  "Depressione respiratoria (soprattutto ev o con oppioidi e alcol)",
+                  "Tolleranza e dipendenza",
+                  "Reazioni paradosse (agitazione)"
+                ],
+                "routes": [
+                  "Orale",
+                  "Sublinguale",
+                  "Intramuscolare",
+                  "Endovenosa",
+                  "Rettale",
+                  "Intranasale"
+                ],
+                "nursingNotes": [
+                  "Via ev lenta con monitoraggio di FR, SpO2 e stato di coscienza; flumazenil disponibile",
+                  "Diazepam: non miscelare in infusione con altri farmaci (precipita); im con assorbimento irregolare",
+                  "Attenzione agli anziani e alle associazioni con oppioidi e alcol",
+                  "Prevenire le cadute",
+                  "Dopo uso prolungato sospendere gradualmente (astinenza, convulsioni)"
                 ]
               },
               "area": "nervoso"
@@ -1953,6 +3133,26 @@
                   "PA",
                   "Funzione renale",
                   "Potassio"
+                ],
+                "contraindications": [
+                  "Gravidanza",
+                  "Stenosi bilaterale delle arterie renali",
+                  "Iperkaliemia grave",
+                  "Associazione con aliskiren in diabete o insufficienza renale"
+                ],
+                "adverseEffects": [
+                  "Ipotensione e vertigini",
+                  "Iperkaliemia",
+                  "Peggioramento della funzione renale",
+                  "Angioedema (più raro rispetto agli ACE-inibitori)"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Controllare PA, potassio e creatinina",
+                  "Attenzione a disidratazione, vomito e diarrea",
+                  "Di norma non associati agli ACE-inibitori, salvo indicazione specialistica"
                 ]
               },
               "area": "cardiovascolare"
@@ -1973,6 +3173,26 @@
                   "Transaminasi",
                   "CPK",
                   "Segni di miopatia"
+                ],
+                "contraindications": [
+                  "Malattia epatica attiva o transaminasi persistentemente elevate",
+                  "Gravidanza e allattamento",
+                  "Ipersensibilità"
+                ],
+                "adverseEffects": [
+                  "Dolori e debolezza muscolare (mialgia)",
+                  "Rabdomiolisi (rara)",
+                  "Aumento delle transaminasi",
+                  "Disturbi gastrointestinali",
+                  "Lieve aumento della glicemia"
+                ],
+                "routes": [
+                  "Orale"
+                ],
+                "nursingNotes": [
+                  "Chiedere al paziente di segnalare dolori muscolari, debolezza o urine scure",
+                  "Attenzione alle interazioni (macrolidi, azoli, succo di pompelmo con simvastatina e atorvastatina)",
+                  "Transaminasi e CK secondo indicazione medica"
                 ]
               },
               "area": "cardiovascolare"
@@ -1993,6 +3213,27 @@
                   "Segni di emorragia",
                   "Stato neurologico",
                   "PA"
+                ],
+                "contraindications": [
+                  "Emorragia intracranica pregressa",
+                  "Ictus, trauma cranico o chirurgia maggiore recenti",
+                  "Sanguinamento interno attivo",
+                  "Ipertensione non controllata",
+                  "Terapia anticoagulante con coagulazione alterata"
+                ],
+                "adverseEffects": [
+                  "Emorragie, anche intracraniche",
+                  "Angioedema orolinguale",
+                  "Aritmie da riperfusione"
+                ],
+                "routes": [
+                  "Endovenosa (bolo seguito da infusione)"
+                ],
+                "nursingNotes": [
+                  "Il tempo è critico: seguire il protocollo (ictus, infarto, embolia polmonare) con dose calcolata sul peso",
+                  "Due accessi venosi; evitare punture arteriose e cateterismi non indispensabili",
+                  "Controlli frequenti di PA e stato neurologico",
+                  "Cefalea intensa, vomito o peggioramento neurologico: interrompere e avvisare subito il medico"
                 ]
               },
               "area": "sangue"
