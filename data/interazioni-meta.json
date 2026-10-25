@@ -2,5 +2,12 @@
   "source": "TDCommons (TDC) — Drug-Drug Interaction (DDI)",
   "sourceUrl": "https://tdcommons.ai/multi_pred_tasks/ddi/",
   "dataset": "DDI",
-  "output": "data/interazioni.csv"
+  "output": "data/interazioni.csv",
+  "dataset_date": "2024-08-31",
+  "records_zip": 191541,
+  "records": 191541,
+  "zip_sha256": "f4df33560729d01e8d2168dfedabdece5f786ceedea545f4038294ed2784e1d4",
+  "last_checked": "2026-10-24",
+  "drugs": 1701,
+  "last_updated": "2024-08-31"
 }

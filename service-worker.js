@@ -8,6 +8,15 @@ const CORE_FILES = [
     "./style.css?v=146",
     "./app.js?v=146",
     "./js/terapia-paziente.js?v=146",
+    "./app/pazienti.js?v=146",
+    "./app/schede.js?v=146",
+    "./app/classi-farmaci.js?v=146",
+    "./app/interazioni-ui.js?v=146",
+    "./app/calcolatori.js?v=146",
+    "./app/condivisione.js?v=146",
+    "./app/note.js?v=146",
+    "./app/note-testo.js?v=146",
+    "./app/editor.js?v=146",
     "./js/interazioni.js?v=124",
     "./js/patient-photos.js?v=124",
     "./js/audio-notes.js?v=140",
@@ -26,7 +35,8 @@ const CORE_FILES = [
     "./src/data/atc-classi.json",
     "./data/db_drug_interactions.csv.zip",
     "./data/alias-farmaci.json",
-    "./data/interazioni-curate.json"
+    "./data/interazioni-curate.json",
+    "./data/interazioni-meta.json"
 ];
 
 self.addEventListener("install", event => {
