@@ -570,17 +570,26 @@ function setupPatientPhotosPage(patient) {
             hour: "2-digit", minute: "2-digit"
         });
 
+        const capText = (label, item, measure) => {
+            const summary = measureSummary(measure);
+
+            return `<strong>${label}</strong> ${escapeHtml(fmt(item))}${item.note ? " · " + escapeHtml(item.note) : ""}${summary ? " · " + escapeHtml(summary) : ""}`;
+        };
+
         const pane = (label, item) => `
             <div class="patient-photo-compare-pane">
                 <div class="patient-photo-viewer-stage">
                     <div class="patient-photo-viewer-layer">
                         <img src="${escapeAttribute(URL.createObjectURL(item.blob))}" alt="" draggable="false">
+                        <svg class="patient-photo-measure-svg" aria-hidden="true"></svg>
                         <svg class="patient-photo-ruler-svg" aria-hidden="true"></svg>
                     </div>
                 </div>
-                <div class="patient-photo-compare-cap">
-                    <strong>${label}</strong> ${escapeHtml(fmt(item))}${item.note ? " · " + escapeHtml(item.note) : ""}${measureSummary(item.measure) ? " · " + escapeHtml(measureSummary(item.measure)) : ""}
+                <div class="patient-photo-pane-tools">
+                    <button type="button" data-pane="measure" aria-label="Misura questa foto (${label})" title="Calibra e misura questa foto">📏</button>
+                    <button type="button" data-pane="delete" aria-label="Elimina questa foto (${label})" title="Elimina questa foto">🗑️</button>
                 </div>
+                <div class="patient-photo-compare-cap">${capText(label, item, item.measure)}</div>
             </div>`;
 
         const view = document.createElement("div");
@@ -599,36 +608,64 @@ function setupPatientPhotosPage(patient) {
                 ${pane("Prima", before)}
                 ${pane("Dopo", after)}
             </div>
+            <div class="patient-photo-compare-panel">
+                <div class="patient-photo-measure" hidden></div>
+                <div class="patient-photo-measure" hidden></div>
+            </div>
         `;
 
         document.body.appendChild(view);
 
         const urls = [...view.querySelectorAll("img")].map(img => img.src);
 
-        // Ogni foto ha il suo righello (posizione, angolo e dimensione indipendenti)
-        // e usa la scala della propria calibrazione, se esiste.
+        // Ogni foto ha il suo righello a L (posizione, angolo e dimensione indipendenti),
+        // la sua calibrazione e le sue misure: si usano gli stessi strumenti del
+        // visualizzatore singolo e il risultato viene salvato nella foto in questione.
         const rulers = [];
         const refits = [];
+        const measurers = [];
+        const labels = ["Prima", "Dopo"];
+        const items = [before, after];
         const homeButton = view.querySelector("[data-cmp=home]");
         const updateHome = () => {
             const out = rulers.some(r => r.isVisible() && r.isOutside());
             homeButton.classList.toggle("attention", out);
         };
 
+        const panels = [...view.querySelectorAll(".patient-photo-compare-panel .patient-photo-measure")];
+
         view.querySelectorAll(".patient-photo-compare-pane").forEach((el, index) => {
-            const item = index === 0 ? before : after;
+            const item = items[index];
             const stage = el.querySelector(".patient-photo-viewer-stage");
             const layerEl = el.querySelector(".patient-photo-viewer-layer");
             const image = layerEl.querySelector("img");
             let paneZoom = null;
+            let paneRuler = null;
 
-            const paneRuler = createRuler({
-                svg: layerEl.querySelector("svg"),
+            const measurer = createMeasurer({
+                item,
+                root: view,
+                layer: layerEl,
+                img: image,
+                svg: layerEl.querySelector(".patient-photo-measure-svg"),
+                panel: panels[index],
+                getZoomScale: () => paneZoom ? paneZoom.getScale() : 1,
+                getRuler: () => paneRuler,
+                onChange: () => {
+                    el.querySelector(".patient-photo-compare-cap").innerHTML =
+                        capText(labels[index], item, measurer.getMeasure());
+                },
+                onModeChange: on => el.querySelector("[data-pane=measure]").classList.toggle("active", on)
+            });
+
+            paneRuler = createRuler({
+                svg: layerEl.querySelector(".patient-photo-ruler-svg"),
                 layer: layerEl,
                 img: image,
                 state: { x: null, y: null, r: 0, arm: null },
-                getMmPerPx: () => measureScale(item.measure),
+                getMmPerPx: () => measureScale(measurer.getMeasure()),
                 getZoomScale: () => paneZoom ? paneZoom.getScale() : 1,
+                isInteractive: () => !measurer.isPlacing(),
                 onDraw: () => updateHome()
             });
 
@@ -640,30 +677,65 @@ function setupPatientPhotosPage(patient) {
 
                 layerEl.style.width = Math.round(naturalW * factor) + "px";
                 layerEl.style.height = Math.round(naturalH * factor) + "px";
-                paneRuler.draw();
+                measurer.draw();
             };
 
-            paneZoom = attachZoom(stage, layerEl, { onChange: () => paneRuler.draw() });
+            paneZoom = attachZoom(stage, layerEl, {
+                onChange: () => measurer.draw(),
+                onTap: measurer.onTap,
+                doubleTap: () => !measurer.isPlacing()
+            });
 
             image.addEventListener("load", fitPane);
             if (image.complete) fitPane();
 
+            el.querySelector("[data-pane=measure]").addEventListener("click", () => {
+                const on = !measurer.isMeasuring();
+
+                // Si misura una foto alla volta: il pannello è condiviso.
+                measurers.forEach(other => { if (other !== measurer && other.isMeasuring()) other.setMeasuring(false); });
+                measurer.setMeasuring(on);
+            });
+
+            el.querySelector("[data-pane=delete]").addEventListener("click", async () => {
+                if (await confirmAndDeletePhoto(item.id)) {
+                    measurers.forEach(m => m.discard());
+                    close();
+                }
+            });
+
             rulers.push(paneRuler);
             refits.push(fitPane);
+            measurers.push(measurer);
         });
 
         const onResize = () => refits.forEach(fit => fit());
         window.addEventListener("resize", onResize);
 
-        const close = () => {
+        const finish = () => {
             document.removeEventListener("keydown", onKey);
             window.removeEventListener("resize", onResize);
+            measurers.forEach(m => m.destroy());
             urls.forEach(url => URL.revokeObjectURL(url));
             view.remove();
             setCompareMode(false);
         };
 
-        const onKey = event => { if (event.key === "Escape") close(); };
+        const close = () => {
+            if (measurers.some(m => m.isDirty()) &&
+                !window.confirm("Ci sono misure non salvate. Chiudere senza salvare?")) return;
+
+            finish();
+        };
+
+        const onKey = event => {
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) {
+                if (event.key === "Escape") event.target.blur();
+                return;
+            }
+
+            if (event.key === "Escape") close();
+        };
 
         document.addEventListener("keydown", onKey);
         view.querySelector("[data-cmp=close]").addEventListener("click", close);
@@ -1301,64 +1373,33 @@ function setupPatientPhotosPage(patient) {
         };
     };
 
-    // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
-    // tocco, pulsanti +/− e trascinamento per spostare la foto ingrandita.
-    // Include il righello: calibra su un riferimento noto e misura L e P.
-    const openPhotoViewer = (src, item) => {
-        document.getElementById("patientPhotoViewer")?.remove();
+    // Elimina una foto (con conferma) e aggiorna la galleria. Vero se è stata eliminata.
+    const confirmAndDeletePhoto = async id => {
+        if (!window.confirm("Eliminare questa foto dal dispositivo? L'operazione non si può annullare.")) return false;
 
-        const viewer = document.createElement("div");
-        viewer.id = "patientPhotoViewer";
-        viewer.className = "patient-photo-viewer";
-        viewer.dataset.returnUrl = window.location.href;
-        window.history.pushState({ patientPhotoViewer: true }, "", window.location.href);
+        let deleted = false;
 
-        const date = item
-            ? new Date(item.createdAt).toLocaleString("it-IT", {
-                day: "2-digit", month: "2-digit", year: "numeric",
-                hour: "2-digit", minute: "2-digit"
-            })
-            : "";
+        try {
+            await photos.deletePhoto(id);
+            deleted = true;
+            showMessage("Foto eliminata.");
+        } catch (error) {
+            console.error("Errore eliminazione foto:", error);
+            showMessage("Impossibile eliminare la foto.");
+        }
 
-        viewer.innerHTML = `
-            <div class="patient-photo-viewer-stage">
-                <div class="patient-photo-viewer-layer">
-                    <img src="${escapeAttribute(src)}" alt="" draggable="false">
-                    <svg class="patient-photo-measure-svg" aria-hidden="true"></svg>
-                    <svg class="patient-photo-ruler-svg" aria-hidden="true"></svg>
-                </div>
-            </div>
-            <div class="patient-photo-viewer-top">
-                <span class="patient-photo-viewer-caption"></span>
-                ${item ? '<button type="button" data-viewer="home" aria-label="Riporta il righello dentro la foto" title="Riporta il righello dentro la foto">🎯</button>' : ""}
-                ${item ? '<button type="button" data-viewer="ruler" class="active" aria-label="Mostra o nascondi il righello a L">📐</button>' : ""}
-                ${item ? '<button type="button" data-viewer="measure" aria-label="Misura">📏</button>' : ""}
-                <button type="button" data-viewer="out" aria-label="Riduci">−</button>
-                <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
-                <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
-            </div>
-            <div class="patient-photo-viewer-bottom">
-                <div class="patient-photo-measure" hidden></div>
-                ${item ? `
-                <form class="patient-photo-viewer-note" autocomplete="off">
-                    <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
-                           value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
-                    <button type="submit">Salva nota</button>
-                </form>` : ""}
-            </div>
-        `;
+        await renderGallery();
+        await refreshStorage();
+        return deleted;
+    };
 
-        document.body.appendChild(viewer);
-
-        const stage = viewer.querySelector(".patient-photo-viewer-stage");
-        const layer = viewer.querySelector(".patient-photo-viewer-layer");
-        const img = layer.querySelector("img");
-        const svg = viewer.querySelector(".patient-photo-measure-svg");
-        const rulerSvg = viewer.querySelector(".patient-photo-ruler-svg");
-        const caption = viewer.querySelector(".patient-photo-viewer-caption");
-        const panel = viewer.querySelector(".patient-photo-measure");
-        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
-
+    /*
+     * Calibrazione e misura (riferimento di scala, lunghezza, larghezza) di UNA foto.
+     * Usata sia dal visualizzatore singolo sia dal confronto: ogni foto salva la
+     * propria misura. Mentre si segnano i punti il layout si nasconde (classe
+     * "measure-focus" su root) e resta solo una pillola compatta.
+     */
+    const createMeasurer = ({ item, root, layer, img, svg, panel, getZoomScale, getRuler, onChange = () => {}, onModeChange = () => {} }) => {
         /* ----- stato della misura ----- */
 
         let measure = item?.measure
@@ -1372,6 +1413,7 @@ function setupPatientPhotosPage(patient) {
         let pending = [];
         let dirty = false;
         let panelMessage = "";
+        let placing = false;      // true mentre si toccano i punti: il layout sparisce
 
         // Righello a L sovrapposto: sempre visibile all'apertura, trascinabile.
         // La posizione resta quella dell'ultima volta finché non si ricarica la pagina.
@@ -1387,14 +1429,6 @@ function setupPatientPhotosPage(patient) {
             });
         };
 
-        const captionText = () => {
-            const summary = measureSummary(measure);
-            return date +
-                (item?.note ? " · " + item.note : "") +
-                (summary ? " · " + summary : "");
-        };
-
-        const updateCaption = () => { caption.textContent = captionText(); };
 
         /* ----- disegno dei segni sulla foto ----- */
 
@@ -1403,7 +1437,7 @@ function setupPatientPhotosPage(patient) {
             const naturalH = img.naturalHeight || 1;
             svg.setAttribute("viewBox", "0 0 " + naturalW + " " + naturalH);
 
-            const zoomScale = zoom ? zoom.getScale() : 1;
+            const zoomScale = getZoomScale();
             const screenPerImage = (layer.offsetWidth / naturalW) * zoomScale || 1;
             const unit = 1 / screenPerImage;               // unità immagine per pixel schermo
             const radius = 7 * unit;
@@ -1450,17 +1484,75 @@ function setupPatientPhotosPage(patient) {
             ));
 
             svg.innerHTML = parts.join("");
-            ruler.draw();
+            getRuler()?.draw();
         };
 
 
 
         /* ----- pannello di misura ----- */
 
+        /* ----- pillola compatta mentre si segnano i punti ----- */
+
+        const pill = document.createElement("div");
+        pill.className = "patient-photo-focus-pill";
+        pill.hidden = true;
+        pill.innerHTML = `
+            <span class="patient-photo-focus-text"></span>
+            <button type="button" data-pill="undo" aria-label="Annulla l'ultimo punto" title="Annulla l'ultimo punto">↩︎</button>
+            <button type="button" data-pill="menu" aria-label="Mostra il menu di misura" title="Mostra il menu di misura">☰</button>
+        `;
+        root.appendChild(pill);
+
         const stepLabel = { ref: "il riferimento", L: "la lunghezza", W: "la larghezza" };
+        let focusShown = false;
+
+        const syncFocus = () => {
+            const focus = measuring && placing && Boolean(step);
+            root.classList.toggle("measure-focus", focus);
+            pill.hidden = !focus;
+
+            if (focus) {
+                pill.querySelector(".patient-photo-focus-text").textContent =
+                    "Tocca " + stepLabel[step] + " · punto " + (pending.length + 1) + " di 2";
+            }
+
+            if (focus !== focusShown) {
+                focusShown = focus;
+                // Il layout è cambiato: le foto devono riadattarsi allo spazio disponibile.
+                window.dispatchEvent(new Event("resize"));
+            }
+        };
+
+        const cancelPlacing = () => {
+            placing = false;
+            pending = [];
+            if (step !== "ref") step = null;
+            panelMessage = "";
+            renderPanel();
+            draw();
+        };
+
+        pill.addEventListener("click", event => {
+            const action = event.target.closest("[data-pill]")?.dataset.pill;
+            if (!action) return;
+
+            if (action === "undo") {
+                if (pending.length) {
+                    pending.pop();
+                    renderPanel();
+                    draw();
+                } else {
+                    cancelPlacing();
+                }
+            }
+
+            if (action === "menu") cancelPlacing();
+        });
+
 
         const renderPanel = () => {
-            panel.hidden = !measuring;
+            panel.hidden = !measuring || placing;
+            syncFocus();
             if (!measuring) return;
 
             const calibrated = Boolean(measure.ref);
@@ -1477,7 +1569,10 @@ function setupPatientPhotosPage(patient) {
                                value="${refMm ? String(refMm).replace(".", ",") : ""}"
                                ${refKey === "custom" ? "" : "disabled"} aria-label="Misura del riferimento in mm">
                     </div>
-                    <p>Inquadra la moneta o il righello vicino alla lesione, sullo stesso piano. Poi tocca le due estremità del riferimento (per la moneta, il diametro).</p>
+                    <p>Inquadra la moneta o il righello vicino alla lesione, sullo stesso piano. Poi premi il pulsante: il menu si nasconde e tocchi le due estremità del riferimento (per la moneta, il diametro).</p>
+                    <div class="patient-photo-measure-row">
+                        <button type="button" data-m="start" class="active">▶ Segna i due punti</button>
+                    </div>
                 `;
                 step = "ref";
             } else {
@@ -1515,10 +1610,11 @@ function setupPatientPhotosPage(patient) {
 
         const setMeasuring = on => {
             measuring = on;
+            placing = false;
             pending = [];
             panelMessage = "";
             step = on ? (measure.ref ? null : "ref") : null;
-            viewer.querySelector('[data-viewer="measure"]')?.classList.toggle("active", on);
+            onModeChange(on);
             renderPanel();
             draw();
         };
@@ -1559,12 +1655,12 @@ function setupPatientPhotosPage(patient) {
             pending = [];
             panelMessage = "";
             dirty = true;
-            updateCaption();
+            onChange();
         };
 
         // Tocco sulla foto in modalità misura: lo converte in coordinate dell'immagine.
         const onMeasureTap = (event, onPhoto) => {
-            if (!measuring || !step || !onPhoto) return;
+            if (!measuring || !step || !placing || !onPhoto) return;
 
             const box = layer.getBoundingClientRect();
             const naturalW = img.naturalWidth || 1;
@@ -1577,7 +1673,10 @@ function setupPatientPhotosPage(patient) {
 
             panelMessage = "";
 
-            if (pending.length === 2) finishStep();
+            if (pending.length === 2) {
+                finishStep();
+                placing = false;
+            }
 
             renderPanel();
             draw();
@@ -1612,9 +1711,21 @@ function setupPatientPhotosPage(patient) {
                 step = action;
                 pending = [];
                 panelMessage = "";
+                placing = true;
+            }
+
+            if (action === "start") {
+                if (!(refMm > 0)) {
+                    panelMessage = "Inserisci la misura del riferimento in mm.";
+                } else {
+                    pending = [];
+                    panelMessage = "";
+                    placing = true;
+                }
             }
 
             if (action === "recal") {
+                placing = false;
                 step = "ref";
                 pending = [];
                 panelMessage = "";
@@ -1623,10 +1734,11 @@ function setupPatientPhotosPage(patient) {
             if (action === "clear") {
                 if (!window.confirm("Azzerare riferimento e misure di questa foto?")) return;
                 measure = { ref: null, refMm: 0, refKey, lines: {} };
+                placing = false;
                 step = "ref";
                 pending = [];
                 dirty = true;
-                updateCaption();
+                onChange();
             }
 
             if (action === "save") {
@@ -1652,6 +1764,114 @@ function setupPatientPhotosPage(patient) {
             draw();
         });
 
+        return {
+            draw,
+            setMeasuring,
+            onTap: onMeasureTap,
+            getMeasure: () => measure,
+            isMeasuring: () => measuring,
+            isPlacing: () => measuring && placing && Boolean(step),
+            isDirty: () => dirty,
+            discard: () => { dirty = false; },
+            destroy: () => { pill.remove(); root.classList.remove("measure-focus"); }
+        };
+
+    };
+
+    // Visualizzatore a schermo intero: pizzico a due dita, rotella, doppio
+    // tocco, pulsanti +/− e trascinamento per spostare la foto ingrandita.
+    // Include il righello: calibra su un riferimento noto e misura L e P.
+    const openPhotoViewer = (src, item) => {
+        document.getElementById("patientPhotoViewer")?.remove();
+
+        const viewer = document.createElement("div");
+        viewer.id = "patientPhotoViewer";
+        viewer.className = "patient-photo-viewer";
+        viewer.dataset.returnUrl = window.location.href;
+        window.history.pushState({ patientPhotoViewer: true }, "", window.location.href);
+
+        const date = item
+            ? new Date(item.createdAt).toLocaleString("it-IT", {
+                day: "2-digit", month: "2-digit", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+            })
+            : "";
+
+        viewer.innerHTML = `
+            <div class="patient-photo-viewer-stage">
+                <div class="patient-photo-viewer-layer">
+                    <img src="${escapeAttribute(src)}" alt="" draggable="false">
+                    <svg class="patient-photo-measure-svg" aria-hidden="true"></svg>
+                    <svg class="patient-photo-ruler-svg" aria-hidden="true"></svg>
+                </div>
+            </div>
+            <div class="patient-photo-viewer-top">
+                <span class="patient-photo-viewer-caption"></span>
+                ${item ? '<button type="button" data-viewer="home" aria-label="Riporta il righello dentro la foto" title="Riporta il righello dentro la foto">🎯</button>' : ""}
+                ${item ? '<button type="button" data-viewer="ruler" class="active" aria-label="Mostra o nascondi il righello a L">📐</button>' : ""}
+                ${item ? '<button type="button" data-viewer="measure" aria-label="Misura">📏</button>' : ""}
+                ${item ? '<button type="button" data-viewer="delete" aria-label="Elimina foto" title="Elimina foto">🗑️</button>' : ""}
+                <button type="button" data-viewer="out" aria-label="Riduci">−</button>
+                <button type="button" data-viewer="in" aria-label="Ingrandisci">+</button>
+                <button type="button" data-viewer="close" aria-label="Chiudi">✕</button>
+            </div>
+            <div class="patient-photo-viewer-bottom">
+                <div class="patient-photo-measure" hidden></div>
+                ${item ? `
+                <form class="patient-photo-viewer-note" autocomplete="off">
+                    <input type="text" maxlength="120" placeholder="Aggiungi una nota…"
+                           value="${escapeAttribute(item.note || "")}" aria-label="Nota della foto">
+                    <button type="submit">Salva nota</button>
+                </form>` : ""}
+            </div>
+        `;
+
+        document.body.appendChild(viewer);
+
+        const stage = viewer.querySelector(".patient-photo-viewer-stage");
+        const layer = viewer.querySelector(".patient-photo-viewer-layer");
+        const img = layer.querySelector("img");
+        const svg = viewer.querySelector(".patient-photo-measure-svg");
+        const rulerSvg = viewer.querySelector(".patient-photo-ruler-svg");
+        const caption = viewer.querySelector(".patient-photo-viewer-caption");
+        const panel = viewer.querySelector(".patient-photo-measure");
+        const noteForm = viewer.querySelector(".patient-photo-viewer-note");
+
+        /* ----- stato della misura ----- */
+
+        let zoom = null;
+        let ruler = null;
+
+        const measurer = createMeasurer({
+            item,
+            root: viewer,
+            layer,
+            img,
+            svg,
+            panel,
+            getZoomScale: () => zoom ? zoom.getScale() : 1,
+            getRuler: () => ruler,
+            onChange: () => updateCaption(),
+            onModeChange: on => viewer.querySelector('[data-viewer="measure"]')?.classList.toggle("active", on)
+        });
+
+        const mmPerPx = () => {
+            const m = measurer.getMeasure();
+            return m.ref ? m.refMm / Math.hypot(m.ref[0][0] - m.ref[1][0], m.ref[0][1] - m.ref[1][1]) : 0;
+        };
+
+        const captionText = () => {
+            const summary = measureSummary(measurer.getMeasure());
+            return date +
+                (item?.note ? " · " + item.note : "") +
+                (summary ? " · " + summary : "");
+        };
+
+        const updateCaption = () => { caption.textContent = captionText(); };
+
+        const draw = () => measurer.draw();
+        const setMeasuring = on => measurer.setMeasuring(on);
+
         /* ----- nota ----- */
 
         noteForm?.addEventListener("submit", async event => {
@@ -1673,8 +1893,6 @@ function setupPatientPhotosPage(patient) {
 
         /* ----- zoom e chiusura ----- */
 
-        let zoom = null;
-
         const fit = () => {
             const naturalW = img.naturalWidth || 1;
             const naturalH = img.naturalHeight || 1;
@@ -1687,7 +1905,7 @@ function setupPatientPhotosPage(patient) {
         };
 
         const close = () => {
-            if (dirty && !window.confirm("La misura non è stata salvata. Chiudere senza salvare?")) return;
+            if (measurer.isDirty() && !window.confirm("La misura non è stata salvata. Chiudere senza salvare?")) return;
 
             document.removeEventListener("keydown", onKey);
             window.removeEventListener("resize", fit);
@@ -1714,14 +1932,14 @@ function setupPatientPhotosPage(patient) {
         };
 
         zoom = attachZoom(stage, layer, {
-            onBackgroundTap: () => { if (!measuring) close(); },
-            onTap: onMeasureTap,
+            onBackgroundTap: () => { if (!measurer.isMeasuring()) close(); },
+            onTap: measurer.onTap,
             // In modalità misura il doppio tocco non ingrandisce: ogni tocco è un punto.
-            doubleTap: () => !(measuring && step),
+            doubleTap: () => !measurer.isPlacing(),
             onChange: () => draw()
         });
 
-        const ruler = createRuler({
+        ruler = createRuler({
             svg: rulerSvg,
             layer,
             img,
@@ -1729,7 +1947,7 @@ function setupPatientPhotosPage(patient) {
             getMmPerPx: mmPerPx,
             getZoomScale: () => zoom.getScale(),
             // Mentre si segnano i punti di una misura il righello lascia passare i tocchi.
-            isInteractive: () => !(measuring && step),
+            isInteractive: () => !measurer.isPlacing(),
             onDraw: () => {
                 const home = viewer.querySelector("[data-viewer=home]");
                 if (home) home.classList.toggle("attention", ruler.isVisible() && ruler.isOutside());
@@ -1741,12 +1959,21 @@ function setupPatientPhotosPage(patient) {
         img.addEventListener("load", fit);
         if (img.complete) fit();
 
-        viewer.querySelector(".patient-photo-viewer-top").addEventListener("click", event => {
+        viewer.querySelector(".patient-photo-viewer-top").addEventListener("click", async event => {
             const action = event.target.closest("[data-viewer]")?.dataset.viewer;
+
+            if (action === "delete" && item) {
+                if (await confirmAndDeletePhoto(item.id)) {
+                    measurer.discard();
+                    close();
+                }
+                return;
+            }
+
             if (action === "close") close();
             if (action === "in") zoom.zoomBy(1.5);
             if (action === "out") zoom.zoomBy(1 / 1.5);
-            if (action === "measure") setMeasuring(!measuring);
+            if (action === "measure") setMeasuring(!measurer.isMeasuring());
 
             if (action === "home") ruler.bringInside();
 
@@ -1766,18 +1993,7 @@ function setupPatientPhotosPage(patient) {
         const deleteButton = event.target.closest("[data-photo-delete]");
 
         if (deleteButton) {
-            if (!window.confirm("Eliminare questa foto dal dispositivo?")) return;
-
-            try {
-                await photos.deletePhoto(deleteButton.dataset.photoDelete);
-                showMessage("Foto eliminata.");
-            } catch (error) {
-                console.error("Errore eliminazione foto:", error);
-                showMessage("Impossibile eliminare la foto.");
-            }
-
-            await renderGallery();
-            await refreshStorage();
+            await confirmAndDeletePhoto(deleteButton.dataset.photoDelete);
             return;
         }
 

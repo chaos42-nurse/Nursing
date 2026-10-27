@@ -4540,3 +4540,95 @@ mark.note-hl { padding: 0 3px; border-radius: 4px; color: inherit; }
 .patient-therapy-pair > .info-block {
     margin: 0 10px 10px;
 }
+
+/* ---------- Misura: il layout si nasconde mentre si segnano i punti ---------- */
+
+.patient-photo-viewer.measure-focus .patient-photo-viewer-top,
+.patient-photo-viewer.measure-focus .patient-photo-viewer-bottom,
+.patient-photo-compare.measure-focus .patient-photo-compare-top,
+.patient-photo-compare.measure-focus .patient-photo-compare-cap,
+.patient-photo-compare.measure-focus .patient-photo-pane-tools,
+.patient-photo-compare.measure-focus .patient-photo-compare-panel {
+    display: none;
+}
+
+.patient-photo-focus-pill {
+    position: absolute;
+    top: calc(8px + env(safe-area-inset-top));
+    left: 8px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 4px 4px 12px;
+    border-radius: 999px;
+    background: rgba(13, 17, 23, .82);
+    color: #fff;
+    font-size: .8rem;
+    line-height: 1.2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+
+.patient-photo-focus-pill[hidden] {
+    display: none;
+}
+
+.patient-photo-focus-pill button {
+    width: 34px;
+    height: 34px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* Confronto: strumenti su ogni foto e pannello di misura condiviso */
+
+.patient-photo-pane-tools {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 4;
+    display: flex;
+    gap: 6px;
+}
+
+.patient-photo-pane-tools button {
+    width: 38px;
+    height: 38px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .55);
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.patient-photo-pane-tools button.active {
+    background: #2f81f7;
+}
+
+.patient-photo-compare-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Elimina foto in galleria: bersaglio di tocco più comodo */
+.patient-photo-delete {
+    min-width: 36px;
+    min-height: 32px;
+    font-size: 1rem;
+}
+
