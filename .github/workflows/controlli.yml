@@ -1,0 +1,50 @@
+name: Controlli automatici
+
+# Verifica sintassi e test a ogni push e pull request, cosi' un errore nei dati o nel codice
+# si vede prima della pubblicazione (il deploy parte solo da main).
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controlli:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configura Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Sintassi JavaScript
+        run: |
+          for f in app.js service-worker.js js/*.js src/data/*.js; do
+            node --check "$f"
+          done
+          for f in app/*.js; do
+            [ -e "$f" ] && node --check "$f"
+          done
+          echo "Sintassi valida."
+
+      - name: Coerenza dei dati (classi farmacologiche)
+        run: node scripts/test_classi.mjs
+
+      - name: Controllo allergie e interazioni sulla terapia del paziente
+        run: node scripts/test_terapia_paziente.mjs
+
+      - name: Modulo interazioni tra farmaci
+        run: node scripts/test_interazioni.mjs
+
+      - name: Metadati dell'archivio interazioni
+        run: node scripts/test_interazioni_meta.mjs
+
+      - name: Versioni dei file coerenti tra index.html e service worker
+        run: node scripts/test_versioni.mjs

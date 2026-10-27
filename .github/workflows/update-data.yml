@@ -37,6 +37,10 @@ jobs:
         if: steps.aifa.outputs.changed == 'true'
         run: node src/data/smista-farmaci.js
 
+      - name: Controlla la coerenza dei dati prima di salvarli
+        if: steps.aifa.outputs.changed == 'true'
+        run: node scripts/test_classi.mjs
+
       - name: Salva le modifiche nel repository e ripubblica l'app
         if: steps.aifa.outputs.changed == 'true'
         env:

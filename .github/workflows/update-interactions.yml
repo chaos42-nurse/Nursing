@@ -1,15 +1,28 @@
 name: Aggiornamento database interazioni
 
+# Il 16 di ogni mese (come l'aggiornamento AIFA) controlla l'archivio interazioni tra farmaci:
+#  - se nel repository e' impostata la variabile INTERACTIONS_SOURCE_URL (Settings > Secrets and
+#    variables > Actions > Variables) con l'indirizzo di uno ZIP nello stesso formato, lo scarica e,
+#    se e' diverso, sostituisce data/db_drug_interactions.csv.zip;
+#  - rigenera data/interazioni.csv e data/traduzioni-interazioni.json;
+#  - aggiorna data/interazioni-meta.json (data dell'ultimo controllo, mostrata nell'app);
+#  - esegue i test e, se qualcosa e' cambiato, salva e ripubblica l'app.
+# Parte anche quando si modifica lo ZIP o lo script, e a mano da "Run workflow".
 on:
+  schedule:
+    - cron: '0 6 16 * *'
   push:
     paths:
       - "data/db_drug_interactions.csv.zip"
       - "scripts/update_interactions.py"
+      - "scripts/aggiorna_interazioni.py"
+      - "scripts/traduzioni_interazioni.py"
       - ".github/workflows/update-interactions.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build-interactions:
@@ -23,13 +36,17 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Configura l'ambiente installando la libreria mancante richiesta dallo script
-      - name: Installa le dipendenze Python
-        run: pip install pandas
+      - name: Configura Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
 
-      # Esegue l'estrazione dallo ZIP TDCommons e converte in CSV
-      - name: Estrai e converti il database TDCommons
-        run: python scripts/update_interactions.py
+      # Scarica l'eventuale archivio nuovo, rigenera il CSV e aggiorna i metadati
+      - name: Controlla e aggiorna l'archivio interazioni
+        id: interazioni
+        env:
+          INTERACTIONS_SOURCE_URL: ${{ vars.INTERACTIONS_SOURCE_URL }}
+        run: python scripts/aggiorna_interazioni.py
 
       # Verifica che il CSV generato rispetti l'esatta struttura a 4 colonne della PWA
       - name: Verifica output
@@ -40,19 +57,32 @@ jobs:
           with open("data/interazioni.csv", encoding="utf-8", newline="") as f:
               r = csv.reader(f)
               header = next(r)
-              # Adeguato alle 4 colonne reali prodotte dallo script (inclusa la colonna 'stato')
               assert header == ["farmacoA", "farmacoB", "stato", "nota"], f"Intestazione non valida: {header}"
               first = next(r, None)
               assert first and first[0] and first[1] and first[2] and first[3], "CSV senza record validi o incompleto nelle colonne"
           print("CSV interazioni valido ed ottimizzato per la PWA.")
           PY
 
-      # Esegue il commit automatico sul repository
+      - name: Test del modulo interazioni e della terapia del paziente
+        run: |
+          node scripts/test_interazioni.mjs
+          node scripts/test_terapia_paziente.mjs
+
+      # Salva i dati; la data dell'ultimo controllo viene registrata anche senza novita'
       - name: Salva il database convertito
+        id: salva
         run: |
           git config user.name "Nursing Shot Data Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/interazioni.csv data/interazioni-meta.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Aggiorna database interazioni TDCommons (Struttura PWA)"
+          git add data/interazioni.csv data/interazioni-meta.json data/traduzioni-interazioni.json data/db_drug_interactions.csv.zip
+          git diff --cached --quiet && echo "saved=false" >> "$GITHUB_OUTPUT" && exit 0
+          git commit -m "Controllo interazioni del $(date -u +%d/%m/%Y)"
           git push
+          echo "saved=true" >> "$GITHUB_OUTPUT"
+
+      # I push fatti con il token del workflow non avviano altri workflow: la pubblicazione si lancia a mano.
+      - name: Ripubblica l'app
+        if: steps.salva.outputs.saved == 'true' && github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref "${{ github.ref_name }}"

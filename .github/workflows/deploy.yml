@@ -26,6 +26,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Configura Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      # Ogni pubblicazione ha una versione nuova della cache: non serve piu' cambiarla a mano.
+      - name: Imposta la versione della cache
+        run: |
+          node scripts/imposta-versione.mjs "$(date -u +%Y%m%d%H%M)"
+          node scripts/test_versioni.mjs
+
+      # Un errore nei dati o nel codice blocca la pubblicazione invece di arrivare agli utenti.
+      - name: Controlli prima della pubblicazione
+        run: |
+          for f in app.js service-worker.js js/*.js app/*.js; do node --check "$f"; done
+          node scripts/test_classi.mjs
+          node scripts/test_terapia_paziente.mjs
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
