@@ -89,6 +89,9 @@
                   "Prima dose di sera o a letto",
                   "Far alzare lentamente il paziente (rischio di cadute)",
                   "Controllare la PA anche in ortostatismo"
+                ],
+                "indications": [
+                  "Esempi: Tamsulosina, Alfuzosina, Doxazosin, Silodosina"
                 ]
               },
               "area": "cardiovascolare"
@@ -99,7 +102,9 @@
               "type": "drug",
               "content": {
                 "class": "Altri antipertensivi (centrali, antiadrenergici)",
-                "indications": [],
+                "indications": [
+                  "Esempi: Moxonidina, Clonidina, Metildopa"
+                ],
                 "effects": [
                   "Riduzione della pressione arteriosa attraverso diversi meccanismi farmacologici.",
                   "Riduzione del tono simpatico centrale con diminuzione della pressione arteriosa.",
@@ -337,7 +342,9 @@
               "type": "drug",
               "content": {
                 "class": "Analgesici non FANS",
-                "indications": [],
+                "indications": [
+                  "Esempi: Paracetamolo, Metamizolo"
+                ],
                 "effects": [
                   "Riduzione della percezione del dolore attraverso meccanismi non riconducibili ai FANS."
                 ],
@@ -376,7 +383,9 @@
               "type": "drug",
               "content": {
                 "class": "Anestetici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Propofol, Ketamina, Etomidato, Sevoflurano"
+                ],
                 "effects": [
                   "Riduzione o perdita reversibile della sensibilità e, secondo il tipo, della coscienza.",
                   "Riduzione della sensibilità, della coscienza o della percezione del dolore mediante specifiche strategie farmacologiche."
@@ -427,7 +436,9 @@
               "type": "drug",
               "content": {
                 "class": "Anestetici locali",
-                "indications": [],
+                "indications": [
+                  "Esempi: Lidocaina, Mepivacaina, Bupivacaina, Ropivacaina"
+                ],
                 "effects": [
                   "Blocco reversibile della conduzione nervosa con riduzione della sensibilità nella zona trattata."
                 ],
@@ -640,7 +651,9 @@
               "type": "drug",
               "content": {
                 "class": "Antiacidi",
-                "indications": [],
+                "indications": [
+                  "Esempi: Magaldrato, Idrossido di alluminio e magnesio, Sodio bicarbonato"
+                ],
                 "effects": [
                   "Neutralizzazione o riduzione dell'acidità gastrica."
                 ],
@@ -713,7 +726,9 @@
               "type": "drug",
               "content": {
                 "class": "Antiandrogeni",
-                "indications": [],
+                "indications": [
+                  "Esempi: Bicalutamide, Ciproterone, Flutamide"
+                ],
                 "effects": [
                   "Riduzione degli effetti degli androgeni sui tessuti bersaglio."
                 ],
@@ -749,7 +764,9 @@
               "type": "drug",
               "content": {
                 "class": "Antianemici ed emopoietici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Acido folico, Ferroso gluconato, Cianocobalamina, Epoetina alfa, Filgrastim"
+                ],
                 "effects": [
                   "Correzione o prevenzione dell'anemia attraverso il supporto alla produzione dei globuli rossi o la disponibilità di nutrienti necessari.",
                   "Stimolazione o supporto della produzione delle cellule ematiche.",
@@ -800,7 +817,9 @@
               "type": "drug",
               "content": {
                 "class": "Antianginosi (nitrati e altri)",
-                "indications": [],
+                "indications": [
+                  "Esempi: Nitroglicerina, Isosorbide mononitrato, Ranolazina, Ivabradina"
+                ],
                 "effects": [
                   "Riduzione della richiesta di ossigeno miocardico e/o miglioramento della perfusione coronarica.",
                   "Vasodilatazione con riduzione del precarico e della richiesta miocardica di ossigeno."
@@ -852,7 +871,9 @@
               "type": "drug",
               "content": {
                 "class": "Antiaritmici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Amiodarone, Flecainide, Propafenone, Adenosina"
+                ],
                 "effects": [
                   "Modulazione dell'attività elettrica cardiaca per favorire il controllo del ritmo."
                 ],
@@ -1044,6 +1065,9 @@
                   "Anziani: attenzione a cadute e confusione",
                   "Cura del cavo orale e idratazione",
                   "Gli effetti si sommano a quelli di altri farmaci anticolinergici (antistaminici sedativi, antidepressivi triciclici)"
+                ],
+                "indications": [
+                  "Esempi: Atropina, Ioscina butilbromuro, Ipratropio, Ossibutinina"
                 ]
               },
               "aliasIds": [
@@ -1086,6 +1110,9 @@
                   "Controllare FC prima e dopo la dose; atropina disponibile come antagonista",
                   "Miastenia: rispettare orari rigorosi, di solito prima dei pasti",
                   "Distinguere crisi colinergica da crisi miastenica e avvisare il medico"
+                ],
+                "indications": [
+                  "Esempi: Neostigmina, Piridostigmina, Donepezil, Rivastigmina"
                 ]
               },
               "area": "nervoso"
@@ -1233,7 +1260,9 @@
               "type": "drug",
               "content": {
                 "class": "Antidoti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Naloxone, Flumazenil, Acetilcisteina, Protamina solfato, Deferoxamina"
+                ],
                 "effects": [
                   "Contrasto o riduzione degli effetti di specifiche sostanze o condizioni tossiche."
                 ],
@@ -1376,6 +1405,9 @@
                   "Iniezione ev lenta",
                   "Osservare segni di trombosi",
                   "Controllare la diuresi"
+                ],
+                "indications": [
+                  "Esempi: Acido tranexamico"
                 ]
               },
               "area": "sangue"
@@ -1427,7 +1459,9 @@
               "type": "drug",
               "content": {
                 "class": "Antigottosi",
-                "indications": [],
+                "indications": [
+                  "Esempi: Allopurinolo, Febuxostat, Colchicina"
+                ],
                 "effects": [
                   "Riduzione dell'accumulo di acido urico e/o della risposta infiammatoria associata alla gotta."
                 ],
@@ -1459,7 +1493,9 @@
               "type": "drug",
               "content": {
                 "class": "Antimigraine",
-                "indications": [],
+                "indications": [
+                  "Esempi: Sumatriptan, Rizatriptan, Zolmitriptan, Eletriptan"
+                ],
                 "effects": [
                   "Riduzione dei meccanismi coinvolti nell'attacco emicranico e dei relativi sintomi."
                 ],
@@ -1497,7 +1533,9 @@
               "type": "drug",
               "content": {
                 "class": "Antiparassitari e antiprotozoari",
-                "indications": [],
+                "indications": [
+                  "Esempi: Ivermectina, Albendazolo, Permetrina, Metronidazolo, Idrossiclorochina"
+                ],
                 "effects": [
                   "Eliminazione o inibizione di parassiti responsabili dell'infestazione.",
                   "Inibizione o eliminazione di protozoi responsabili di infezioni."
@@ -1575,6 +1613,9 @@
                   "Verificare sempre le interazioni prima di aggiungere farmaci, integratori o erbe (iperico)",
                   "Controlli periodici di carica virale, CD4, funzione renale ed epatica",
                   "Riservatezza dei dati"
+                ],
+                "indications": [
+                  "Esempi: Dolutegravir, Tenofovir, Emtricitabina, Raltegravir, Darunavir"
                 ]
               },
               "area": "infezioni"
@@ -1617,6 +1658,9 @@
                   "Controllare emocromo e funzione epatica e renale secondo programma",
                   "Segnalare febbre, mal di gola, ulcere orali, tosse nuova",
                   "Il beneficio compare dopo settimane o mesi"
+                ],
+                "indications": [
+                  "Esempi: Metotrexato, Idrossiclorochina, Sulfasalazina, Leflunomide"
                 ]
               },
               "area": "dolore"
@@ -1627,7 +1671,9 @@
               "type": "drug",
               "content": {
                 "class": "Antisettici e disinfettanti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Clorexidina, Povidone-iodio, Perossido di idrogeno, Ipoclorito di sodio, Alcol etilico"
+                ],
                 "effects": [
                   "Riduzione o eliminazione di microrganismi su tessuti o superfici, secondo l'impiego."
                 ],
@@ -1667,7 +1713,9 @@
               "type": "drug",
               "content": {
                 "class": "Antispastici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Ioscina butilbromuro, Otilonio bromuro, Pinaverio bromuro, Mebeverina"
+                ],
                 "effects": [
                   "Riduzione degli spasmi della muscolatura liscia o scheletrica, secondo la classe."
                 ],
@@ -1773,6 +1821,9 @@
                   "Dose adattata alla funzione renale",
                   "Ev: infusione lenta secondo scheda tecnica",
                   "Osservare lo stato mentale nell'anziano"
+                ],
+                "indications": [
+                  "Esempi: Famotidina"
                 ]
               },
               "area": "gastrointestinale"
@@ -1809,6 +1860,9 @@
                   "Segnalare subito febbre, mal di gola o ulcere orali: possibile agranulocitosi, serve un emocromo",
                   "Controllare transaminasi, FC e peso",
                   "Monitorare la funzione tiroidea secondo il medico"
+                ],
+                "indications": [
+                  "Esempi: Tiamazolo, Propiltiouracile"
                 ]
               },
               "area": "endocrino"
@@ -1851,6 +1905,9 @@
                   "Piridossina insieme a isoniazide, se prescritta",
                   "Visita oculistica e valutazione della vista con etambutolo",
                   "Misure di isolamento e di protezione secondo protocollo"
+                ],
+                "indications": [
+                  "Esempi: Isoniazide, Rifampicina, Etambutolo, Pirazinamide"
                 ]
               },
               "area": "infezioni"
@@ -1861,7 +1918,9 @@
               "type": "drug",
               "content": {
                 "class": "Antitussivi",
-                "indications": [],
+                "indications": [
+                  "Esempi: Destrometorfano, Levodropropizina, Cloperastina, Codeina"
+                ],
                 "effects": [
                   "Riduzione dello stimolo della tosse."
                 ],
@@ -1983,7 +2042,9 @@
               "type": "drug",
               "content": {
                 "class": "Bisfosfonati",
-                "indications": [],
+                "indications": [
+                  "Esempi: Acido alendronico, Acido risedronico, Acido ibandronico, Acido zoledronico"
+                ],
                 "effects": [
                   "Riduzione del riassorbimento osseo."
                 ],
@@ -2134,6 +2195,9 @@
                   "Deferoxamina: infusione lenta; controllare udito e vista nei trattamenti prolungati",
                   "Controllare funzione renale ed elettroliti",
                   "Raccogliere la diuresi quando richiesto; le urine possono cambiare colore"
+                ],
+                "indications": [
+                  "Esempi: Deferoxamina, Deferasirox, Deferiprone, Penicillamina"
                 ]
               },
               "area": "emergenza"
@@ -2344,7 +2408,9 @@
               "type": "drug",
               "content": {
                 "class": "Decongestionanti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Ossimetazolina, Xilometazolina, Nafazolina, Pseudoefedrina"
+                ],
                 "effects": [
                   "Riduzione della congestione delle mucose attraverso vasocostrizione locale o sistemica."
                 ],
@@ -2513,6 +2579,9 @@
                   "Assumere durante i pasti, deglutendo le capsule intere (o miscelando i granuli con cibo acido non caldo)",
                   "Non frantumare le formulazioni gastroresistenti",
                   "Adeguare la dose al contenuto di grassi del pasto"
+                ],
+                "indications": [
+                  "Esempi: Pancrelipasi, Pancreatina, Lattasi"
                 ]
               },
               "aliasIds": [
@@ -2664,7 +2733,9 @@
               "type": "drug",
               "content": {
                 "class": "Farmaci del metabolismo",
-                "indications": [],
+                "indications": [
+                  "Esempi: Levocarnitina, Sapropterina, Miglustat, Nitisinone"
+                ],
                 "effects": [
                   "Modulazione di specifiche vie metaboliche per correggere alterazioni del metabolismo."
                 ],
@@ -2682,7 +2753,9 @@
               "type": "drug",
               "content": {
                 "class": "Farmaci dermatologici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Calcipotriolo, Isotretinoina, Acitretina, Imiquimod"
+                ],
                 "effects": [
                   "Trattamento o modulazione di condizioni della cute e degli annessi.",
                   "Trattamento farmacologico delle condizioni della cute e degli annessi cutanei."
@@ -2732,7 +2805,9 @@
               "type": "drug",
               "content": {
                 "class": "Farmaci oftalmologici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Latanoprost, Timololo, Dorzolamide, Brimonidina, Tropicamide"
+                ],
                 "effects": [
                   "Trattamento o modulazione di condizioni dell'occhio e degli annessi oculari.",
                   "Interventi farmacologici rivolti a patologie e disturbi dell'occhio e della funzione visiva."
@@ -2782,7 +2857,9 @@
               "type": "drug",
               "content": {
                 "class": "Farmaci ostetrici e ginecologici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Ossitocina, Metilergometrina, Misoprostolo, Dinoprostone"
+                ],
                 "effects": [
                   "Modulazione di processi ormonali e fisiologici dell'apparato riproduttivo e della gravidanza, secondo la classe."
                 ],
@@ -2822,7 +2899,9 @@
               "type": "drug",
               "content": {
                 "class": "Farmaci respiratori diversi dai broncodilatatori",
-                "indications": [],
+                "indications": [
+                  "Esempi: Montelukast"
+                ],
                 "effects": [
                   "Modulazione della funzione delle vie aeree con effetti sulla broncocostrizione, secondo la specifica classe."
                 ],
@@ -2856,7 +2935,9 @@
               "type": "drug",
               "content": {
                 "class": "Farmaci urologici e urogenitali",
-                "indications": [],
+                "indications": [
+                  "Esempi: Finasteride, Dutasteride, Sildenafil, Tadalafil, Solifenacina, Ossibutinina"
+                ],
                 "effects": [
                   "Modulazione della funzione delle vie urinarie e/o della prostata, secondo la classe.",
                   "Trattamento o modulazione di funzioni e condizioni dell'apparato urogenitale."
@@ -2933,6 +3014,9 @@
                   "Iniziare lentamente e aumentare la velocità secondo scheda, monitorando i parametri vitali",
                   "Buona idratazione prima dell'infusione, soprattutto nei pazienti a rischio renale",
                   "Tenere pronti presidi e farmaci per la reazione allergica"
+                ],
+                "indications": [
+                  "Esempi: Immunoglobuline umane normali, Immunoglobulina anti-D, Immunoglobulina antitetanica"
                 ]
               },
               "area": "immunita-oncologia"
@@ -2943,7 +3027,9 @@
               "type": "drug",
               "content": {
                 "class": "Immunomodulanti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Interferone beta, Glatiramer, Fingolimod"
+                ],
                 "effects": [
                   "Modulazione della risposta immunitaria."
                 ],
@@ -3126,7 +3212,9 @@
               "type": "drug",
               "content": {
                 "class": "Ipolipemizzanti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Ezetimibe, Fenofibrato, Gemfibrozil, Omega-3"
+                ],
                 "effects": [
                   "Riduzione delle concentrazioni plasmatiche dei lipidi aterogeni."
                 ],
@@ -3203,7 +3291,9 @@
               "type": "drug",
               "content": {
                 "class": "Metabolismo osseo e antiosteoporotici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Raloxifene, Teriparatide, Denosumab, Cinacalcet, Paracalcitolo"
+                ],
                 "effects": [
                   "Riduzione della perdita di massa ossea e/o aumento della resistenza scheletrica.",
                   "Regolazione del rimodellamento e della mineralizzazione ossea."
@@ -3254,7 +3344,9 @@
               "type": "drug",
               "content": {
                 "class": "Minerali ed elettroliti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Potassio cloruro, Calcio carbonato, Magnesio solfato, Sodio cloruro"
+                ],
                 "effects": [
                   "Correzione o mantenimento dell'equilibrio di minerali ed elettroliti."
                 ],
@@ -3294,7 +3386,9 @@
               "type": "drug",
               "content": {
                 "class": "Miorilassanti",
-                "indications": [],
+                "indications": [
+                  "Esempi: Baclofene, Tizanidina, Tiocolchicoside, Rocuronio, Succinilcolina"
+                ],
                 "effects": [
                   "Riduzione del tono o della contrazione della muscolatura, secondo il meccanismo."
                 ],
@@ -3509,6 +3603,9 @@
                   "Rilevare diuresi nelle 24 ore nel diabete insipido",
                   "Octreotide e lanreotide: controllare la glicemia",
                   "Cabergolina: prima dose a letto, alzarsi lentamente"
+                ],
+                "indications": [
+                  "Esempi: Desmopressina, Octreotide, Lanreotide, Cabergolina"
                 ]
               },
               "area": "endocrino"
@@ -3519,7 +3616,9 @@
               "type": "drug",
               "content": {
                 "class": "Ormoni sessuali e contraccettivi ormonali",
-                "indications": [],
+                "indications": [
+                  "Esempi: Estradiolo, Progesterone, Tibolone, Drospirenone, Testosterone"
+                ],
                 "effects": [
                   "Sostituzione o modulazione degli effetti degli ormoni sessuali.",
                   "Modulazione dell'attività ormonale riproduttiva per prevenire l'ovulazione e/o modificare il tratto riproduttivo."
@@ -3567,7 +3666,9 @@
               "type": "drug",
               "content": {
                 "class": "Ormoni tiroidei",
-                "indications": [],
+                "indications": [
+                  "Esempi: Levotiroxina, Liotironina"
+                ],
                 "effects": [
                   "Sostituzione dell'ormone tiroideo o modulazione dell'attività tiroidea."
                 ],
@@ -3633,6 +3734,9 @@
                   "Gocce auricolari: portarle a temperatura corporea e mantenere la testa inclinata 2-5 minuti",
                   "Spray nasale: testa leggermente inclinata e getto verso l'esterno del setto",
                   "Dolore, secrezione purulenta o calo dell'udito: avvisare il medico"
+                ],
+                "indications": [
+                  "Esempi: Mometasone nasale, Fluticasone nasale, Ciprofloxacina auricolare, Ossimetazolina"
                 ]
               },
               "aliasIds": [
@@ -3649,7 +3753,9 @@
               "type": "drug",
               "content": {
                 "class": "Procinetici",
-                "indications": [],
+                "indications": [
+                  "Esempi: Metoclopramide, Domperidone, Levosulpiride"
+                ],
                 "effects": [
                   "Aumento della motilità gastrointestinale e facilitazione dello svuotamento gastrico, secondo la classe."
                 ],
@@ -3684,7 +3790,9 @@
               "type": "drug",
               "content": {
                 "class": "Protettori della mucosa e gastroprotettori",
-                "indications": [],
+                "indications": [
+                  "Esempi: Sucralfato, Misoprostolo, Sodio alginato"
+                ],
                 "effects": [
                   "Protezione della mucosa gastrointestinale da agenti irritanti o dall'acidità.",
                   "Riduzione dell'aggressione della mucosa gastrointestinale e/o della secrezione acida, secondo la classe."
@@ -3896,7 +4004,9 @@
               "type": "drug",
               "content": {
                 "class": "Vasodilatatori",
-                "indications": [],
+                "indications": [
+                  "Esempi: Nitroprussiato di sodio, Idralazina, Papaverina, Pentossifillina"
+                ],
                 "effects": [
                   "Rilassamento della muscolatura vascolare con riduzione delle resistenze periferiche."
                 ],
@@ -3936,7 +4046,9 @@
               "type": "drug",
               "content": {
                 "class": "Vitamine",
-                "indications": [],
+                "indications": [
+                  "Esempi: Colecalciferolo, Cianocobalamina, Acido ascorbico, Fitomenadione, Tiamina"
+                ],
                 "effects": [
                   "Integrazione o sostituzione di vitamine necessarie ai normali processi metabolici."
                 ],
