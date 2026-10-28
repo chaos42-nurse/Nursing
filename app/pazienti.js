@@ -1037,6 +1037,7 @@ function setupPatientPhotosPage(patient) {
      *  - due dita lo ingrandiscono/rimpiccioliscono e lo ruotano (pizzico + torsione);
      *  - la maniglia blu all'angolo lo ruota liberamente (un tocco = +90°);
      *  - la maniglia verde sulla punta lo allunga o lo accorcia;
+     *  - la maniglia arancione sul bordo restringe la larghezza della fascia (più foto visibile);
      *  - rotella = dimensione, Maiusc + rotella = rotazione.
      * Calibrato: tacche in scala reale, la lunghezza è un numero intero di cm.
      * Non calibrato: stesso righello con 10 cm nominali, marcato "NON IN SCALA".
@@ -1078,9 +1079,13 @@ function setupPatientPhotosPage(patient) {
 
             const tickPxPerMm = calibrated ? pxPerMm : armPx / 100;      // non calibrato: 10 cm nominali
             const totalMm = calibrated ? armCm * 10 : 100;
-            const stripPx = Math.min(Math.max(12 * tickPxPerMm, 22 * unit), armPx * 0.4);
+            // Larghezza della fascia: di base 12 mm; con la maniglia arancione si restringe
+            // (state.w da 0,2 a 1) per lasciare più foto visibile. Mai sotto ~12 px di schermo.
+            const stripBase = Math.min(Math.max(12 * tickPxPerMm, 22 * unit), armPx * 0.4);
+            const stripMin = Math.min(12 * unit, stripBase);
+            const stripPx = Math.max(stripBase * Math.min(1, Math.max(0.2, state.w ?? 1)), stripMin);
 
-            return { width, height, screenPerImage, unit, calibrated, armPx, tickPxPerMm, totalMm, stripPx };
+            return { width, height, screenPerImage, unit, calibrated, armPx, tickPxPerMm, totalMm, stripPx, stripBase };
         };
 
         const draw = (clampPosition = false) => {
@@ -1167,7 +1172,7 @@ function setupPatientPhotosPage(patient) {
             parts.push("</g>");
 
             const every = cmScreen >= 18 ? 1 : cmScreen >= 9 ? 2 : 5;
-            const fontSize = Math.min(11 * unit, stripPx * 0.24);
+            const fontSize = Math.max(Math.min(11 * unit, stripPx * 0.24), 6.5 * unit);
             const numberColor = "#000";
 
             for (let n = every; n * 10 <= totalMm; n += every) {
@@ -1192,7 +1197,7 @@ function setupPatientPhotosPage(patient) {
             }
 
             // Maniglie: rotazione (angolo) e lunghezza (punta del braccio).
-            const handleR = Math.min(stripPx * 0.42, 15 * unit);
+            const handleR = Math.max(Math.min(stripPx * 0.42, 15 * unit), 10 * unit);
             const handle = (kind, lx, ly, fill, glyph) => {
                 const [hx, hy] = toGlobal(lx, ly);
                 parts.push(
@@ -1203,6 +1208,8 @@ function setupPatientPhotosPage(patient) {
 
             handle("data-ruler-rot", stripPx * 0.5, stripPx * 0.5, "#2f81f7", "↻");
             handle("data-ruler-size", armPx - stripPx * 0.5, stripPx * 0.5, "#238636", "⤢");
+            // Maniglia arancione: trascinata di lato restringe (o riallarga) la fascia del righello.
+            handle("data-ruler-width", armPx * 0.5, stripPx, "#d97706", "↕");
 
             svg.innerHTML = parts.join("") + labels.join("");
             if (onDraw) onDraw();
@@ -1219,8 +1226,9 @@ function setupPatientPhotosPage(patient) {
         svg.addEventListener("pointerdown", event => {
             const rot = event.target.closest?.("[data-ruler-rot]");
             const size = event.target.closest?.("[data-ruler-size]");
+            const wid = event.target.closest?.("[data-ruler-width]");
             const body = event.target.closest?.("[data-ruler]");
-            if (!rot && !size && !body) return;
+            if (!rot && !size && !wid && !body) return;
 
             // Il gesto è del righello: la foto sotto non si sposta e non riceve il tocco.
             event.stopPropagation();
@@ -1246,7 +1254,7 @@ function setupPatientPhotosPage(patient) {
             }
 
             mode = {
-                type: rot ? "rot" : size ? "size" : "move",
+                type: rot ? "rot" : size ? "size" : wid ? "width" : "move",
                 id: event.pointerId,
                 sx: event.clientX,
                 sy: event.clientY,
@@ -1298,6 +1306,11 @@ function setupPatientPhotosPage(patient) {
                     const nearest = Math.round(angle / 90) * 90;
                     if (Math.abs(angle - nearest) < 4) angle = normalize(nearest);
                     state.r = angle;
+                } else if (mode.type === "width") {
+                    // Distanza del dito dal bordo esterno del braccio, misurata di traverso.
+                    const rad = state.r * Math.PI / 180;
+                    const across = (-vx * Math.sin(rad) + vy * Math.cos(rad)) / g.screenPerImage;
+                    state.w = Math.min(1, Math.max(0.2, across / g.stripBase));
                 } else {
                     const rad = state.r * Math.PI / 180;
                     const along = (vx * Math.cos(rad) + vy * Math.sin(rad)) / g.screenPerImage;
@@ -1328,7 +1341,7 @@ function setupPatientPhotosPage(patient) {
         svg.addEventListener("pointercancel", release);
 
         svg.addEventListener("wheel", event => {
-            if (!event.target.closest?.("[data-ruler],[data-ruler-rot],[data-ruler-size]")) return;
+            if (!event.target.closest?.("[data-ruler],[data-ruler-rot],[data-ruler-size],[data-ruler-width]")) return;
 
             event.preventDefault();
             event.stopPropagation();
