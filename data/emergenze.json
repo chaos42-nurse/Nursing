@@ -51,7 +51,23 @@
         },
         "Parametri vitali",
         "Stato di coscienza",
-        "Monitoraggio"
+        "Monitoraggio",
+        {
+          "id": "triage",
+          "title": "TRIAGE",
+          "blocks": [
+            {
+              "type": "note",
+              "title": "Triage classico",
+              "content": "Appunto in fase di compilazione."
+            },
+            {
+              "type": "note",
+              "title": "Triage avanzato",
+              "content": "Appunto in fase di compilazione."
+            }
+          ]
+        }
       ]
     },
     {
