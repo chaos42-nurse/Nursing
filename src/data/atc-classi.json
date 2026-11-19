@@ -576,7 +576,9 @@
   "betametasone": "corticosteroidi",
   "calcipotriolobetametasone": "corticosteroidi",
   "metoclopramide": "antiemetici",
-  "doxazosin": "alfa-bloccanti"
+  "doxazosin": "alfa-bloccanti",
+  "diclofenac": "fans",
+  "paracetamolo": "antidolorifici-non-fans"
  },
  "classi": {
   "ace-inibitori": "ACE-inibitori",
