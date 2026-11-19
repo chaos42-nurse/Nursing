@@ -54,7 +54,7 @@
         "Monitoraggio",
         {
           "id": "triage",
-          "title": "TRIAGE",
+          "title": "Triage",
           "blocks": [
             {
               "type": "note",
